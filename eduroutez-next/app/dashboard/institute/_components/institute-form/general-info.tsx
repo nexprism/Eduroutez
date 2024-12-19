@@ -1,0 +1,651 @@
+import CustomEditor from '@/components/custom-editor';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus, X } from 'lucide-react';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
+
+const courseTypes = [
+  { value: 'live', label: 'Live' },
+  { value: 'recorded', label: 'Recorded' },
+  { value: 'hybrid', label: 'Hybrid' }
+];
+
+const orgTypes = [
+  { value: 'public', label: 'Public' },
+  { value: 'private', label: 'Private' }
+];
+
+const formSchema = z.object({
+  title: z.string().min(2, {
+    message: 'Title must be at least 2 characters.'
+  }),
+  courseType: z.string({
+    required_error: 'Please select a course type.'
+  }),
+  instructor: z.string({
+    required_error: 'Please select an instructor.'
+  }),
+  level: z.string({
+    required_error: 'Please select a level.'
+  }),
+  shortDescription: z.any().optional(),
+  longDescription: z.any().optional(),
+
+  category: z.string({
+    required_error: 'Please select a category.'
+  }),
+  status: z.string({
+    required_error: 'Please select a status.'
+  }),
+  visibility: z.string({
+    required_error: 'Please select a visibility option.'
+  }),
+  language: z.string({
+    required_error: 'Please select a language.'
+  }),
+  isCourseFree: z.enum(['free', 'notfree'], {
+    required_error: 'You need to select one option.'
+  }),
+  isCourseDiscounted: z.enum(['yes', 'no'], {
+    required_error: 'You need to select one option.'
+  }),
+  applicationStartDate: z.date({
+    required_error: 'Application start date is required.'
+  }),
+  applicationEndDate: z.date({
+    required_error: 'Application end date is required.'
+  }),
+  thumbnail: z.any().optional(),
+  cover: z.any().optional(),
+  logo: z.any().optional(),
+  state: z.string({
+    required_error: 'Please select a state.'
+  }),
+  city: z.string({
+    required_error: 'Please select a city.'
+  }),
+  phone: z.string({
+    required_error: 'Please enter a phone number.'
+  }),
+  email: z.string({
+    required_error: 'Please enter an email.'
+  }),
+  establishedYear: z.string({
+    required_error: 'Please enter an established year.'
+  }),
+  website: z.string({
+    required_error: 'Please enter a website.'
+  }),
+  address: z.string({
+    required_error: 'Please enter an address.'
+  }),
+  about: z.string({
+    required_error: 'Please enter about.'
+  }),
+  organizationType: z.string({
+    required_error: 'Please select an organization type.'
+  }),
+  brochure: z.any().optional(),
+  pictures: z.array(z.any())
+});
+
+const GeneralInfo = () => {
+  const [previewThumbnailUrl, setPreviewThumbnailUrl] = React.useState<
+    string | null
+  >(null);
+  const [previewCoverUrl, setPreviewCoverUrl] = React.useState<string | null>(
+    null
+  );
+  const [previewLogoUrl, setPreviewLogoUrl] = React.useState<string | null>(
+    null
+  );
+
+  const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
+  const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
+  const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
+  const pathname = usePathname();
+  const segments = pathname.split('/');
+  const [isEdit, setIsEdit] = React.useState(false);
+
+  React.useEffect(() => {
+    if (segments.length === 5 && segments[3] === 'update') {
+      setIsEdit(true);
+    }
+  }, [segments]);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: '',
+      shortDescription: '',
+      longDescription: '',
+      isCourseFree: 'free',
+      isCourseDiscounted: 'yes'
+      // city: '',
+      // state: '',
+      // organizationType: ''
+    }
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {}
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewThumbnailUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      form.setValue('thumbnail', file);
+    } else {
+      setPreviewThumbnailUrl(null);
+      form.setValue('thumbnail', undefined);
+    }
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewCoverUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      form.setValue('cover', file);
+    } else {
+      setPreviewCoverUrl(null);
+      form.setValue('cover', undefined);
+    }
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewLogoUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      form.setValue('logo', file);
+    } else {
+      setPreviewLogoUrl(null);
+      form.setValue('logo', undefined);
+    }
+  };
+
+  const triggerThumbnailFileInput = () => {
+    fileInputThumbnailRef.current?.click();
+  };
+
+  const triggerLogoFileInput = () => {
+    fileInputLogoRef.current?.click();
+  };
+
+  const triggerCoverFileInput = () => {
+    fileInputCoverRef.current?.click();
+  };
+  const removeThumbnailImage = () => {
+    setPreviewThumbnailUrl(null);
+    form.setValue('thumbnail', undefined);
+    if (fileInputThumbnailRef.current) {
+      fileInputThumbnailRef.current.value = ''; // Reset the file input
+    }
+  };
+
+  const removeCoverImage = () => {
+    setPreviewCoverUrl(null);
+    form.setValue('cover', undefined);
+    if (fileInputCoverRef.current) {
+      fileInputCoverRef.current.value = ''; // Reset the file input
+    }
+  };
+
+  const removeLogo = () => {
+    setPreviewLogoUrl(null);
+    form.setValue('logo', undefined);
+    if (fileInputLogoRef.current) {
+      fileInputLogoRef.current.value = ''; // Reset the file input
+    }
+  };
+
+  return (
+    <Card className="mx-auto w-full">
+      <CardHeader>
+        <CardTitle className="text-left text-2xl font-bold">
+          General Information
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Institute Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter Institute Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter Title"
+                        {...field}
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter Title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="establishedYear"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Established Year</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter Title"
+                        {...field}
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="organizationType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Organization Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Organization Type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {orgTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter Title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select City" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {courseTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select State" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {courseTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address</FormLabel>
+                  <Textarea placeholder="Enter address" {...field} cols={10} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="about"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>About</FormLabel>
+                  <FormControl>
+                    <Controller
+                      name="about"
+                      control={form.control}
+                      render={({ field }) => (
+                        <CustomEditor
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+              <FormField
+                control={form.control}
+                name="logo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Logo Image</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <Input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={handleLogoChange}
+                          ref={fileInputLogoRef} // Reference to reset input
+                          className="hidden "
+                        />
+
+                        {previewLogoUrl ? (
+                          <div className="relative inline-block">
+                            <Image
+                              src={previewLogoUrl}
+                              alt="Preview"
+                              className="max-h-[200px] max-w-full rounded-md object-cover"
+                              width={1200}
+                              height={1200}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removeLogo}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove image</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={triggerLogoFileInput}
+                            className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                          >
+                            <Plus className="text-grey-400 h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="thumbnail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Thumbnail Image</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <Input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={handleThumbnailChange}
+                          ref={fileInputThumbnailRef} // Reference to reset input
+                          className="hidden "
+                        />
+
+                        {previewThumbnailUrl ? (
+                          <div className="relative inline-block">
+                            <Image
+                              src={previewThumbnailUrl}
+                              alt="Preview"
+                              className="max-h-[200px] max-w-full rounded-md object-cover"
+                              width={1200}
+                              height={1200}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removeThumbnailImage}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove image</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={triggerThumbnailFileInput}
+                            className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                          >
+                            <Plus className="text-grey-400 h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cover"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cover Image</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <Input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={handleCoverChange}
+                          ref={fileInputCoverRef} // Reference to reset input
+                          className="hidden"
+                        />
+
+                        {previewCoverUrl ? (
+                          <div className="relative inline-block">
+                            <Image
+                              src={previewCoverUrl}
+                              alt="Preview"
+                              className="max-h-[200px] max-w-full rounded-md object-cover"
+                              width={1200}
+                              height={1200}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removeCoverImage}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove image</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={triggerCoverFileInput}
+                            className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                          >
+                            <Plus className="text-grey-400 h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="brochure"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Brochure</FormLabel>
+                  <FormControl>
+                    <div className="space-y-4">
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        onChange={handleLogoChange}
+                        ref={fileInputLogoRef} // Reference to reset input
+                        className="hidden "
+                      />
+
+                      {previewLogoUrl ? (
+                        <div className="relative inline-block">
+                          <Image
+                            src={previewLogoUrl}
+                            alt="Preview"
+                            className="max-h-[200px] max-w-full rounded-md object-cover"
+                            width={1200}
+                            height={1200}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-0 top-0 -mr-2 -mt-2"
+                            onClick={removeLogo}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove image</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={triggerLogoFileInput}
+                          className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                        >
+                          <Plus className="text-grey-400 h-10 w-10" />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end">
+              <Button type="submit">Save & Update</Button>
+            </div>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default GeneralInfo;

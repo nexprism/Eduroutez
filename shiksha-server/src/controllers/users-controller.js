@@ -1,0 +1,125 @@
+import fs from "fs/promises";
+import path from "path";
+import { StatusCodes } from "http-status-codes";
+import { FileUpload } from "../middlewares/index.js";
+import UserService from "../services/users-service.js";
+import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
+const singleUploader = FileUpload.upload.single("image");
+const userService = new UserService();
+
+/**
+ * GET : /user
+ * req.body {}
+ */
+
+export async function getUsers(req, res) {
+  try {
+    const response = await userService.getAll(req.query);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched users";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+/**
+ * GET : /user/:id
+ * req.body {}
+ */
+
+export async function getUser(req, res) {
+  try {
+    const response = await userService.get(req.params.id);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the user";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+/**
+ * PATCH : /user/:id
+ * req.body {capacity:200}
+ */
+
+export async function updateUser(req, res) {
+  singleUploader(req, res, async (err) => {
+    if (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
+    }
+
+    try {
+      const userId = req.params.id;
+      const payload = {};
+      let oldImagePath;
+
+      // Check if a new title is provided
+      if (req.body.name) {
+        payload.name = req.body.name;
+      }
+      if (req.body.contact_number) {
+        payload.contact_number = req.body.contact_number;
+      }
+      if (req.body.permissions) {
+        payload.address = req.body.address;
+      }
+
+ 
+
+      // Check if a new image is uploaded
+      if (req.file) {
+        const user = await userService.get(userId);
+
+        // Record the old image path if it exists
+        if (user.image) {
+          oldImagePath = path.join("uploads", user.image);
+        }
+
+        // Set the new image filename in payload
+        payload.image = req.file.filename;
+      }
+
+      // Update the user with new data
+      const response = await userService.update(userId, payload);
+
+      // Delete the old image only if the update is successful and old image exists
+      if (oldImagePath) {
+        try {
+          fs.unlink(oldImagePath);
+        } catch (unlinkError) {
+          console.error("Error deleting old image:", unlinkError);
+        }
+      }
+
+      // Return success response
+      SuccessResponse.data = response;
+      SuccessResponse.message = "Successfully updated the user";
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+      console.error("Update user error:", error);
+      ErrorResponse.error = error;
+      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+    }
+  });
+}
+
+/**
+ * DELETE : /user/:id
+ * req.body {}
+ */
+
+export async function deleteUser(req, res) {
+  try {
+    const response = await userService.delete(req.params.id);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully deleted the user";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}

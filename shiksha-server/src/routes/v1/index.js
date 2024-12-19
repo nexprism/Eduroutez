@@ -1,0 +1,287 @@
+import express from "express";
+
+import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset } from "../../controllers/auth-controller.js";
+import accessTokenAutoRefresh from "../../middlewares/accessTokenAutoRefresh.js";
+import passport from "passport";
+import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from "../../controllers/coupon-controller.js";
+import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
+import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
+import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
+import { getUsers, updateUser } from "../../controllers/users-controller.js";
+import { createCategory, deleteCategory, getCategories, getCategory, updateCategory } from "../../controllers/category-controller.js";
+import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
+import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
+import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
+import { createCourse, deleteCourse, getCourse, getCourses, updateCourse } from "../../controllers/course-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstitutes, updateInstitute } from "../../controllers/institute-controller.js";
+import { createCareer, deleteCareer, getCareer, getCareers, updateCareer } from "../../controllers/career-controller.js";
+import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";
+import { createCounselor, deleteCounselor, getCounselor, getCounselors, updateCounselor } from "../../controllers/counselor-controller.js";
+import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
+import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
+import { createReview, deleteReview, getReview, getReviews, updateReview } from "../../controllers/review-controller.js";
+import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCategory, updateBlogCategory } from "../../controllers/blog-category-controller.js";
+import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog } from "../../controllers/blog-controller.js";
+import { createPayout, deletePayout, getPayout, getPayouts, updatePayout } from "../../controllers/payout-controller.js";
+import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
+import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer } from "../../controllers/question-answer-controller.js";
+import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishlist } from "../../controllers/wishlist-controller.js";
+import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar } from "../../controllers/webinar-controller.js";
+import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
+import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
+import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
+import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
+
+const router = express.Router();
+
+/**
+ * auth routes
+ */
+router.post("/signup", signup);
+router.post("/admin", createAdmin);
+router.get("/admins", getAdmins);
+router.post("/verify-email", verifyEmail);
+router.post("/login", login);
+router.post("/logout", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), logout);
+router.post("/change-password", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), changeUserPassword);
+router.post("/reset-password-link", sendUserPasswordResetEmail);
+router.post("/reset-password/:id/:token", userPasswordReset);
+
+/**
+ * subscription routes
+ */
+router.post("/subscription", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createSubscription);
+router.get("/subscriptions", getSubscriptions);
+router.get("/subscription/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getSubscription);
+router.patch("/subscription/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateSubscription);
+router.delete("/subscription/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteSubscription);
+
+/**
+ * stream routes
+ */
+router.post("/stream", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createStream);
+router.get("/streams", getStreams);
+router.get("/stream/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getStream);
+router.patch("/stream/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateStream);
+router.delete("/stream/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteStream);
+
+/**
+ * course-category routes
+ */
+router.post("/course-category", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCourseCategory);
+router.get("/course-categories", getCourseCategories);
+router.get("/course-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCourseCategory);
+router.patch("/course-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCourseCategory);
+router.delete("/course-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCourseCategory);
+
+/**
+ * course routes
+ */
+router.post("/course", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCourse);
+router.get("/courses", getCourses);
+router.get("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCourse);
+router.patch("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCourse);
+router.delete("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCourse);
+
+/**
+ * institute routes
+ */
+router.post("/institute", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createInstitute);
+router.get("/institutes", getInstitutes);
+router.get("/institute/:id", getInstitute);
+router.patch("/institute/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateInstitute);
+router.delete("/institute/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteInstitute);
+
+/**
+ * institute-inquiries routes
+ */
+router.post("/institute-inquiry", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createInstituteInquiry);
+router.get("/institute-inquiries", getInstituteInquiries);
+router.get("/institute-inquiry/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getInstituteInquiry);
+router.patch("/institute-inquiry/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateInstituteInquiry);
+router.delete("/institute-inquiry/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteInstituteInquiry);
+
+/**
+ * career routes
+ */
+router.post("/career", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCareer);
+router.get("/careers", getCareers);
+router.get("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCareer);
+router.patch("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCareer);
+router.delete("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCareer);
+
+/**
+ * counselor routes
+ */
+router.post("/counselor", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCounselor);
+router.get("/counselors", getCounselors);
+router.get("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselor);
+router.patch("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselor);
+router.delete("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselor);
+
+/**
+ * student routes
+ */
+router.post("/student", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createStudent);
+router.get("/students", getStudents);
+router.get("/student/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getStudent);
+router.patch("/student/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateStudent);
+router.delete("/student/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteStudent);
+
+/**
+ * payment-method routes
+ */
+router.post("/payment-method", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createPaymentMethod);
+router.get("/payment-methods", getPaymentMethods);
+router.get("/payment-method/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPaymentMethod);
+router.patch("/payment-method/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updatePaymentMethod);
+router.delete("/payment-method/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deletePaymentMethod);
+
+/**
+ * review routes
+ */
+router.post("/review", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createReview);
+router.get("/reviews", getReviews);
+router.get("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getReview);
+router.patch("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateReview);
+router.delete("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteReview);
+
+/**
+ * blog-category routes
+ */
+router.post("/blog-category", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBlogCategory);
+router.get("/blog-categories", getBlogCategories);
+router.get("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlogCategory);
+router.patch("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBlogCategory);
+router.delete("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBlogCategory);
+
+/**
+ * blog routes
+ */
+router.post("/blog", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBlog);
+router.get("/blogs", getBlogs);
+router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
+router.patch("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBlog);
+router.delete("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBlog);
+
+/**
+ * payout routes
+ */
+router.post("/payout", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createPayout);
+router.get("/payouts", getPayouts);
+router.get("/payout/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPayout);
+router.patch("/payout/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updatePayout);
+router.delete("/payout/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deletePayout);
+
+/**
+ * feedback routes
+ */
+router.post("/feedback", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createFeedback);
+router.get("/feedbacks", getFeedbacks);
+router.get("/feedback/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getFeedback);
+router.patch("/feedback/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateFeedback);
+router.delete("/feedback/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteFeedback);
+
+/**
+ * question-answer routes
+ */
+router.post("/question-answer", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createQuestionAnswer);
+router.get("/question-answers", getQuestionAnswers);
+router.get("/question-answer/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswer);
+router.patch("/question-answer/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateQuestionAnswer);
+router.delete("/question-answer/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteQuestionAnswer);
+
+/**
+ * wishlist routes
+ */
+router.post("/wishlist", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createWishlist);
+router.get("/wishlists", getWishlists);
+router.get("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWishlist);
+router.patch("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateWishlist);
+router.delete("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteWishlist);
+
+/**
+ * webinar routes
+ */
+router.post("/webinar", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createWebinar);
+router.get("/webinars", getWebinars);
+router.get("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinar);
+router.patch("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateWebinar);
+router.delete("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteWebinar);
+
+/**
+ * level routes
+ */
+router.post("/level", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createLevel);
+router.get("/levels", getLevels);
+router.get("/level/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getLevel);
+router.patch("/level/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateLevel);
+router.delete("/level/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteLevel);
+
+/**
+ * role routes
+ */
+// router.post("/role", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBanner);
+// router.get("/roles", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBanners);
+// router.get("/role/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBanner);
+// router.patch("/role/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBanner);
+// router.delete("/role/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBanner);
+
+/**
+ * user routes
+ */
+router.get("/user", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), userProfile);
+router.patch("/user/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateUser);
+router.get("/users", UserMiddleware.validateGetAllRequest, accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getUsers);
+
+/**
+ * category routes
+ */
+// router.post("/category", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCategory);
+// router.get("/categories", CategoryMiddleware.validateGetAllRequest, getCategories);
+// router.get("/category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCategory);
+// router.patch("/category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCategory);
+// router.delete("/category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCategory);
+
+/**
+ * coupon routes
+ */
+router.post("/coupon", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCoupon);
+router.get("/coupons", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCoupons);
+// router.get("/coupons-by-category", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCoupons);
+router.get("/coupon/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCoupon);
+router.patch("/coupon/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCoupon);
+router.delete("/coupon/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCoupon);
+/**
+ * transaction routes
+ */
+router.post("/transaction", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createTransaction);
+router.get("/transactions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getTransactions);
+/**
+ * template routes
+ */
+router.post("/template", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createTemplate);
+router.get("/templates", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getTemplates);
+router.get("/template/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getTemplate);
+router.patch("/template/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateTemplate);
+router.delete("/template/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteTemplate);
+
+/**
+ * promotion routes
+ */
+router.post("/promotion", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createPromotion);
+router.get("/promotions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPromotions);
+router.get("/promotion/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPromotion);
+router.patch("/promotion/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updatePromotion);
+router.delete("/promotion/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deletePromotion);
+
+/**
+ * media routes
+ */
+router.post("/media", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createMedia);
+router.get("/medias", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMedias);
+router.get("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMedia);
+router.patch("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateMedia);
+router.delete("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteMedia);
+
+export default router;
