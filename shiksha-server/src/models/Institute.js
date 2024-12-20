@@ -82,13 +82,30 @@ const instituteSchema = new mongoose.Schema(
     scholarshipInfo: {
       type: String,
     },
+    minFees: {
+      type: String,
+    },
+    maxFees: {
+      type: String,
+    },
+    affiliation: {
+      type: String,
+    },
+    highestPackage: {
+      type: String,
+    },
     reviews: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Review",
       },
     ],
-    skills: [
+    streams: [
+      {
+        type: String,
+      },
+    ],
+    specialization: [
       {
         type: String,
       },

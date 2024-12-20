@@ -68,6 +68,8 @@ export default function CourseCategoryForm() {
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
 
+  console.log(segments);
+
   React.useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
       setIsEdit(true);
@@ -95,6 +97,7 @@ export default function CourseCategoryForm() {
 
     mutate(formData);
   }
+
   const router = useRouter();
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {

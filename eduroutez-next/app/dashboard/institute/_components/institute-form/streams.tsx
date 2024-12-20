@@ -41,7 +41,6 @@ const Skills = () => {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {/* Form Field for Skills */}
             <FormField
               control={form.control}
               name="about"

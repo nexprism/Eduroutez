@@ -86,7 +86,9 @@ export async function getCourses(req, res) {
 
 export async function getCourse(req, res) {
   try {
+    console.log(req.params.id);
     const response = await courseService.get(req.params.id);
+    console.log(response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the course";
     return res.status(StatusCodes.OK).json(SuccessResponse);

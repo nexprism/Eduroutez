@@ -160,7 +160,9 @@ export default function CreateInstitute() {
     }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {}
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    
+  }
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {

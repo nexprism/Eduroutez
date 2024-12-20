@@ -18,7 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import axiosInstance from '@/lib/axios';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -33,13 +33,6 @@ const formSchema = z.object({
     .regex(/^[6-9]\d{9}$/, {
       message: 'Please enter a valid Indian mobile number.'
     }),
-  about: z.any().optional(),
-  admissionInfo: z.string().optional(),
-  placementInfo: z.string().optional(),
-  state: z.string().optional(),
-  city: z.string().optional(),
-  website: z.string().url().optional(),
-  establishedYear: z.any().optional(),
   email: z
     .string({
       required_error: 'Please enter an email.'
@@ -67,13 +60,6 @@ export default function InstituteCreateForm() {
     defaultValues: {
       title: '',
       phone: '',
-      about: '',
-      admissionInfo: '',
-      placementInfo: '',
-      state: '',
-      city: '',
-      website: '',
-      establishedYear: '',
       email: '',
       password: '',
     },
@@ -82,16 +68,9 @@ export default function InstituteCreateForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const instituteData = {
       instituteName: values.title,
-      about:values.about,
-      admissionInfo:values.admissionInfo,
-      placementInfo:values.placementInfo,
-      state:values.state,
-      city:values.city,
-      website:values.website,
-      establishedYear:values.establishedYear,
       institutePhone: values.phone,
       email: values.email,
-      password: values.password
+      password: values.password,
     };
     mutate(instituteData);
   }
@@ -126,6 +105,7 @@ export default function InstituteCreateForm() {
     }
   });
 
+
   return (
     <div className="container mx-auto space-y-6 py-6">
       <Card className="mx-auto w-full">
@@ -151,142 +131,6 @@ export default function InstituteCreateForm() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="about"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>About</FormLabel>
-                    <FormControl>
-                      <Controller
-                        name="about"
-                        control={form.control}
-                        render={({ field }) => (
-                          <CustomEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="admissionInfo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Admission Procedure</FormLabel>
-                    <FormControl>
-                      <Controller
-                        name="admissionInfo"
-                        control={form.control}
-                        render={({ field }) => (
-                          <CustomEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="placementInfo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Placements Procedure</FormLabel>
-                    <FormControl>
-                      <Controller
-                        name="placementInfo"
-                        control={form.control}
-                        render={({ field }) => (
-                          <CustomEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="enter email"
-                        {...field}
-                        type="string"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="enter email"
-                        {...field}
-                        type="string"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="website"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Website</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="enter email"
-                        {...field}
-                        type="string"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="establishedYear"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Established Year</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="enter email"
-                        {...field}
-                        type="string"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={form.control}
                 name="email"

@@ -19,12 +19,17 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation } from '@tanstack/react-query';
 import { Plus, X } from 'lucide-react';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import axiosInstance from '@/lib/axios';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { toast } from 'sonner';
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 const courseTypes = [
   { value: 'live', label: 'Live' },
@@ -38,55 +43,25 @@ const orgTypes = [
 ];
 
 const formSchema = z.object({
-  title: z.string().min(2, {
+  instituteName: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
-  }),
-  courseType: z.string({
-    required_error: 'Please select a course type.'
-  }),
-  instructor: z.string({
-    required_error: 'Please select an instructor.'
-  }),
-  level: z.string({
-    required_error: 'Please select a level.'
-  }),
-  shortDescription: z.any().optional(),
-  longDescription: z.any().optional(),
-
-  category: z.string({
-    required_error: 'Please select a category.'
-  }),
-  status: z.string({
-    required_error: 'Please select a status.'
-  }),
-  visibility: z.string({
-    required_error: 'Please select a visibility option.'
-  }),
-  language: z.string({
-    required_error: 'Please select a language.'
-  }),
-  isCourseFree: z.enum(['free', 'notfree'], {
-    required_error: 'You need to select one option.'
-  }),
-  isCourseDiscounted: z.enum(['yes', 'no'], {
-    required_error: 'You need to select one option.'
-  }),
-  applicationStartDate: z.date({
-    required_error: 'Application start date is required.'
-  }),
-  applicationEndDate: z.date({
-    required_error: 'Application end date is required.'
   }),
   thumbnail: z.any().optional(),
   cover: z.any().optional(),
   logo: z.any().optional(),
+  maxFees: z.any().optional(),
+  minFees: z.any().optional(),
+  affiliation: z.any().optional(),
+  highestPackage: z.any().optional(),
+  streams:z.any().optional(),
+  specialization:z.any().optional(),
   state: z.string({
     required_error: 'Please select a state.'
   }),
   city: z.string({
     required_error: 'Please select a city.'
   }),
-  phone: z.string({
+  institutePhone: z.string({
     required_error: 'Please enter a phone number.'
   }),
   email: z.string({
@@ -107,8 +82,7 @@ const formSchema = z.object({
   organizationType: z.string({
     required_error: 'Please select an organization type.'
   }),
-  brochure: z.any().optional(),
-  pictures: z.array(z.any())
+  brochure: z.any().optional()
 });
 
 const GeneralInfo = () => {
@@ -138,18 +112,88 @@ const GeneralInfo = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      shortDescription: '',
-      longDescription: '',
-      isCourseFree: 'free',
-      isCourseDiscounted: 'yes'
-      // city: '',
-      // state: '',
-      // organizationType: ''
+      instituteName:'',
+      institutePhone:'',
+      email:'',
+      establishedYear:'',
+      organizationType:'',
+      website:'',
+      city:'',
+      state:'',
+      address:'',
+      about:'',
+      minFees:'',
+      maxFees:'',
+      affiliation:'',
+      highestPackage:'',
+      streams:'',
+      specialization:'',
     }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {}
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log('hi')
+    const formData = new FormData();
+    formData.append('instituteName', values.instituteName);
+    formData.append('institutePhone', values.institutePhone);
+    formData.append('email', values.email);
+    formData.append('establishedYear', values.establishedYear);
+    formData.append('organizationType', values.organizationType);
+    formData.append('website', values.website);
+    formData.append('city', values.city);
+    formData.append('state', values.state);
+    formData.append('address', values.address);
+    formData.append('about', values.about);
+    formData.append('minFees', values.minFees);
+    formData.append('maxFees', values.maxFees);
+    formData.append('affiliation', values.affiliation);
+    formData.append('highestPackage', values.highestPackage);
+    formData.append('streams', values.streams);
+    formData.append('specialization', values.specialization);
+    if (values.logo) {
+      formData.append('instituteLogo', values.logo);
+    }
+    if (values.thumbnail) {
+      formData.append('thumbnail', values.thumbnail);
+    }
+    if (values.cover) {
+      formData.append('cover', values.cover);
+    }
+    if (values.brochure) {
+      formData.append('brochure', values.brochure);
+    }
+
+    mutate(formData);
+  }
+
+  const router = useRouter();
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const endpoint = `${apiUrl}/institute/${segments[4]}`;
+      const response = await axiosInstance({
+        url: `${endpoint}`,
+        method: 'patch',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data;
+    },
+
+    onSuccess: () => {
+      const message = 'Course category updated successfully';
+      toast.success(message);
+      form.reset();
+      setPreviewThumbnailUrl(null);
+      setPreviewCoverUrl(null);
+      setPreviewLogoUrl(null);
+      router.push('/dashboard/institute');
+    },
+    onError: () => {
+      toast.error('Something went wrong');
+    }
+  });
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -242,7 +286,7 @@ const GeneralInfo = () => {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
-              name="title"
+              name="instituteName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Institute Name</FormLabel>
@@ -257,7 +301,7 @@ const GeneralInfo = () => {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               <FormField
                 control={form.control}
-                name="phone"
+                name="institutePhone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
@@ -345,59 +389,117 @@ const GeneralInfo = () => {
               />
               <FormField
                 control={form.control}
-                name="city"
+                name="state"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select City" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {courseTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter State" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name="state"
+                name="city"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select State" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {courseTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter City" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="minFees"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Min Fees</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter minimum Fees" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxFees"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Fees</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter maximum fees" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="affiliation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Affiliation</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your affiliation" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="highestPackage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Highest Package</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter highest Package" {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="streams"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Streams (comma separated)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Add skills like -> designing, developing, marketing"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="specialization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Specialization (comma separated)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Add skills like -> designing, developing, marketing"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import InstituteService from "../services/institute-service.js";
+const singleUploader = FileUpload.upload.single("image");
 const multiUploader = FileUpload.upload.fields([
   {
     name: "instituteLogo",
@@ -112,25 +113,28 @@ export async function getInstitute(req, res) {
  */
 
 export async function updateInstitute(req, res) {
-  singleUploader(req, res, async (err) => {
+  multiUploader(req, res, async (err) => {
     if (err) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }
 
     try {
       const instituteId = req.params.id;
-      const payload = {};
+      const payload = req.body;
       let oldImagePath;
-
+      console.log(req.files);
+      // console.log(req.file);
       // Check if a new title is provided
-      if (req.body.title) {
-        payload.title = req.body.title;
-      }
+      // if (req.body.title) {
+      //   payload.title = req.body.title;
+      // }
 
+      // console.log('hi')
       // Check if a new image is uploaded
       if (req.file) {
         const institute = await instituteService.get(instituteId);
 
+        console.log(institute);
         // Record the old image path if it exists
         if (institute.image) {
           oldImagePath = path.join("uploads", institute.image);
@@ -141,7 +145,9 @@ export async function updateInstitute(req, res) {
       }
 
       // Update the institute with new data
+      // console.log(payload);
       const response = await instituteService.update(instituteId, payload);
+      // console.log(response);
 
       // Delete the old image only if the update is successful and old image exists
       if (oldImagePath) {

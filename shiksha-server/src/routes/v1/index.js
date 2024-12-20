@@ -79,7 +79,7 @@ router.delete("/course-category/:id", accessTokenAutoRefresh, passport.authentic
  */
 router.post("/course", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCourse);
 router.get("/courses", getCourses);
-router.get("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCourse);
+router.get("/course/:id", getCourse);
 router.patch("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCourse);
 router.delete("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCourse);
 
