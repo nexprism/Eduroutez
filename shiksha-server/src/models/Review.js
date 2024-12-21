@@ -57,14 +57,14 @@ const reviewSchema = new mongoose.Schema(
     recommendation: {
       type: Boolean, // Would you Recommend other to take admission in your college?
     },
-    studentDocument: {
+    studentIdImage:{
       type: String, // image
     },
-    studentSelfie: {
+    selfieImage: {
       type: String, // image
     },
-    reviewerLinkedInUrl: {
-      type: String,
+    socialLinks: {
+      type: [],
     },
     reviewerTwitterUrl: {
       type: String,

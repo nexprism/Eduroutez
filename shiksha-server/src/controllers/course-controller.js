@@ -46,9 +46,13 @@ export const createCourse = async (req, res) => {
       if (req.files["metaImage"]) {
         payload.metaImage = req.files["metaImage"][0].filename;
       }
-      const resp=await instituteService.addCourses(instituteCategory,rest);
-        
+      
       const response = await courseService.create(payload);
+      const resp=await instituteService.addCourses(instituteCategory,response);
+      // console.log('good')
+      // console.log(response)
+      // console.log('good2');
+      // console.log(resp)
 
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully created a course";
@@ -86,9 +90,8 @@ export async function getCourses(req, res) {
 
 export async function getCourse(req, res) {
   try {
-    console.log(req.params.id);
+    // console.log(req.params.id);
     const response = await courseService.get(req.params.id);
-    console.log(response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the course";
     return res.status(StatusCodes.OK).json(SuccessResponse);
@@ -163,12 +166,31 @@ export async function updateCourse(req, res) {
 
 export async function deleteCourse(req, res) {
   try {
+    const course = await courseService.get(req.params.id);
+    if (!course) {
+      return res.status(404).json({
+        message: "Course not found",
+      });
+    }
+
+    const { instituteCategory } = course;
+    // console.log(course);
+    // console.log(instituteCategory);
+    // console.log('bro');
+
+
+    // Remove the course from the associated institute
+    const log=await instituteService.deleteCourse(instituteCategory,req.params.id);
+    // console.log(log);
+
     const response = await courseService.delete(req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully deleted the course";
-    return res.status(StatusCodes.OK).json(SuccessResponse);
+    return res.status(200).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+
+

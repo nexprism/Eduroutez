@@ -74,6 +74,16 @@ class InstituteService {
     }
   }
 
+  async deleteCourse(instituteId,courseId){
+    try {
+      const updatesInstitute = await this.instituteRepository.removeCourse(instituteId,courseId);
+
+      return updatesInstitute;
+    } catch (error) {
+      throw new AppError("Cannot update the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async update(id, data) {
     try {
       const institute = await this.instituteRepository.update(id, data);
