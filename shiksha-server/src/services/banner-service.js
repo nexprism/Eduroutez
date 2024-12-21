@@ -1,21 +1,21 @@
-import { BlogRepository } from "../repository/index.js";
+import { BannerRepository } from "../repository/index.js";
 
-class BlogService {
+class BannerService {
   constructor() {
-    this.blogRepository = new BlogRepository();  
+    this.bannerRepository = new BannerRepository();  
   }
 
   async create(data) { 
     try {
-      const blog = await this.blogRepository.create(data);
-      return blog;
+      const banner = await this.bannerRepository.create(data);
+      return banner;
     } catch (error) {
       throw error;
     }
   }
   async get(id) {
-    const blog = await this.blogRepository.get(id);
-    return blog;
+    const banner = await this.bannerRepository.get(id);
+    return banner;
   }
   async getAll(query) {
     try {
@@ -52,18 +52,18 @@ class BlogService {
 
       // Execute query with dynamic filters, sorting, and pagination
       // const populateFields = ["createdBy"];
-      const blogs = await this.blogRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
+      const banner = await this.bannerRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
 
-      return blogs;
+      return banner;
     } catch (error) {
       console.log(error);
-      throw new AppError("Cannot fetch data of all the blogs", StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new AppError("Cannot fetch data of all the banner", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
   async update(id, data) {
     try {
-      const blog = await this.blogRepository.update(id, data);
-      return blog;
+      const banner = await this.bannerRepository.update(id, data);
+      return banner;
     } catch (error) {
       throw error;
     }
@@ -71,18 +71,18 @@ class BlogService {
 
   async delete(id) {
     try {
-      const blog = await this.blogRepository.destroy(id);
-      return blog;
+      const banner = await this.bannerRepository.destroy(id);
+      return banner;
     } catch (error) {
       if (error.statusCode === StatusCodes.NOT_FOUND) {
-        throw new AppError("The blog you requested to delete is not present", error.statusCode);
+        throw new AppError("The banner you requested to delete is not present", error.statusCode);
       }
-      throw new AppError("Cannot delete the blog ", StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new AppError("Cannot delete the banner ", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 }
 
-export default BlogService;
+export default BannerService;
 
 /*
     this is my #first #tweet . I am really #excited
