@@ -115,8 +115,8 @@ export default function CounselorForm() {
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
-        ? `${apiUrl}/blog/${segments[4]}`
-        : `${apiUrl}/blog`;
+        ? `${apiUrl}/career/${segments[4]}`
+        : `${apiUrl}/career`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: isEdit ? 'patch' : 'post',
@@ -135,7 +135,7 @@ export default function CounselorForm() {
       toast.success(message);
       form.reset();
       setPreviewImageUrl(null);
-      router.push('/dashboard/blog');
+      router.push('/dashboard/career');
     },
     onError: (error) => {
       toast.error('Something went wrong');
@@ -182,16 +182,16 @@ export default function CounselorForm() {
   } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/blogs`);
+      const response = await axiosInstance.get(`${apiUrl}/career`);
       return response.data;
     }
   });
 
   const { data: counselor } = useQuery({
-    queryKey: ['blog', segments[4]],
+    queryKey: ['career', segments[4]],
     queryFn: async () => {
       const response = await axiosInstance.get(
-        `${apiUrl}/blog/${segments[4]}`
+        `${apiUrl}/career/${segments[4]}`
       );
       return response.data;
     },
@@ -219,7 +219,7 @@ export default function CounselorForm() {
     <Card className="mx-auto w-full">
       <CardHeader>
         <CardTitle className="text-left text-2xl font-bold">
-          Create Blog
+          Career
         </CardTitle>
       </CardHeader>
       <CardContent>

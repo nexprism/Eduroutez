@@ -12,7 +12,6 @@ const promotionSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: true,
     },
     status: {
       type: String,

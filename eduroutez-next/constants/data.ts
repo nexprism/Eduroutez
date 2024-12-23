@@ -111,10 +111,19 @@ export const navItems: NavItem[] = [
   },
   {
     title: 'Media',
-    url: '/dashboard/media',
-    icon: 'media',
+    url: '/dashboard/banner',
+    icon: 'bookmark',
     isActive: false,
-    items: [] // No child items
+    items: [
+      {
+        title: 'Banner',
+        url: '/dashboard/banner'
+      },
+      {
+        title: 'Gallery',
+        url: '/dashboard/media'
+      }
+    ]
   },
 
   // {
@@ -136,6 +145,13 @@ export const navItems: NavItem[] = [
   {
     title: 'Blogs',
     url: '/dashboard/blog',
+    icon: 'post',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Career',
+    url: '/dashboard/career',
     icon: 'post',
     isActive: false,
     items: [] // No child items

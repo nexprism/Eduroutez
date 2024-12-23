@@ -4,7 +4,14 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CareerService from "../services/career-service.js";
-const singleUploader = FileUpload.upload.single("image");
+const singleUploader = FileUpload.upload.single("images");
+
+const multiUploader = FileUpload.upload.fields([
+  {
+    name: "images",
+    maxCount: 1,
+  }
+]);
 const careerService = new CareerService();
 
 /**
@@ -13,15 +20,15 @@ const careerService = new CareerService();
  */
 export const createCareer = async (req, res) => {
   try {
-    singleUploader(req, res, async function (err, data) {
+    multiUploader(req, res, async function (err, data) {
       if (err) {
         return res.status(500).json({ error: err });
       }
 
       const payload = { ...req.body };
-      payload.careerPreviewThumbnail = req.files["career-preview-thumbnail"][0].filename;
-      payload.careerPreviewCover = req.files["career-preview-cover"][0].filename;
-      payload.metaImage = req.files["meta-image"][0].filename;
+      if (req.files && req.files["images"]) {
+        payload.image = req.files["images"][0].filename;
+      }
 
       const response = await careerService.create(payload);
 

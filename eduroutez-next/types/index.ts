@@ -421,6 +421,7 @@ export type Wishlist = {
 };
 
 export type Media = {
+  title:string;
   images: string[];
   video: string;
   creteadAt: string;

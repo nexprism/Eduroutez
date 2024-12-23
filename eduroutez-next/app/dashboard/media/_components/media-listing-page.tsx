@@ -22,7 +22,7 @@ export default function MediaListingPage({}: TMediaListingPage) {
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['medias', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/medias`, {
+      const response = await axiosInstance.get(`${apiUrl}/media`, {
         params: {
           searchFields: JSON.stringify({}),
           sort: JSON.stringify({ createdAt: 'desc' }),

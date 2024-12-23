@@ -6,13 +6,9 @@ import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import BlogService from "../services/blog-service.js";
 const multiUploader = FileUpload.upload.fields([
   {
-    name: "image",
+    name: "images",
     maxCount: 1,
-  },
-  {
-    name: "metaImage",
-    maxCount: 1,
-  },
+  }
 ]);
 const blogService = new BlogService();
 
@@ -23,17 +19,13 @@ const blogService = new BlogService();
 
 export const createBlog = async (req, res) => {
   try {
-    multiUploader(req, res, async function (err, data) {
+    multiUploader(req, res, async function (err) {
       if (err) {
-        return res.status(500).json({ error: err });
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err });
       }
-
       const payload = { ...req.body };
-      if (req.files["image"]) {
-        payload.image = req.files["image"][0].filename;
-      }
-      if (req.files["metaImage"]) {
-        payload.metaImage = req.files["metaImage"][0].filename;
+      if (req.files && req.files["images"]) {
+        payload.image = req.files["images"][0].filename;
       }
       const response = await blogService.create(payload);
 

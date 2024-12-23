@@ -20,9 +20,9 @@ export default function BlogListingPage({}: TBlogListingPage) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['blogs', searchQuery],
+    queryKey: ['career', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/blogs`, {
+      const response = await axiosInstance.get(`${apiUrl}/careers`, {
         params: {
           searchFields: JSON.stringify({}),
           sort: JSON.stringify({ createdAt: 'desc' }),
@@ -43,18 +43,18 @@ export default function BlogListingPage({}: TBlogListingPage) {
           <div className="space-y-4">
             <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
               <Heading
-                title={`Blog (${data.data.totalDocuments})`}
-                description="All blogs online and offline are listed here."
+                title={`Carrer (${data.data.totalDocuments})`}
+                description="All career online and offline are listed here."
               />
               <div className="flex gap-4">
                 <Button asChild className="w-fit whitespace-nowrap px-2">
-                  <Link href="/dashboard/blog/new">
-                    <Plus className="mr-1 h-4 w-4" /> Add New Blog
+                  <Link href="/dashboard/career/new">
+                    <Plus className="mr-1 h-4 w-4" /> Add New Career
                   </Link>
                 </Button>
                 <Button asChild className="w-fit whitespace-nowrap px-2">
-                  <Link href="/dashboard/blog/blog-category">
-                    <Plus className="mr-1 h-4 w-4" /> Add New Blog Category
+                  <Link href="/dashboard/career/blog-category">
+                    <Plus className="mr-1 h-4 w-4" /> Add New Career Category
                   </Link>
                 </Button>
               </div>

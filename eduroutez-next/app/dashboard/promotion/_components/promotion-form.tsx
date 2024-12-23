@@ -1,18 +1,37 @@
 'use client';
-import * as React from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format, set } from 'date-fns';
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
+  FormControl,
   FormMessage
 } from '@/components/ui/form';
+
 import { Input } from '@/components/ui/input';
+import { X, Plus } from 'lucide-react';
+import { CourseCategory } from '@/types';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -20,72 +39,46 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import Image from 'next/image';
-import { CalendarIcon, Plus, X } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { Textarea } from '@/components/ui/textarea';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { usePathname, useRouter } from 'next/navigation';
-import axiosInstance from '@/lib/axios';
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.'
-  }),
-  // price: z.string().min(1, {
-  //   message: 'Discount is required.'
-  // }),
-  price: z.string().refine(
-    (value) => {
-      const price = Number(value);
-      return !isNaN(price) && price >= 1 && price <= 100;
-    },
-    {
-      message: 'Discount must be a number between 1 and 100.'
-    }
-  ),
-  startDate: z.date({
-    required_error: 'Please select a start date.'
-  }),
-  endDate: z.date({
-    required_error: 'Please select a end date.'
-  }),
-
-  category: z
-    .string()
-    .min(1, { message: 'Please select a category.' })
-    .refine(
-      (value) => {
-        const category = value;
-        return category !== 'Select a category';
-      },
-      {
-        message: 'Please select a category.'
-      }
-    ),
-  counselorType: z.string().optional(),
-
-  description: z.string().min(20, {
-    message: 'description must be at least 20 characters.'
-  })
-});
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
-export default function CounselorForm() {
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+const formSchema = z.object({
+  title: z.string().min(2, {
+    message: 'Title must be at least 2 characters.'
+  }),
+  work: z.string(),
+  image: z
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= 1024 * 1024, {
+      message: 'Image size must be less than 1 MB.'
+    })
+    .refine(
+      (file) =>
+        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      {
+        message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
+      }
+    )
+  ,
+    startDate: z.date({
+      required_error: 'Start date is required.'
+    }),
+    endDate: z.date({
+      required_error: 'End date is required.'
+    })
+});
+
+export default function CourseCategoryForm() {
+  const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
+  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(
+    null
+  );
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
+
+  console.log(segments);
 
   React.useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
@@ -96,33 +89,32 @@ export default function CounselorForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      category: '',
-      description: '',
-      // mode: undefined,
-      counselorType: ''
+      title: '',
+      work: 'Promotion',
+      startDate: undefined,
+      endDate: undefined,
+      image: undefined
     }
   });
-  const router = useRouter();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Handle form submission here
     const formData = new FormData();
-    formData.append('name', values.name);
-    formData.append('price', values.price);
+    formData.append('title', values.title);
     formData.append('startDate', values.startDate.toISOString());
-    formData.append('category', values.category);
-    formData.append('description', values.description);
-    formData.append('mode', 'ONLINE');
-    formData.append('counselorType', values.counselorType ?? '');
+    formData.append('endDate', values.endDate.toISOString());
+    if (values.image) {
+      formData.append('images', values.image);
+    }
+
     mutate(formData);
   }
 
-  const { mutate, isPending: isSubmitting } = useMutation({
+  const router = useRouter();
+  const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
-        ? `${apiUrl}/counselor/${segments[4]}`
-        : `${apiUrl}/counselor`;
+        ? `${apiUrl}/promotion/${segments[4]}`
+        : `${apiUrl}/promotion`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: isEdit ? 'patch' : 'post',
@@ -131,19 +123,20 @@ export default function CounselorForm() {
           'Content-Type': 'multipart/form-data'
         }
       });
+      console.log(response.data);
       return response.data;
     },
 
     onSuccess: () => {
       const message = isEdit
-        ? 'Counselor updated successfully'
-        : 'Counselor created successfully';
+        ? 'Media updated successfully'
+        : 'Media created successfully';
       toast.success(message);
       form.reset();
-      setPreviewUrl(null);
-      router.push('/dashboard/counselor');
+      setPreviewImageUrl(null);
+      router.push('/dashboard/promotion');
     },
-    onError: (error) => {
+    onError: () => {
       toast.error('Something went wrong');
     }
   });
@@ -153,137 +146,244 @@ export default function CounselorForm() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
+        setPreviewImageUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
+      form.setValue('image', file);
     } else {
-      setPreviewUrl(null);
+      setPreviewImageUrl(null);
+      form.setValue('image', undefined);
     }
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
+  const triggerImageFileInput = () => {
+    fileInputImageRef.current?.click();
   };
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  // write code to get categories from serve by tanstack query
+
+  const removeImage = () => {
+    setPreviewImageUrl(null);
+    form.setValue('image', undefined);
+    if (fileInputImageRef.current) {
+      fileInputImageRef.current.value = ''; // Reset the file input
+    }
+  };
+
+  const fetchCategories = async () => {
+    const response = await axiosInstance.get(`${apiUrl}/promotions`);
+    return response.data;
+  };
+
   const {
-    data: categories,
+    data: courseCategories = [],
     isLoading,
-    isSuccess
-  } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/categories`);
-      return response.data;
-    }
-  });
+    error
+  } = useQuery({ queryKey: ['promotion'], queryFn: fetchCategories });
 
-  const { data: counselor } = useQuery({
-    queryKey: ['counselor', segments[4]],
+  const { data: category } = useQuery({
+    queryKey: ['promotion', segments[4]],
     queryFn: async () => {
       const response = await axiosInstance.get(
-        `${apiUrl}/counselor/${segments[4]}`
+        `${apiUrl}/promotion/${segments[4]}`
       );
       return response.data;
     },
     enabled: isEdit // Only fetch when in edit mode
   });
 
+  console.log(category);
+
   React.useEffect(() => {
-    if (counselor?.data) {
+    if (category?.data && courseCategories?.data?.result) {
+      // Find the matching parent category
+      const parentCategory = courseCategories.data.result.find(
+        (cat: CourseCategory) => cat._id === category.data.parentCategory
+      );
+
       form.reset({
-        name: counselor.data.name,
-        price: counselor.data.price.toString(),
-        startDate: new Date(counselor.data.startDate),
-        endDate: new Date(counselor.data.endDate),
-        category: counselor.data.category[0],
-        description: counselor.data.description,
-        //  image: undefined // Handle image separately
-        counselorType: counselor?.data?.counselorType
+        title: category.data.title
       });
 
-      // Set preview URL for existing image
-      if (counselor.data.image) {
-        setPreviewUrl(`${IMAGE_URL}/${counselor.data.image}`);
+      if (category.data.icon) {
+        setPreviewImageUrl(`${IMAGE_URL}/${category.data.icon}`);
       }
     }
-  }, [counselor, form]);
+  }, [category, courseCategories, form]);
 
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading categories</div>;
   return (
-    <Card className="mx-auto w-full">
-      <CardHeader>
-        <CardTitle className="text-left text-2xl font-bold">
-          Counselor Information
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div className="container mx-auto space-y-6 py-6">
+      <Card className="mx-auto w-full">
+        <CardHeader>
+          <CardTitle className="text-left text-2xl font-bold">
+            Promotion Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                name="name"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Counselor Name</FormLabel>
+                    <FormLabel>Title</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter your counselor name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your counselor price"
-                        {...field}
-                        type="number"
-                      />
+                      <Input placeholder="Enter Title" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="counselorType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Counselor Type (optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+              <div className="grid grid-cols-1">
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a counselor type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={'DEFAULT'}>Default</SelectItem>
-                        <SelectItem value={'POPULAR'}>Popular</SelectItem>
-                        <SelectItem value={'TRENDING'}>Trending</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                        <div className="space-y-4">
+                          <Input
+                            type="file"
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={handleImageChange}
+                            ref={fileInputImageRef} // Reference to reset input
+                            className="hidden "
+                          />
 
-            <Button type="submit" disabled={isSubmitting}>
-              Submit
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+                          {previewImageUrl ? (
+                            <div className="relative inline-block">
+                              <Image
+                                src={previewImageUrl}
+                                alt="Preview"
+                                className="max-h-[400px] max-w-full rounded-md object-cover"
+                                width={1200}
+                                height={400}
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute right-0 top-0 -mr-2 -mt-2"
+                                onClick={removeImage}
+                              >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Remove image</span>
+                              </Button>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={triggerImageFileInput}
+                              className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                            >
+                              <Plus className="text-grey-400 h-10 w-10" />
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="mt-4 flex flex-col gap-4 grid-rows-2 lg:mt-0">
+                <div className="flex flex-col gap-4">
+                  <Label>Promotion Start Date</Label>
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={'outline'}
+                                className={cn(
+                                  'w-[240px] pl-3 text-left font-normal',
+                                  !field.value && 'text-muted-foreground'
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, 'PPP')
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => date < new Date('1900-01-01')}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="mt-4 flex flex-col gap-4 lg:mt-0">
+                  <Label>Promotion End Date</Label>
+
+                  <FormField
+                    control={form.control}
+                    name="endDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                variant={'outline'}
+                                className={cn(
+                                  'w-[240px] pl-3 text-left font-normal',
+                                  !field.value && 'text-muted-foreground'
+                                )}
+                              >
+                                {field.value ? (
+                                  format(field.value, 'PPP')
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={field.onChange}
+                              disabled={(date) => date < new Date('1900-01-01')}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isPending}>
+                  {isEdit ? 'Update' : 'Create'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

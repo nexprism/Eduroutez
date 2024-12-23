@@ -2,15 +2,7 @@ import mongoose from "mongoose";
 
 const careerSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
     title: {
-      type: String,
-      required: true,
-    },
-    overview: {
       type: String,
       required: true,
     },
@@ -18,25 +10,14 @@ const careerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    eligibility: {
+    description: {
       type: String,
       required: true,
     },
-    typesOfJobRoles: {
-      type: String,
-    },
-    payScaleSalary: {
-      type: String,
-    },
-    careerOpportunities: {
-      type: String,
-    },
-    topColleges: {
-      type: String,
-    },
-    status: {
-      type: Boolean,
-      required: true,
+    category: {
+      // type: mongoose.Schema.Types.ObjectId,
+      // ref: "BlogCategory", // Reference to the category associated with the coupon
+      type:String
     },
   },
   { timestamps: true }

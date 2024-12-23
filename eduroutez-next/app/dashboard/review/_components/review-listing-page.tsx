@@ -22,7 +22,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['reviews', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/reviews`, {
+      const response = await axiosInstance.get(`${apiUrl}/review`, {
         params: {
           searchFields: JSON.stringify({}),
           sort: JSON.stringify({ createdAt: 'desc' }),
@@ -33,7 +33,8 @@ export default function ReviewListingPage({}: TReviewListingPage) {
       return response.data;
     }
   });
-  // console.log(data?.data);
+  console.log('hiii');
+  console.log(data);
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -43,19 +44,19 @@ export default function ReviewListingPage({}: TReviewListingPage) {
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Review (${data.data.totalDocuments})`}
+                title={`Review (${data?.data?.totalDocuments || 0})`}
                 description="All reviews online and offline are listed here."
               />
-              <Button asChild className="w-fit whitespace-nowrap px-2">
+              {/* <Button asChild className="w-fit whitespace-nowrap px-2">
                 <Link href="/dashboard/review/new">
                   <Plus className="mr-1 h-4 w-4" /> Add New
                 </Link>
-              </Button>
+              </Button> */}
             </div>
             <Separator />
             <ReviewTable
-              data={data.data.result}
-              totalData={data.data.totalDocuments}
+              data={data?.data || []}
+              totalData={data?.data?.totalDocuments || 0}
             />
           </div>
         )

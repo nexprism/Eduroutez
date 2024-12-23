@@ -287,7 +287,7 @@ router.delete("/promotion/:id", accessTokenAutoRefresh, passport.authenticate("j
  * media routes
  */
 router.post("/media", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createMedia);
-router.get("/medias", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMedias);
+router.get("/media", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMedias);
 router.get("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMedia);
 router.patch("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateMedia);
 router.delete("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteMedia);

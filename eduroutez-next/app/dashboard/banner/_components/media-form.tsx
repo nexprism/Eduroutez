@@ -37,6 +37,7 @@ const formSchema = z.object({
   title: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
   }),
+  work: z.string(),
   image: z
     .instanceof(File)
     .optional()
@@ -72,7 +73,8 @@ export default function CourseCategoryForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: 'Promotion',
+      title: '',
+      work:'Banner',
       image: undefined,
     }
   });
@@ -80,6 +82,7 @@ export default function CourseCategoryForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
     formData.append('title', values.title);
+    formData.append('work', values.work);
     if (values.image) {
       formData.append('images', values.image);
     }
@@ -194,7 +197,7 @@ export default function CourseCategoryForm() {
       <Card className="mx-auto w-full">
         <CardHeader>
           <CardTitle className="text-left text-2xl font-bold">
-            Adds Images
+            Banner Information
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -205,7 +208,7 @@ export default function CourseCategoryForm() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Course Title</FormLabel>
+                    <FormLabel>Title</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter Title" {...field} />
                     </FormControl>
@@ -220,7 +223,7 @@ export default function CourseCategoryForm() {
                   name="image"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category Icon</FormLabel>
+                      <FormLabel>Image</FormLabel>
                       <FormControl>
                         <div className="space-y-4">
                           <Input

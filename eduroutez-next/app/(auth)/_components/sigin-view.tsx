@@ -65,7 +65,7 @@ export default function SignInViewPage() {
             </p>
           </div>
           {/* <UserAuthForm/> */}
-          {toggle?<UserAuthForm setToggle={setToggle}/>:<UserSignUpForm setToggle={setToggle}/>}          
+          {toggle?<UserAuthForm setToggle={setToggle} toggle={toggle}/>:<UserSignUpForm setToggle={setToggle} toggle={toggle}/>}          
         </div>
       </div>
     </div>

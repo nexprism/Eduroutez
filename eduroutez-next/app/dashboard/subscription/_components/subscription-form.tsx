@@ -45,22 +45,21 @@ const formSchema = z.object({
   // price: z.string().min(1, {
   //   message: 'Discount is required.'
   // }),
-  price: z.string().refine(
-    (value) => {
-      const price = Number(value);
-      return !isNaN(price) && price >= 1 && price <= 100;
-    },
-    {
-      message: 'Discount must be a number between 1 and 100.'
-    }
-  ),
+  price: z.string(),
   startDate: z.date({
     required_error: 'Please select a start date.'
   }),
   endDate: z.date({
     required_error: 'Please select a end date.'
   }),
-
+  features: z
+    .array(
+      z.object({
+        key: z.string().min(1, { message: 'Key is required.' }),
+        value: z.string().min(1, { message: 'Value is required.' })
+      })
+    )
+    .min(1, { message: 'At least one feature is required.' }),
   category: z
     .string()
     .min(1, { message: 'Please select a category.' })
@@ -73,18 +72,26 @@ const formSchema = z.object({
         message: 'Please select a category.'
       }
     ),
-  subscriptionType: z.string().optional(),
 
+  subscriptionType: z.string().optional(),
+  status: z.string().optional(),
   description: z.string().min(20, {
     message: 'description must be at least 20 characters.'
   })
 });
+
+const statuses = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' }
+];
+
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 export default function SubscriptionForm() {
+  const [cnt, setcnt] = React.useState(1);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const pathname = usePathname();
-  console.log(pathname)
+  console.log(pathname);
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
 
@@ -101,21 +108,31 @@ export default function SubscriptionForm() {
       category: '',
       description: '',
       // mode: undefined,
-      subscriptionType: ''
+      subscriptionType: '',
+      status: ''
     }
   });
   const router = useRouter();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Handle form submission here
+    console.log('hi');
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('price', values.price);
     formData.append('startDate', values.startDate.toISOString());
-    formData.append('category', values.category);
+    formData.append('endDate', values.endDate.toISOString());
+    formData.append('status', values.status ?? '');
     formData.append('description', values.description);
     formData.append('mode', 'ONLINE');
     formData.append('subscriptionType', values.subscriptionType ?? '');
+
+    // Add features dynamically
+    values.features?.forEach((feature, index) => {
+      formData.append(`features[${index}][key]`, feature.key);
+      formData.append(`features[${index}][value]`, feature.value);
+    });
+
+    console.log(formData);
     mutate(formData);
   }
 
@@ -172,9 +189,9 @@ export default function SubscriptionForm() {
     isLoading,
     isSuccess
   } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ['subcriptions'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/categories`);
+      const response = await axiosInstance.get(`${apiUrl}/subscriptions`);
       return response.data;
     }
   });
@@ -254,8 +271,7 @@ export default function SubscriptionForm() {
                   </FormItem>
                 )}
               />
-              
-              
+
               <FormField
                 control={form.control}
                 name="subscriptionType"
@@ -278,7 +294,74 @@ export default function SubscriptionForm() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {statuses.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
+            <FormLabel className="top-2">Features</FormLabel>
+            <Button
+              type="button"
+              className="ml-2"
+              onClick={() => setcnt(cnt + 1)}
+            >
+              +
+            </Button>
+            {Array.from({ length: cnt }).map((_, index) => (
+              <div
+                key={index}
+                className="grid grid-cols-1 gap-6 md:grid-cols-3"
+              >
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Key"
+                      {...form.register(`features.${index}.key`)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Value"
+                      {...form.register(`features.${index}.value`)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+                <Button
+                  type="button"
+                  className="w-2"
+                  onClick={() => setcnt(cnt - 1)}
+                >
+                  -
+                </Button>
+              </div>
+            ))}
 
             <Button type="submit" disabled={isSubmitting}>
               Submit

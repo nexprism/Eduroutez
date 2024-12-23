@@ -47,7 +47,7 @@ const roleTypes = [
 
 type UserFormValue = z.infer<typeof formSchema>;
 
-export default function UserSignupForm({setToggle}:any) {
+export default function UserSignupForm({ setToggle ,toggle}: any) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -111,6 +111,8 @@ export default function UserSignupForm({setToggle}:any) {
         alert(
           'Your Request was sent to Admin!! You can Login when admin allow you'
         );
+        setToggle(!toggle);
+        alert('Login to continue');
     }else{
         alert('Mismatched Password');
     }
@@ -238,7 +240,7 @@ export default function UserSignupForm({setToggle}:any) {
             </FormItem>
           )}
         />
-        <Button onClick={handleToggle}>Already have account? Sign In</Button>
+        <button className='w-full justify-end text-blue-600 ml-0' onClick={()=>setToggle(!toggle)} type='button'>Already have account? Sign In</button>
         <Button
           disabled={mutation.isLoading || isPending}
           className="ml-auto w-full"

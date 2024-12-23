@@ -39,6 +39,7 @@ export const createReview = async (req, res) => {
       //   payload.studentSelfie = req.files["selfieImage"][0].filename;
       // }
       const response = await reviewService.create(payload);
+      console.log(response);
       const resp=await instituteService.addReviews(institute,response);
 
       SuccessResponse.data = response;
@@ -62,7 +63,7 @@ export async function getReviews(req, res) {
   try {
     // console.log('hi2');
     const response = await reviewService.getall();
-    console.log(response);
+    // console.log(response);y
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched reviews";
     return res.status(StatusCodes.OK).json(SuccessResponse);

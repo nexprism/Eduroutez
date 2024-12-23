@@ -15,8 +15,9 @@ const blogSchema = new mongoose.Schema(
       required: true,
     },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "BlogCategory", // Reference to the category associated with the coupon
+      // type: mongoose.Schema.Types.ObjectId,
+      // ref: "BlogCategory", // Reference to the category associated with the coupon
+      type:String
     },
     metaTitle: {
       type: String,
