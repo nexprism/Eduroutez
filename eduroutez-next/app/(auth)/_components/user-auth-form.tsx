@@ -13,7 +13,7 @@ import axiosInstance from '@/lib/axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -27,9 +27,10 @@ const formSchema = z.object({
 
 type UserFormValue = z.infer<typeof formSchema>;
 
-export default function UserAuthForm() {
+export default function UserAuthForm({ setToggle }: any) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const [user, setuser] = useState();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const form = useForm<UserFormValue>({
@@ -61,11 +62,22 @@ export default function UserAuthForm() {
       }
     },
     onSuccess: (data) => {
+      console.log(data?.data?.user)
+      setuser(data?.data?.user);
+      console.log(user);
       toast.success('Signed In Successfully!');
       localStorage.setItem(
         'accessToken',
         JSON.stringify(data.data.accessToken)
       );
+      localStorage.setItem(
+        'role',
+        data?.data?.user?.role
+      );
+      localStorage.setItem(
+        'email',
+        data?.data?.user?.email
+      );      
       localStorage.setItem(
         'refreshToken',
         JSON.stringify(data.data.refreshToken)
@@ -84,6 +96,10 @@ export default function UserAuthForm() {
   // Form submit handler
   const onSubmit = (data: UserFormValue) => {
     mutation.mutate(data);
+  };
+
+  const handleToggle = () => {
+    setToggle(true);
   };
 
   return (
@@ -125,7 +141,7 @@ export default function UserAuthForm() {
             </FormItem>
           )}
         />
-
+        <button className='w-full justify-end text-blue-600 ml-0' onClick={handleToggle}>Don't Have Account?Create Account</button>
         <Button
           disabled={mutation.isLoading || isPending}
           className="ml-auto w-full"

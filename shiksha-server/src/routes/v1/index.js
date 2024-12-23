@@ -7,15 +7,15 @@ import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from 
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
-import { getUsers, updateUser } from "../../controllers/users-controller.js";
+import { getUsers, updateUser,allowUser } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory, getCategories, getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstitutes, updateInstitute } from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, updateInstitute } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer } from "../../controllers/career-controller.js";
-import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";
+import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
 import { createCounselor, deleteCounselor, getCounselor, getCounselors, updateCounselor } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
@@ -42,6 +42,7 @@ router.post("/admin", createAdmin);
 router.get("/admins", getAdmins);
 router.post("/verify-email", verifyEmail);
 router.post("/login", login);
+router.post("/allow",allowUser);
 router.post("/logout", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), logout);
 router.post("/change-password", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), changeUserPassword);
 router.post("/reset-password-link", sendUserPasswordResetEmail);
@@ -89,6 +90,7 @@ router.delete("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt"
 router.post("/institute", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createInstitute);
 router.get("/institutes", getInstitutes);
 router.get("/institute/:id", getInstitute);
+router.get("/institutes/:email", getInstituteByEmail);
 router.patch("/institute/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateInstitute);
 router.delete("/institute/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteInstitute);
 
@@ -140,11 +142,17 @@ router.delete("/payment-method/:id", accessTokenAutoRefresh, passport.authentica
 /**
  * review routes
  */
-router.post("/review", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createReview);
-router.get("/reviews", getReviews);
-router.get("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getReview);
-router.patch("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateReview);
-router.delete("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteReview);
+// router.post("/review", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createReview);
+// router.get("/reviews", getReviews);
+// router.get("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getReview);
+// router.patch("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateReview);
+// router.delete("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteReview);
+
+router.post("/review",  createReview);
+router.get("/review", getReviews);
+router.get("/review/:id",  getReview);
+router.patch("/review/:id", updateReview);
+router.delete("/review/:id", deleteReview);
 
 /**
  * blog-category routes

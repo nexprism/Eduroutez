@@ -88,6 +88,11 @@ class ReviewService {
     const review = await this.reviewRepository.get(id);
     return review;
   }
+  async getall(){
+    const review = await this.reviewRepository.getALL();
+    return review;
+  }
+  
   async update(id, data) {
     try {
       const review = await this.reviewRepository.update(id, data);

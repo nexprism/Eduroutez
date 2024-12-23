@@ -26,8 +26,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["ADMIN", "SUPER_ADMIN"], // "STUDENT", "COUNSELOR", "INSTITUTE",  they have thier different tables
-      default: "ADMIN",
+      enum: ["admin", "SUPER_ADMIN","student","institute","counsellor"], // "STUDENT", "COUNSELOR", "INSTITUTE",  they have thier different tables
+      default: "SUPER_ADMIN",
     },
     access: [
       {

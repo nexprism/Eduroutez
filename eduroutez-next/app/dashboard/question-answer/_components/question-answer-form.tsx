@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
+import { Controller } from 'react-hook-form';
 import {
   Form,
   FormControl,
@@ -37,52 +38,14 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { usePathname, useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
+import CustomEditor from '@/components/custom-editor';
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.'
-  }),
-  // price: z.string().min(1, {
-  //   message: 'Discount is required.'
-  // }),
-  price: z.string().refine(
-    (value) => {
-      const price = Number(value);
-      return !isNaN(price) && price >= 1 && price <= 100;
-    },
-    {
-      message: 'Discount must be a number between 1 and 100.'
-    }
-  ),
-  startDate: z.date({
-    required_error: 'Please select a start date.'
-  }),
-  endDate: z.date({
-    required_error: 'Please select a end date.'
-  }),
-
-  category: z
-    .string()
-    .min(1, { message: 'Please select a category.' })
-    .refine(
-      (value) => {
-        const category = value;
-        return category !== 'Select a category';
-      },
-      {
-        message: 'Please select a category.'
-      }
-    ),
-  counselorType: z.string().optional(),
-
-  description: z.string().min(20, {
-    message: 'description must be at least 20 characters.'
-  })
+  question: z.string().nonempty('Question is required'),
+  answer: z.string().nonempty('Answer is required')
 });
-const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+
 export default function CounselorForm() {
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
@@ -96,39 +59,34 @@ export default function CounselorForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      category: '',
-      description: '',
-      // mode: undefined,
-      counselorType: ''
+      question: '',
+      answer: ''
     }
   });
   const router = useRouter();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Handle form submission here
-    const formData = new FormData();
-    formData.append('name', values.name);
-    formData.append('price', values.price);
-    formData.append('startDate', values.startDate.toISOString());
-    formData.append('category', values.category);
-    formData.append('description', values.description);
-    formData.append('mode', 'ONLINE');
-    formData.append('counselorType', values.counselorType ?? '');
-    mutate(formData);
+    // const formData = new FormData();
+    // formData.append('question', values.question);
+    // formData.append('answer', values.answer);
+    // console.log(`hi${values.question}`);
+    // console.log(`hi${values.answer}`);
+    // console.log(formData);
+    mutate({ question: values.question, answer: values.answer });
   }
 
   const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: async (formData: FormData) => {
+    mutationFn: async (formData: z.infer<typeof formSchema>) => {
       const endpoint = isEdit
-        ? `${apiUrl}/counselor/${segments[4]}`
-        : `${apiUrl}/counselor`;
+        ? `${apiUrl}/question-answer/${segments[4]}`
+        : `${apiUrl}/question-answer`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: isEdit ? 'patch' : 'post',
         data: formData,
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         }
       });
       return response.data;
@@ -136,53 +94,25 @@ export default function CounselorForm() {
 
     onSuccess: () => {
       const message = isEdit
-        ? 'Counselor updated successfully'
-        : 'Counselor created successfully';
+        ? 'FAQs updated successfully'
+        : 'FAQs created successfully';
       toast.success(message);
       form.reset();
-      setPreviewUrl(null);
-      router.push('/dashboard/counselor');
+      router.push('/dashboard/question-answer');
     },
     onError: (error) => {
       toast.error('Something went wrong');
     }
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setPreviewUrl(null);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   // write code to get categories from serve by tanstack query
-  const {
-    data: categories,
-    isLoading,
-    isSuccess
-  } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/categories`);
-      return response.data;
-    }
-  });
 
-  const { data: counselor } = useQuery({
-    queryKey: ['counselor', segments[4]],
+  const { data: faq } = useQuery({
+    queryKey: ['answer', segments[4]],
     queryFn: async () => {
       const response = await axiosInstance.get(
-        `${apiUrl}/counselor/${segments[4]}`
+        `${apiUrl}/question-answer/${segments[4]}`
       );
       return response.data;
     },
@@ -190,64 +120,33 @@ export default function CounselorForm() {
   });
 
   React.useEffect(() => {
-    if (counselor?.data) {
+    if (faq?.data) {
       form.reset({
-        name: counselor.data.name,
-        price: counselor.data.price.toString(),
-        startDate: new Date(counselor.data.startDate),
-        endDate: new Date(counselor.data.endDate),
-        category: counselor.data.category[0],
-        description: counselor.data.description,
-        //  image: undefined // Handle image separately
-        counselorType: counselor?.data?.counselorType
+        question: faq.data.question,
+        answer: faq.data.answer
       });
-
-      // Set preview URL for existing image
-      if (counselor.data.image) {
-        setPreviewUrl(`${IMAGE_URL}/${counselor.data.image}`);
-      }
     }
-  }, [counselor, form]);
+  }, [faq, form]);
 
   return (
     <Card className="mx-auto w-full">
       <CardHeader>
         <CardTitle className="text-left text-2xl font-bold">
-          Counselor Information
+          Add Questions and its Answers
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
               <FormField
                 control={form.control}
-                name="name"
+                name="question"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Counselor Name</FormLabel>
+                    <FormLabel>Questions</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Enter your counselor name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your counselor price"
-                        {...field}
-                        type="number"
-                      />
+                      <Input placeholder="Write  the  question" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -256,22 +155,22 @@ export default function CounselorForm() {
 
               <FormField
                 control={form.control}
-                name="counselorType"
+                name="answer"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Counselor Type (optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a counselor type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={'DEFAULT'}>Default</SelectItem>
-                        <SelectItem value={'POPULAR'}>Popular</SelectItem>
-                        <SelectItem value={'TRENDING'}>Trending</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Answers</FormLabel>
+                    <FormControl>
+                      <Controller
+                        name="answer"
+                        control={form.control}
+                        render={({ field }) => (
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

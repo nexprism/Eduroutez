@@ -238,6 +238,7 @@ interface IBlogCategory {
 export type Blog = {
   title: string;
   image: string;
+  createdAt:string;
   description: string;
   category?: IBlogCategory;
   metaTitle?: string;

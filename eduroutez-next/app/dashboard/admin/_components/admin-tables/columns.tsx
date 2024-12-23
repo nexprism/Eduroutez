@@ -44,10 +44,10 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => (
       <div className="flex w-32 space-x-1">
         <Badge
-          variant={!row.original.status ? 'secondary' : 'default'}
+          variant={!row.original.is_verified? 'secondary' : 'default'}
           className="text-xs "
         >
-          {row.original.status ? 'Active' : 'Inactive'}
+          {row.original.is_verified ? 'Allowed' : 'NotAllowed'}
         </Badge>
       </div>
     )

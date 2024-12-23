@@ -32,6 +32,15 @@ class CrudRepository {
     }
   }
 
+  async getALL() {
+    try {
+      const result = await this.model.find();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = []) {
     let query = this.model
       .find(filterCon)

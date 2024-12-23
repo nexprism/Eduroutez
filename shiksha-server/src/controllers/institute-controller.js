@@ -107,6 +107,18 @@ export async function getInstitute(req, res) {
   }
 }
 
+export async function getInstituteByEmail(req, res) {
+  try {
+    const response = await instituteService.getbyemail(req.params.email);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the institute";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(500).json(ErrorResponse);
+  }
+}
+
 /**
  * PATCH : /institute/:id
  * req.body {capacity:200}

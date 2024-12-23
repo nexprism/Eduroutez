@@ -1,8 +1,11 @@
+'use client'
 import { Metadata } from 'next';
 import Link from 'next/link';
 import UserAuthForm from './user-auth-form';
+import UserSignUpForm from './user-signup-form';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 export const metadata: Metadata = {
   title: 'Authentication',
@@ -10,6 +13,8 @@ export const metadata: Metadata = {
 };
 
 export default function SignInViewPage() {
+  const [toggle, setToggle] = useState(true);
+
   return (
     <div className="relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <Link
@@ -59,8 +64,16 @@ export default function SignInViewPage() {
               Enter your email and password below to sign in to your account
             </p>
           </div>
-          <UserAuthForm />
-          {/* <p className="px-8 text-center text-sm text-muted-foreground">
+          {/* <UserAuthForm/> */}
+          {toggle?<UserAuthForm setToggle={setToggle}/>:<UserSignUpForm setToggle={setToggle}/>}          
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+{/* <p className="px-8 text-center text-sm text-muted-foreground">
             By clicking continue, you agree to our{' '}
             <Link
               href="/terms"
@@ -77,8 +90,3 @@ export default function SignInViewPage() {
             </Link>
             .
           </p> */}
-        </div>
-      </div>
-    </div>
-  );
-}

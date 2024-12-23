@@ -117,13 +117,13 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
 
-  {
-    title: 'Newsletter',
-    url: '/dashboard/newsletter',
-    icon: 'mails',
-    isActive: false,
-    items: [] // No child items
-  },
+  // {
+  //   title: 'Newsletter',
+  //   url: '/dashboard/newsletter',
+  //   icon: 'mails',
+  //   isActive: false,
+  //   items: [] // No child items
+  // },
 
   {
     title: 'Promotions',

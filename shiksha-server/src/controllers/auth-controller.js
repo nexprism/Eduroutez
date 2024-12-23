@@ -9,9 +9,10 @@ export const signup = async (req, res) => {
   try {
     const response = await userService.signup(
       {
+        name:req.body.name,
+        contact_number:req.body.contact_number,
         email: req.body.email,
         password: req.body.password,
-        name: req.body.name,
         role: req.body.role,
       },
       res

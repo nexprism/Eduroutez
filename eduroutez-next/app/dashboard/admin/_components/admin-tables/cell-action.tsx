@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface CellActionProps {
   data: User;
@@ -46,6 +47,36 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       setLoading(false);
     }
   });
+  console.log(data);
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (jsonData: { id: string }) => {
+      const endpoint = `${apiUrl}/allow`;
+      const response = await axiosInstance({
+        url: endpoint,
+        method: 'POST',
+        data: jsonData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      const message = 'User Allowed Sucessfully';
+      toast.success(message);
+      router.push('/dashboard/institute');
+    },
+    onError: (error) => {
+      toast.error('Something went wrong');
+    },
+  });
+  
+  const handlePermission = async () => {
+    mutate({ id: data?._id }); // Pass the `id` as an object
+  };
+  
+
+
 
   const onConfirm = async () => {
     setLoading(true);
@@ -71,14 +102,14 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
           <DropdownMenuItem
-            onClick={() =>
-              router.push(`/dashboard/admin/update/${data._id}/`)
+            onClick={
+              handlePermission
             }
           >
-            <Edit className="mr-2 h-4 w-4" /> Update
+            <Edit className="mr-2 h-4 w-4" /> Allow
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className="mr-2 h-4 w-4" /> Delete
+            <Trash className="mr-2 h-4 w-4" /> Deny
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

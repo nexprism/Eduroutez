@@ -19,6 +19,19 @@ class InstituteRepository extends CrudRepository {
     }
   }
 
+  async addReview(id, data) {
+    try {
+      const result = await this.model.findByIdAndUpdate(
+        id, 
+        { $push: { reviews: data } }, // Append new course data to the `courses` array
+        { new: true } // Return the updated document
+      );
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async removeCourse(instituteId, courseId) {
     try {
       // Find the institute by its ID
@@ -37,6 +50,15 @@ class InstituteRepository extends CrudRepository {
       return institute; // Return the updated institute document (optional)
     } catch (error) {
       throw new Error(`Error removing course from institute: ${error.message}`);
+    }
+  }
+
+  async getByEmail(email) {
+    try {
+      const result = await this.model.findOne({ email }); // Query by email
+      return result;
+    } catch (error) {
+      throw error;
     }
   }
   

@@ -31,6 +31,7 @@ import { Breadcrumbs } from '../breadcrumbs';
 import { Icons } from '../icons';
 import ThemeToggle from './ThemeToggle/theme-toggle';
 import { UserNav } from './user-nav';
+import { useEffect } from 'react';
 
 export const company = {
   name: 'Eduroutez App Inc.',
@@ -44,15 +45,45 @@ export default function AppSidebar({
   children: React.ReactNode;
 }) {
   const [mounted, setMounted] = React.useState(false);
+  const [filteredNavItems, setFilteredNavItems] = React.useState(navItems);
   const pathname = usePathname();
   // Only render after first client-side mount
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
+    const role = localStorage.getItem('role'); 
+    const excludedTitles = role === 'institute'
+      ? ['Institutes', 'Admins', 'Promotions','Streams','Media'] // Titles to exclude for 'institute'
+      // : role === 'admin'
+      // ? ['Promotion'] // Titles to exclude for 'admin'
+      : []; // Default: no exclusions
+
+    const filteredItems = navItems.filter(
+      (item) => !excludedTitles.includes(item.title)
+    );
+
+    setFilteredNavItems(filteredItems); 
   }, []);
 
   if (!mounted) {
     return null; // or a loading skeleton
   }
+
+  // React.useEffect(() => {
+  //   const role = localStorage.getItem('role'); // Access localStorage
+  //   const excludedTitles = role === 'institute'
+  //     ? ['Institutes', 'Admin', 'Promotion'] // Titles to exclude for 'institute'
+  //     // : role === 'admin'
+  //     // ? ['Promotion'] // Titles to exclude for 'admin'
+  //     : []; // Default: no exclusions
+
+  //   const filteredItems = navItems.filter(
+  //     (item) => !excludedTitles.includes(item.title)
+  //   );
+
+  //   setFilteredNavItems(filteredItems); // Update the state with filtered items
+  // }, []);
+  
+
 
   return (
     <SidebarProvider>
@@ -72,7 +103,7 @@ export default function AppSidebar({
           <SidebarGroup>
             <SidebarGroupLabel>Overview</SidebarGroupLabel>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {filteredNavItems?.map((item) => {
                 const Icon = item.icon ? Icons[item.icon] : Icons.logo;
                 return item?.items && item?.items?.length > 0 ? (
                   <Collapsible

@@ -9,10 +9,9 @@ const questionAnswerService = new QuestionAnswerService();
  */
 export const createQuestionAnswer = async (req, res) => {
   try {
-    const payload = { ...req.body };
-
+    const payload = req.body;
     const response = await questionAnswerService.create(payload);
-
+    console.log(response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully created a question and answer";
 

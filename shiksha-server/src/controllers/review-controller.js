@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import ReviewService from "../services/review-service.js";
+import InstituteService from "../services/institute-service.js";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "studentDocument",
@@ -15,12 +16,14 @@ const multiUploader = FileUpload.upload.fields([
   },
 ]);
 const reviewService = new ReviewService();
+const instituteService = new InstituteService();
 
 /**
  * POST : /review
  * req.body {}
  */
 export const createReview = async (req, res) => {
+  // console.log(req?.files);
   try {
     multiUploader(req, res, async function (err, data) {
       if (err) {
@@ -28,14 +31,15 @@ export const createReview = async (req, res) => {
       }
 
       const payload = { ...req.body };
-      if (req.files["studentDocument"]) {
-        payload.studentDocument = req.files["studentDocument"][0].filename;
-      }
-      if (req.files["studentSelfie"]) {
-        payload.studentSelfie = req.files["studentSelfie"][0].filename;
-      }
-
+      const {institute,...rest}=payload;
+      // if (req?.files["studentIdImage"]) {
+      //   payload.studentDocument = req.files["studentIdImage"][0].filename;
+      // }
+      // if (req?.files["selfieImage"]) {
+      //   payload.studentSelfie = req.files["selfieImage"][0].filename;
+      // }
       const response = await reviewService.create(payload);
+      const resp=await instituteService.addReviews(institute,response);
 
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully created a review";
@@ -56,7 +60,9 @@ export const createReview = async (req, res) => {
 
 export async function getReviews(req, res) {
   try {
-    const response = await reviewService.getAll(req.query);
+    // console.log('hi2');
+    const response = await reviewService.getall();
+    console.log(response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched reviews";
     return res.status(StatusCodes.OK).json(SuccessResponse);

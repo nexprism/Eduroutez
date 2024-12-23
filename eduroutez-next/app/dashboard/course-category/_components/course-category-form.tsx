@@ -178,6 +178,8 @@ export default function CourseCategoryForm() {
     enabled: isEdit // Only fetch when in edit mode
   });
 
+  console.log(category);
+
   React.useEffect(() => {
     if (category?.data && courseCategories?.data?.result) {
       // Find the matching parent category

@@ -64,6 +64,12 @@ class InstituteService {
     return institute;
   }
 
+  async getbyemail(email) {
+    const institute = await this.instituteRepository.getByEmail(email);
+    return institute;
+  }
+  
+
   async addCourses(id,data){
     try {
       const updatesInstitute = await this.instituteRepository.addCourse(id, data);
@@ -73,6 +79,17 @@ class InstituteService {
       throw new AppError("Cannot update the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
+
+  async addReviews(id,data){
+    try {
+      const updatesInstitute = await this.instituteRepository.addReview(id, data);
+
+      return updatesInstitute;
+    } catch (error) {
+      throw new AppError("Cannot update the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
 
   async deleteCourse(instituteId,courseId){
     try {

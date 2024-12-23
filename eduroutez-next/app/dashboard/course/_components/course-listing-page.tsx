@@ -10,14 +10,28 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useCourseTableFilters } from './course-tables/use-course-table-filters';
 import axiosInstance from '@/lib/axios';
+import { useEffect, useState } from 'react';
 
 type TCourseListingPage = {};
 
 export default function CourseListingPage({}: TCourseListingPage) {
   // const queryClient = useQueryClient()
   const { searchQuery, page, limit } = useCourseTableFilters();
+  const [content, setcontent] = useState([]);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  const [enabled, setEnabled] = useState(false); // State to control whether the query is enabled
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    const emailFromStorage = localStorage.getItem('email');
+    if (role === 'institute' && emailFromStorage) {
+      setEmail(emailFromStorage); // Save email if the condition is met
+      setEnabled(true); // Enable the query
+    }
+  }, []);
 
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['courses', searchQuery],
@@ -33,7 +47,40 @@ export default function CourseListingPage({}: TCourseListingPage) {
       return response.data;
     }
   });
-  console.log(data?.data);
+
+  useEffect(() => {
+    if (isSuccess && data?.data?.result) {
+      setcontent(data.data.result); // Update content when data is available
+      console.log('Data successfully set in content');
+    }
+  }, [isSuccess, data]);
+
+  // Log `content` only when it updates
+
+  const data1 = useQuery({
+    queryKey: ['institute', searchQuery],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/institutes/${email}`, {
+        params: {
+          searchFields: JSON.stringify({}),
+          sort: JSON.stringify({ createdAt: 'desc' }),
+          page: page,
+          limit: limit
+        }
+      });
+      return response.data;
+    },
+    enabled // Only run the query if the role is 'institute'
+  });
+
+  console.log(localStorage.getItem('role'));
+  console.log(data1?.data?.data);
+  useEffect(() => {
+    if(data1?.data?.data.courses){
+      setcontent(data1?.data?.data.courses);
+    }
+  }, [data1]);
+
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -53,10 +100,7 @@ export default function CourseListingPage({}: TCourseListingPage) {
               </Button>
             </div>
             <Separator />
-            <CourseTable
-              data={data.data.result}
-              totalData={data.data.totalDocuments}
-            />
+            <CourseTable data={content} totalData={data.data.totalDocuments} />
           </div>
         )
       )}
