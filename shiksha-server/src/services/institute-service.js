@@ -15,6 +15,16 @@ class InstituteService {
       throw error;
     }
   }
+
+  async make(email,data){
+    try {
+      const institute = await this.instituteRepository.make(email,data);
+      return institute;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
   async getAll(query) {
     try {
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;

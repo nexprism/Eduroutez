@@ -34,7 +34,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import GeneralInfo from './institute-form/general-info';
+import GeneralInfo from './general-info';
 const courseTypes = [
   { value: 'live', label: 'Live' },
   { value: 'recorded', label: 'Recorded' },
@@ -135,16 +135,16 @@ export default function CreateInstitute() {
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
-  const pathname = usePathname();
-  const segments = pathname.split('/');
-  const [isEdit, setIsEdit] = React.useState(false);
+  // const pathname = usePathname();
+  // const segments = pathname.split('/');
+  // const [isEdit, setIsEdit] = React.useState(false);
   const multipleFileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  React.useEffect(() => {
-    if (segments.length === 5 && segments[3] === 'update') {
-      setIsEdit(true);
-    }
-  }, [segments]);
+  // React.useEffect(() => {
+  //   if (segments.length === 5 && segments[3] === 'update') {
+  //     setIsEdit(true);
+  //   }
+  // }, [segments]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

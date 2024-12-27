@@ -1,9 +1,11 @@
 'use client';
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
+import { Controller } from 'react-hook-form';
+import CustomEditor from '@/components/custom-editor';
 import {
   Form,
   FormControl,
@@ -46,12 +48,6 @@ const formSchema = z.object({
   //   message: 'Discount is required.'
   // }),
   price: z.string(),
-  startDate: z.date({
-    required_error: 'Please select a start date.'
-  }),
-  endDate: z.date({
-    required_error: 'Please select a end date.'
-  }),
   features: z
     .array(
       z.object({
@@ -60,24 +56,12 @@ const formSchema = z.object({
       })
     )
     .min(1, { message: 'At least one feature is required.' }),
-  category: z
-    .string()
-    .min(1, { message: 'Please select a category.' })
-    .refine(
-      (value) => {
-        const category = value;
-        return category !== 'Select a category';
-      },
-      {
-        message: 'Please select a category.'
-      }
-    ),
 
   subscriptionType: z.string().optional(),
   status: z.string().optional(),
-  description: z.string().min(20, {
-    message: 'description must be at least 20 characters.'
-  })
+  description: z.string(),
+  duration: z.string(),
+  durationType: z.string()
 });
 
 const statuses = [
@@ -85,10 +69,15 @@ const statuses = [
   { value: 'inactive', label: 'Inactive' }
 ];
 
+const durationType = [
+  { value: 'month', label: 'Month' },
+  { value: 'year', label: 'Year' }
+];
+
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 export default function SubscriptionForm() {
-  const [cnt, setcnt] = React.useState(1);
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  // const [cnt, setcnt] = React.useState(1);
+  // const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const pathname = usePathname();
   console.log(pathname);
@@ -105,12 +94,24 @@ export default function SubscriptionForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      category: '',
-      description: '',
-      // mode: undefined,
+      price: '',
+      features: [{ key: '', value: '' }],
       subscriptionType: '',
-      status: ''
+      status: '',
+      duration:'',
+      durationType: '',
+      description: ''
     }
+  });
+
+  const {
+    control,
+    formState: { errors }
+  } = form;
+
+  const { append, remove, fields } = useFieldArray({
+    control,
+    name: 'features'
   });
   const router = useRouter();
 
@@ -119,11 +120,10 @@ export default function SubscriptionForm() {
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('price', values.price);
-    formData.append('startDate', values.startDate.toISOString());
-    formData.append('endDate', values.endDate.toISOString());
+    formData.append('duration', values.duration.toString());
+    formData.append('durationType', values.durationType);
     formData.append('status', values.status ?? '');
     formData.append('description', values.description);
-    formData.append('mode', 'ONLINE');
     formData.append('subscriptionType', values.subscriptionType ?? '');
 
     // Add features dynamically
@@ -146,7 +146,7 @@ export default function SubscriptionForm() {
         method: isEdit ? 'patch' : 'post',
         data: formData,
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         }
       });
       return response.data;
@@ -158,7 +158,6 @@ export default function SubscriptionForm() {
         : 'Subscription created successfully';
       toast.success(message);
       form.reset();
-      setPreviewUrl(null);
       router.push('/dashboard/subscription');
     },
     onError: (error) => {
@@ -166,22 +165,6 @@ export default function SubscriptionForm() {
     }
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setPreviewUrl(null);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   // write code to get categories from serve by tanstack query
   const {
@@ -212,18 +195,18 @@ export default function SubscriptionForm() {
       form.reset({
         name: subscription.data.name,
         price: subscription.data.price.toString(),
-        startDate: new Date(subscription.data.startDate),
-        endDate: new Date(subscription.data.endDate),
-        category: subscription.data.category[0],
+        duration: subscription.data.duration.toString(),
+        durationType: subscription.data.durationType,
+        // category: subscription.data.category[0],
         description: subscription.data.description,
         //  image: undefined // Handle image separately
         subscriptionType: subscription?.data?.subscriptionType
       });
-
-      // Set preview URL for existing image
-      if (subscription.data.image) {
-        setPreviewUrl(`${IMAGE_URL}/${subscription.data.image}`);
-      }
+      subscription.data.features.forEach(
+        (feature: { key: string; value: string }) => {
+          append({ key: feature.key, value: feature.value });
+        }
+      );
     }
   }, [subscription, form]);
 
@@ -236,7 +219,19 @@ export default function SubscriptionForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form
+            onSubmit={form.handleSubmit(onSubmit, (errors) => {
+              if (Object.keys(errors).length > 0) {
+                console.log('hi2');
+                console.log(errors);
+                console.log(form);
+                toast.error(
+                  'Please correct the errors in the form before submitting.'
+                );
+              }
+            })}
+            className="space-y-8"
+          >
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
@@ -321,16 +316,118 @@ export default function SubscriptionForm() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="durationType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duration Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {durationType.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="duration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duration</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter Duration"
+                        {...field}
+                        type="number"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-            <FormLabel className="top-2">Features</FormLabel>
-            <Button
-              type="button"
-              className="ml-2"
-              onClick={() => setcnt(cnt + 1)}
-            >
-              +
-            </Button>
-            {Array.from({ length: cnt }).map((_, index) => (
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Long Description</FormLabel>
+                  <FormControl>
+                    <Controller
+                      name="description"
+                      control={form.control}
+                      render={({ field }) => (
+                        <CustomEditor
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div>
+              <FormLabel className="top-2">Features</FormLabel>
+              <Button
+                type="button"
+                className="ml-2"
+                onClick={() => append({ key: '', value: '' })}
+              >
+                +
+              </Button>
+            </div>
+            {fields.map((field, index) => (
+              <div
+                key={field.id}
+                className="grid grid-cols-1 gap-6 md:grid-cols-3"
+              >
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Key"
+                      {...form.register(`features.${index}.key`)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Value"
+                      {...form.register(`features.${index}.value`)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+                <Button
+                  type="button"
+                  className="w-2"
+                  onClick={() => remove(index)}
+                >
+                  -
+                </Button>
+              </div>
+            ))}
+
+            {/* {Array.from({ length: cnt }).map((_, index) => (
               <div
                 key={index}
                 className="grid grid-cols-1 gap-6 md:grid-cols-3"
@@ -361,7 +458,7 @@ export default function SubscriptionForm() {
                   -
                 </Button>
               </div>
-            ))}
+            ))} */}
 
             <Button type="submit" disabled={isSubmitting}>
               Submit

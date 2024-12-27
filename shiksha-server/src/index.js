@@ -12,6 +12,7 @@ import { DATABASE } from "./utils/database/index.js";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { setupINIT } from "./utils/helpers/init.js";
+import mg from "mailgun-js";
 const app = express();
 
 app.use("/uploads", express.static("uploads"));
@@ -60,6 +61,30 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 app.use("/api", apiRoutes);
+
+const mailgun=()=>mg({
+  apiKey: process.env.MAILGUN_API_KEY,
+  domain: process.env.MAILGUN_DOMAIN
+})
+
+// app.post("/send-email", async (req, res) => {
+//   const { to, subject, message } = req.body;
+//   const data = {
+//     from: '"Eduroutez" <ayushjhadbg9876@gmail.com>',
+//     to:`${to}`,
+//     subject: `${subject}`,
+//     html:`${message}`
+//   };
+//   console.log(data);
+//   mailgun().messages().send(data, (error, body) => {
+//     if (error) {
+//       console.log(error);
+//       return res.status(500).json({ error: error });
+//     }
+//     return res.status(200).json({ message: "Email sent successfully" });
+//   });
+// });
+
 app.listen(ServerConfig.PORT, async () => {
   console.log(`Server started on port ${ServerConfig.PORT}`);
   await DATABASE.connect(ServerConfig.DATABASE_URL);

@@ -15,6 +15,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Heading } from '@/components/ui/heading';
+import { X, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -24,13 +25,115 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { profileSchema, type ProfileFormValues } from '@/lib/form-schema';
+// import { profileSchema, type ProfileFormValues } from '@/lib/form-schema';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { m } from 'framer-motion';
 import { AlertTriangleIcon, Trash, Trash2Icon } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 // import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import axiosInstance from '@/lib/axios';
+import * as z from 'zod';
+
+export const profileSchema = z.object({
+  firstname: z
+    .string()
+    .min(3, { message: ' firstName must be at least 3 characters' }),
+  lastname: z
+    .string()
+    .min(3, { message: ' lastName must be at least 3 characters' }),
+  category: z
+    .string(),
+  address: z
+    .string()
+    .min(3, { message: ' Name must be at least 3 characters' }),
+  bankName: z.string().min(3, { message: 'Account Name characters' }),
+  accountDetails: z
+    .string()
+    .min(10, { message: 'Account Number must be at least 10 characters' }),
+  ifscCode: z
+    .string()
+    .min(3, { message: 'Product Name must be at least 3 characters' }),
+  email: z
+    .string()
+    .email({ message: 'Product Name must be at least 3 characters' }),
+  instituteEmail: z
+    .string(),
+  contactno: z.coerce.number(),
+  country: z.string().min(1, { message: 'Please select a category' }),
+  city: z.string().min(1, { message: 'Please select a category' }),
+  gender: z.string(),
+  dateOfBirth: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
+    message: 'Start date should be in the format YYYY-MM-DD'
+  }),
+  panCard: z
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= 1024 * 1024, {
+      message: 'Image size must be less than 1 MB.'
+    })
+    .refine(
+      (file) =>
+        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      {
+        message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
+      }
+    ),
+  adharCard: z
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= 1024 * 1024, {
+      message: 'Image size must be less than 1 MB.'
+    })
+    .refine(
+      (file) =>
+        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      {
+        message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
+      }
+    ),
+  profilePhoto: z
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= 1024 * 1024, {
+      message: 'Image size must be less than 1 MB.'
+    })
+    .refine(
+      (file) =>
+        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      {
+        message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
+      }
+    ),
+  experiences: z.array(
+    z.object({
+      title: z.string().min(1, { message: 'Please enter title' }),
+      employmentType: z
+        .string()
+        .min(1, { message: 'Please enter employment type' }),
+      location: z.string().optional(),
+      companyName: z
+        .string()
+        .min(3, { message: 'Product Name must be at least 3 characters' }),
+      description: z.string().optional(),
+      startdate: z
+        .string()
+        .refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
+          message: 'Start date should be in the format YYYY-MM-DD'
+        }),
+      enddate: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
+        message: 'End date should be in the format YYYY-MM-DD'
+      })
+    })
+  )
+});
+
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
 interface ProfileFormType {
   initialData: any | null;
@@ -53,20 +156,36 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   // const action = initialData ? 'Save changes' : 'Create';
   const [previousStep, setPreviousStep] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
+  const fileInputPanCardRef = React.useRef<HTMLInputElement | null>(null);
+  const fileInputAdharCardRef = React.useRef<HTMLInputElement | null>(null);
+  const fileInputProfilePhotoRef = React.useRef<HTMLInputElement | null>(null);
+  const [previewPanCardUrl, setPreviewPanCardUrl] = React.useState<
+    string | null
+  >(null);
+  const [previewAdharCardUrl, setPreviewAdharCardUrl] = React.useState<
+    string | null
+  >(null);
+  const [previewProfilePhotoUrl, setPreviewProfilePhotoUrl] = React.useState<
+    string | null
+  >(null);
   const [data, setData] = useState({});
+  const [isEdit, setIsEdit] = React.useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const delta = currentStep - previousStep;
 
   const defaultValues = {
-    jobs: [
+    email:localStorage.getItem('email') || '',
+    experiences: [
       {
-        jobtitle: '',
-        employer: '',
+        title: '',
+        employmentType: '',
         startdate: '',
         enddate: '',
-        jobcountry: '',
-        jobcity: ''
+        location: '',
+        startDate: '',
+        endDate: '',
+        description: ''
       }
     ]
   };
@@ -84,7 +203,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
 
   const { append, remove, fields } = useFieldArray({
     control,
-    name: 'jobs'
+    name: 'experiences'
   });
 
   const processForm: SubmitHandler<ProfileFormValues> = (data) => {
@@ -99,25 +218,42 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     {
       id: 'Step 1',
       name: 'Personal Information',
-      fields: ['firstname', 'lastname', 'email', 'contactno', 'country', 'city']
+      fields: [
+        'firstname',
+        'lastname',
+        'email',
+        'contactno',
+        'country',
+        'city',
+        'gender',
+        'dateOfBirth'
+      ]
     },
     {
       id: 'Step 2',
-      name: 'Professional Informations',
-      // fields are mapping and flattening for the error to be trigger  for the dynamic fields
+      name: 'Professional Information',
       fields: fields
         ?.map((_, index) => [
-          `jobs.${index}.jobtitle`,
-          `jobs.${index}.employer`,
-          `jobs.${index}.startdate`,
-          `jobs.${index}.enddate`,
-          `jobs.${index}.jobcountry`,
-          `jobs.${index}.jobcity`
+          `experiences.${index}.title`,
+          `experiences.${index}.companyName`,
+          `experiences.${index}.startdate`,
+          `experiences.${index}.enddate`,
+          `experiences.${index}.location`
           // Add other field names as needed
         ])
         .flat()
     },
-    { id: 'Step 3', name: 'Complete' }
+    {
+      id: 'Step 3',
+      name: 'Upload Documents',
+      fields: ['panCard', 'adharCard', 'markSheet']
+    },
+    {
+      id: 'Step 4',
+      name: 'Bank Details',
+      fields: ['bankName', 'accountDetails', 'ifscCode']
+    },
+    { id: 'Step 5', name: 'Complete', fields: [] }
   ];
 
   const next = async () => {
@@ -145,8 +281,210 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     }
   };
 
-  const countries = [{ id: 'wow', name: 'india' }];
-  const cities = [{ id: '2', name: 'kerala' }];
+  function onSubmit(values: ProfileFormValues) {
+    try {
+      const formData = new FormData();
+      formData.append('firstname', values.firstname);
+      formData.append('lastname', values.lastname);
+      formData.append('email', values.email);
+      formData.append('contactno', values.contactno.toString());
+      formData.append('country', values.country);
+      formData.append('city', values.city);
+      formData.append('gender', values.gender);
+      formData.append('dateOfBirth', values.dateOfBirth);
+      formData.append('address', values.address);
+      formData.append('category', values.category);
+      formData.append('instituteEmail', values.instituteEmail);
+      values.experiences.forEach((job, index) => {
+        formData.append(`jobs[${index}][title]`, job.title);
+        formData.append(`jobs[${index}][employmentType]`, job.employmentType);
+        formData.append(`jobs[${index}][startdate]`, job.startdate);
+        formData.append(`jobs[${index}][enddate]`, job.enddate);
+        formData.append(`jobs[${index}][location]`, job.location || '');
+        formData.append(`jobs[${index}][description]`, job.description || '');
+      });
+      if (values.panCard) {
+        formData.append('panCard', values.panCard);
+      }
+      if (values.adharCard) {
+        formData.append('adharCard', values.adharCard);
+      }
+      if (values.profilePhoto) {
+        formData.append('profilePhoto', values.profilePhoto);
+      }
+      formData.append('bankName', values.bankName);
+      formData.append('accountDetails', values.accountDetails);
+      formData.append('ifscCode', values.ifscCode);
+      // console.log(formData);
+      console.log('hi');
+      console.log(values);
+      mutate(formData);
+    } catch (error) {}
+  }
+
+  const router = useRouter();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (formData: any) => {
+      const endpoint =`${apiUrl}/counselor` 
+      const response = await axiosInstance({
+        url: `${endpoint}`,
+        method:'post',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data;
+    },
+
+    onSuccess: () => {
+      const message = isEdit
+        ? 'User updated successfully'
+        : 'User created successfully';
+      toast.success(message);
+      form.reset();
+
+      router.push('/dashboard/profile');
+    },
+    onError: () => {
+      toast.error('Something went wrong');
+    }
+  });
+
+  const handlePanCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewPanCardUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      form.setValue('panCard', file);
+    } else {
+      setPreviewPanCardUrl(null);
+      form.setValue('panCard', undefined);
+    }
+  };
+
+  const triggerPanCardFileInput = () => {
+    fileInputPanCardRef.current?.click();
+  };
+
+  const removePanCard = () => {
+    setPreviewPanCardUrl(null);
+    form.setValue('panCard', undefined);
+    if (fileInputPanCardRef.current) {
+      fileInputPanCardRef.current.value = ''; // Reset the file input
+    }
+  };
+
+  const handleAdharCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewAdharCardUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      form.setValue('adharCard', file);
+    } else {
+      setPreviewAdharCardUrl(null);
+      form.setValue('adharCard', undefined);
+    }
+  };
+
+  const triggerAdharCardFileInput = () => {
+    fileInputAdharCardRef.current?.click();
+  };
+
+  const removeAdharCard = () => {
+    setPreviewAdharCardUrl(null);
+    form.setValue('adharCard', undefined);
+    if (fileInputAdharCardRef.current) {
+      fileInputAdharCardRef.current.value = ''; // Reset the file input
+    }
+  };
+
+  const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewProfilePhotoUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      form.setValue('profilePhoto', file);
+    } else {
+      setPreviewProfilePhotoUrl(null);
+      form.setValue('profilePhoto', undefined);
+    }
+  };
+
+  const triggerProfilePhotoFileInput = () => {
+    fileInputProfilePhotoRef.current?.click();
+  };
+
+  const removeProfilePhoto = () => {
+    setPreviewProfilePhotoUrl(null);
+    form.setValue('profilePhoto', undefined);
+    if (fileInputProfilePhotoRef.current) {
+      fileInputProfilePhotoRef.current.value = ''; // Reset the file input
+    }
+  };
+
+  // const countries = [{ id: 'wow', name: 'india' }];
+  // const cities = [{ id: '2', name: 'kerala' }];
+  const gender = [
+    { id: 'male', name: 'Male' },
+    { id: 'female', name: 'Female' }
+  ];
+
+  const { data: counselor } = useQuery({
+    queryKey: ['answer'],
+    queryFn: async () => {
+      const email =localStorage.getItem('email') ;
+      console.log('hi',email);
+      const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`);
+      // console.log(response.data);
+      return response.data;
+    },
+  // Only fetch when in edit mode
+  });
+  const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+
+  React.useEffect(() => {
+    if (counselor?.data) {
+      form.reset({
+        firstname: counselor.data?.firstname,
+        lastname: counselor.data?.lastname,
+        email: counselor.data?.email,
+        contactno: counselor.data?.contactno,
+        country: counselor.data?.country,
+        address: counselor.data?.address,
+        category: counselor.data?.category,
+        instituteEmail: counselor.data?.instituteEmail,
+        city: counselor.data?.city,
+        gender: counselor.data?.gender,
+        dateOfBirth: counselor.data?.dateOfBirth || '',
+        experiences: counselor.data?.experiences,
+        bankName: counselor.data?.bankName,
+        accountDetails: counselor.data?.accountDetails,
+        ifscCode: counselor.data?.ifscCode
+      });
+      if (counselor.data.panCard) {
+        setPreviewPanCardUrl(`${IMAGE_URL}/${counselor.data?.panCard}`);
+      }
+      if (counselor.data.adharCard) {
+        setPreviewAdharCardUrl(`${IMAGE_URL}/${counselor.data?.adharCard}`);
+      }
+      if (counselor.data.profilePicture) {
+        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.data?.profilePicture}`);
+      }
+      // console.log(datOfBirth);
+    }
+  }, [counselor, form]);
 
   return (
     <>
@@ -164,6 +502,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         )}
       </div>
       <Separator />
+
       <div>
         <ul className="flex gap-4">
           {steps.map((step, index) => (
@@ -200,7 +539,16 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       <Separator />
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(processForm)}
+          onSubmit={form.handleSubmit(onSubmit, (errors) => {
+            if (Object.keys(errors).length > 0) {
+              console.log('hi2');
+              console.log(errors);
+              console.log(form);
+              toast.error(
+                'Please correct the errors in the form before submitting.'
+              );
+            }
+          })}
           className="w-full space-y-8"
         >
           <div
@@ -254,8 +602,12 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input
-                          disabled={loading}
-                          placeholder="johndoe@gmail.com"
+                          disabled
+                          defaultValue={
+                            typeof window !== 'undefined'
+                              ? localStorage.getItem('email') || ''
+                              : ''
+                          }
                           {...field}
                         />
                       </FormControl>
@@ -287,6 +639,23 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Country</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Select Country"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
                       <Select
                         disabled={loading}
                         onValueChange={field.onChange}
@@ -297,13 +666,13 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           <SelectTrigger>
                             <SelectValue
                               defaultValue={field.value}
-                              placeholder="Select a country"
+                              placeholder="Gender"
                             />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {/* @ts-ignore  */}
-                          {countries.map((country) => (
+                          {gender.map((country) => (
                             <SelectItem key={country.id} value={country.id}>
                               {country.name}
                             </SelectItem>
@@ -314,35 +683,84 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="dateOfBirth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date of Birth</FormLabel>
+                      <FormControl>
+                        <Input type="date" disabled={loading} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="city"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>City</FormLabel>
-                      <Select
-                        disabled={loading}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              defaultValue={field.value}
-                              placeholder="Select a city"
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {/* @ts-ignore  */}
-                          {cities.map((city) => (
-                            <SelectItem key={city.id} value={city.id}>
-                              {city.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Your City"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Write your Catogery"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Write your address"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="instituteEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Institute Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="N/A if not available"
+                          {...field}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -362,7 +780,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                       <AccordionTrigger
                         className={cn(
                           'relative !no-underline [&[data-state=closed]>button]:hidden [&[data-state=open]>.alert]:hidden',
-                          errors?.jobs?.[index] && 'text-red-700'
+                          errors?.experiences?.[index] && 'text-red-700'
                         )}
                       >
                         {`Work Experience ${index + 1}`}
@@ -375,7 +793,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         >
                           <Trash2Icon className="h-4 w-4 " />
                         </Button>
-                        {errors?.jobs?.[index] && (
+                        {errors?.experiences?.[index] && (
                           <span className="alert absolute right-8">
                             <AlertTriangleIcon className="h-4 w-4   text-red-700" />
                           </span>
@@ -389,7 +807,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         >
                           <FormField
                             control={form.control}
-                            name={`jobs.${index}.jobtitle`}
+                            name={`experiences.${index}.title`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Job title</FormLabel>
@@ -406,10 +824,10 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           />
                           <FormField
                             control={form.control}
-                            name={`jobs.${index}.employer`}
+                            name={`experiences.${index}.companyName`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Employer</FormLabel>
+                                <FormLabel>Company Name</FormLabel>
                                 <FormControl>
                                   <Input
                                     type="text"
@@ -423,7 +841,41 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           />
                           <FormField
                             control={form.control}
-                            name={`jobs.${index}.startdate`}
+                            name={`experiences.${index}.description`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    disabled={loading}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`experiences.${index}.employmentType`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Employment Type</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    disabled={loading}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name={`experiences.${index}.startdate`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Start date</FormLabel>
@@ -440,7 +892,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           />
                           <FormField
                             control={form.control}
-                            name={`jobs.${index}.enddate`}
+                            name={`experiences.${index}.enddate`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>End date</FormLabel>
@@ -455,69 +907,20 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                               </FormItem>
                             )}
                           />
+
                           <FormField
                             control={form.control}
-                            name={`jobs.${index}.jobcountry`}
+                            name={`experiences.${index}.location`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Job country</FormLabel>
-                                <Select
-                                  disabled={loading}
-                                  onValueChange={field.onChange}
-                                  value={field.value}
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue
-                                        defaultValue={field.value}
-                                        placeholder="Select your job country"
-                                      />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {countries.map((country) => (
-                                      <SelectItem
-                                        key={country.id}
-                                        value={country.id}
-                                      >
-                                        {country.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`jobs.${index}.jobcity`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Job city</FormLabel>
-                                <Select
-                                  disabled={loading}
-                                  onValueChange={field.onChange}
-                                  value={field.value}
-                                  defaultValue={field.value}
-                                >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue
-                                        defaultValue={field.value}
-                                        placeholder="Select your job city"
-                                      />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {cities.map((city) => (
-                                      <SelectItem key={city.id} value={city.id}>
-                                        {city.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <FormLabel>Country</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    disabled={loading}
+                                    placeholder="Country"
+                                    {...field}
+                                  />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -535,12 +938,13 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                     size={'lg'}
                     onClick={() =>
                       append({
-                        jobtitle: '',
-                        employer: '',
+                        title: '',
+                        employmentType: '',
+                        companyName: '',
                         startdate: '',
                         enddate: '',
-                        jobcountry: '',
-                        jobcity: ''
+                        location: '',
+                        description: ''
                       })
                     }
                   >
@@ -549,19 +953,229 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                 </div>
               </>
             )}
-            {currentStep === 2 && (
-              <div>
-                <h1>Completed</h1>
-                <pre className="whitespace-pre-wrap">
-                  {JSON.stringify(data)}
-                </pre>
-              </div>
-            )}
           </div>
+          {currentStep === 2 && (
+            <div className="grid w-full grid-cols-3 gap-2">
+              <FormField
+                control={form.control}
+                name="panCard"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pan Card</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={handlePanCardChange}
+                          ref={fileInputPanCardRef}
+                          className="hidden"
+                        />
+                        {previewPanCardUrl ? (
+                          <div className="relative inline-block">
+                            <Image
+                              src={previewPanCardUrl}
+                              alt="Preview"
+                              className="max-h-[400px] max-w-full rounded-md object-cover"
+                              width={1200}
+                              height={400}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removePanCard}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove image</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={triggerPanCardFileInput}
+                            className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                          >
+                            <Plus className="text-grey-400 h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* <Button disabled={loading} className="ml-auto" type="submit">
-            {action}
-          </Button> */}
+              <FormField
+                control={form.control}
+                name="adharCard"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Adhar Card</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={handleAdharCardChange}
+                          ref={fileInputAdharCardRef}
+                          className="hidden"
+                        />
+                        {previewAdharCardUrl ? (
+                          <div className="relative inline-block">
+                            <Image
+                              src={previewAdharCardUrl}
+                              alt="Preview"
+                              className="max-h-[400px] max-w-full rounded-md object-cover"
+                              width={1200}
+                              height={400}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removeAdharCard}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove image</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={triggerAdharCardFileInput}
+                            className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                          >
+                            <Plus className="text-grey-400 h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="profilePhoto"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ProfilePhoto</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={handleProfilePhotoChange}
+                          ref={fileInputProfilePhotoRef}
+                          className="hidden"
+                        />
+                        {previewProfilePhotoUrl ? (
+                          <div className="relative inline-block">
+                            <Image
+                              src={previewProfilePhotoUrl}
+                              alt="Preview"
+                              className="max-h-[400px] max-w-full rounded-md object-cover"
+                              width={1200}
+                              height={400}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removeProfilePhoto}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove image</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={triggerProfilePhotoFileInput}
+                            className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                          >
+                            <Plus className="text-grey-400 h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+          {currentStep === 3 && (
+            <>
+              <FormField
+                control={form.control}
+                name="bankName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bank Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        disabled={loading}
+                        placeholder="Enter your bank name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="accountDetails"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Details</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        disabled={loading}
+                        placeholder="Enter your account details"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="ifscCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>IFSC Code</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        disabled={loading}
+                        placeholder="Enter your IFSC code"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+          {currentStep === 4 && (
+            <div>
+              <h1>Completed</h1>
+              <pre className="whitespace-pre-wrap">{JSON.stringify(data)}</pre>
+            </div>
+          )}
+          {currentStep === 4 && (
+            <Button disabled={loading} className="ml-auto" type="submit">
+              Submit
+            </Button>
+          )}
         </form>
       </Form>
       {/* Navigation */}

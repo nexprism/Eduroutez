@@ -72,6 +72,47 @@ export const createInstitute = async (req, res) => {
   }
 };
 
+export const makeInstitute = async (req, res) => {
+  // console.log('hi1')
+  try {
+    multiUploader(req, res, async function (err, data) {
+      if (err) {
+        return res.status(500).json({ error: err });
+      }
+      // console.log('hi2')
+    const payload = { ...req.body };
+    // console.log(payload);
+
+    if (req.files["instituteLogo"]) {
+      payload.instituteLogo = req.files["instituteLogo"][0].filename;
+    }
+    if (req.files["coverImage"]) {
+      payload.coverImage = req.files["coverImage"][0].filename;
+    }
+    if (req.files["thumbnailImage"]) {
+      payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
+    }
+    if (req.files["brochure"]) {
+      payload.brochure = req.files["brochure"][0].filename;
+    }
+    if (req.files["gallery"]) {
+      payload.gallery = req.files["gallery"].map((file) => file.filename);
+    }
+
+    const response = await instituteService.make(req.params.email,payload);
+
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully created an institute";
+
+    return res.status(StatusCodes.CREATED).json(SuccessResponse);
+    });
+  } catch (error) {
+    ErrorResponse.error = error;
+
+    return res.status(error.statusCode || 500).json(ErrorResponse);
+  }
+};
+
 /**
  * GET : /institute
  * req.body {}
@@ -86,7 +127,7 @@ export async function getInstitutes(req, res) {
   } catch (error) {
     console.error("Get institutes error:", error);
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 }
 
@@ -103,16 +144,18 @@ export async function getInstitute(req, res) {
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(error.statusCode||500).json(ErrorResponse);
   }
 }
 
 export async function getInstituteByEmail(req, res) {
   try {
+    console.log('hello',req.params.email);
     const response = await instituteService.getbyemail(req.params.email);
+    console.log(response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the institute";
-    return res.status(StatusCodes.OK).json(SuccessResponse);
+    return res.status(200).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
     return res.status(500).json(ErrorResponse);

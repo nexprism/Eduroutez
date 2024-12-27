@@ -5,6 +5,7 @@ import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
 import { Counselor } from '@/types';
 
+const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 export const columns: ColumnDef<Counselor>[] = [
   {
     header: 'ID',
@@ -12,38 +13,15 @@ export const columns: ColumnDef<Counselor>[] = [
   },
   {
     header: 'NAME',
-    cell: ({ row }) => <div>{`${row.original.name}`}</div>
+    cell: ({ row }) => <div>{`${row.original.firstname} ${row.original.lastname}`}</div>
   },
   {
-    header: 'COURSE',
-    cell: ({ row }) => <div>{`${2}`}</div>
+    header: 'CATEGORY',
+    cell: ({ row }) => <div>{row.original.category}</div>
   },
   {
-    header: 'SALES',
-    cell: ({ row }) => <div>{`${1}`}</div>
-  },
-  {
-    header: 'INCOME',
-    cell: ({ row }) => <div>{`${4}`}</div>
-  },
-  {
-    header: 'BALANCE',
-    cell: ({ row }) => <div>{`${4}`}</div>
-  },
-
-  {
-    accessorKey: 'status',
-    header: 'STATUS',
-    cell: ({ row }) => (
-      <div className="flex w-32 space-x-1">
-        <Badge
-          variant={!row.original.status ? 'secondary' : 'default'}
-          className="text-xs "
-        >
-          {row.original.status ? 'Active' : 'Inactive'}
-        </Badge>
-      </div>
-    )
+      header: 'Icon',
+      cell: ({ row }) => <img className='w-[2.5rem] h-[2rem] rounded-full' src={`${IMAGE_URL}/${row.original.profilePicture}`} alt="Icon" />
   },
   {
     header: 'CREATED AT',

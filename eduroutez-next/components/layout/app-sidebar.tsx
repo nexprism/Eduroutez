@@ -53,9 +53,9 @@ export default function AppSidebar({
     const role = localStorage.getItem('role'); 
     const excludedTitles = role === 'institute'
       ? ['Institutes', 'Admins', 'Promotions','Streams','Media'] // Titles to exclude for 'institute'
-      // : role === 'admin'
-      // ? ['Promotion'] // Titles to exclude for 'admin'
-      : []; // Default: no exclusions
+      : role === 'counsellor'
+      ? ['Institutes', 'Admins', 'Promotions','Streams','Media','Subscription','Courses','Streams','Counselors','Admins','Students','Email Templates','SMS Templates','Media','Promotions','Blogs','Career','Questions and Answers','Online counselling list','Webinars'] // Titles to exclude for 'counsellor'
+      : ['Online counselling']; // Default: no exclusions
 
     const filteredItems = navItems.filter(
       (item) => !excludedTitles.includes(item.title)

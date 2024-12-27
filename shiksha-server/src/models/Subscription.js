@@ -21,13 +21,21 @@ const subscriptionSchema = new mongoose.Schema(
     },
     features: [
       {
-        fName: String,
-        fValue: String,
+        key: String,
+        value: String,
       },
     ],
     status: {
-      type: Boolean,
-      default: true,
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
+    description: {
+      type: String,
+    },
+    subscriptionType: {
+      type: String,
+      enum: ["POPULAR", "STANDARD", "PREMIUM"],
     },
   },
   { timestamps: true }

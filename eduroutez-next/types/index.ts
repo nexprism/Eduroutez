@@ -132,26 +132,35 @@ interface IExperience {
 }
 
 export type Counselor = {
-  name: string;
+  firstname: string;
+  lastname: string;
   phone: string;
   email: string;
   dateOfBirth: Date;
   gender: string;
-  address?: string;
+  address: string;
   country: string;
   designation: string;
   about?: string;
-  profilePicture?: string;
+  profilePicture: string;
   password: string;
   counselorCreatedBy?: string;
-  category?: string;
-  level?: string;
+  category: string;
+  city: string;
+  state:string;
+  contactno: string;
+  bankName: string;
+  ifscCode: string;
+  adharCard: string;
+  panCard: string;
   educations: IEducation[];
   experiences: IExperience[];
   skills: string[];
   commission: number;
   eventCommission: number;
   status: boolean;
+  createdAt: string;
+  updatedAt: string;
   _id: string;
 };
 

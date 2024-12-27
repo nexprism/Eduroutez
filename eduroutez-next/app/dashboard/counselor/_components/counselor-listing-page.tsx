@@ -33,6 +33,7 @@ export default function CounselorListingPage({}: TCounselorListingPage) {
       return response.data;
     }
   });
+  console.log(data?.data);
   return (
     <PageContainer scrollable>
       {isLoading ? (

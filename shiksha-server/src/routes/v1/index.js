@@ -1,4 +1,6 @@
 import express from "express";
+import { EventEmitter } from "events";
+EventEmitter.defaultMaxListeners = 20;
 
 import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset } from "../../controllers/auth-controller.js";
 import accessTokenAutoRefresh from "../../middlewares/accessTokenAutoRefresh.js";
@@ -13,7 +15,7 @@ import { createStream, deleteStream, getStream, getStreams, updateStream } from 
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, updateInstitute } from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
 import { createCounselor, deleteCounselor, getCounselor, getCounselors, updateCounselor } from "../../controllers/counselor-controller.js";
@@ -31,6 +33,7 @@ import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../.
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
+import { createCounselorSlots, getCounselorSlot, updateCounselorSlot } from "../../controllers/counselorSlot-controller.js";
 
 const router = express.Router();
 
@@ -88,6 +91,7 @@ router.delete("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt"
  * institute routes
  */
 router.post("/institute", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createInstitute);
+router.post("/institute/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), makeInstitute);
 router.get("/institutes", getInstitutes);
 router.get("/institute/:id", getInstitute);
 router.get("/institutes/:email", getInstituteByEmail);
@@ -117,9 +121,18 @@ router.delete("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt"
  */
 router.post("/counselor", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCounselor);
 router.get("/counselors", getCounselors);
-router.get("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselor);
+router.get("/counselor/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselor);
 router.patch("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselor);
 router.delete("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselor);
+
+/**
+ * counselorSlots routes
+ */
+router.post("/counselorslots", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCounselorSlots);
+// router.get("/counselorslots", getCounselors);
+router.get("/counselorslots/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorSlot);
+router.patch("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselorSlot);
+// router.delete("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselorSlots);
 
 /**
  * student routes

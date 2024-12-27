@@ -2,17 +2,25 @@ import mongoose from "mongoose";
 
 const counselorSchema = new mongoose.Schema(
   {
-    name: {
+    firstname: {
       type: String,
       required: true,
     },
-    phone: {
+    lastname: {
+      type: String,
+      required: true,
+    },
+    contactno: {
       type: String,
       required: true,
     },
     email: {
       type: String,
       required: true,
+    },
+    city: {
+      type: String,
+      // required: true,
     },
     dateOfBirth: {
       type: Date,
@@ -29,32 +37,30 @@ const counselorSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    designation: {
-      type: String,
-      required: true,
-    },
-    about: {
-      type: String,
-    },
     profilePicture: {
       type: String,
     }, // image
-    password: {
+    adharCard: {
       type: String,
-      required: true,
-    },
-    counselorCreatedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "InstItute",
+    }, // image
+    panCard: {
+      type: String,
+    }, // image
+    instituteEmail: {
+      type: String,
+      // ref: "InstItute",
     },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+      type: String,
+      // ref: "Category",
     },
-    level: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Level",
+    wallet: {
+      type: String,
+      // ref: "Level",
     },
+    bankName: { type: String },
+    accountDetails: { type: String },
+    ifscCode: { type: String },
     educations: [
       {
         institute: {
@@ -104,7 +110,6 @@ const counselorSchema = new mongoose.Schema(
         },
         locationType: {
           type: String,
-          required: true,
         },
         startDate: {
           type: Date,
@@ -118,24 +123,7 @@ const counselorSchema = new mongoose.Schema(
         },
       },
     ],
-    skills: [
-      {
-        type: String,
-      },
-    ],
-    commission: {
-      type: Number,
-      required: true,
-    },
-    eventCommission: {
-      type: Number,
-      required: true,
-    },
-
-    status: {
-      type: Boolean,
-      required: true,
-    },
+    
   },
   { timestamps: true }
 );

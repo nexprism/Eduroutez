@@ -40,7 +40,7 @@ const formSchema = z.object({
 
 const roleTypes = [
   { value: 'admin', label: 'Admin' },
-  { value: 'student', label: 'Student' },
+  // { value: 'student', label: 'Student' },
   { value: 'institute', label: 'University/College Institute' },
   { value: 'counsellor', label: 'Counsellor' }
 ];

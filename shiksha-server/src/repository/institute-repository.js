@@ -55,6 +55,7 @@ class InstituteRepository extends CrudRepository {
 
   async getByEmail(email) {
     try {
+      console.log('hello2')
       const result = await this.model.findOne({ email }); // Query by email
       return result;
     } catch (error) {
@@ -62,6 +63,18 @@ class InstituteRepository extends CrudRepository {
     }
   }
   
+  async make(email,data){
+    try {
+      const institute = await this.model.findOneAndUpdate(
+        { email },
+        { $set: data },
+        { new: true, upsert: true } // Create a new document if no match is found
+      );
+      return institute;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export { InstituteRepository };

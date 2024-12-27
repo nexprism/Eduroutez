@@ -6,7 +6,15 @@ import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CounselorService from "../services/counselor-service.js";
 const multiUploader = FileUpload.upload.fields([
   {
-    name: "profilePicture",
+    name: "profilePhoto",
+    maxCount: 1,
+  },
+  {
+    name: "adharCard",
+    maxCount: 1,
+  },
+  {
+    name: "panCard",
     maxCount: 1,
   },
 ]);
@@ -22,10 +30,18 @@ export const createCounselor = async (req, res) => {
       if (err) {
         return res.status(500).json({ error: err });
       }
-
       const payload = { ...req.body };
-      if (req.files["profilePicture"]) {
-        payload.profilePicture = req.files["profilePicture"][0].filename;
+      // console.log(payload);
+      if (req.files["profilePhoto"]) {
+        payload.profilePicture = req.files["profilePhoto"][0].filename;
+      }
+
+      if (req.files["adharCard"]) {
+        payload.adharCard = req.files["adharCard"][0].filename;
+      }
+
+      if (req.files["panCard"]) {
+        payload.panCard = req.files["panCard"][0].filename;
       }
 
       const response = await counselorService.create(payload);
@@ -66,7 +82,7 @@ export async function getCounselors(req, res) {
 
 export async function getCounselor(req, res) {
   try {
-    const response = await counselorService.get(req.params.id);
+    const response = await counselorService.get(req.params.email);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the counselor";
     return res.status(StatusCodes.OK).json(SuccessResponse);

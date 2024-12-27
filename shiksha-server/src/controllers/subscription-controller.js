@@ -8,8 +8,17 @@ const subscriptionService = new SubscriptionService();
  * req.body {}
  */
 export const createSubscription = async (req, res) => {
+  // console.log('hi',req.body);
+  const { features, ...rest } = req.body;
+  // console.log(features);
+  const formattedFeatures = features ? Object.keys(features).map(key => ({
+    key: features[key].key,
+    value: features[key].value
+  })) : [];
+  req.body = { ...rest, features: formattedFeatures };
   try {
     const payload = { ...req.body };
+    console.log(payload);
 
     const response = await subscriptionService.create(payload);
 
@@ -64,23 +73,27 @@ export async function getSubscription(req, res) {
  */
 
 export async function updateSubscription(req, res) {
+  const { features, ...rest } = req.body;
+  const formattedFeatures = features ? Object.keys(features).map(key => ({
+    key: features[key].key,
+    value: features[key].value
+  })) : [];
+  req.body = { ...rest, features: formattedFeatures };
+  
   try {
     const subscriptionId = req.params.id;
-    const payload = {};
-
-    if (req.body.title) {
-      payload.title = req.body.title;
-    }
+    const payload = { ...req.body };
+    console.log(payload);
 
     const response = await subscriptionService.update(subscriptionId, payload);
 
-    // Return success response
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully updated the subscription";
+
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
-    console.error("Update subscription error:", error);
     ErrorResponse.error = error;
+
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
 }

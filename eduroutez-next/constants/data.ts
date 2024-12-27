@@ -10,6 +10,13 @@ export const navItems: NavItem[] = [
     items: [] // Empty array as there are no child items for Dashboard
   },
   {
+    title: 'Profile',
+    url: '/dashboard/profile',
+    icon: 'users',
+    isActive: false,
+    items: [] // Empty array as there are no child items for Dashboard
+  },
+  {
     title: 'Subscription',
     url: '/dashboard/subscription',
     icon: 'award',
@@ -157,21 +164,21 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
 
-  {
-    title: 'Import and Export Data',
-    url: '/dashboard/import-export',
-    icon: 'download',
-    isActive: false,
-    items: [] // No child items
-  },
+  // {
+  //   title: 'Import and Export Data',
+  //   url: '/dashboard/import-export',
+  //   icon: 'download',
+  //   isActive: false,
+  //   items: [] // No child items
+  // },
 
-  {
-    title: 'Chats',
-    url: '/dashboard/chat',
-    icon: 'message-circle-more',
-    isActive: false,
-    items: [] // No child itemspreloa
-  },
+  // {
+  //   title: 'Chats',
+  //   url: '/dashboard/chat',
+  //   icon: 'message-circle-more',
+  //   isActive: false,
+  //   items: [] // No child itemspreloa
+  // },
   {
     title: 'Webinars',
     url: '/dashboard/webinar',
@@ -185,6 +192,14 @@ export const navItems: NavItem[] = [
     icon: 'message-circle-question',
     isActive: false,
     items: [] // No child items
+  },
+  {
+    title: 'Online counselling',
+    url: '/dashboard/online-counselling',
+    icon: 'scroll-text',
+    isActive: false,
+    items: [
+    ] // No child items
   },
   {
     title: 'Online counselling list',

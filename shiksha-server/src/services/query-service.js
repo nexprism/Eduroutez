@@ -1,27 +1,18 @@
-import { ServerConfig } from "../config/index.js";
-import { CounselorRepository } from "../repository/index.js";
-import bcrypt from "bcrypt";
+import { QueryRepository } from "../repository/query-repository.js";
 
-class CounselorService {
+class questionAnswerService {
   constructor() {
-    this.counselorRepository = new CounselorRepository();
-  }
-
-  hashPassword(password) {
-    const salt = bcrypt.genSaltSync(+ServerConfig.SALT);
-    const hashedPassword = bcrypt.hashSync(password, salt);
-    return hashedPassword;
+    this.queryRepository = new QueryRepository();
   }
 
   async create(data) {
     try {
-      const counselor = await this.counselorRepository.makeCounselor(data);
-      return counselor;
+      const questionAnswer = await this.queryRepository.create(data);
+      return questionAnswer;
     } catch (error) {
       throw error;
     }
   }
-
   async getAll(query) {
     try {
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
@@ -37,9 +28,7 @@ class CounselorService {
       const filterConditions = {};
 
       for (const [key, value] of Object.entries(parsedFilters)) {
-        if (parsedFilters.category !== "by-category") {
-          filterConditions[key] = value;
-        }
+        filterConditions[key] = value;
       }
 
       // Build search conditions for multiple fields with partial matching
@@ -58,40 +47,40 @@ class CounselorService {
       }
 
       // Execute query with dynamic filters, sorting, and pagination
-      const populateFields = [];
-      const counselors = await this.counselorRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+      const questionAnswers = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
 
-      return counselors;
+      return questionAnswers;
     } catch (error) {
-      console.log(error);
-      throw new AppError("Cannot fetch data of all the counselors", StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new AppError("Cannot fetch data of all the questionAnswers", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
-  async get(email) {
-    const counselor = await this.counselorRepository.get(email);
-    return counselor;
+
+  async get(id) {
+    const questionAnswer = await this.queryRepository.get(id);
+    return questionAnswer;
   }
+
   async update(id, data) {
     try {
-      const counselor = await this.counselorRepository.update(id, data);
-      return counselor;
+      const questionAnswer = await this.queryRepository.update(id, data);
+
+      return questionAnswer;
     } catch (error) {
-      throw error;
+      throw new AppError("Cannot update the questionAnswer ", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 
   async delete(id) {
     try {
-      const counselor = await this.counselorRepository.destroy(id);
-      return counselor;
+      const questionAnswer = await this.queryRepository.destroy(id);
+      return questionAnswer;
     } catch (error) {
-      throw error;
+      if (error.statusCode === StatusCodes.NOT_FOUND) {
+        throw new AppError("The questionAnswer you requested to delete is not present", error.statusCode);
+      }
+      throw new AppError("Cannot delete the questionAnswer ", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 }
 
-export default CounselorService;
-
-/*
-    this is my #first #tweet . I am really #excited
-*/
+export default questionAnswerService;
