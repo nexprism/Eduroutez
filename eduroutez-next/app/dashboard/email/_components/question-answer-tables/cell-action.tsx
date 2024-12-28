@@ -9,14 +9,14 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import axiosInstance from '@/lib/axios';
-import { Subscription } from '@/types';
+import { QuestionAnswer } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface CellActionProps {
-  data: Subscription;
+  data: QuestionAnswer;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
@@ -25,10 +25,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const deleteSubscriptionMutation = useMutation({
-    mutationFn: async (subscriptionId: string) => {
+  const deleteQuestionAnswerMutation = useMutation({
+    mutationFn: async (questionAnswerId: string) => {
       const response = await axiosInstance({
-        url: `${apiUrl}/subscription/${subscriptionId}`,
+        url: `${apiUrl}/create-email/${questionAnswerId}`,
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -38,8 +38,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
-      router.push('/dashboard/subscription');
+      queryClient.invalidateQueries({ queryKey: ['question-answers'] });
+      router.push('/dashboard/email');
     },
     onSettled: () => {
       setOpen(false);
@@ -49,30 +49,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onConfirm = async () => {
     setLoading(true);
-    deleteSubscriptionMutation.mutate(data._id);
-  };
-
-  const handleAllow = async () => {
-    setLoading(true);
-    try {
-      const email = localStorage.getItem('email');
-      if (!email) {
-        throw new Error('Email not found in localStorage');
-      }
-      const res=await axiosInstance.post(`${apiUrl}/instituteUpgrade/${email}`, { subscriptionId: data._id }, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
-      if(res?.status===200) localStorage.setItem('plan',data?._id);
-      // localStorage.setItem('plan',res)
-      router.push('/dashboard/subscription');
-    } catch (error) {
-      console.error('Error allowing subscription:', error);
-    } finally {
-      setLoading(false);
-    }
+    deleteQuestionAnswerMutation.mutate(data._id);
   };
 
   return (
@@ -94,13 +71,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
           <DropdownMenuItem
-            onClick={handleAllow}
+            onClick={() =>
+              router.push(`/dashboard/email/update/${data._id}/`)
+            }
           >
-            <Edit className="mr-2 h-4 w-4" /> Allow
+            <Edit className="mr-2 h-4 w-4" /> Update
           </DropdownMenuItem>
-          {/* <DropdownMenuItem onClick={() => setOpen(true)}>
+          <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="mr-2 h-4 w-4" /> Delete
-          </DropdownMenuItem> */}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

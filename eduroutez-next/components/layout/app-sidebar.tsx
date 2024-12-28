@@ -32,6 +32,8 @@ import { Icons } from '../icons';
 import ThemeToggle from './ThemeToggle/theme-toggle';
 import { UserNav } from './user-nav';
 import { useEffect } from 'react';
+import axiosInstance from '@/lib/axios';
+import { useQuery } from '@tanstack/react-query';
 
 export const company = {
   name: 'Eduroutez App Inc.',
@@ -50,40 +52,65 @@ export default function AppSidebar({
   // Only render after first client-side mount
   useEffect(() => {
     setMounted(true);
-    const role = localStorage.getItem('role'); 
-    const excludedTitles = role === 'institute'
-      ? ['Institutes', 'Admins', 'Promotions','Streams','Media'] // Titles to exclude for 'institute'
-      : role === 'counsellor'
-      ? ['Institutes', 'Admins', 'Promotions','Streams','Media','Subscription','Courses','Streams','Counselors','Admins','Students','Email Templates','SMS Templates','Media','Promotions','Blogs','Career','Questions and Answers','Online counselling list','Webinars'] // Titles to exclude for 'counsellor'
-      : ['Online counselling']; // Default: no exclusions
+    const role = localStorage.getItem('role');
+    const excludedTitles =
+      role === 'institute'
+        ? ['Institutes', 'Admins', 'Promotions', 'Streams', 'Media','Online counselling list','Online counselling'] // Titles to exclude for 'institute'
+        : role === 'counsellor'
+        ? [
+            'Institutes',
+            'Admins',
+            'Promotions',
+            'Streams',
+            'Media',
+            'Subscription',
+            'Courses',
+            'Streams',
+            'Counselors',
+            'Admins',
+            'Students',
+            'Email Templates',
+            'SMS Templates',
+            'Media',
+            'Promotions',
+            'Blogs',
+            'Career',
+            'Questions and Answers',
+            'Online counselling list',
+            'Webinars'
+          ] // Titles to exclude for 'counsellor'
+        : ['Online counselling']; // Default: no exclusions
 
     const filteredItems = navItems.filter(
       (item) => !excludedTitles.includes(item.title)
     );
 
-    setFilteredNavItems(filteredItems); 
+    setFilteredNavItems(filteredItems);
   }, []);
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        `${apiUrl}/subscription/${localStorage.getItem('plan')}`
+      );
+      return response.data;
+    },
+  });
+
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    if (role === 'institute' && subscription?.data?.name === 'Standard') {
+      setFilteredNavItems((prevItems) =>
+        prevItems.filter((item) => !['Email Templates', 'SMS Templates'].includes(item.title))
+      );
+    }
+  }, [subscription]); // Depend on subscription
+
   if (!mounted) {
-    return null; // or a loading skeleton
+    return null; // Render nothing or a skeleton until mounted
   }
-
-  // React.useEffect(() => {
-  //   const role = localStorage.getItem('role'); // Access localStorage
-  //   const excludedTitles = role === 'institute'
-  //     ? ['Institutes', 'Admin', 'Promotion'] // Titles to exclude for 'institute'
-  //     // : role === 'admin'
-  //     // ? ['Promotion'] // Titles to exclude for 'admin'
-  //     : []; // Default: no exclusions
-
-  //   const filteredItems = navItems.filter(
-  //     (item) => !excludedTitles.includes(item.title)
-  //   );
-
-  //   setFilteredNavItems(filteredItems); // Update the state with filtered items
-  // }, []);
-  
-
 
   return (
     <SidebarProvider>

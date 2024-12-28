@@ -72,6 +72,22 @@ export const createInstitute = async (req, res) => {
   }
 };
 
+export const upgradeInstitute = async (req, res) => {
+  try {
+      const payload = { ...req.body };
+      const response = await instituteService.Upgrade(req.params.email, payload);
+
+      SuccessResponse.data = response;
+      SuccessResponse.message = "Successfully upgraded the institute";
+
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+
+    return res.status(error.statusCode || 500).json(ErrorResponse);
+  }
+};
+
 export const makeInstitute = async (req, res) => {
   // console.log('hi1')
   try {

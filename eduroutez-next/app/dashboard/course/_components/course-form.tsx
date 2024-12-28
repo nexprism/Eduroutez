@@ -74,9 +74,9 @@ const statuses = [
 ];
 
 const visibilities = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'public', label: 'Public' },
-  { value: 'private', label: 'Private' }
+  { value: 'trending', label: 'Trending' },
+  { value: 'popular', label: 'Popular' },
+  { value: 'default', label: 'Default' }
 ];
 
 const languages = [
@@ -282,10 +282,10 @@ export default function CreateCourse() {
   } = useQuery({ queryKey: ['course-categories'], queryFn: fetchCategories });
 
   //a
-  const fetchInstitute = async () => {
-    const response = await axiosInstance.get(`${apiUrl}/institutes`);
-    return response.data;
-  };
+  // const fetchInstitute = async () => {
+  //   const response = await axiosInstance.get(`${apiUrl}/institutes`);
+  //   return response.data;
+  // };
 
   const {
     data: instituteCategories = [],
@@ -301,6 +301,7 @@ export default function CreateCourse() {
       return response.data;
     }
   });
+
   // console.log(instituteCategories);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -445,7 +446,7 @@ export default function CreateCourse() {
     }
   });
 
-  const { data: category } = useQuery({
+  const { data: course } = useQuery({
     queryKey: ['category', segments[4]],
     queryFn: async () => {
       const response = await axiosInstance.get(
@@ -455,6 +456,51 @@ export default function CreateCourse() {
     },
     enabled: isEdit // Only fetch when in edit mode
   });
+  React.useEffect(() => {
+      if (course?.data) {
+        form.reset({
+          courseTitle: course.data.courseTitle,
+          shortDescription: course.data.shortDescription,
+          longDescription: course.data.longDescription,
+          isCourseFree: course.data.isCourseFree,
+          isCourseDiscounted: course.data.isCourseDiscounted,
+          courseType: course.data.courseType,
+          instructor: course.data.instructor,
+          courseLevel: course.data.courseLevel,
+          category: course.data.category,
+          status: course.data.status,
+          instituteCategory: course.data.instituteCategory,
+          visibility: course.data.visibility,
+          language: course.data.language,
+          examAccepted: course.data.examAccepted,
+          eligibility: course.data.eligibility,
+          cutOff: course.data.cutOff,
+          ranking: course.data.ranking,
+          courseDurationYears: course.data.courseDurationYears,
+          courseDurationMonths: course.data.courseDurationMonths,
+          applicationStartDate: new Date(course.data.applicationStartDate),
+          applicationEndDate: new Date(course.data.applicationEndDate),
+          courseOverview: course.data.courseOverview,
+          courseEligibility: course.data.courseEligibility,
+          courseCurriculum: course.data.courseCurriculum,
+          courseFee: course.data.courseFee,
+          courseOpportunities: course.data.courseOpportunities,
+          coursePrice: course.data.coursePrice,
+          courseDiscount: course.data.courseDiscount,
+          courseDiscountType: course.data.courseDiscountType,
+          coursePreviewType: course.data.coursePreviewType,
+          coursePreviewUrl: course.data.coursePreviewUrl,
+          coursePreviewThumbnail: course.data.coursePreviewThumbnail,
+          coursePreviewCover: course.data.coursePreviewCover,
+          metaTitle: course.data.metaTitle,
+          metaDescription: course.data.metaDescription,
+          metaKeywords: course.data.metaKeywords,
+          metaImage: course.data.metaImage
+        });
+      }
+    }, [course, form]);
+
+
   
   return (
     <div className="container mx-auto space-y-6 py-6">

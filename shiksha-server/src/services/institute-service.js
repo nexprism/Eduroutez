@@ -24,6 +24,15 @@ class InstituteService {
       throw error;
     }
   }
+
+  async Upgrade(email,data){
+    try {
+      const institute=await this.instituteRepository.upgrade(email,data);
+      console.log(institute);
+    } catch (error) {
+      throw error;
+    }
+  }
   
   async getAll(query) {
     try {

@@ -47,6 +47,7 @@ export default function CourseListingPage({}: TCourseListingPage) {
       return response.data;
     }
   });
+  console.log('hi',data);
 
   useEffect(() => {
     if (isSuccess && data?.data?.result) {

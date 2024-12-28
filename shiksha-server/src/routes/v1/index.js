@@ -15,7 +15,7 @@ import { createStream, deleteStream, getStream, getStreams, updateStream } from 
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute } from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
 import { createCounselor, deleteCounselor, getCounselor, getCounselors, updateCounselor } from "../../controllers/counselor-controller.js";
@@ -34,6 +34,8 @@ import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
 import { createCounselorSlots, getCounselorSlot, updateCounselorSlot } from "../../controllers/counselorSlot-controller.js";
+import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
+import { createQuery, deleteQuery, getQueries, getQuery, updateQuery } from "../../controllers/query-controller.js";
 
 const router = express.Router();
 
@@ -59,6 +61,15 @@ router.get("/subscriptions", getSubscriptions);
 router.get("/subscription/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getSubscription);
 router.patch("/subscription/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateSubscription);
 router.delete("/subscription/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteSubscription);
+
+/**
+ * Email Templates routes
+ */
+router.post("/create-Email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createEmail);
+router.get("/create-Emails", getEmails);
+router.get("/create-Email/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getEmail);
+router.patch("/create-Email/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateEmail);
+router.delete("/create-Email/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteEmail);
 
 /**
  * stream routes
@@ -88,9 +99,19 @@ router.patch("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt",
 router.delete("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCourse);
 
 /**
+ * query routes
+ */
+router.post("/query", createQuery);
+router.get("/queries", getQueries);
+router.get("/query/:id", getQuery);
+router.patch("/query/:id",  updateQuery);
+router.delete("/query/:id", deleteQuery);
+
+/**
  * institute routes
  */
 router.post("/institute", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createInstitute);
+router.post("/instituteUpgrade/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), upgradeInstitute);
 router.post("/institute/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), makeInstitute);
 router.get("/institutes", getInstitutes);
 router.get("/institute/:id", getInstitute);

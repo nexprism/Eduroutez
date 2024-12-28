@@ -17,7 +17,23 @@ const careerSchema = new mongoose.Schema(
     category: {
       // type: mongoose.Schema.Types.ObjectId,
       // ref: "BlogCategory", // Reference to the category associated with the coupon
-      type:String
+      type: String,
+    },
+    eligibility: {
+      type: String,
+      // required: true,
+    },
+    jobRoles: {
+      type: String,
+      // required: true,
+    },
+    opportunity: {
+      type: String,
+      // required: true,
+    },
+    topColleges: {
+      type: String,
+      // required: true,
     },
   },
   { timestamps: true }

@@ -55,10 +55,10 @@ export const columns: ColumnDef<Subscription>[] = [
     cell: ({ row }) => (
       <div className="flex w-32 space-x-1">
         <Badge
-          variant={!row.original.status ? 'secondary' : 'default'}
+          variant={row.original._id === localStorage.getItem('plan') ? 'secondary' : 'default'}
           className="text-xs "
         >
-          {row.original.status ? 'Active' : 'Inactive'}
+          {row.original._id === localStorage.getItem('plan') ? 'Current' : 'Upgrade'}
         </Badge>
       </div>
     )

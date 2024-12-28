@@ -7,11 +7,11 @@ const subscriptionSchema = new mongoose.Schema(
       required: true,
     },
     price: {
-      type: Number,
+      type: String,
       required: true,
     },
     duration: {
-      type: Number,
+      type: String,
       required: true,
     },
     durationType: {
@@ -35,7 +35,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     subscriptionType: {
       type: String,
-      enum: ["POPULAR", "STANDARD", "PREMIUM"],
+      // enum: ["POPULAR", "STANDARD", "PREMIUM"],
     },
   },
   { timestamps: true }

@@ -75,6 +75,20 @@ class InstituteRepository extends CrudRepository {
       throw error;
     }
   }
+
+  async upgrade(email, data) {
+    try {
+      const result = await this.model.findOneAndUpdate(
+        { email },
+        { $set: { plan: data?.subscriptionId } }, // Set the `plan` field with the id
+        { new: true } // Return the updated document
+      );
+      // console.log('hi',result);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export { InstituteRepository };

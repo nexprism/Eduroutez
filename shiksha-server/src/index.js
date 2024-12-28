@@ -67,23 +67,33 @@ const mailgun=()=>mg({
   domain: process.env.MAILGUN_DOMAIN
 })
 
-// app.post("/send-email", async (req, res) => {
-//   const { to, subject, message } = req.body;
-//   const data = {
-//     from: '"Eduroutez" <ayushjhadbg9876@gmail.com>',
-//     to:`${to}`,
-//     subject: `${subject}`,
-//     html:`${message}`
-//   };
-//   console.log(data);
-//   mailgun().messages().send(data, (error, body) => {
-//     if (error) {
-//       console.log(error);
-//       return res.status(500).json({ error: error });
-//     }
-//     return res.status(200).json({ message: "Email sent successfully" });
-//   });
-// });
+app.post("/send-email", async (req, res) => {
+  const { to, subject, message } = req.body; // `to` is an array
+  if (!Array.isArray(to) || to.length === 0) {
+    return res.status(400).json({ error: "Recipient email list is empty or invalid" });
+  }
+
+  // Convert the array of email addresses to a comma-separated string
+  const recipients = to.join(",");
+
+  const data = {
+    from: '"Eduroutez" <eduroutezdigital@gmail.com>',
+    to: recipients,
+    subject: subject,
+    html: message
+  };
+
+  console.log(data);
+
+  mailgun().messages().send(data, (error, body) => {
+    if (error) {
+      console.error("Error sending email:", error);
+      return res.status(500).json({ error: "Failed to send email", details: error });
+    }
+    return res.status(200).json({ message: "Email sent successfully", body });
+  });
+});
+
 
 app.listen(ServerConfig.PORT, async () => {
   console.log(`Server started on port ${ServerConfig.PORT}`);

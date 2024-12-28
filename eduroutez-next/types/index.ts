@@ -328,6 +328,24 @@ export type QuestionAnswer = {
   _id: string;
 };
 
+export type Query = {
+  city: string;
+  createdAt: string;
+  email: string;
+  name: string;
+  phoneNo: string;
+  query: string;
+  queryRelatedTo: string;
+  updatedAt: string;
+  _id: string;
+};
+export type EmailTemplate = {
+  subject: string;
+  message: string;
+  to: string[];
+  _id: string;
+};
+
 export type Review = {
   email?: string;
   fullName?: string;

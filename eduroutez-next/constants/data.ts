@@ -144,6 +144,13 @@ export const navItems: NavItem[] = [
   {
     title: 'Promotions',
     url: '/dashboard/promotion',
+    icon: 'message-square',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Queries',
+    url: '/dashboard/query',
     icon: 'rocket',
     isActive: false,
     items: [] // No child items
@@ -208,13 +215,13 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: [] // No child items
   },
-  {
-    title: 'Refer and Earn',
-    url: '/dashboard/refer-earn',
-    icon: 'receipt-indian-rupee',
-    isActive: false,
-    items: [] // No child items
-  },
+  // {
+  //   title: 'Refer and Earn',
+  //   url: '/dashboard/refer-earn',
+  //   icon: 'receipt-indian-rupee',
+  //   isActive: false,
+  //   items: [] // No child items
+  // },
   {
     title: 'Settings',
     url: '/dashboard/setting',

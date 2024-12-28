@@ -70,7 +70,11 @@ const formSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
-  description: z.string()
+    eligibility:z.string(),
+    jobRoles:z.string(),
+    oppertunity:z.string(),
+    topColleges:z.string(),
+    description: z.string()
 });
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 export default function CounselorForm() {
@@ -94,6 +98,10 @@ export default function CounselorForm() {
       title: '',
       category: '',
       description: '',
+      eligibility: '',
+      jobRoles: '',
+      oppertunity: '',
+      topColleges: '',
       // mode: undefined,
       counselorType: ''
     }
@@ -106,6 +114,10 @@ export default function CounselorForm() {
     formData.append('title', values.title);
     formData.append('category', values.category);
     formData.append('description', values.description);
+    formData.append('eligibility', values.eligibility);
+    formData.append('jobRoles', values.jobRoles);
+    formData.append('oppertunity', values.oppertunity);
+    formData.append('topColleges', values.topColleges);
     if (values.image) {
       formData.append('images', values.image);
     }
@@ -130,8 +142,8 @@ export default function CounselorForm() {
 
     onSuccess: () => {
       const message = isEdit
-        ? 'Counselor updated successfully'
-        : 'Counselor created successfully';
+        ? 'Career updated successfully'
+        : 'Career created successfully';
       toast.success(message);
       form.reset();
       setPreviewImageUrl(null);
@@ -204,7 +216,11 @@ export default function CounselorForm() {
         title: counselor.data.name,
         category: counselor.data.category[0],
         description: counselor.data.description,
-        //  image: undefined // Handle image separately
+        image: undefined, // Handle image separately
+        eligibility: counselor.data.eligibility,
+        jobRoles: counselor.data.jobRoles,
+        oppertunity: counselor.data.oppertunity,
+        topColleges: counselor.data.topColleges,
         counselorType: counselor?.data?.counselorType
       });
 
@@ -323,6 +339,94 @@ export default function CounselorForm() {
                     <FormControl>
                       <Controller
                         name="description"
+                        control={form.control}
+                        render={({ field }) => (
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="eligibility"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Eligibility</FormLabel>
+                    <FormControl>
+                      <Controller
+                        name="eligibility"
+                        control={form.control}
+                        render={({ field }) => (
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="jobRoles"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>jobRoles</FormLabel>
+                    <FormControl>
+                      <Controller
+                        name="jobRoles"
+                        control={form.control}
+                        render={({ field }) => (
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="oppertunity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Oppertunity</FormLabel>
+                    <FormControl>
+                      <Controller
+                        name="oppertunity"
+                        control={form.control}
+                        render={({ field }) => (
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="topColleges"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Top Colleges</FormLabel>
+                    <FormControl>
+                      <Controller
+                        name="topColleges"
                         control={form.control}
                         render={({ field }) => (
                           <CustomEditor

@@ -1,16 +1,17 @@
 import { StatusCodes } from "http-status-codes";
-import QuestionAnswerService from "../services/query-service.js";
+import EmailService from "../services/email-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
-const questionAnswerService = new QuestionAnswerService();
+const emailService = new EmailService();
+
 
 /**
  * POST : /question-answer
  * req.body {}
  */
-export const createQuery = async (req, res) => {
+export const createEmail = async (req, res) => {
   try {
     const payload = req.body;
-    const response = await questionAnswerService.create(payload);
+    const response = await emailService.create(payload);
     console.log(response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully created a question and answer";
@@ -19,7 +20,6 @@ export const createQuery = async (req, res) => {
   } catch (error) {
     console.error("Error creating question and answer:", error);
     ErrorResponse.error = error;
-
     return res.status(error.statusCode).json(ErrorResponse);
   }
 };
@@ -29,11 +29,11 @@ export const createQuery = async (req, res) => {
  * req.body {}
  */
 
-export async function getQueries(req, res) {
+export async function getEmails(req, res) {
   try {
-    const response = await questionAnswerService.getAll(req.query);
+    const response = await emailService.getAll(req.query);
     SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully fetched question and answer";
+    SuccessResponse.message = "Successfully fetched Email Templates";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
@@ -46,11 +46,11 @@ export async function getQueries(req, res) {
  * req.body {}
  */
 
-export async function getQuery(req, res) {
+export async function getEmail(req, res) {
   try {
-    const response = await questionAnswerService.get(req.params.id);
+    const response = await emailService.get(req.params.id);
     SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully fetched the question and answer";
+    SuccessResponse.message = "Successfully fetched the Email Template";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
@@ -63,16 +63,14 @@ export async function getQuery(req, res) {
  * req.body {capacity:200}
  */
 
-export async function updateQuery(req, res) {
+export async function updateEmail(req, res) {
   try {
-    const questionAnswerId = req.params.id;
-    const payload = {};
+    const emailId = req.params.id;
 
-    if (req.body.title) {
-      payload.title = req.body.title;
-    }
+    const payload = req.body;
+    // console.log(emailId, payload);
 
-    const response = await questionAnswerService.update(questionAnswerId, payload);
+    const response = await emailService.update(emailId, payload);
 
     // Return success response
     SuccessResponse.data = response;
@@ -90,9 +88,9 @@ export async function updateQuery(req, res) {
  * req.body {}
  */
 
-export async function deleteQuery(req, res) {
+export async function deleteEmail(req, res) {
   try {
-    const response = await questionAnswerService.delete(req.params.id);
+    const response = await emailService.delete(req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully deleted the question and answer";
     return res.status(StatusCodes.OK).json(SuccessResponse);
@@ -101,3 +99,7 @@ export async function deleteQuery(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+
+
+
+

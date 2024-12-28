@@ -124,6 +124,10 @@ const instituteSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    plan:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription",
+    }
   },
   { timestamps: true }
 );
