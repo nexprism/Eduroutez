@@ -30,6 +30,7 @@ const formSchema = z.object({
   contact_number: z.string(),
   role: z.string(),
   email: z.string().email({ message: 'Enter a valid email address' }),
+  is_verified:z.boolean(),
   password: z
     .string()
     .min(8, { message: 'Password must be at least 8 characters' }),
@@ -50,7 +51,7 @@ type UserFormValue = z.infer<typeof formSchema>;
 export default function UserSignupForm({ setToggle ,toggle}: any) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = process.env.VITE_BASE_URL;
 
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
@@ -59,7 +60,8 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
       contact_number: '',
       role: '',
       email: '',
-      password: ''
+      password: '',
+      is_verified:false
     }
   });
 
@@ -107,6 +109,9 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
   // Form submit handler
   const onSubmit = (data: UserFormValue) => {
     if(data?.password===data?.confirmPassword){
+        if (data?.role === 'counsellor') {
+          data.is_verified = true;
+        }
         mutation.mutate(data);
         alert(
           'Your Request was sent to Admin!! You can Login when admin allow you'

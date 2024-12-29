@@ -6,14 +6,18 @@ const singleUploader = FileUpload.upload.single("image");
 const userService = new UserService();
 
 export const signup = async (req, res) => {
+  console.log(req.body);
   try {
+    console.log(req.body);
     const response = await userService.signup(
       {
         name:req.body.name,
         contact_number:req.body.contact_number,
         email: req.body.email,
         password: req.body.password,
-        role: req.body.role,
+        role: req.body?.role,
+        city:req.body.city,
+        state:req.body.state
       },
       res
     );

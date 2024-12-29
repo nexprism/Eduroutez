@@ -8,14 +8,24 @@ const questionAnswerSchema = new mongoose.Schema(
     answer: {
       type: String,
     },
+    grade:{
+      type:String
+    },
+    label:{
+      type:String
+    },
     askedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Student",
+      type: String,
+      // ref: "Student",
     },
     answeredBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Counselor",
+      type: String,
+      // ref: "Counselor",
     },
+    instituteId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Institute'
+    }
   },
   { timestamps: true }
 );

@@ -117,7 +117,7 @@ const instituteSchema = new mongoose.Schema(
     ],
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
 
     status: {
@@ -127,6 +127,11 @@ const instituteSchema = new mongoose.Schema(
     plan:{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subscription",
+      default:"676d7f071e0e1af8cb5344d7"
+    },
+    planName:{
+      type:String,
+      default:"Standard"
     }
   },
   { timestamps: true }

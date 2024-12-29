@@ -227,11 +227,11 @@ router.delete("/feedback/:id", accessTokenAutoRefresh, passport.authenticate("jw
 /**
  * question-answer routes
  */
-router.post("/question-answer", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createQuestionAnswer);
+router.post("/question-answer", createQuestionAnswer);
 router.get("/question-answers", getQuestionAnswers);
-router.get("/question-answer/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswer);
-router.patch("/question-answer/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateQuestionAnswer);
-router.delete("/question-answer/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteQuestionAnswer);
+router.get("/question-answer/:id", getQuestionAnswer);
+router.patch("/question-answer/:id",  updateQuestionAnswer);
+router.delete("/question-answer/:id",  deleteQuestionAnswer);
 
 /**
  * wishlist routes

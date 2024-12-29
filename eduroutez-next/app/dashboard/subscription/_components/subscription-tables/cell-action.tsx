@@ -59,7 +59,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       if (!email) {
         throw new Error('Email not found in localStorage');
       }
-      const res=await axiosInstance.post(`${apiUrl}/instituteUpgrade/${email}`, { subscriptionId: data._id }, {
+      const res=await axiosInstance.post(`${apiUrl}/instituteUpgrade/${email}`, { subscriptionId: data._id ,planName:data?.name}, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -98,9 +98,20 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           >
             <Edit className="mr-2 h-4 w-4" /> Allow
           </DropdownMenuItem>
-          {/* <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className="mr-2 h-4 w-4" /> Delete
-          </DropdownMenuItem> */}
+            {localStorage.getItem('role') === 'SUPER_ADMIN' && (
+            <>
+              <DropdownMenuItem
+              onClick={() =>
+                router.push(`/dashboard/subscription/update/${data._id}/`)
+              }
+              >
+              <Edit className="mr-2 h-4 w-4" /> Update
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpen(true)}>
+              <Trash className="mr-2 h-4 w-4" /> Delete
+              </DropdownMenuItem>
+            </>
+            )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>

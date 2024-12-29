@@ -80,7 +80,7 @@ class InstituteRepository extends CrudRepository {
     try {
       const result = await this.model.findOneAndUpdate(
         { email },
-        { $set: { plan: data?.subscriptionId } }, // Set the `plan` field with the id
+        { $set: { plan: data?.subscriptionId,planName:data?.planName } }, // Set the `plan` field with the id
         { new: true } // Return the updated document
       );
       // console.log('hi',result);
