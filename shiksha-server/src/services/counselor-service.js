@@ -71,6 +71,19 @@ class CounselorService {
     const counselor = await this.counselorRepository.get(email);
     return counselor;
   }
+
+  async book(email,data) {
+    // console.log('hi',email,data);
+    const questionAnswer = await this.counselorRepository.book(email,data);
+    return questionAnswer;
+  }
+
+  async mark(data) {
+    // console.log('hi',email,data);
+    const questionAnswer = await this.counselorRepository.mark(data);
+    return questionAnswer;
+  }
+
   async update(id, data) {
     try {
       const counselor = await this.counselorRepository.update(id, data);

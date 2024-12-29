@@ -110,6 +110,13 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Slots',
+    url: '/dashboard/slot',
+    icon: 'message-circle',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
     title: 'Sales',
     url: '/dashboard/sales',
     icon: 'chart-no-axes-combined',
@@ -194,8 +201,15 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'Questions and Answers',
+    title: 'FAQs',
     url: '/dashboard/question-answer',
+    icon: 'message-circle-question',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Questions and Answers',
+    url: '/dashboard/answer',
     icon: 'message-circle-question',
     isActive: false,
     items: [] // No child items

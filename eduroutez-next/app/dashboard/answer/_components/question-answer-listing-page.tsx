@@ -22,7 +22,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['question-answers', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/faq`, {
+      const response = await axiosInstance.get(`${apiUrl}/question-answers`, {
         params: {
           searchFields: JSON.stringify({}),
           sort: JSON.stringify({ createdAt: 'desc' }),

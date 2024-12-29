@@ -65,6 +65,8 @@ export const profileSchema = z.object({
   instituteEmail: z
     .string(),
   contactno: z.coerce.number(),
+  language:z.string(),
+  ExperienceYear:z.string(),
   country: z.string().min(1, { message: 'Please select a category' }),
   city: z.string().min(1, { message: 'Please select a category' }),
   gender: z.string(),
@@ -226,7 +228,9 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         'country',
         'city',
         'gender',
-        'dateOfBirth'
+        'dateOfBirth',
+        'language',
+        'ExpereinceYear'
       ]
     },
     {
@@ -295,6 +299,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       formData.append('address', values.address);
       formData.append('category', values.category);
       formData.append('instituteEmail', values.instituteEmail);
+      formData.append('language', values.language);
+      formData.append('ExperienceYear', values.ExperienceYear);
       values.experiences.forEach((job, index) => {
         formData.append(`jobs[${index}][title]`, job.title);
         formData.append(`jobs[${index}][employmentType]`, job.employmentType);
@@ -471,7 +477,9 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         experiences: counselor.data?.experiences,
         bankName: counselor.data?.bankName,
         accountDetails: counselor.data?.accountDetails,
-        ifscCode: counselor.data?.ifscCode
+        ifscCode: counselor.data?.ifscCode,
+        language:counselor.data?.language,
+        ExperienceYear:counselor.data?.ExperienceYear
       });
       if (counselor.data.panCard) {
         setPreviewPanCardUrl(`${IMAGE_URL}/${counselor.data?.panCard}`);
@@ -643,6 +651,40 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         <Input
                           disabled={loading}
                           placeholder="Select Country"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="language"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Language You Know</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Language(comma separated)"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="ExperienceYear"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ExperienceYear</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="ExperienceYear"
                           {...field}
                         />
                       </FormControl>

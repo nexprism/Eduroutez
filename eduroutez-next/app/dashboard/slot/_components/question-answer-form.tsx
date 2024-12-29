@@ -42,8 +42,7 @@ import CustomEditor from '@/components/custom-editor';
 
 const formSchema = z.object({
   question: z.string().nonempty('Question is required'),
-  answer: z.string().nonempty('Answer is required'),
-  email: z.string().optional()
+  answer: z.string().nonempty('Answer is required')
 });
 
 export default function CounselorForm() {
@@ -67,18 +66,21 @@ export default function CounselorForm() {
   const router = useRouter();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    mutate({
-      question: values.question,
-      answer: values.answer,
-      email: localStorage.getItem('email') ?? ''
-    });
+    // Handle form submission here
+    // const formData = new FormData();
+    // formData.append('question', values.question);
+    // formData.append('answer', values.answer);
+    // console.log(`hi${values.question}`);
+    // console.log(`hi${values.answer}`);
+    // console.log(formData);
+    mutate({ question: values.question, answer: values.answer });
   }
 
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: async (formData: z.infer<typeof formSchema>) => {
       const endpoint = isEdit
-        ? `${apiUrl}/faq/${segments[4]}`
-        : `${apiUrl}/faq`;
+        ? `${apiUrl}/question-answer/${segments[4]}`
+        : `${apiUrl}/question-answer`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: isEdit ? 'patch' : 'post',
@@ -109,7 +111,9 @@ export default function CounselorForm() {
   const { data: faq } = useQuery({
     queryKey: ['answer', segments[4]],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/faq/${segments[4]}`);
+      const response = await axiosInstance.get(
+        `${apiUrl}/question-answer/${segments[4]}`
+      );
       return response.data;
     },
     enabled: isEdit // Only fetch when in edit mode
@@ -133,19 +137,7 @@ export default function CounselorForm() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit, (errors) => {
-              if (Object.keys(errors).length > 0) {
-                console.log('hi2');
-                console.log(errors);
-                console.log(form);
-                toast.error(
-                  'Please correct the errors in the form before submitting.'
-                );
-              }
-            })}
-            className="space-y-8"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
               <FormField
                 control={form.control}

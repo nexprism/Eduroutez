@@ -1,14 +1,15 @@
-import { CounselorSlotRepository } from "../repository/counselorSlot-repository.js";
+import { FAQRepository } from "../repository/faq-repository.js";
+// import { QuestionAnswerRepository } from "../repository/question-answer-repository.js";
 
-class questionAnswerService {
+class faqService {
   constructor() {
-    this.counselorSlotRepository = new CounselorSlotRepository();
+    this.questionAnswerRepository = new FAQRepository();
   }
 
   async create(data) {
     try {
-      const counselorSlot = await this.counselorSlotRepository.create(data);
-      return counselorSlot;
+      const questionAnswer = await this.questionAnswerRepository.create(data);
+      return questionAnswer;
     } catch (error) {
       throw error;
     }
@@ -55,16 +56,14 @@ class questionAnswerService {
     }
   }
 
-  async get(email) {
-    const questionAnswer = await this.counselorSlotRepository.get(email);
+  async get(id) {
+    const questionAnswer = await this.questionAnswerRepository.get(id);
     return questionAnswer;
   }
 
-  
-
-  async update(email, data) {
+  async update(id, data) {
     try {
-      const questionAnswer = await this.counselorSlotRepository.update(email, data);
+      const questionAnswer = await this.questionAnswerRepository.update(id, data);
 
       return questionAnswer;
     } catch (error) {
@@ -85,4 +84,4 @@ class questionAnswerService {
   }
 }
 
-export default questionAnswerService;
+export default faqService;

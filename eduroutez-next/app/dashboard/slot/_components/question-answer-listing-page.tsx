@@ -18,11 +18,12 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const { searchQuery, page, limit } = useQuestionAnswerTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const email=localStorage.getItem('email');
 
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['question-answers', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/faq`, {
+      const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`, {
         params: {
           searchFields: JSON.stringify({}),
           sort: JSON.stringify({ createdAt: 'desc' }),
@@ -33,7 +34,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
       return response.data;
     }
   });
-  console.log(data?.data)
+  console.log(data?.data?.students);
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -43,19 +44,19 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Question And Answer (${data.data.totalDocuments})`}
+                title={`Booked Slots`}
                 description="All question and answers are listed here."
               />
-              <Button asChild className="w-fit whitespace-nowrap px-2">
+              {/* <Button asChild className="w-fit whitespace-nowrap px-2">
                 <Link href="/dashboard/question-answer/new">
                   <Plus className="mr-1 h-4 w-4" /> Add New
                 </Link>
-              </Button>
+              </Button> */}
             </div>
             <Separator />
             <QuestionAnswerTable
-              data={data.data.result}
-              totalData={data.data.totalDocuments}
+              data={data?.data?.students}
+              totalData={data?.data?.totalDocuments}
             />
           </div>
         )

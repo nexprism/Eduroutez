@@ -15,12 +15,12 @@ export const createCounselorSlots = async (req, res) => {
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully created a question and answer";
 
-    return res.status(StatusCodes.CREATED).json(SuccessResponse);
+    return res.status(200).json(SuccessResponse);
   } catch (error) {
     console.error("Error creating question and answer:", error);
     ErrorResponse.error = error;
 
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(500).json(ErrorResponse);
   }
 };
 /**
@@ -95,3 +95,5 @@ export const deleteCounselorSlot = async (req, res) => {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 };
+
+

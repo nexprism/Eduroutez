@@ -327,6 +327,28 @@ export type QuestionAnswer = {
   status?: boolean;
   _id: string;
 };
+export type Answer = {
+  question?: string;
+  answer?: string;
+  askedBy?: string;
+  answeredBy?: string;
+  status?: boolean;
+  grade?: string;
+  instituteEmail?: string;
+  label?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  _id: string;
+};
+
+export type Slot = {
+  date:string,
+  slot:string,
+  studentEmail:string,
+  completed:boolean,
+  _id: string;
+};
+
 
 export type Query = {
   city: string;

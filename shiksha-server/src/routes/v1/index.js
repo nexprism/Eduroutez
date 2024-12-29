@@ -18,7 +18,7 @@ import { createCourse, deleteCourse, getCourse, getCourses, updateCourse } from 
 import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
-import { createCounselor, deleteCounselor, getCounselor, getCounselors, updateCounselor } from "../../controllers/counselor-controller.js";
+import {  bookSlots,createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
 import { createReview, deleteReview, getReview, getReviews, updateReview } from "../../controllers/review-controller.js";
@@ -36,6 +36,7 @@ import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePr
 import { createCounselorSlots, getCounselorSlot, updateCounselorSlot } from "../../controllers/counselorSlot-controller.js";
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
 import { createQuery, deleteQuery, getQueries, getQuery, updateQuery } from "../../controllers/query-controller.js";
+import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ } from "../../controllers/faq-controller.js";
 
 const router = express.Router();
 
@@ -150,7 +151,9 @@ router.delete("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("j
  * counselorSlots routes
  */
 router.post("/counselorslots", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCounselorSlots);
-// router.get("/counselorslots", getCounselors);
+router.post("/bookslot", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), bookSlots);
+router.post("/markslot", markSlot);
+router.get("/counselorslots", getCounselors);
 router.get("/counselorslots/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorSlot);
 router.patch("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselorSlot);
 // router.delete("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselorSlots);
@@ -227,11 +230,20 @@ router.delete("/feedback/:id", accessTokenAutoRefresh, passport.authenticate("jw
 /**
  * question-answer routes
  */
-router.post("/question-answer", createQuestionAnswer);
+router.post("/question-answer",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createQuestionAnswer);
 router.get("/question-answers", getQuestionAnswers);
-router.get("/question-answer/:id", getQuestionAnswer);
-router.patch("/question-answer/:id",  updateQuestionAnswer);
-router.delete("/question-answer/:id",  deleteQuestionAnswer);
+router.get("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswer);
+router.patch("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  updateQuestionAnswer);
+router.delete("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  deleteQuestionAnswer);
+
+/**
+ * FAQs routes
+ */
+router.post("/faq",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createFAQ);
+router.get("/faq", getFAQs);
+router.get("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getFAQ);
+router.patch("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  updateFAQ);
+router.delete("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  deleteFAQ);
 
 /**
  * wishlist routes

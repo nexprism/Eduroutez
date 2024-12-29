@@ -22,9 +22,8 @@ const questionAnswerSchema = new mongoose.Schema(
       type: String,
       // ref: "Counselor",
     },
-    instituteId:{
-      type:mongoose.Schema.Types.ObjectId,
-      ref:'Institute'
+    instituteEmail:{
+      type:String,
     }
   },
   { timestamps: true }

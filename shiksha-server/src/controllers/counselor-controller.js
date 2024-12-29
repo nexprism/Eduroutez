@@ -166,3 +166,34 @@ export async function deleteCounselor(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+
+
+export const bookSlots = async (req, res) => {
+  try {
+    const { email, slot, studentEmail,date } = req.body;
+    const payload = { slot, studentEmail,date };
+    // console.log('cont',payload);
+    const response = await counselorService.book(email, payload);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully booked the slot";
+    return res.status(200).json(SuccessResponse);
+    
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(500).json(ErrorResponse);
+  }
+};
+
+export const markSlot = async (req, res) => {
+  console.log(req.body);
+  try {
+    const response = await counselorService.mark(req.body);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully booked the slot";
+    return res.status(200).json(SuccessResponse);
+    
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(500).json(ErrorResponse);
+  }
+};

@@ -54,6 +54,18 @@ const counselorSchema = new mongoose.Schema(
       type: String,
       // ref: "Category",
     },
+    language: {
+      type: String,
+      // ref: "Category",
+    },
+    ExperienceYear: {
+      type: String,
+      // ref: "Category",
+    },
+    rating:{
+      type:Number,
+      default:2
+    },
     wallet: {
       type: String,
       // ref: "Level",
@@ -123,7 +135,26 @@ const counselorSchema = new mongoose.Schema(
         },
       },
     ],
-    
+    students: [
+      {
+        studentEmail: {
+          type: String,
+          // required: true,
+        },
+        slot: {
+          type: String,
+          // required: true,
+        },
+        date: {
+          type: String,
+          // required: true,
+        },
+        completed:{
+          type:Boolean,
+          default:false
+        }
+      },
+    ],
   },
   { timestamps: true }
 );

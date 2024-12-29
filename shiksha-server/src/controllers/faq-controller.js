@@ -1,13 +1,13 @@
 import { StatusCodes } from "http-status-codes";
-import QuestionAnswerService from "../services/question-answer-service.js";
+import FAQService from "../services/faq-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
-const questionAnswerService = new QuestionAnswerService();
+const questionAnswerService = new FAQService();
 
 /**
  * POST : /question-answer
  * req.body {}
  */
-export const createQuestionAnswer = async (req, res) => {
+export const createFAQ = async (req, res) => {
   try {
     const payload = req.body;
     const response = await questionAnswerService.create(payload);
@@ -29,7 +29,7 @@ export const createQuestionAnswer = async (req, res) => {
  * req.body {}
  */
 
-export async function getQuestionAnswers(req, res) {
+export async function getFAQs(req, res) {
   try {
     const response = await questionAnswerService.getAll(req.query);
     SuccessResponse.data = response;
@@ -46,11 +46,9 @@ export async function getQuestionAnswers(req, res) {
  * req.body {}
  */
 
-export async function getQuestionAnswer(req, res) {
+export async function getFAQ(req, res) {
   try {
-    console.log(req.params);
     const response = await questionAnswerService.get(req.params.id);
-    console.log('hi',response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the question and answer";
     return res.status(StatusCodes.OK).json(SuccessResponse);
@@ -65,7 +63,7 @@ export async function getQuestionAnswer(req, res) {
  * req.body {capacity:200}
  */
 
-export async function updateQuestionAnswer(req, res) {
+export async function updateFAQ(req, res) {
   try {
     const questionAnswerId = req.params.id;
     const payload = {};
@@ -92,7 +90,7 @@ export async function updateQuestionAnswer(req, res) {
  * req.body {}
  */
 
-export async function deleteQuestionAnswer(req, res) {
+export async function deleteFAQ(req, res) {
   try {
     const response = await questionAnswerService.delete(req.params.id);
     SuccessResponse.data = response;

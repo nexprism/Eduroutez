@@ -43,7 +43,7 @@ import CustomEditor from '@/components/custom-editor';
 const formSchema = z.object({
   question: z.string().nonempty('Question is required'),
   answer: z.string().nonempty('Answer is required'),
-  email: z.string().optional()
+  answeredBy: z.string().optional()
 });
 
 export default function CounselorForm() {
@@ -70,15 +70,15 @@ export default function CounselorForm() {
     mutate({
       question: values.question,
       answer: values.answer,
-      email: localStorage.getItem('email') ?? ''
+      answeredBy: localStorage.getItem('email') ?? ''
     });
   }
 
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: async (formData: z.infer<typeof formSchema>) => {
       const endpoint = isEdit
-        ? `${apiUrl}/faq/${segments[4]}`
-        : `${apiUrl}/faq`;
+        ? `${apiUrl}/question-answer/${segments[4]}`
+        : `${apiUrl}/question-answer`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: isEdit ? 'patch' : 'post',
@@ -92,8 +92,8 @@ export default function CounselorForm() {
 
     onSuccess: () => {
       const message = isEdit
-        ? 'FAQs updated successfully'
-        : 'FAQs created successfully';
+        ? 'Answer updated successfully'
+        : 'FAQs Saved successfully';
       toast.success(message);
       form.reset();
       router.push('/dashboard/question-answer');
@@ -109,11 +109,12 @@ export default function CounselorForm() {
   const { data: faq } = useQuery({
     queryKey: ['answer', segments[4]],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/faq/${segments[4]}`);
+      const response = await axiosInstance.get(`${apiUrl}/question-answer/${segments[4]}`);
       return response.data;
     },
     enabled: isEdit // Only fetch when in edit mode
   });
+  console.log(faq);
 
   React.useEffect(() => {
     if (faq?.data) {
