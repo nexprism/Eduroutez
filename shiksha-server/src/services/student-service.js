@@ -7,7 +7,7 @@ class StudentService {
 
   async create(data) {
     try {
-      const student = await this.studentRepository.create(data);
+      const student = await this.studentRepository.makeStudent(data);
       return student;
     } catch (error) {
       throw error;

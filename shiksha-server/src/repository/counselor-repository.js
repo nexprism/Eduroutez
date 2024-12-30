@@ -1,9 +1,9 @@
-import Counselor from "../models/Counselor.js";
+import Student from "../models/Student.js";
 import CrudRepository from "./crud-repository.js";
 
 class CounselorRepository extends CrudRepository {
   constructor() {
-    super(Counselor);
+    super(Student);
   }
 
   async makeCounselor(data) {

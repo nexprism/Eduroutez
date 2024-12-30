@@ -47,7 +47,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
                 description="All question and answers are listed here."
               />
               <Button asChild className="w-fit whitespace-nowrap px-2">
-                <Link href="/dashboard/question-answer/new">
+                <Link href="/dashboard/answer/new">
                   <Plus className="mr-1 h-4 w-4" /> Add New
                 </Link>
               </Button>

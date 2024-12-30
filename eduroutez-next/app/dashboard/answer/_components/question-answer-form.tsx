@@ -96,7 +96,7 @@ export default function CounselorForm() {
         : 'FAQs Saved successfully';
       toast.success(message);
       form.reset();
-      router.push('/dashboard/question-answer');
+      router.push('/dashboard/answer');
     },
     onError: (error) => {
       toast.error('Something went wrong');
@@ -129,7 +129,7 @@ export default function CounselorForm() {
     <Card className="mx-auto w-full">
       <CardHeader>
         <CardTitle className="text-left text-2xl font-bold">
-          Add Questions and its Answers
+           Answers the Question
         </CardTitle>
       </CardHeader>
       <CardContent>

@@ -50,24 +50,24 @@ export const createStudent = async (req, res) => {
       }
 
       const payload = { ...req.body };
-      if (req.files["profilePicture"]) {
+      if (req.files && req.files["profilePicture"]) {
         payload.profilePicture = req.files["profilePicture"][0].filename;
       }
-      if (req.files["adharCardImage"]) {
+      if (req.files && req.files["adharCardImage"]) {
         payload.adharCardImage = req.files["adharCardImage"][0].filename;
       }
-      if (req.files["panCardImage"]) {
+      if (req.files && req.files["panCardImage"]) {
         payload.panCardImage = req.files["panCardImage"][0].filename;
       }
-      if (req.files["tenthMarksheetImage"]) {
+      if (req.files && req.files["tenthMarksheetImage"]) {
         payload.tenthMarksheetImage = req.files["tenthMarksheetImage"][0].filename;
       }
-      if (req.files["twelthMarksheetImage"]) {
+      if (req.files && req.files["twelthMarksheetImage"]) {
         payload.twelthMarksheetImage = req.files["twelthMarksheetImage"][0].filename;
       }
 
       // Handle certificateImage files inside the educations array
-      if (req.files["certificateImage"]) {
+      if (req.files && req.files["certificateImage"]) {
         const certificateImages = req.files["certificateImage"].map((file) => file.filename);
         if (Array.isArray(payload.educations)) {
           payload.educations = JSON.parse(payload.educations);

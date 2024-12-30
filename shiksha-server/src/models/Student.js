@@ -4,34 +4,34 @@ const studentSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      // required: true,
     },
     phone: {
       type: String,
-      required: true,
+      // required: true,
     },
     email: {
       type: String,
-      required: true,
+      // required: true,
     },
     dateOfBirth: {
       type: Date,
-      required: true,
+      // required: true,
     },
     gender: {
       type: String,
-      required: true,
+      // required: true,
     },
     address: {
       type: String,
     },
     country: {
       type: String,
-      required: true,
+      // required: true,
     },
     designation: {
       type: String,
-      required: true,
+      // required: true,
     },
     about: {
       type: String,
@@ -41,7 +41,7 @@ const studentSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
     bankName: {
       type: String,

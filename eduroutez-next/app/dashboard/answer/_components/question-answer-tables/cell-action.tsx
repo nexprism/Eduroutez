@@ -72,7 +72,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
           <DropdownMenuItem
             onClick={() =>
-              router.push(`/dashboard/question-answer/update/${data._id}/`)
+              router.push(`/dashboard/answer/update/${data._id}/`)
             }
           >
             <Edit className="mr-2 h-4 w-4" /> Answer
