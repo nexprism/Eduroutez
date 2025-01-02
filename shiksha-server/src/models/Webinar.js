@@ -11,7 +11,7 @@ const webinarSchema = new mongoose.Schema(
     description: {
       type: String,
     },
-    webinarLInk: {
+    webinarLink: {
       type: String,
     },
     date: {
@@ -29,7 +29,7 @@ const webinarSchema = new mongoose.Schema(
     },
     status: {
       type: Boolean,
-      default: true,
+      // default: true,
     },
   },
   { timestamps: true }

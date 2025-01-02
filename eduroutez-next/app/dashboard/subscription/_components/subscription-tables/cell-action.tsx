@@ -59,13 +59,17 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       if (!email) {
         throw new Error('Email not found in localStorage');
       }
-      const res=await axiosInstance.post(`${apiUrl}/instituteUpgrade/${email}`, { subscriptionId: data._id ,planName:data?.name}, {
-        headers: {
-          'Content-Type': 'application/json'
+      const res = await axiosInstance.post(
+        `${apiUrl}/instituteUpgrade/${email}`,
+        { subscriptionId: data._id, planName: data?.name },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-      });
+      );
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
-      if(res?.status===200) localStorage.setItem('plan',data?._id);
+      if (res?.status === 200) localStorage.setItem('plan', data?._id);
       // localStorage.setItem('plan',res)
       router.push('/dashboard/subscription');
     } catch (error) {
@@ -93,25 +97,24 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-          <DropdownMenuItem
-            onClick={handleAllow}
-          >
-            <Edit className="mr-2 h-4 w-4" /> Allow
-          </DropdownMenuItem>
-            {localStorage.getItem('role') === 'SUPER_ADMIN' && (
+          {localStorage.getItem('role') === 'SUPER_ADMIN' ? (
             <>
               <DropdownMenuItem
-              onClick={() =>
-                router.push(`/dashboard/subscription/update/${data._id}/`)
-              }
+                onClick={() =>
+                  router.push(`/dashboard/subscription/update/${data._id}/`)
+                }
               >
-              <Edit className="mr-2 h-4 w-4" /> Update
+                <Edit className="mr-2 h-4 w-4" /> Update
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setOpen(true)}>
-              <Trash className="mr-2 h-4 w-4" /> Delete
+                <Trash className="mr-2 h-4 w-4" /> Delete
               </DropdownMenuItem>
             </>
-            )}
+          ) : (
+            <DropdownMenuItem onClick={handleAllow}>
+              <Edit className="mr-2 h-4 w-4" /> Buy
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
