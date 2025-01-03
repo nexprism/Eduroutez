@@ -134,7 +134,8 @@ router.delete("/institute-inquiry/:id", accessTokenAutoRefresh, passport.authent
  */
 router.post("/career", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCareer);
 router.get("/careers", getCareers);
-router.get("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCareer);
+//router.get("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCareer);
+router.get("/career/:id", getCareer);
 router.patch("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCareer);
 router.delete("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCareer);
 
@@ -205,7 +206,9 @@ router.delete("/blog-category/:id", accessTokenAutoRefresh, passport.authenticat
  */
 router.post("/blog", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBlog);
 router.get("/blogs", getBlogs);
-router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
+// router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
+router.get("/blog/:id", getBlog);
+
 router.patch("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBlog);
 router.delete("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBlog);
 

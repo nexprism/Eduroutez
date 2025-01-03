@@ -9,20 +9,22 @@ const wishlistService = new WishlistService();
  */
 export const createWishlist = async (req, res) => {
   try {
-    const payload = { ...req.body };
-    payload.image = req.file.filename;
+    const studentId = req.user;
+    const { courseId, instituteId } = req.body;
+   const payload = {
+      student: studentId,  
+      courses: courseId ? [courseId] : [],  
+      colleges: instituteId ? [instituteId] : [],  
+    };
 
     const response = await wishlistService.create(payload);
 
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully created a wishlist";
-
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
-    ErrorResponse.error = error;
-
-    return res.status(error.statusCode).json(ErrorResponse);
-  }
+    ErrorResponse.error = error;    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+    }
 };
 
 /**

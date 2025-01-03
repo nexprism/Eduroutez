@@ -53,24 +53,48 @@ export async function updateUser(req, res) {
     }
 
     try {
-      const userId = req.params.id;
+       const userId = req.params.id;
       const payload = {};
       let oldImagePath;
 
-      // Check if a new title is provided
+      // Check and update the fields
       if (req.body.name) {
         payload.name = req.body.name;
       }
       if (req.body.contact_number) {
         payload.contact_number = req.body.contact_number;
       }
-      if (req.body.permissions) {
+      if (req.body.address) {
         payload.address = req.body.address;
       }
+      if (req.body.city) {
+        payload.city = req.body.city;
+      }
+      if (req.body.state) {
+        payload.state = req.body.state;
+      }
+      if (req.body.country) {
+        payload.country = req.body.country;
+      }
+      if (req.body.date_of_birth) {
+        payload.date_of_birth = new Date(req.body.date_of_birth); // Assuming date is passed in 'YYYY-MM-DD' format
+      }
+      if (req.body.gender) {
+        payload.gender = req.body.gender;
+      }
+      if (req.body.designation) {
+        payload.designation = req.body.designation;
+      }
+      if (req.body.about) {
+        payload.about = req.body.about;
+      }
+      if (req.body.role) {
+        payload.role = req.body.role;
+      }
+      if (req.body.access) {
+        payload.access = req.body.access; 
+      }
 
- 
-
-      // Check if a new image is uploaded
       if (req.file) {
         const user = await userService.get(userId);
 
