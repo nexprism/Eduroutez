@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["admin", "SUPER_ADMIN","student","institute","counsellor"], // "STUDENT", "COUNSELOR", "INSTITUTE",  they have thier different tables
-      default: "SUPER_ADMIN",
+      default: "student",
     },
     access: [
       {
@@ -56,6 +56,23 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    country: {
+      type: String,
+    },
+    date_of_birth: {
+      type: Date,
+    },
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other"],
+    },
+    designation: {
+      type: String,
+    },
+    about: {
+      type: String,
+    }
+
   },
   { timestamps: true }
 );
