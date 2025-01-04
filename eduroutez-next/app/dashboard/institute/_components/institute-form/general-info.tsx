@@ -24,7 +24,7 @@ import { Plus, X } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { toast } from 'sonner';
@@ -103,11 +103,44 @@ const GeneralInfo = () => {
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
 
-  React.useEffect(() => {
+
+  const fetchInstituteData = async () => {
+    try {
+      const id = segments[4];
+      const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
+      const instituteData = response.data.data;
+
+      form.reset({
+        instituteName: instituteData.instituteName,
+        institutePhone: instituteData.institutePhone,
+        email: instituteData.email,
+        establishedYear: instituteData.establishedYear,
+        organizationType: instituteData.organizationType,
+        website: instituteData.website,
+        city: instituteData.city,
+        state: instituteData.state,
+        address: instituteData.address,
+        about: instituteData.about,
+        minFees: instituteData.minFees,
+        maxFees: instituteData.maxFees,
+        affiliation: instituteData.affiliation,
+        highestPackage: instituteData.highestPackage,
+        streams: instituteData.streams,
+        specialization: instituteData.specialization,
+      });
+
+      console.log('Institute fetch successfully:', instituteData);
+    } catch (error: any) {
+      console.log('Error fetching institute:', error.message);
+    }
+  };
+  
+  useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
       setIsEdit(true);
+      fetchInstituteData();
     }
-  }, [segments]);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -182,7 +215,7 @@ const GeneralInfo = () => {
     },
 
     onSuccess: () => {
-      const message = 'Course category updated successfully';
+      const message = ' updated successfully';
       toast.success(message);
       form.reset();
       setPreviewThumbnailUrl(null);
