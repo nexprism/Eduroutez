@@ -10,13 +10,14 @@ const wishlistService = new WishlistService();
 export const createWishlist = async (req, res) => {
   try {
     const studentId = req.user;
+    console.log("req.body", req.body);
     const { courseId, instituteId } = req.body;
    const payload = {
       student: studentId,  
       courses: courseId ? [courseId] : [],  
       colleges: instituteId ? [instituteId] : [],  
     };
-
+    console.log("payload", payload);
     const response = await wishlistService.create(payload);
 
     SuccessResponse.data = response;

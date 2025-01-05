@@ -55,6 +55,17 @@ class CourseService {
     }
   }
 
+  //getPopularCourses
+  async getPopularCourses() {
+    try {
+      const courses = await this.courseRepository.getPopularCourses();
+      return courses;
+    } catch (error) {
+      throw new AppError("Cannot fetch popular courses", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+  
+
   async get(id) {
     const course = await this.courseRepository.get(id);
     return course;
