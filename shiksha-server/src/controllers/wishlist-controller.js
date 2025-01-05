@@ -1,7 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 import WishlistService from "../services/wishlist-service.js";
+import UserService from "../services/user-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 const wishlistService = new WishlistService();
+const userService = new UserService();
+
 
 /**
  * POST : /wishlist
@@ -11,19 +14,51 @@ export const createWishlist = async (req, res) => {
   try {
     const studentId = req.user;
     console.log("req.body", req.body);
-    const { courseId, instituteId } = req.body;
-   const payload = {
-      student: studentId,  
-      courses: courseId ? [courseId] : [],  
-      colleges: instituteId ? [instituteId] : [],  
-    };
-    console.log("payload", payload);
-    const response = await wishlistService.create(payload);
+    const { instituteId, courseId } = req.body;
+    const data = { studentId, instituteId, courseId };
 
-    SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully created a wishlist";
-    return res.status(StatusCodes.CREATED).json(SuccessResponse);
+    
+    //get user by id
+    const user = await userService.getUserById(studentId);
+    
+    if (!user) {
+      throw new AppError("User not found", StatusCodes.NOT_FOUND);
+    }
+
+    if (courseId && user.course_wishlist.includes(courseId)) {
+      user.course_wishlist = user.course_wishlist.filter((course) => course !== courseId);
+      
+      await user.save();
+      SuccessResponse.message = "Successfully removed course from wishlist";
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+
+    }else{
+    
+        user.course_wishlist.push(courseId);
+
+        //save user
+        await user.save();
+        SuccessResponse.message = "Successfully added course to wishlist";
+        return res.status(StatusCodes.CREATED).json(SuccessResponse);
+        
+
+    }
+
+    //check college_wishlist
+    if (instituteId && user.college_wishlist.includes(instituteId)) {
+      user.college_wishlist = user.college_wishlist.filter((college) => college !== instituteId);
+      await user.save();
+      SuccessResponse.message = "Successfully removed college from wishlist";
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+    }else{
+      user.college_wishlist.push(instituteId);
+      await user.save();
+      SuccessResponse.message = "Successfully added college to wishlist";
+      return res.status(StatusCodes.CREATED).json(SuccessResponse);
+    }
+    
   } catch (error) {
+    console.log("Create wishlist error:", error.message);
     ErrorResponse.error = error;    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
     }
 };
