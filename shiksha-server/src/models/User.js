@@ -71,7 +71,19 @@ const userSchema = new mongoose.Schema(
     },
     about: {
       type: String,
-    }
+    },
+    course_wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course",
+      },
+    ],
+    college_wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Institute",
+      },
+    ],
 
   },
   { timestamps: true }

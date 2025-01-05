@@ -27,6 +27,18 @@ class UserService {
     }
   }
 
+  //getbyid
+  async getUserById(id) {
+    try {
+      const user = await this.userRepository.get(id);
+      
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+
   async signup(data, res) {
     try {
       data.password = this.hashPassword(data.password);

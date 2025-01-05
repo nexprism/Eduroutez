@@ -83,6 +83,34 @@ class InstituteService {
     return institute;
   }
 
+//addGallery
+  async addGallery(id,data){
+    console.log(id);
+    console.log('data',data);
+    try {
+      const updatesInstitute = await this.instituteRepository.addGallery(id, data.gallery);
+      return updatesInstitute;
+    } catch (error) {
+      throw new AppError("Cannot update the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
   async getbyemail(email) {
     const institute = await this.instituteRepository.getByEmail(email);
     return institute;

@@ -83,6 +83,20 @@ export async function getCourses(req, res) {
   }
 }
 
+
+
+export async function getPopularCourses(req, res) {
+  try {
+    const response = await courseService.getPopularCourses();
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched popular courses";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 /**
  * GET : /course/:id
  * req.body {}

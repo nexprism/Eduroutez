@@ -72,6 +72,8 @@ export const createInstitute = async (req, res) => {
   }
 };
 
+
+
 export const upgradeInstitute = async (req, res) => {
   try {
       const payload = { ...req.body };
@@ -240,6 +242,46 @@ export async function updateInstitute(req, res) {
     }
   });
 }
+
+
+
+
+export const addGallery = async (req, res) => {
+  try {
+    multiUploader(req, res, async function (err) {
+      if (err) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
+      }
+
+      console.log('file',req.files);
+
+
+      const instituteId = req.params.id;
+      const payload = { ...req.body };
+      // console.log(payload);
+
+    
+      if (req.files["gallery"]) {
+        payload.gallery = req.files["gallery"].map((file) => file.filename);
+      }
+      console.log('payload',payload);
+      const response = await instituteService.addGallery(instituteId, payload);
+
+      SuccessResponse.data = response;
+      SuccessResponse.message = "Successfully added gallery images to the institute";
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+    });
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+};
+
+
+      
+
+
+
 
 /**
  * DELETE : /institute/:id
