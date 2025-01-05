@@ -15,7 +15,7 @@ import { createStream, deleteStream, getStream, getStreams, updateStream } from 
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute } from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute,addGallery } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
 import {  bookSlots,createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor } from "../../controllers/counselor-controller.js";
@@ -119,6 +119,11 @@ router.get("/institute/:id", getInstitute);
 router.get("/institutes/:email", getInstituteByEmail);
 router.patch("/institute/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateInstitute);
 router.delete("/institute/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteInstitute);
+
+
+//addGallery
+router.post("/addGallery/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), addGallery);
+
 
 /**
  * institute-inquiries routes
