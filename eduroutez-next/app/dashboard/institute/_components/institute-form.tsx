@@ -128,7 +128,7 @@ const formSchema = z.object({
   campusInfo: z.string().optional(),
 gallery:z.array(z.any()).optional(),
 facility: z.array(z.string()).optional(),
-
+scholarshipInfo: z.string().optional()
 });
 
 export default function CreateInstitute() {
@@ -197,7 +197,8 @@ export default function CreateInstitute() {
         admissionInfo: instituteData.admissionInfo,
         placementInfo: instituteData.placementInfo,
         campusInfo: instituteData.campusInfo,
-        gallery: fetchedGalleryImages, // Update gallery with the fetched images
+        gallery: fetchedGalleryImages,
+        scholarshipInfo:instituteData.scholarshipInfo // Update gallery with the fetched images
       });
   
       setGalleryImages(fetchedGalleryImages); // Update gallery images state
