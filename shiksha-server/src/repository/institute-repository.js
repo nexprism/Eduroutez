@@ -47,6 +47,24 @@ class InstituteRepository extends CrudRepository {
     }
   }
 
+  async addFacility(id, data) {
+    try {
+    
+      const result = await this.model.findByIdAndUpdate(
+        id, 
+        { $push: { facilities: data } },
+        { new: true }
+      );
+      return result;
+    } catch (error) {
+      console.log('error',error.message);
+      throw error;
+    }
+  }
+
+
+
+
   async removeCourse(instituteId, courseId) {
     try {
       // Find the institute by its ID
