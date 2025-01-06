@@ -27,17 +27,24 @@ export const createWishlist = async (req, res) => {
 
     // Function to update wishlist
     const updateWishlist = async (wishlistField, itemId, addMessage, removeMessage) => {
-      if (user[wishlistField].includes(itemId)) {
-        user[wishlistField] = user[wishlistField].filter(item => item !== itemId);
-        console.log("user[wishlistField]", user[wishlistField]);
+      // Check if the wishlist field is valid and user has the property
+      if (!Array.isArray(user[wishlistField])) {
+        throw new AppError(`Invalid wishlist field: ${wishlistField}`, StatusCodes.BAD_REQUEST);
+      }
+
+      // Check if item is already in the wishlist
+      const itemIndex = user[wishlistField].indexOf(itemId);
+
+      if (itemIndex > -1) {
+        // Item exists, remove it
+        user[wishlistField].splice(itemIndex, 1);
         await user.save();
-        SuccessResponse.message = removeMessage;
-        return res.status(StatusCodes.OK).json(SuccessResponse);
+        return res.status(StatusCodes.OK).json({ message: removeMessage });
       } else {
+        // Item doesn't exist, add it
         user[wishlistField].push(itemId);
         await user.save();
-        SuccessResponse.message = addMessage;
-        return res.status(StatusCodes.CREATED).json(SuccessResponse);
+        return res.status(StatusCodes.CREATED).json({ message: addMessage });
       }
     };
 
@@ -63,8 +70,9 @@ export const createWishlist = async (req, res) => {
 
   } catch (error) {
     console.log("Create wishlist error:", error.message);
-    ErrorResponse.error = error;
-    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: error.message || "Internal Server Error"
+    });
   }
 };
 
@@ -76,34 +84,56 @@ export const createWishlist = async (req, res) => {
 export async function getWishlists(req, res) {
   try {
     const studentId = req.user;
-    console.log("req.body", req.body);
-    
     const user = await userService.getUserById(studentId);
-
     if (!user) {
       throw new AppError("User not found", StatusCodes.NOT_FOUND);
     }
+    // console.log("user.college_wishlist", user.college_wishlist);
 
-    const college_wishlist = {};
-    const course_wishlist = {};
+    
+    // console.log("user.course_wishlist", user.course_wishlist);
+    const response = {};
+    if (user.college_wishlist.length > 0) {
+      const collegeDetailsList = [];
 
-    for (const collegeId of user.college_wishlist) {
-      const college = await instituteService.get(collegeId);
-      college_wishlist[collegeId] = college;
+      for (const collegeId of user.college_wishlist) {
+        const college = await instituteService.get(collegeId);
+        const collegeDetails = {
+          _id: college._id,
+          instituteName: college.instituteName,
+          establishedYear: college.establishedYear,
+          collegeInfo: college.collegeInfo,
+          coverImage: college.coverImage,
+          highestPackage: college.highestPackage,
+          averagePackage: college.averagePackage,
+        };
+
+        // Push the current college details into the collegeDetailsList array
+        collegeDetailsList.push(collegeDetails);
+      }
+
+      // Assign the array to the response object
+      response['college_wishlist'] = collegeDetailsList;
     }
 
+    
+
+    if(user.course_wishlist.length > 0){
     for (const courseId of user.course_wishlist) {
       const course = await courseService.get(courseId);
-      course_wishlist[courseId] = course;
+      //push in course_wishlist
+      response['course_wishlist'] = course;
     }
+  }
 
-    const response = { college_wishlist, course_wishlist };
-
+    // const response = { college_wishlist, course_wishlist };
+    // console.log("response", response);
 
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched wishlists";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.error("Get wishlists error:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }
