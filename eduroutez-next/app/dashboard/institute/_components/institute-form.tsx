@@ -122,6 +122,8 @@ const formSchema = z.object({
   pictures: z.array(z.any()),
   admissionInfo: z.string(),
   placementInfo: z.string(),
+  campusInfo: z.string().optional(),
+
 
 });
 
@@ -175,7 +177,8 @@ export default function CreateInstitute() {
         address: instituteData.address,
         about: instituteData.about,
         admissionInfo: instituteData.admissionInfo,
-        placementInfo: instituteData.placementInfo
+        placementInfo: instituteData.placementInfo,
+        campusInfo: instituteData.campusInfo
           
       });
 
@@ -340,6 +343,7 @@ console.log('Error updating institute:', error.message); }
           <ResponsiveTabsTrigger value="placement">Placement</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="scholarship">Scholarship</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="gallery">Gallery</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="campus">Campus</ResponsiveTabsTrigger>
         </ResponsiveTabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -501,6 +505,42 @@ console.log('Error updating institute:', error.message); }
             </CardContent>
           </Card> 
         </TabsContent>
+
+        <TabsContent value="campus" className="space-y-6">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Campus Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="campusInfo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Campus Details</FormLabel>
+                        <FormControl>
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end">
+                    <Button type="button" onClick={handleFormSubmit}>
+                      Save & Update
+                    </Button>
+                  </div>
+                </div>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         </Tabs>
     </div>
   );
