@@ -187,7 +187,7 @@ const GeneralInfo = () => {
       formData.append('instituteLogo', values.logo);
     }
     if (values.thumbnail) {
-      formData.append('thumbnail', values.thumbnail);
+      formData.append('thumbnailImage', values.thumbnail);
     }
     if (values.cover) {
       formData.append('coverImage', values.cover);
