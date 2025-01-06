@@ -95,7 +95,7 @@ const NewsListingPage: React.FC = () => {
                     <div className="flex gap-4">
                         <Button asChild className="w-fit whitespace-nowrap px-2">
                             <Link href="/dashboard/news/new">
-                                <Plus className="mr-1 h-4 w-4" /> Add New News Article
+                                <Plus className="mr-1 h-4 w-4" /> Add News
                             </Link>
                         </Button>
                     </div>

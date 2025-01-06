@@ -70,7 +70,7 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
     mutationFn: async (credentials: UserFormValue) => {
       try {
         const response = await axiosInstance.post(
-          `${apiUrl}/signup`,
+          `http://localhost:4001/api/v1//signup`,
           credentials,
           {
             headers: {

@@ -16,3 +16,6 @@ export default async function Page({ searchParams }: pageProps) {
   searchParamsCache.parse(searchParams);
   return <NewsListingPage />;
 }
+
+
+
