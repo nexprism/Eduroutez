@@ -24,6 +24,7 @@ import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentM
 import { createReview, deleteReview, getReview, getReviews, updateReview } from "../../controllers/review-controller.js";
 import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCategory, updateBlogCategory } from "../../controllers/blog-category-controller.js";
 import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog } from "../../controllers/blog-controller.js";
+import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, updateNews } from "../../controllers/news-controller.js";
 import { createPayout, deletePayout, getPayout, getPayouts, updatePayout } from "../../controllers/payout-controller.js";
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
 import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer } from "../../controllers/question-answer-controller.js";
@@ -218,8 +219,20 @@ router.get("/blog/:id", getBlog);
 
 
 
+
 router.patch("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBlog);
 router.delete("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBlog);
+
+
+//newsa
+router.post("/create-news", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createNews);
+router.get("/news", getNews);
+router.get("/news/:id", getNewsById);
+router.get("/news/:id", getNewsByInstitute);
+router.patch("/news/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateNews);
+router.delete("/news/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteNews);
+
+
 
 /**
  * payout routes
