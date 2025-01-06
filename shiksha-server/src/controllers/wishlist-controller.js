@@ -104,6 +104,7 @@ export async function getWishlists(req, res) {
           establishedYear: college.establishedYear,
           collegeInfo: college.collegeInfo,
           coverImage: college.coverImage,
+          thumbnailImage: college.thumbnailImage,
           highestPackage: college.highestPackage,
           averagePackage: college.averagePackage,
         };
