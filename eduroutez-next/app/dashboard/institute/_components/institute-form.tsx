@@ -38,6 +38,8 @@ import GeneralInfo from './institute-form/general-info';
 import axios from 'axios';
 import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';
+import { add } from 'date-fns';
+import { title } from 'process';
 const courseTypes = [
   { value: 'live', label: 'Live' },
   { value: 'recorded', label: 'Recorded' },
@@ -124,7 +126,8 @@ const formSchema = z.object({
   admissionInfo: z.string(),
   placementInfo: z.string(),
   campusInfo: z.string().optional(),
-gallery:z.array(z.any()).optional()
+gallery:z.array(z.any()).optional(),
+facility: z.array(z.string()).optional(),
 
 });
 
@@ -280,6 +283,26 @@ console.log('Error updating institute:', error.message); }
     }
   };
 
+
+  const addFacility = async () => {
+    try {
+      const id = segments[4];
+      console.log('Adding facility...');
+      const values = form.getValues();
+      console.log('Facility values:', values);
+      const response = await axiosInstance.post(
+        `http://localhost:4001/api/v1/addfacility/${id}`,
+        { title: values.facility }
+      );
+      console.log('Facility added successfully:', response.data);
+      console.log('Facility added successfully:', response.data);
+      toast.success('Facility added successfully!');
+    } catch (error) {
+      console.error('Error adding facility:', error);
+      toast.error('Failed to add facility');
+    }
+  };
+
   const handleMultipleImageChange = async (event: any) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
@@ -321,7 +344,7 @@ console.log('Error updating institute:', error.message); }
         setPreviewUrls((prev) => [...prev, ...imageUrls]);
 
 
-        console.log('yest') // Add the server response image URLs
+        console.log('yest') 
         toast.success('Image Added Successfully!');
       }
     } catch (error) {
@@ -391,6 +414,7 @@ console.log('Error updating institute:', error.message); }
           <ResponsiveTabsTrigger value="scholarship">Scholarship</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="gallery">Gallery</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="campus">Campus</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="facility">Facility</ResponsiveTabsTrigger>
         </ResponsiveTabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -643,7 +667,46 @@ console.log('Error updating institute:', error.message); }
   </Card>
 </TabsContent>
 
-
+<TabsContent value="facility">
+  <Card>
+    <CardHeader>
+      <CardTitle>Facility</CardTitle>
+      <p className="text-sm text-gray-600">
+        Add facilities provided by your institute.
+      </p>
+          
+    </CardHeader>
+    <CardContent>
+      <Form {...form}>
+          <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="facility"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Facility</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter facility"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="button"
+                onClick={addFacility}
+              >
+                Add Facility
+              </Button>
+</div>
+</Form>
+</CardContent>
+</Card>
+</TabsContent>
 
         </Tabs>
     </div>
