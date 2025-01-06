@@ -260,7 +260,7 @@ router.delete("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { 
  * wishlist routes
  */
 router.post("/wishlist", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createWishlist);
-router.get("/wishlists", getWishlists);
+router.get("/wishlists", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWishlists);
 router.get("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWishlist);
 router.patch("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateWishlist);
 router.delete("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteWishlist);
