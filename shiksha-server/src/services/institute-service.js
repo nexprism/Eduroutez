@@ -25,11 +25,26 @@ class InstituteService {
     }
   }
 
+  async addFacility(id,data){
+    try {
+      console.log('id',id);
+      console.log('data',data);
+      const updatesInstitute = await this.instituteRepository.addFacility(id, data.title);
+console.log('updatesInstitute',updatesInstitute);
+      return updatesInstitute;
+    } catch (error) {
+      console.log(error.message);
+      throw new AppError("Cannot update the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
   async Upgrade(email,data){
     try {
       const institute=await this.instituteRepository.upgrade(email,data);
       console.log(institute);
     } catch (error) {
+      console.log(error.message);
       throw error;
     }
   }

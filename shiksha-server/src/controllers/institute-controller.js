@@ -244,6 +244,25 @@ export async function updateInstitute(req, res) {
 }
 
 
+export async function addFacility(req, res) {
+  try {
+    const instituteId = req.params.id;
+    const payload = req.body;
+    if (payload.facilities) {
+      payload.facilities = payload.facilities.map(facility => facility.data);
+    }
+    const response = await instituteService.addFacility(instituteId, payload);
+
+    SuccessResponse.data = response;
+    console.log('response',response);
+    SuccessResponse.message = "Successfully added facility to the institute";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+}
+
 
 
 export const addGallery = async (req, res) => {

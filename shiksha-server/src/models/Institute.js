@@ -115,6 +115,11 @@ const instituteSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    facilities: [
+      {
+        type: String,
+      },
+    ],
     password: {
       type: String,
       // required: true,
