@@ -190,7 +190,7 @@ const GeneralInfo = () => {
       formData.append('thumbnail', values.thumbnail);
     }
     if (values.cover) {
-      formData.append('cover', values.cover);
+      formData.append('coverImage', values.cover);
     }
     if (values.brochure) {
       formData.append('brochure', values.brochure);

@@ -18,7 +18,7 @@ const app = express();
 app.use("/uploads", express.static("uploads"));
 const corsOptions = {
   // origin: process.env.FRONTEND_HOST,
-  origin: "http://localhost:5173", // Allows all origins
+  origin: ["http://localhost:5173", "http://localhost:3000"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
