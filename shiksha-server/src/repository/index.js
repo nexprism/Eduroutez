@@ -17,6 +17,7 @@ export { PaymentMethodRepository } from "./payment-method-repository.js";
 export { ReviewRepository } from "./review-repository.js";
 export { BlogCategoryRepository } from "./blog-category-repository.js";
 export { BlogRepository } from "./blog-repository.js";
+export { NewsRepository } from "./news-repository.js";
 export { PayoutRepository } from "./payout-repository.js";
 export { FeedbackRepository } from "./feedback-repository.js";
 export { QuestionAnswerRepository } from "./question-answer-repository.js";
