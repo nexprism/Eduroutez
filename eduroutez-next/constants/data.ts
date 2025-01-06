@@ -171,6 +171,14 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'News',
+    url: '/dashboard/news',
+    icon: 'post',
+    isActive: false,
+    items: [] // No child items
+  },
+
+  {
     title: 'Career',
     url: '/dashboard/career',
     icon: 'post',
