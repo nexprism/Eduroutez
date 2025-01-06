@@ -30,13 +30,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CustomEditor from '@/components/custom-editor';
 import { Plus, X } from 'lucide-react';
 import Image from 'next/image';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import GeneralInfo from './institute-form/general-info';
 import axios from 'axios';
 import axiosInstance from '@/lib/axios';
+import { toast } from 'sonner';
 const courseTypes = [
   { value: 'live', label: 'Live' },
   { value: 'recorded', label: 'Recorded' },
@@ -123,7 +124,7 @@ const formSchema = z.object({
   admissionInfo: z.string(),
   placementInfo: z.string(),
   campusInfo: z.string().optional(),
-
+gallery:z.array(z.any()).optional()
 
 });
 
@@ -159,13 +160,27 @@ export default function CreateInstitute() {
   });
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  const [galleryImages, setGalleryImages] = useState<string[]>([]); // Initialize state for gallery images
 
   const fetchInstituteData = async () => {
     try {
       const id = segments[4];
       const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
-
+      console.log('Institute data:', instituteData);
+  
+      // Fetch image URLs for gallery images
+      const fetchedGalleryImages = await Promise.all(
+        instituteData.gallery.map(async (image: any) => {
+          const imageResponse = await axiosInstance.get(`http://localhost:4001/api/uploads/${image}`,{
+          responseType: 'blob'
+          });
+          const imageUrl = URL.createObjectURL(imageResponse.data);
+          return imageUrl;    // Assuming this returns the image URL
+        })
+      );
+  
+      // Update the form and gallery images state
       form.reset({
         institutePhone: instituteData.institutePhone,
         email: instituteData.email,
@@ -178,13 +193,13 @@ export default function CreateInstitute() {
         about: instituteData.about,
         admissionInfo: instituteData.admissionInfo,
         placementInfo: instituteData.placementInfo,
-        campusInfo: instituteData.campusInfo
-          
+        campusInfo: instituteData.campusInfo,
+        gallery: fetchedGalleryImages, // Update gallery with the fetched images
       });
-
-      console.log('Institute fetch successfully:', instituteData);
-    } catch (error: any) {
-      console.log('Error fetching institute:', error.message);
+  
+      setGalleryImages(fetchedGalleryImages); // Update gallery images state
+    } catch (error) {
+      console.error('Error fetching institute data:', error);
     }
   };
   
@@ -213,6 +228,7 @@ export default function CreateInstitute() {
       });
    
       console.log('Institute updated successfully:', response.data);
+      toast.success('Institute updated successfully!')
       // Add success notification or redirect here
     } catch (error:any) 
     { 
@@ -264,25 +280,56 @@ console.log('Error updating institute:', error.message); }
     }
   };
 
-  const handleMultipleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const newPreviewUrls: string[] = [];
-
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviewUrls.push(reader.result as string);
-        if (newPreviewUrls.length === files.length) {
-          setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
-        }
-      };
-      reader.readAsDataURL(file);
+  const handleMultipleImageChange = async (event: any) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+  
+    // Show preview of selected images
+    const previewArray = Array.from(files).map((file: any) => {
+      return URL.createObjectURL(file);
     });
+    
+    setPreviewUrls((prev) => [...prev, ...previewArray]);
+  
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('gallery', files[i]);
+    }
+  
+    try {
+      const id = segments[4];
+      const response = await axiosInstance.post(`/addGallery/${id}`, formData, {
+        withCredentials: true,
+      });
+  
+      console.log('Response:', response.data);
+      if (response.data.data) {
+        const imageUrls = await Promise.all(
+          response.data.data.gallery.map(async (image: any) => {
+            const imageResponse = await axiosInstance.get(
+              `http://localhost:4001/api/uploads/${image}`,
+              { responseType: 'blob' }
+            );
+            const imageUrl = URL.createObjectURL(imageResponse.data);
+            return imageUrl;
+          })
+          
+        );
+  
+        window.location.reload();
+        // Update the state with the new image URLs
+        setPreviewUrls((prev) => [...prev, ...imageUrls]);
 
-    const currentPictures = form.getValues('pictures');
-    form.setValue('pictures', [...currentPictures, ...files]);
+
+        console.log('yest') // Add the server response image URLs
+        toast.success('Image Added Successfully!');
+      }
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error('Failed to upload images');
+    }
   };
-
+  
   const triggerThumbnailFileInput = () => {
     fileInputThumbnailRef.current?.click();
   };
@@ -540,6 +587,63 @@ console.log('Error updating institute:', error.message); }
             </CardContent>
           </Card>
         </TabsContent>
+
+
+        <TabsContent value="gallery">
+  <Card>
+    <CardHeader>
+      <CardTitle>Gallery</CardTitle>
+      <p className="text-sm text-gray-600">
+        Add images to showcase your institute's gallery.
+      </p>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        {/* Multiple Image Upload */}
+        <div className="flex items-center space-x-4">
+          <Button type="button" onClick={triggerMultipleFileInput}>
+            Add Images
+          </Button>
+          <Input
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            ref={multipleFileInputRef}
+            onChange={handleMultipleImageChange}
+          />
+        </div>
+        {/* Preview Gallery */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          {/* Render fetched gallery images */}
+          
+          {galleryImages.map((url, index) => (
+            <div key={index} className="relative group">
+              <Image
+                src={url}
+                alt={`Preview ${index}`}
+                width={150}
+                height={150}
+                className="rounded-md object-cover w-full h-full"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white rounded-full"
+                onClick={() => removeMultipleImage(index)}
+              >
+                <X size={16} />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+</TabsContent>
+
+
 
         </Tabs>
     </div>
