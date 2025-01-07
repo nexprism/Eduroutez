@@ -228,8 +228,8 @@ router.delete("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", 
 router.post("/create-news", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createNews);
 router.get("/news", getNews);
 router.get("/news/:id", getNewsById);
-router.get("/news/:id", getNewsByInstitute);
-router.patch("/news/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateNews);
+router.get("/news-by-institute/:id", getNewsByInstitute);
+router.patch("/update-news/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateNews);
 router.delete("/news/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteNews);
 
 

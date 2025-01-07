@@ -5,6 +5,16 @@ class NewsRepository extends CrudRepository {
   constructor() {
       super(News);
   }
+
+    //getNewsByInstitute
+    async getNewsByInstitute(instituteId) {
+        try {
+            const news = await News.find({ institute: instituteId });
+            return news;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export { NewsRepository };

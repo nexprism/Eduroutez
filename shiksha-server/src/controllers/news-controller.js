@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import NewsService from "../services/news-service.js";
+// import InstituteService from "../services/institute-service.js";
 
 const multiUploader = FileUpload.upload.fields([
   {
@@ -25,6 +26,8 @@ const newsService = new NewsService();
  */
 export const createNews = async (req, res) => {
   try {
+    const instituteId = req.user;
+    console.log('instituteId',instituteId);
     multiUploader(req, res, async function (err) {
       if (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err });
@@ -33,6 +36,15 @@ export const createNews = async (req, res) => {
         if (req.files && req.files["image"]) {
             payload.image = req.files["image"][0].filename;
       }
+
+      //check if institute exists
+        // const institute = await instituteService.getInstituteById(instituteId);
+        // if (!institute) {
+        //     throw new AppError("Institute not found", StatusCodes.NOT_FOUND);
+        // }
+
+      payload.institute = instituteId;
+
       const response = await newsService.create(payload);
 
       SuccessResponse.data = response;
@@ -126,7 +138,7 @@ export async function updateNews(req, res) {
         payload.image = req.file.filename;
       }
 
-      const response = await newsService.update(newsId, payload);
+        const blog = await this.blogRepository.update(id, data);
 
       if (oldImagePath) {
         try {
