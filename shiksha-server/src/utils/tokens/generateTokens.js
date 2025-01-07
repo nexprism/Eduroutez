@@ -4,7 +4,8 @@ import { ServerConfig } from "../../config/index.js";
 
 const generateTokens = async (user) => {
   try {
-    const payload = { _id: user._id, roles: user.roles };
+    const payload = { _id: user._id, roles: user.role };
+    console.log('payload',payload)
 
     // Generate access token with expiration time
     const accessTokenExp = Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 5; // Set expiration to 100 seconds from now

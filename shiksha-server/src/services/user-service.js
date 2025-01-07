@@ -41,14 +41,17 @@ class UserService {
 
   async signup(data, res) {
     try {
+      console.log('data',data)
       data.password = this.hashPassword(data.password);
       const user = await this.userRepository.create(data);
-
+console.log('user',user)
       const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = await Token.generateTokens(user);
       Token.setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);
 
       return { accessToken, refreshToken, accessTokenExp, refreshTokenExp, user };
     } catch (error) {
+      console.log(error.message)
+
       throw error;
     }
   }

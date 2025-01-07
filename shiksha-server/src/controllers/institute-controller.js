@@ -4,6 +4,9 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import InstituteService from "../services/institute-service.js";
+import UserService from "../services/user-service.js";
+import { UserRepository } from "../repository/user-repository.js";
+
 const singleUploader = FileUpload.upload.single("image");
 const multiUploader = FileUpload.upload.fields([
   {
@@ -32,6 +35,7 @@ const multiUploader = FileUpload.upload.fields([
   }
 ]);
 const instituteService = new InstituteService();
+const userService = new UserService();
 
 /**
  * POST : /institute
@@ -62,15 +66,26 @@ export const createInstitute = async (req, res) => {
     //   payload.gallery = req.files["gallery"].map((file) => file.filename);
     // }
 
+    
     const response = await instituteService.create(payload);
+
+    const userPayload = {
+      name: req.body.instituteName,
+      email: req.body.email,
+      password: req.body.password,
+      role: "institute"
+    };
+
+    const userresponse = await userService.signup(userPayload,res);
 
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully created an institute";
 
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
-    // });
   } catch (error) {
     ErrorResponse.error = error;
+    console.log(error.message)
+
 
     return res.status(error.statusCode || 500).json(ErrorResponse);
   }

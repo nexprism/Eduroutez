@@ -30,11 +30,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CustomEditor from '@/components/custom-editor';
 import { Plus, X } from 'lucide-react';
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import GeneralInfo from './general-info';
+import axios from 'axios';
+import axiosInstance from '@/lib/axios';
+import { toast } from 'sonner';
+import { add } from 'date-fns';
+import { title } from 'process';
+import { useQuery } from '@tanstack/react-query';
 const courseTypes = [
   { value: 'live', label: 'Live' },
   { value: 'recorded', label: 'Recorded' },
@@ -61,7 +67,6 @@ const formSchema = z.object({
   }),
   shortDescription: z.any().optional(),
   longDescription: z.any().optional(),
-
   category: z.string({
     required_error: 'Please select a category.'
   }),
@@ -98,6 +103,7 @@ const formSchema = z.object({
   phone: z.string({
     required_error: 'Please enter a phone number.'
   }),
+  institutePhone: z.string().optional(),
   email: z.string({
     required_error: 'Please enter an email.'
   }),
@@ -117,7 +123,13 @@ const formSchema = z.object({
     required_error: 'Please select an organization type.'
   }),
   brochure: z.any().optional(),
-  pictures: z.array(z.any())
+  pictures: z.array(z.any()),
+  admissionInfo: z.string(),
+  placementInfo: z.string(),
+  campusInfo: z.string().optional(),
+gallery:z.array(z.any()).optional(),
+facility: z.array(z.string()).optional(),
+scholarshipInfo: z.string().optional()
 });
 
 export default function CreateInstitute() {
@@ -135,34 +147,96 @@ export default function CreateInstitute() {
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
-  // const pathname = usePathname();
-  // const segments = pathname.split('/');
-  // const [isEdit, setIsEdit] = React.useState(false);
   const multipleFileInputRef = React.useRef<HTMLInputElement | null>(null);
+  
+  const pathname = usePathname();
+  const segments = pathname.split('/');
+  const [isEdit, setIsEdit] = React.useState(false);
 
-  // React.useEffect(() => {
-  //   if (segments.length === 5 && segments[3] === 'update') {
-  //     setIsEdit(true);
-  //   }
-  // }, [segments]);
+  React.useEffect(() => {
+    if (segments.length === 5 && segments[3] === 'update') {
+      setIsEdit(true);
+    }
+  }, [segments]);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: '',
-      shortDescription: '',
-      longDescription: '',
-      isCourseFree: 'free',
-      isCourseDiscounted: 'yes'
-      // city: '',
-      // state: '',
-      // organizationType: ''
-    }
+    resolver: zodResolver(formSchema)
   });
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    
-  }
+  const [galleryImages, setGalleryImages] = useState<string[]>([]); // Initialize state for gallery images
+
+  
+
+  const email =
+    typeof window !== 'undefined' ? localStorage.getItem('email') || '' : '';
+
+    const fetchInstituteData = async () => {
+      const response = await axiosInstance.get(`${apiUrl}/institutes/${email}`);
+      const instituteData = response.data.data;
+  
+      const fetchedGalleryImages = await Promise.all(
+        instituteData.gallery.map(async (image: any) => {
+          const imageResponse = await axiosInstance.get(`http://localhost:4001/api/uploads/${image}`, {
+            responseType: 'blob'
+          });
+          const imageUrl = URL.createObjectURL(imageResponse.data);
+          return imageUrl;
+        })
+      );
+  
+      form.reset({
+        institutePhone: instituteData.institutePhone,
+        email: instituteData.email,
+        establishedYear: instituteData.establishedYear,
+        organizationType: instituteData.organizationType,
+        website: instituteData.website,
+        city: instituteData.city,
+        state: instituteData.state,
+        address: instituteData.address,
+        about: instituteData.about,
+        admissionInfo: instituteData.admissionInfo,
+        placementInfo: instituteData.placementInfo,
+        campusInfo: instituteData.campusInfo,
+        gallery: fetchedGalleryImages,
+        scholarshipInfo: instituteData.scholarshipInfo
+      });
+  
+      setGalleryImages(fetchedGalleryImages);
+    };
+  
+    useEffect(() => {
+      fetchInstituteData();
+    }, []);
+  
+  
+  
+
+  const handleFormSubmit = async () => {
+    try {
+      const values = form.getValues();
+  
+
+      const id = segments[4];
+      console.log('Form values:', values);
+      const endpoint = `${apiUrl}/institute/${email}`;
+      const response = await axiosInstance({
+        url: `${endpoint}`,
+        method: 'patch',
+        data: values,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+   
+      console.log('Institute updated successfully:', response.data);
+      toast.success('Institute updated successfully!')
+      // Add success notification or redirect here
+    } catch (error:any) 
+    { 
+console.log('Error updating institute:', error.message); }
+  };
+
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -208,6 +282,76 @@ export default function CreateInstitute() {
     }
   };
 
+
+  const addFacility = async () => {
+    try {
+      const id = segments[4];
+      console.log('Adding facility...');
+      const values = form.getValues();
+      console.log('Facility values:', values);
+      const response = await axiosInstance.post(
+        `http://localhost:4001/api/v1/addfacility/${email}`,
+        { title: values.facility }
+      );
+      console.log('Facility added successfully:', response.data);
+      console.log('Facility added successfully:', response.data);
+      toast.success('Facility added successfully!');
+    } catch (error) {
+      console.error('Error adding facility:', error);
+      toast.error('Failed to add facility');
+    }
+  };
+
+  const handleMultipleImageChange = async (event: any) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+  
+    // Show preview of selected images
+    const previewArray = Array.from(files).map((file: any) => {
+      return URL.createObjectURL(file);
+    });
+    
+    setPreviewUrls((prev) => [...prev, ...previewArray]);
+  
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('gallery', files[i]);
+    }
+  
+    try {
+      const id = segments[4];
+      const response = await axiosInstance.post(`/addGallery/${email}`, formData, {
+        withCredentials: true,
+      });
+  
+      console.log('Response:', response.data);
+      if (response.data.data) {
+        const imageUrls = await Promise.all(
+          response.data.data.gallery.map(async (image: any) => {
+            const imageResponse = await axiosInstance.get(
+              `http://localhost:4001/api/uploads/${image}`,
+              { responseType: 'blob' }
+            );
+            const imageUrl = URL.createObjectURL(imageResponse.data);
+            return imageUrl;
+          })
+          
+        );
+  
+        window.location.reload();
+        // Update the state with the new image URLs
+        setPreviewUrls((prev) => [...prev, ...imageUrls]);
+
+
+        console.log('yest') 
+        toast.success('Image Added Successfully!');
+      }
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      toast.error('Failed to upload images');
+    }
+  };
+  
   const triggerThumbnailFileInput = () => {
     fileInputThumbnailRef.current?.click();
   };
@@ -219,11 +363,16 @@ export default function CreateInstitute() {
   const triggerCoverFileInput = () => {
     fileInputCoverRef.current?.click();
   };
+
+  const triggerMultipleFileInput = () => {
+    multipleFileInputRef.current?.click();
+  };
+
   const removeThumbnailImage = () => {
     setPreviewThumbnailUrl(null);
     form.setValue('thumbnail', undefined);
     if (fileInputThumbnailRef.current) {
-      fileInputThumbnailRef.current.value = ''; // Reset the file input
+      fileInputThumbnailRef.current.value = '';
     }
   };
 
@@ -231,7 +380,7 @@ export default function CreateInstitute() {
     setPreviewCoverUrl(null);
     form.setValue('cover', undefined);
     if (fileInputCoverRef.current) {
-      fileInputCoverRef.current.value = ''; // Reset the file input
+      fileInputCoverRef.current.value = '';
     }
   };
 
@@ -239,29 +388,10 @@ export default function CreateInstitute() {
     setPreviewLogoUrl(null);
     form.setValue('logo', undefined);
     if (fileInputLogoRef.current) {
-      fileInputLogoRef.current.value = ''; // Reset the file input
+      fileInputLogoRef.current.value = '';
     }
   };
-  const handleMultipleImageChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = Array.from(e.target.files || []);
-    const newPreviewUrls: string[] = [];
 
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        newPreviewUrls.push(reader.result as string);
-        if (newPreviewUrls.length === files.length) {
-          setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-
-    const currentPictures = form.getValues('pictures');
-    form.setValue('pictures', [...currentPictures, ...files]);
-  };
   const removeMultipleImage = (index: number) => {
     setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
     const currentPictures = form.getValues('pictures');
@@ -270,38 +400,30 @@ export default function CreateInstitute() {
       currentPictures.filter((_, i) => i !== index)
     );
   };
-  const triggerMultipleFileInput = () => {
-    multipleFileInputRef.current?.click();
-  };
+
   return (
     <div className="container mx-auto space-y-6 py-6">
       <Tabs defaultValue="general" className="w-full">
+        
         <ResponsiveTabsList className="flex w-full justify-evenly">
           <ResponsiveTabsTrigger value="general">General</ResponsiveTabsTrigger>
-          <ResponsiveTabsTrigger value="college_info">
-            College Information
-          </ResponsiveTabsTrigger>
-          {/* <ResponsiveTabsTrigger value="courses">Courses</ResponsiveTabsTrigger> */}
-          <ResponsiveTabsTrigger value="admission">
-            Admission
-          </ResponsiveTabsTrigger>
-          <ResponsiveTabsTrigger value="placement">
-            Placement
-          </ResponsiveTabsTrigger>
-          {/* <ResponsiveTabsTrigger value="campus">Campus</ResponsiveTabsTrigger> */}
-          <ResponsiveTabsTrigger value="scholarship">
-            Scholarship
-          </ResponsiveTabsTrigger>
-          {/* <ResponsiveTabsTrigger value="reviews">Reviews</ResponsiveTabsTrigger> */}
-          {/* <ResponsiveTabsTrigger value="skills">Skills</ResponsiveTabsTrigger> */}
+          <ResponsiveTabsTrigger value="college_info">College Information</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="admission">Admission</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="placement">Placement</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="scholarship">Scholarship</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="gallery">Gallery</ResponsiveTabsTrigger>
-          {/* <ResponsiveTabsTrigger value="security">
-            Security
-          </ResponsiveTabsTrigger> */}
+          <ResponsiveTabsTrigger value="campus">Campus</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="fee">Fee</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="ranking">Ranking</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="cut-off">Cut-offs</ResponsiveTabsTrigger>
+
+          <ResponsiveTabsTrigger value="facility">Facility</ResponsiveTabsTrigger>
         </ResponsiveTabsList>
+
         <TabsContent value="general" className="space-y-6">
           <GeneralInfo />
         </TabsContent>
+
         <TabsContent value="college_info" className="space-y-6">
           <Card className="mx-auto w-full">
             <CardHeader>
@@ -311,10 +433,7 @@ export default function CreateInstitute() {
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
+                <div className="space-y-8">
                   <FormField
                     control={form.control}
                     name="about"
@@ -322,74 +441,28 @@ export default function CreateInstitute() {
                       <FormItem>
                         <FormLabel>About</FormLabel>
                         <FormControl>
-                          <Controller
-                            name="about"
-                            control={form.control}
-                            render={({ field }) => (
-                              <CustomEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                              />
-                            )}
+                          <CustomEditor
+                            value={field.value}
+                            onChange={(value: any) => {
+                              field.onChange(value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <div className="flex justify-end">
-                    <Button type="submit">Save & Update</Button>
+                    <Button type="button" onClick={handleFormSubmit}>
+                      Save & Update
+                    </Button>
                   </div>
-                </form>
+                </div>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
-        {/* <TabsContent value="courses" className="space-y-6">
-          <Card className="mx-auto w-full">
-            <CardHeader>
-              <CardTitle className="text-left text-2xl font-bold">
-                Course Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
-                  <FormField
-                    control={form.control}
-                    name="about"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>About</FormLabel>
-                        <FormControl>
-                          <Controller
-                            name="about"
-                            control={form.control}
-                            render={({ field }) => (
-                              <CustomEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                              />
-                            )}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
-                  <div className="flex justify-end">
-                    <Button type="submit">Save & Update</Button>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent> */}
         <TabsContent value="admission" className="space-y-6">
           <Card className="mx-auto w-full">
             <CardHeader>
@@ -399,41 +472,36 @@ export default function CreateInstitute() {
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
+                <div className="space-y-8">
                   <FormField
                     control={form.control}
-                    name="about"
+                    name="admissionInfo"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>About</FormLabel>
                         <FormControl>
-                          <Controller
-                            name="about"
-                            control={form.control}
-                            render={({ field }) => (
-                              <CustomEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                              />
-                            )}
+                          <CustomEditor
+                            value={field.value}
+                            onChange={(value: any) => {
+                              field.onChange(value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <div className="flex justify-end">
-                    <Button type="submit">Save & Update</Button>
+                    <Button type="button" onClick={handleFormSubmit}>
+                      Save & Update
+                    </Button>
                   </div>
-                </form>
+                </div>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
+
         <TabsContent value="placement" className="space-y-6">
           <Card className="mx-auto w-full">
             <CardHeader>
@@ -443,85 +511,36 @@ export default function CreateInstitute() {
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
+                <div className="space-y-8">
                   <FormField
                     control={form.control}
-                    name="about"
+                    name="placementInfo"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>About</FormLabel>
                         <FormControl>
-                          <Controller
-                            name="about"
-                            control={form.control}
-                            render={({ field }) => (
-                              <CustomEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                              />
-                            )}
+                          <CustomEditor
+                            value={field.value}
+                            onChange={(value: any) => {
+                              field.onChange(value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <div className="flex justify-end">
-                    <Button type="submit">Save & Update</Button>
+                    <Button type="button" onClick={handleFormSubmit}>
+                      Save & Update
+                    </Button>
                   </div>
-                </form>
+                </div>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
-        {/* <TabsContent value="campus" className="space-y-6">
-          <Card className="mx-auto w-full">
-            <CardHeader>
-              <CardTitle className="text-left text-2xl font-bold">
-                Campus Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
-                  <FormField
-                    control={form.control}
-                    name="about"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>About</FormLabel>
-                        <FormControl>
-                          <Controller
-                            name="about"
-                            control={form.control}
-                            render={({ field }) => (
-                              <CustomEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                              />
-                            )}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
-                  <div className="flex justify-end">
-                    <Button type="submit">Save & Update</Button>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent> */}
         <TabsContent value="scholarship" className="space-y-6">
           <Card className="mx-auto w-full">
             <CardHeader>
@@ -531,10 +550,7 @@ export default function CreateInstitute() {
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
+                <div className="space-y-8">
                   <FormField
                     control={form.control}
                     name="about"
@@ -542,185 +558,268 @@ export default function CreateInstitute() {
                       <FormItem>
                         <FormLabel>About</FormLabel>
                         <FormControl>
-                          <Controller
-                            name="about"
-                            control={form.control}
-                            render={({ field }) => (
-                              <CustomEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                              />
-                            )}
+                          <CustomEditor
+                            value={field.value}
+                            onChange={(value: any) => {
+                              field.onChange(value);
+                            }}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <div className="flex justify-end">
-                    <Button type="submit">Save & Update</Button>
+                    <Button type="button" onClick={handleFormSubmit}>
+                      Save & Update
+                    </Button>
                   </div>
-                </form>
+                </div>
+              </Form>
+            </CardContent>
+          </Card> 
+        </TabsContent>
+
+        <TabsContent value="campus" className="space-y-6">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Campus Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="campusInfo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Campus Details</FormLabel>
+                        <FormControl>
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end">
+                    <Button type="button" onClick={handleFormSubmit}>
+                      Save & Update
+                    </Button>
+                  </div>
+                </div>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="gallery" className="space-y-6">
-          <Card className="mx-auto w-full">
+
+
+        <TabsContent value="fee" className="space-y-6">
+          <Card className="w-full">
             <CardHeader>
-              <CardTitle className="text-left text-2xl font-bold">
-                Institute Information
-              </CardTitle>
+              <CardTitle>Fees</CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
+                <div className="space-y-6">
                   <FormField
                     control={form.control}
-                    name="pictures"
+                    name="campusInfo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Property Images</FormLabel>
+                        <FormLabel>Fees Details</FormLabel>
                         <FormControl>
-                          <div className="space-y-4">
-                            <Input
-                              type="file"
-                              accept="image/png, image/jpeg, image/webp"
-                              onChange={handleMultipleImageChange}
-                              ref={multipleFileInputRef}
-                              className="hidden"
-                              multiple
-                            />
-
-                            <ScrollArea className="h-72 w-full rounded-md border p-4">
-                              <div className="flex flex-wrap gap-4">
-                                {previewUrls.map((url, index) => (
-                                  <div
-                                    key={index}
-                                    className="relative top-2 inline-block"
-                                  >
-                                    <Image
-                                      src={url}
-                                      alt={`Preview ${index + 1}`}
-                                      className="h-24 w-24 rounded-md object-cover"
-                                      width={96}
-                                      height={96}
-                                    />
-                                    <Button
-                                      type="button"
-                                      variant="destructive"
-                                      size="icon"
-                                      className="absolute right-0 top-0 -mr-2 -mt-2"
-                                      onClick={() => removeMultipleImage(index)}
-                                    >
-                                      <X className="h-4 w-4" />
-                                      <span className="sr-only">
-                                        Remove image
-                                      </span>
-                                    </Button>
-                                  </div>
-                                ))}
-                                <div
-                                  onClick={triggerMultipleFileInput}
-                                  className="mt-2 flex h-24 w-24 cursor-pointer items-center justify-center rounded-md border border-dashed"
-                                >
-                                  <Plus className="h-8 w-8 text-gray-400" />
-                                </div>
-                              </div>
-                            </ScrollArea>
-                          </div>
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <div className="flex justify-end">
-                    <Button type="submit">Save & Update</Button>
+                    <Button type="button" onClick={handleFormSubmit}>
+                      Save & Update
+                    </Button>
                   </div>
-                </form>
+                </div>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
-        {/* <TabsContent value="security" className="space-y-6">
-          <Card className="mx-auto w-full">
+
+
+        <TabsContent value="ranking" className="space-y-6">
+          <Card className="w-full">
             <CardHeader>
-              <CardTitle className="text-left text-2xl font-bold">
-                Security
-              </CardTitle>
+              <CardTitle>Ranking Details</CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
+                <div className="space-y-6">
                   <FormField
                     control={form.control}
-                    name="about"
+                    name="campusInfo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Old Password</FormLabel>
+                        <FormLabel>Ranking</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Enter old password"
-                            {...field}
-                            type="password"
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="about"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>New Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Enter old password"
-                            {...field}
-                            type="password"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="about"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Repeat Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Repeat your password here"
-                            {...field}
-                            type="password"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <div className="flex justify-end">
-                    <Button type="submit">Save & Update</Button>
+                    <Button type="button" onClick={handleFormSubmit}>
+                      Save & Update
+                    </Button>
                   </div>
-                </form>
+                </div>
               </Form>
             </CardContent>
           </Card>
-        </TabsContent> */}
-      </Tabs>
+        </TabsContent>
+
+        <TabsContent value="cut-off" className="space-y-6">
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Cut-Offs Detail</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <div className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="campusInfo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cut-Offs Details</FormLabel>
+                        <FormControl>
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end">
+                    <Button type="button" onClick={handleFormSubmit}>
+                      Save & Update
+                    </Button>
+                  </div>
+                </div>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      
+
+        <TabsContent value="gallery">
+  <Card>
+    <CardHeader>
+      <CardTitle>Gallery</CardTitle>
+      <p className="text-sm text-gray-600">
+        Add images to showcase your institute's gallery.
+      </p>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        {/* Multiple Image Upload */}
+        <div className="flex items-center space-x-4">
+          <Button type="button" onClick={triggerMultipleFileInput}>
+            Add Images
+          </Button>
+          <Input
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            ref={multipleFileInputRef}
+            onChange={handleMultipleImageChange}
+          />
+        </div>
+        {/* Preview Gallery */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          {/* Render fetched gallery images */}
+          
+          {galleryImages.map((url, index) => (
+            <div key={index} className="relative group">
+              <Image
+                src={url}
+                alt={`Preview ${index}`}
+                width={150}
+                height={150}
+                className="rounded-md object-cover w-full h-full"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white rounded-full"
+                onClick={() => removeMultipleImage(index)}
+              >
+                <X size={16} />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+</TabsContent>
+
+<TabsContent value="facility">
+  <Card>
+    <CardHeader>
+      <CardTitle>Facility</CardTitle>
+      <p className="text-sm text-gray-600">
+        Add facilities provided by your institute.
+      </p>
+          
+    </CardHeader>
+    <CardContent>
+      <Form {...form}>
+          <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="facility"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Facility</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter facility"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="button"
+                onClick={addFacility}
+              >
+                Add Facility
+              </Button>
+</div>
+</Form>
+</CardContent>
+</Card>
+</TabsContent>
+
+        </Tabs>
     </div>
   );
 }
+

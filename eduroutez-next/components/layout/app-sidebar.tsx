@@ -79,7 +79,7 @@ export default function AppSidebar({
             'Online counselling list',
             'Webinars'
           ] // Titles to exclude for 'counsellor'
-        : ['Online counselling','Slots','Profile']; // Default: no exclusions
+        : ['Online counselling','Slots','Profile','Support']; // Default: no exclusions
 
     const filteredItems = navItems.filter(
       (item) => !excludedTitles.includes(item.title)
@@ -112,6 +112,8 @@ export default function AppSidebar({
     return null; // Render nothing or a skeleton until mounted
   }
 
+  console.log('filteredNavItems',filteredNavItems)
+
   return (
     <SidebarProvider>
       <Sidebar collapsible="icon">
@@ -128,7 +130,7 @@ export default function AppSidebar({
         </SidebarHeader>
         <SidebarContent className="overflow-x-hidden">
           <SidebarGroup>
-            <SidebarGroupLabel>Overview</SidebarGroupLabel>
+            <SidebarGroupLabel>Overview </SidebarGroupLabel>
             <SidebarMenu>
               {filteredNavItems?.map((item) => {
                 const Icon = item.icon ? Icons[item.icon] : Icons.logo;

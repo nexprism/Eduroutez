@@ -24,7 +24,7 @@ import { Plus, X } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { toast } from 'sonner';
@@ -53,8 +53,8 @@ const formSchema = z.object({
   minFees: z.any().optional(),
   affiliation: z.any().optional(),
   highestPackage: z.any().optional(),
-  streams: z.any().optional(),
-  specialization: z.any().optional(),
+  streams:z.any().optional(),
+  specialization:z.any().optional(),
   state: z.string({
     required_error: 'Please select a state.'
   }),
@@ -95,44 +95,73 @@ const GeneralInfo = () => {
   const [previewLogoUrl, setPreviewLogoUrl] = React.useState<string | null>(
     null
   );
-  const [previewBrochureUrl, setPreviewBrochureUrl] = React.useState<
-    string | null
-  >(null);
 
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
-  const fileInputBrochureRef = React.useRef<HTMLInputElement | null>(null);
+  const pathname = usePathname();
+  const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
+
+  
 
   const email =
     typeof window !== 'undefined' ? localStorage.getItem('email') || '' : '';
+
+
+    const { data: institute } = useQuery({
+      queryKey: ['institute'],
+      queryFn: async () => {
+        const email = localStorage.getItem('email');
+        // console.log('hiiiiii',email);
+        const response = await axiosInstance.get(`${apiUrl}/institutes/${email}`);
+      const instituteData = response.data.data;
+
+      form.reset({
+        instituteName: instituteData.instituteName,
+        institutePhone: instituteData.institutePhone,
+        email: instituteData.email,
+        establishedYear: instituteData.establishedYear,
+        organizationType: instituteData.organizationType,
+        website: instituteData.website,
+        city: instituteData.city,
+        state: instituteData.state,
+        address: instituteData.address,
+        about: instituteData.about,
+        minFees: instituteData.minFees,
+        maxFees: instituteData.maxFees,
+        affiliation: instituteData.affiliation,
+        highestPackage: instituteData.highestPackage,
+        streams: instituteData.streams,
+        specialization: instituteData.specialization,
+      });
+    }})
+
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      instituteName: '',
-      email:
-        typeof window !== 'undefined'
-          ? localStorage.getItem('email') || ''
-          : '',
-      establishedYear: '',
-      organizationType: '',
-      website: '',
-      city: '',
-      state: '',
-      address: '',
-      about: '',
-      minFees: '',
-      maxFees: '',
-      affiliation: '',
-      highestPackage: '',
-      streams: '',
-      specialization: ''
+      instituteName:'',
+      institutePhone:'',
+      email:'',
+      establishedYear:'',
+      organizationType:'',
+      website:'',
+      city:'',
+      state:'',
+      address:'',
+      about:'',
+      minFees:'',
+      maxFees:'',
+      affiliation:'',
+      highestPackage:'',
+      streams:'',
+      specialization:'',
     }
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log('hi');
+    console.log('hi')
     const formData = new FormData();
     formData.append('instituteName', values.instituteName);
     formData.append('institutePhone', values.institutePhone);
@@ -162,18 +191,17 @@ const GeneralInfo = () => {
     if (values.brochure) {
       formData.append('brochure', values.brochure);
     }
-    console.log(values);
+
     mutate(formData);
   }
 
   const router = useRouter();
-  // const email = localStorage.getItem('email');
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
-      const endpoint = `${apiUrl}/institute/${email}`;
+      const endpoint = `${apiUrl}/institute/${segments[4]}`;
       const response = await axiosInstance({
         url: `${endpoint}`,
-        method: 'post',
+        method: 'patch',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -183,14 +211,13 @@ const GeneralInfo = () => {
     },
 
     onSuccess: () => {
-      const message = 'Course category updated successfully';
+      const message = ' updated successfully';
       toast.success(message);
       form.reset();
       setPreviewThumbnailUrl(null);
       setPreviewCoverUrl(null);
       setPreviewLogoUrl(null);
-      setPreviewBrochureUrl(null);
-      router.push('/dashboard/profile');
+      router.push('/dashboard/institute');
     },
     onError: () => {
       toast.error('Something went wrong');
@@ -241,21 +268,6 @@ const GeneralInfo = () => {
     }
   };
 
-  const handleBrochureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewBrochureUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      form.setValue('brochure', file);
-    } else {
-      setPreviewBrochureUrl(null);
-      form.setValue('brochure', undefined);
-    }
-  };
-
   const triggerThumbnailFileInput = () => {
     fileInputThumbnailRef.current?.click();
   };
@@ -266,9 +278,6 @@ const GeneralInfo = () => {
 
   const triggerCoverFileInput = () => {
     fileInputCoverRef.current?.click();
-  };
-  const triggerBrochureFileInput = () => {
-    fileInputBrochureRef.current?.click();
   };
   const removeThumbnailImage = () => {
     setPreviewThumbnailUrl(null);
@@ -293,62 +302,6 @@ const GeneralInfo = () => {
       fileInputLogoRef.current.value = ''; // Reset the file input
     }
   };
-  const removeBrochure = () => {
-    setPreviewBrochureUrl(null);
-    form.setValue('brochure', undefined);
-    if (fileInputBrochureRef.current) {
-      fileInputBrochureRef.current.value = ''; // Reset the file input
-    }
-  };
-
-  const { data: institute } = useQuery({
-    queryKey: ['institute'],
-    queryFn: async () => {
-      const email = localStorage.getItem('email');
-      // console.log('hiiiiii',email);
-      const response = await axiosInstance.get(`${apiUrl}/institutes/${email}`);
-      // console.log(response.data);
-      return response.data;
-    }
-    // Only fetch when in edit mode
-  });
-  const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
-
-  React.useEffect(() => {
-    console.log(institute);
-    if (institute?.data) {
-      form.reset({
-        instituteName: institute?.data.instituteName,
-        institutePhone: institute?.data.institutePhone,
-        email: institute?.data.email,
-        establishedYear: institute?.data.establishedYear,
-        organizationType: institute?.data.organizationType,
-        website: institute?.data.website,
-        city: institute?.data.city,
-        state: institute?.data.state,
-        address: institute?.data.address,
-        about: institute?.data.about,
-        minFees: institute?.data.minFees,
-        maxFees: institute?.data.maxFees,
-        affiliation: institute?.data.affiliation,
-        highestPackage: institute?.data.highestPackage,
-        streams: institute?.data.streams,
-        specialization: institute?.data.specialization
-      });
-      if (institute.logo) {
-        setPreviewLogoUrl(`${IMAGE_URL}/${institute?.data?.logo}`);
-      }
-      if (institute.thumbnail) {
-        setPreviewThumbnailUrl(`${IMAGE_URL}/${institute?.data?.thumbnailImage}`);
-      }
-      if (institute.cover) {
-        setPreviewCoverUrl(`${IMAGE_URL}/${institute?.data?.coverImage}`);
-      }
-      if (institute.brochure) {
-        setPreviewBrochureUrl(`${IMAGE_URL}/${institute?.data?.brochureImage}`);
-      }
-    }
-  }, [institute, form]);
 
   return (
     <Card className="mx-auto w-full">
@@ -359,19 +312,13 @@ const GeneralInfo = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit, (errors) => {
-              if (Object.keys(errors).length > 0) {
-                console.log('hi2');
-                console.log(errors);
-                console.log(form);
-                toast.error(
-                  'Please correct the errors in the form before submitting.'
-                );
-              }
-            })}
-            className="space-y-8"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                              if (Object.keys(errors).length > 0) {
+                                toast.error(
+                                  'Please correct the errors in the form before submitting.'
+                                );
+                              }
+                            })} className="space-y-8">
             <FormField
               control={form.control}
               name="instituteName"
@@ -411,15 +358,7 @@ const GeneralInfo = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input
-                        disabled
-                        defaultValue={
-                          typeof window !== 'undefined'
-                            ? localStorage.getItem('email') || ''
-                            : ''
-                        }
-                        {...field}
-                      />
+                      <Input placeholder="Enter Title" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -562,48 +501,40 @@ const GeneralInfo = () => {
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="streams"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Streams (comma separated)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Add streams like -> designing, developing, marketing"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value.split(',').map((item) => item.trim())
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="specialization"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Specialization (comma separated)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Add specializations like -> AI, ML, Data Science"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value.split(',').map((item) => item.trim())
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                <FormField
+                  control={form.control}
+                  name="streams"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Streams (comma separated)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Add streams like -> designing, developing, marketing"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value.split(',').map(item => item.trim()))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="specialization"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Specialization (comma separated)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Add specializations like -> AI, ML, Data Science"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value.split(',').map(item => item.trim()))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
             <FormField
               control={form.control}
@@ -804,15 +735,15 @@ const GeneralInfo = () => {
                       <Input
                         type="file"
                         accept="image/png, image/jpeg, image/webp"
-                        onChange={handleBrochureChange}
-                        ref={fileInputBrochureRef} // Reference to reset input
+                        onChange={handleLogoChange}
+                        ref={fileInputLogoRef} // Reference to reset input
                         className="hidden "
                       />
 
-                      {previewBrochureUrl ? (
+                      {previewLogoUrl ? (
                         <div className="relative inline-block">
                           <Image
-                            src={previewBrochureUrl}
+                            src={previewLogoUrl}
                             alt="Preview"
                             className="max-h-[200px] max-w-full rounded-md object-cover"
                             width={1200}
@@ -823,7 +754,7 @@ const GeneralInfo = () => {
                             variant="destructive"
                             size="icon"
                             className="absolute right-0 top-0 -mr-2 -mt-2"
-                            onClick={removeBrochure}
+                            onClick={removeLogo}
                           >
                             <X className="h-4 w-4" />
                             <span className="sr-only">Remove image</span>
@@ -831,7 +762,7 @@ const GeneralInfo = () => {
                         </div>
                       ) : (
                         <div
-                          onClick={triggerBrochureFileInput}
+                          onClick={triggerLogoFileInput}
                           className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
                         >
                           <Plus className="text-grey-400 h-10 w-10" />
