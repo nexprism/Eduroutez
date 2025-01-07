@@ -57,6 +57,7 @@ export const verifyEmail = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
+    console.log(req.body);
     const token = await userService.signin(req.body, res);
     return res.status(200).json({
       success: true,

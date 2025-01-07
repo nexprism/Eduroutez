@@ -26,6 +26,10 @@ const multiUploader = FileUpload.upload.fields([
     name: "gallery",
     maxCount: 10,
   },
+  {
+    name: "image",
+    maxCount: 1,
+  }
 ]);
 const instituteService = new InstituteService();
 
@@ -262,6 +266,65 @@ export async function addFacility(req, res) {
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
 }
+
+export const submitIssue = async (req, res) => {
+  try {
+    const instituteId = req.user;
+    console.log('instituteId',instituteId);
+    multiUploader(req, res, async function (err) {
+      if (err) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
+      }
+
+      console.log('file',req.files);
+
+      const payload = { ...req.body };
+
+      if (req.files && req.files["image"]) {
+        payload.image = req.files["image"][0].filename;
+      }
+      
+    const response = await instituteService.submitIssue(instituteId, payload);
+
+      SuccessResponse.data = response;
+      SuccessResponse.message = "Successfully submitted issue to the admin";
+
+      return res.status(StatusCodes.CREATED).json(SuccessResponse);
+    });
+  } catch (error) {
+    ErrorResponse.error = error;
+
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+};
+// export async function submitIssue(req, res) {
+//   try {
+//     const instituteId = req.user;
+//     //form data from req 
+//     const formdata = req.body;
+//     singleUploader(req, res, async function (err) {
+//       if (err) {
+//         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
+//       }
+//     }
+//     );
+
+//     const payload = { ...req.body };
+//     console.log('payload',payload);
+//     if (req.files && req.files["image"]) {
+//       payload.image = req.files["image"][0].filename;
+//     }
+  
+//     const response = await instituteService.submitIssue(instituteId, payload);
+
+//     SuccessResponse.data = response;
+//     SuccessResponse.message = "Successfully submitted issue to the institute";
+//     return res.status(StatusCodes.OK).json(SuccessResponse);
+//   } catch (error) {
+//     ErrorResponse.error = error;
+//     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+//   }
+// }
 
 
 

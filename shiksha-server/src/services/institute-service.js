@@ -1,11 +1,14 @@
 import { StatusCodes } from "http-status-codes";
 import { InstituteRepository } from "../repository/index.js";
+import { InstituteIssuesRepository } from "../repository/index.js";
 
 import AppError from "../utils/errors/app-error.js";
 class InstituteService {
   constructor() {
     this.instituteRepository = new InstituteRepository();
+    this.instituteIssuesRepository = new InstituteIssuesRepository();
   }
+  
 
   async create(data) {
     try {
@@ -184,6 +187,27 @@ console.log('updatesInstitute',updatesInstitute);
       throw new AppError("Cannot delete the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
+
+  //submitIssue
+  async submitIssue(id,data){
+    try {
+      
+      const payload = { 
+        ...data,
+        institute: id,
+        status: "Pending",
+      };
+
+      console.log('data', payload);
+      const issue = await this.instituteIssuesRepository.create(payload);
+      return issue;
+    } catch (error) {
+      console.log('error',error.message);
+      throw new AppError("Cannot submit the issue ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  
 }
 
 export default InstituteService;

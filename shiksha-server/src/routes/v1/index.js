@@ -1,6 +1,6 @@
 import express from "express";
 import { EventEmitter } from "events";
-EventEmitter.defaultMaxListeners = 20;
+EventEmitter.defaultMaxListeners = 20;``
 
 import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset } from "../../controllers/auth-controller.js";
 import accessTokenAutoRefresh from "../../middlewares/accessTokenAutoRefresh.js";
@@ -15,7 +15,7 @@ import { createStream, deleteStream, getStream, getStreams, updateStream } from 
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute,addGallery,addFacility } from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute,addGallery,addFacility,submitIssue } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
 import {  bookSlots,createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor } from "../../controllers/counselor-controller.js";
@@ -126,6 +126,9 @@ router.post("/addfacility/:id", accessTokenAutoRefresh, passport.authenticate("j
 
 //addGallery
 router.post("/addGallery/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), addGallery);
+
+//submitIssue
+router.post("/submitIssue", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitIssue);
 
 
 /**

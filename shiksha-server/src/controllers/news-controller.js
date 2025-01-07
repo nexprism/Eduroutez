@@ -32,6 +32,7 @@ export const createNews = async (req, res) => {
       if (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err });
       }
+
       const payload = { ...req.body };
         if (req.files && req.files["image"]) {
             payload.image = req.files["image"][0].filename;
@@ -48,7 +49,7 @@ export const createNews = async (req, res) => {
       const response = await newsService.create(payload);
 
       SuccessResponse.data = response;
-      SuccessResponse.message = "Successfully created a news article";
+      SuccessResponse.message = "Successfully created a new news article";
 
       return res.status(StatusCodes.CREATED).json(SuccessResponse);
     });
