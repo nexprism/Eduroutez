@@ -1,6 +1,8 @@
 import { NavItem } from '@/types';
 import { url } from 'inspector';
 
+
+
 export const navItems: NavItem[] = [
   {
     title: 'Dashboard',
@@ -124,6 +126,13 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Support',
+    url: '/dashboard/support',
+    icon: 'chart-no-axes-combined',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
     title: 'Media',
     url: '/dashboard/banner',
     icon: 'bookmark',
@@ -222,6 +231,7 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: [] // No child items
   },
+
   {
     title: 'Online counselling',
     url: '/dashboard/online-counselling',
@@ -237,13 +247,13 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: [] // No child items
   },
-  // {
-  //   title: 'Refer and Earn',
-  //   url: '/dashboard/refer-earn',
-  //   icon: 'receipt-indian-rupee',
-  //   isActive: false,
-  //   items: [] // No child items
-  // },
+   {
+ title: 'Refer and Earn',
+   url: '/dashboard/refer-earn',
+   icon: 'receipt-indian-rupee',
+  isActive: false,
+  items: [] // No child items
+},
   {
     title: 'Settings',
     url: '/dashboard/setting',
