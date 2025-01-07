@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-import { Plus, MoreHorizontal } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const staticNewsData = [
     {
@@ -86,7 +87,7 @@ const NewsListingPage: React.FC = () => {
 
     return (
         <div>
-            <div className="space-y-4">
+            <div className="space-y-4 p-12">
                 <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
                     <Heading
                         title={`News Articles (${totalItems})`}
@@ -123,29 +124,30 @@ const NewsListingPage: React.FC = () => {
                                     <td className="px-4 py-2">{news.title}</td>
                                     <td className="px-4 py-2">{news.description}</td>
                                     <td className="px-4 py-2">{news.date}</td>
-                                    <td className="px-4 py-2 space-x-2">
-                                        <Button
-                                            onClick={() => setShowOptions(showOptions === news.id ? null : news.id)}
-                                            className="bg-gray-300 text-black"
-                                        >
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                        {showOptions === news.id && (
-                                            <div className="mt-2">
-                                                <Button
+                                    <td className="px-4 py-2">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="sm">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem 
                                                     onClick={() => handleUpdate(news.id)}
-                                                    className="bg-blue-500 text-white"
+                                                    className="flex items-center gap-2 cursor-pointer"
                                                 >
+                                                    <Pencil className="h-4 w-4" />
                                                     Update
-                                                </Button>
-                                                <Button
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem 
                                                     onClick={() => handleDelete(news.id)}
-                                                    className="bg-red-500 text-white"
+                                                    className="flex items-center gap-2 cursor-pointer text-red-600"
                                                 >
+                                                    <Trash className="h-4 w-4" />
                                                     Delete
-                                                </Button>
-                                            </div>
-                                        )}
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </td>
                                 </tr>
                             ))}
