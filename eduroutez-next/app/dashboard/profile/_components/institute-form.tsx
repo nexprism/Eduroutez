@@ -40,6 +40,7 @@ import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';
 import { add } from 'date-fns';
 import { title } from 'process';
+
 const courseTypes = [
   { value: 'live', label: 'Live' },
   { value: 'recorded', label: 'Recorded' },
@@ -174,21 +175,17 @@ export default function CreateInstitute() {
 
   const fetchInstituteData = async () => {
     try {
-      console.log('Fetching institute data...');
+      console.log("Fetching institute data...");
       const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
-      console.log('Institute data:', instituteData);
+      console.log("Institute data:", instituteData);
   
-      // Fetch image URLs for gallery images
-      const fetchedGalleryImages = await Promise.all(
-        instituteData.gallery.map(async (image: any) => {
-          const imageResponse = await axiosInstance.get(`http://localhost:4001/api/uploads/${image}`,{
-          responseType: 'blob'
-          });
-          const imageUrl = URL.createObjectURL(imageResponse.data);
-          return imageUrl;    // Assuming this returns the image URL
-        })
+      // Convert filenames to URLs for rendering in the frontend
+      const galleryUrls = instituteData.gallery.map(
+        (filename: string) => `http://localhost:4001/api/uploads/${filename}`
       );
+  
+      console.log("Gallery URLs for rendering:", galleryUrls);
   
       // Update the form and gallery images state
       form.reset({
@@ -204,15 +201,22 @@ export default function CreateInstitute() {
         admissionInfo: instituteData.admissionInfo,
         placementInfo: instituteData.placementInfo,
         campusInfo: instituteData.campusInfo,
-        gallery: fetchedGalleryImages,
-        scholarshipInfo:instituteData.scholarshipInfo // Update gallery with the fetched images
+        gallery: instituteData.gallery, 
+        scholarshipInfo: instituteData.scholarshipInfo,
+        fee: instituteData.fee,
+        ranking: instituteData.ranking,
+        cutoff: instituteData.cutoff,
       });
   
-      setGalleryImages(fetchedGalleryImages); // Update gallery images state
+      setGalleryImages(galleryUrls); // Set the full URLs for rendering
     } catch (error) {
-      console.error('Error fetching institute data:', error);
+      console.error("Error fetching institute data:", error);
     }
   };
+  
+  
+  
+  
   
   useEffect(() => {
       setIsEdit(true);
@@ -220,11 +224,11 @@ export default function CreateInstitute() {
     
   }, []);
 
+  
   const handleFormSubmit = async () => {
     try {
       const values = form.getValues();
-  
-
+      delete values.gallery;
       console.log('Form values:', values);
       const endpoint = `${apiUrl}/institute/${id}`;
       const response = await axiosInstance({
@@ -312,11 +316,8 @@ console.log('Error updating institute:', error.message); }
     const files = event.target.files;
     if (!files || files.length === 0) return;
   
-    // Show preview of selected images
-    const previewArray = Array.from(files).map((file: any) => {
-      return URL.createObjectURL(file);
-    });
-    
+    // Show temporary previews of selected images
+    const previewArray = Array.from(files).map((file: any) => URL.createObjectURL(file));
     setPreviewUrls((prev) => [...prev, ...previewArray]);
   
     const formData = new FormData();
@@ -325,37 +326,42 @@ console.log('Error updating institute:', error.message); }
     }
   
     try {
+      console.log('FormData:', formData);
       const response = await axiosInstance.post(`/addGallery/${id}`, formData, {
         withCredentials: true,
       });
   
       console.log('Response:', response.data);
       if (response.data.data) {
-        const imageUrls = await Promise.all(
-          response.data.data.gallery.map(async (image: any) => {
-            const imageResponse = await axiosInstance.get(
-              `http://localhost:4001/api/uploads/${image}`,
-              { responseType: 'blob' }
-            );
-            const imageUrl = URL.createObjectURL(imageResponse.data);
-            return imageUrl;
-          })
-          
-        );
+        // Get file names from backend response
+        const fileNames = response.data.data.gallery;
   
-        window.location.reload();
+        // Fetch image URLs using the file names
+        const imageUrls = await Promise.all(
+          fileNames.map(async (fileName: string) => {
+            try {
+              const response = await axios.get(`/uploads/${fileName}`);
+              return response.data.url;
+            } catch (error) {
+              console.error(`Error fetching image URL for ${fileName}:`, error);
+              return null;
+            }
+          })
+        );
+        
+      window.location.reload();
+  
         // Update the state with the new image URLs
         setPreviewUrls((prev) => [...prev, ...imageUrls]);
-
-
-        console.log('yest') 
-        toast.success('Image Added Successfully!');
+  
+        toast.success('Images added successfully!');
       }
     } catch (error) {
       console.error('Error uploading images:', error);
       toast.error('Failed to upload images');
     }
   };
+  
   
   const triggerThumbnailFileInput = () => {
     fileInputThumbnailRef.current?.click();
