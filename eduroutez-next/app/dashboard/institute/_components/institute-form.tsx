@@ -128,7 +128,10 @@ const formSchema = z.object({
   campusInfo: z.string().optional(),
 gallery:z.array(z.any()).optional(),
 facility: z.array(z.string()).optional(),
-scholarshipInfo: z.string().optional()
+scholarshipInfo: z.string().optional(),
+fee: z.string().optional(),
+ranking: z.string().optional(),
+cutoff: z.string().optional()
 });
 
 export default function CreateInstitute() {
@@ -171,6 +174,11 @@ export default function CreateInstitute() {
       const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
       console.log('Institute data:', instituteData);
+      console.log('admissionInfo:', instituteData.admissionInfo);
+      console.log('placementInfo:', instituteData.placementInfo);
+      console.log('campusInfo:', instituteData.campusInfo);
+      console.log('scholarshipInfo:', instituteData.scholarshipInfo);
+      console.log('gallery:', instituteData.gallery);
   
       // Fetch image URLs for gallery images
       const fetchedGalleryImages = await Promise.all(
@@ -203,15 +211,15 @@ export default function CreateInstitute() {
   
       setGalleryImages(fetchedGalleryImages); // Update gallery images state
     } catch (error) {
-      console.error('Error fetching institute data:', error);
+      console.error('Error fetching institute datafff:', error);
     }
   };
   
   useEffect(() => {
-    if (segments.length === 5 && segments[3] === 'update') {
+   
       setIsEdit(true);
       fetchInstituteData();
-    }
+    
   }, []);
 
   const handleFormSubmit = async () => {
@@ -415,7 +423,10 @@ console.log('Error updating institute:', error.message); }
           <ResponsiveTabsTrigger value="scholarship">Scholarship</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="gallery">Gallery</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="campus">Campus</ResponsiveTabsTrigger>
-          <ResponsiveTabsTrigger value="facility">Facility</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="fee">Fee</ResponsiveTabsTrigger>
+             <ResponsiveTabsTrigger value="ranking">Ranking</ResponsiveTabsTrigger>
+                    <ResponsiveTabsTrigger value="cutoff">Cut-Offs</ResponsiveTabsTrigger>
+                    <ResponsiveTabsTrigger value="facility">Facility</ResponsiveTabsTrigger>
         </ResponsiveTabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -708,6 +719,114 @@ console.log('Error updating institute:', error.message); }
 </CardContent>
 </Card>
 </TabsContent>
+
+  <TabsContent value="fee">
+    <Card>
+      <CardHeader>
+        <CardTitle>Fee Structure</CardTitle>
+        <p className="text-sm text-gray-600">
+          Add fee structure details for your institute.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="fee"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fee Structure</FormLabel>
+                  <FormControl>
+                    <CustomEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="button" onClick={handleFormSubmit}>
+              Save & Update
+            </Button>
+          </div>
+        </Form>
+      </CardContent>
+    </Card>
+  </TabsContent>
+  
+  <TabsContent value="ranking">
+    <Card>
+      <CardHeader>
+        <CardTitle>Ranking</CardTitle>
+        <p className="text-sm text-gray-600">
+          Add ranking details for your institute.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="ranking"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ranking</FormLabel>
+                  <FormControl>
+                    <CustomEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="button" onClick={handleFormSubmit}>
+              Save & Update
+            </Button>
+          </div>
+        </Form>
+      </CardContent>
+    </Card>
+  </TabsContent>
+  
+  <TabsContent value="cutoff">
+    <Card>
+      <CardHeader>
+        <CardTitle>Cut-Offs</CardTitle>
+        <p className="text-sm text-gray-600">
+          Add cut-off details for your institute.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <div className="space-y-6">
+            <FormField
+              control={form.control}
+              name="cutoff"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cut-Offs</FormLabel>
+                  <FormControl>
+                    <CustomEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="button" onClick={handleFormSubmit}>
+              Save & Update
+            </Button>
+          </div>
+        </Form>
+      </CardContent>
+    </Card>
+  </TabsContent>
 
         </Tabs>
     </div>
