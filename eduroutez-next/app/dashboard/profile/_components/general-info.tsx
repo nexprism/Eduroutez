@@ -103,18 +103,13 @@ const GeneralInfo = () => {
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
 
-  
-
-  const email =
-    typeof window !== 'undefined' ? localStorage.getItem('email') || '' : '';
-
 
     const { data: institute } = useQuery({
       queryKey: ['institute'],
       queryFn: async () => {
-        const email = localStorage.getItem('email');
+        const id = localStorage.getItem('instituteId');
         // console.log('hiiiiii',email);
-        const response = await axiosInstance.get(`${apiUrl}/institutes/${email}`);
+        const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
 
       form.reset({
@@ -198,7 +193,8 @@ const GeneralInfo = () => {
   const router = useRouter();
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
-      const endpoint = `${apiUrl}/institute/${segments[4]}`;
+      const id = localStorage.getItem('instituteId');
+      const endpoint = `${apiUrl}/institute/${id}`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: 'patch',

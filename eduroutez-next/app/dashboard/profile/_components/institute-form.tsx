@@ -41,6 +41,7 @@ import { toast } from 'sonner';
 import { add } from 'date-fns';
 import { title } from 'process';
 import { useQuery } from '@tanstack/react-query';
+import { id_ID } from '@faker-js/faker';
 const courseTypes = [
   { value: 'live', label: 'Live' },
   { value: 'recorded', label: 'Recorded' },
@@ -167,12 +168,9 @@ export default function CreateInstitute() {
   const [galleryImages, setGalleryImages] = useState<string[]>([]); // Initialize state for gallery images
 
   
-
-  const email =
-    typeof window !== 'undefined' ? localStorage.getItem('email') || '' : '';
-
     const fetchInstituteData = async () => {
-      const response = await axiosInstance.get(`${apiUrl}/institutes/${email}`);
+      const id = localStorage.getItem('instituteId');
+      const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
   
       const fetchedGalleryImages = await Promise.all(
@@ -216,10 +214,11 @@ export default function CreateInstitute() {
     try {
       const values = form.getValues();
   
+      const id = localStorage.getItem('instituteId');
 
-      const id = segments[4];
       console.log('Form values:', values);
-      const endpoint = `${apiUrl}/institute/${email}`;
+
+      const endpoint = `${apiUrl}/institute/${id}`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: 'patch',
@@ -285,12 +284,12 @@ console.log('Error updating institute:', error.message); }
 
   const addFacility = async () => {
     try {
-      const id = segments[4];
+      const id = localStorage.getItem('instituteId');
       console.log('Adding facility...');
       const values = form.getValues();
       console.log('Facility values:', values);
       const response = await axiosInstance.post(
-        `http://localhost:4001/api/v1/addfacility/${email}`,
+        `http://localhost:4001/api/v1/addfacility/${id}`,
         { title: values.facility }
       );
       console.log('Facility added successfully:', response.data);
@@ -319,8 +318,8 @@ console.log('Error updating institute:', error.message); }
     }
   
     try {
-      const id = segments[4];
-      const response = await axiosInstance.post(`/addGallery/${email}`, formData, {
+      const id = localStorage.getItem('instituteId');
+      const response = await axiosInstance.post(`/addGallery/${id}`, formData, {
         withCredentials: true,
       });
   
@@ -436,7 +435,7 @@ console.log('Error updating institute:', error.message); }
                 <div className="space-y-8">
                   <FormField
                     control={form.control}
-                    name="about"
+                    name="college_info"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>About</FormLabel>

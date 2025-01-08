@@ -3,6 +3,7 @@ import { courseSchema } from "./Course.js";
 
 const instituteSchema = new mongoose.Schema(
   {
+    _id: { type: mongoose.Schema.Types.ObjectId },
     instituteName: {
       type: String,
       required: true,

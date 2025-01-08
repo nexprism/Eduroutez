@@ -43,53 +43,40 @@ const userService = new UserService();
  */
 export const createInstitute = async (req, res) => {
   try {
-    // multiUploader(req, res, async function (err, data) {
-    //   if (err) {
-    //     return res.status(500).json({ error: err });
-    //   }
-
-    const payload = { ...req.body };
-
-    // if (req.files["instituteLogo"]) {
-    //   payload.instituteLogo = req.files["instituteLogo"][0].filename;
-    // }
-    // if (req.files["coverImage"]) {
-    //   payload.coverImage = req.files["coverImage"][0].filename;
-    // }
-    // if (req.files["thumbnailImage"]) {
-    //   payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
-    // }
-    // if (req.files["brochure"]) {
-    //   payload.brochure = req.files["brochure"][0].filename;
-    // }
-    // if (req.files["gallery"]) {
-    //   payload.gallery = req.files["gallery"].map((file) => file.filename);
-    // }
-
-    
-    const response = await instituteService.create(payload);
-
+    // Create the user first
     const userPayload = {
       name: req.body.instituteName,
       email: req.body.email,
       password: req.body.password,
-      role: "institute"
+      role: "institute",
     };
 
-    const userresponse = await userService.signup(userPayload,res);
+    const userResponse = await userService.signup(userPayload, res);
+    console.log('userResponse',userResponse);
+    const userId = userResponse.user._id;
 
-    SuccessResponse.data = response;
+    const institutePayload = {
+      ...req.body,
+      _id: userId,
+    };
+console.log('institutePayload',institutePayload);
+    const instituteResponse = await instituteService.create(institutePayload);
+
+    SuccessResponse.data = {
+      user: userResponse,
+      institute: instituteResponse,
+    };
     SuccessResponse.message = "Successfully created an institute";
 
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
-    console.log(error.message)
-
+    console.log(error.message);
 
     return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 };
+
 
 
 
