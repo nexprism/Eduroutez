@@ -40,8 +40,6 @@ import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';
 import { add } from 'date-fns';
 import { title } from 'process';
-import { useQuery } from '@tanstack/react-query';
-import { id_ID } from '@faker-js/faker';
 const courseTypes = [
   { value: 'live', label: 'Live' },
   { value: 'recorded', label: 'Recorded' },
@@ -167,22 +165,25 @@ export default function CreateInstitute() {
 
   const [galleryImages, setGalleryImages] = useState<string[]>([]); // Initialize state for gallery images
 
-  
-    const fetchInstituteData = async () => {
+  const fetchInstituteData = async () => {
+    try {
       const id = localStorage.getItem('instituteId');
       const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
+      console.log('Institute data:', instituteData);
   
+      // Fetch image URLs for gallery images
       const fetchedGalleryImages = await Promise.all(
         instituteData.gallery.map(async (image: any) => {
-          const imageResponse = await axiosInstance.get(`http://localhost:4001/api/uploads/${image}`, {
-            responseType: 'blob'
+          const imageResponse = await axiosInstance.get(`http://localhost:4001/api/uploads/${image}`,{
+          responseType: 'blob'
           });
           const imageUrl = URL.createObjectURL(imageResponse.data);
-          return imageUrl;
+          return imageUrl;    // Assuming this returns the image URL
         })
       );
   
+      // Update the form and gallery images state
       form.reset({
         institutePhone: instituteData.institutePhone,
         email: instituteData.email,
@@ -197,27 +198,28 @@ export default function CreateInstitute() {
         placementInfo: instituteData.placementInfo,
         campusInfo: instituteData.campusInfo,
         gallery: fetchedGalleryImages,
-        scholarshipInfo: instituteData.scholarshipInfo
+        scholarshipInfo:instituteData.scholarshipInfo // Update gallery with the fetched images
       });
   
-      setGalleryImages(fetchedGalleryImages);
-    };
+      setGalleryImages(fetchedGalleryImages); // Update gallery images state
+    } catch (error) {
+      console.error('Error fetching institute data:', error);
+    }
+  };
   
-    useEffect(() => {
+  useEffect(() => {
+   
+      setIsEdit(true);
       fetchInstituteData();
-    }, []);
-  
-  
-  
+  }, []);
 
   const handleFormSubmit = async () => {
     try {
       const values = form.getValues();
   
+
       const id = localStorage.getItem('instituteId');
-
       console.log('Form values:', values);
-
       const endpoint = `${apiUrl}/institute/${id}`;
       const response = await axiosInstance({
         url: `${endpoint}`,
@@ -323,7 +325,7 @@ console.log('Error updating institute:', error.message); }
         withCredentials: true,
       });
   
-      console.log('Response:', response.data);
+      console.log('Response image:', response.data);
       if (response.data.data) {
         const imageUrls = await Promise.all(
           response.data.data.gallery.map(async (image: any) => {
@@ -332,6 +334,7 @@ console.log('Error updating institute:', error.message); }
               { responseType: 'blob' }
             );
             const imageUrl = URL.createObjectURL(imageResponse.data);
+            console.log('Image URL:', imageUrl);
             return imageUrl;
           })
           
@@ -345,8 +348,8 @@ console.log('Error updating institute:', error.message); }
         console.log('yest') 
         toast.success('Image Added Successfully!');
       }
-    } catch (error) {
-      console.error('Error uploading images:', error);
+    } catch (error:any) {
+      console.error('Error uploading images:', error.message);
       toast.error('Failed to upload images');
     }
   };
@@ -412,10 +415,6 @@ console.log('Error updating institute:', error.message); }
           <ResponsiveTabsTrigger value="scholarship">Scholarship</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="gallery">Gallery</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="campus">Campus</ResponsiveTabsTrigger>
-          <ResponsiveTabsTrigger value="fee">Fee</ResponsiveTabsTrigger>
-          <ResponsiveTabsTrigger value="ranking">Ranking</ResponsiveTabsTrigger>
-          <ResponsiveTabsTrigger value="cut-off">Cut-offs</ResponsiveTabsTrigger>
-
           <ResponsiveTabsTrigger value="facility">Facility</ResponsiveTabsTrigger>
         </ResponsiveTabsList>
 
@@ -435,7 +434,7 @@ console.log('Error updating institute:', error.message); }
                 <div className="space-y-8">
                   <FormField
                     control={form.control}
-                    name="college_info"
+                    name="about"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>About</FormLabel>
@@ -614,113 +613,6 @@ console.log('Error updating institute:', error.message); }
           </Card>
         </TabsContent>
 
-
-        <TabsContent value="fee" className="space-y-6">
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Fees</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <div className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="campusInfo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Fees Details</FormLabel>
-                        <FormControl>
-                          <CustomEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end">
-                    <Button type="button" onClick={handleFormSubmit}>
-                      Save & Update
-                    </Button>
-                  </div>
-                </div>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-
-        <TabsContent value="ranking" className="space-y-6">
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Ranking Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <div className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="campusInfo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ranking</FormLabel>
-                        <FormControl>
-                          <CustomEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end">
-                    <Button type="button" onClick={handleFormSubmit}>
-                      Save & Update
-                    </Button>
-                  </div>
-                </div>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="cut-off" className="space-y-6">
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Cut-Offs Detail</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <div className="space-y-6">
-                  <FormField
-                    control={form.control}
-                    name="campusInfo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cut-Offs Details</FormLabel>
-                        <FormControl>
-                          <CustomEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end">
-                    <Button type="button" onClick={handleFormSubmit}>
-                      Save & Update
-                    </Button>
-                  </div>
-                </div>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      
 
         <TabsContent value="gallery">
   <Card>

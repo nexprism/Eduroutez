@@ -28,7 +28,10 @@ export function UserNav() {
             'Content-Type': 'application/json'
           }
         });
+        localStorage.clear();
+
         return response.data;
+
       } catch (error: any) {
         // Handle error based on axios structure
         const errorMessage =

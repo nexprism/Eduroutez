@@ -75,6 +75,10 @@ export default function UserAuthForm({ setToggle ,toggle}: any) {
         data?.data?.user?._id
       );
       localStorage.setItem(
+        'role',
+        data?.data?.user?.role
+      );
+      localStorage.setItem(
         'email',
         data?.data?.user?.email
       );      
