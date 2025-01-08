@@ -55,7 +55,7 @@ export default function AppSidebar({
     const role = localStorage.getItem('role');
     const excludedTitles =
       role === 'institute'
-        ? ['Institutes', 'Admins', 'Promotions', 'Streams', 'Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
+        ? ['Institutes', 'Admins','Refer and Earn','Earnings','Payouts','Promotions', 'Streams', 'Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
         : role === 'counsellor'
         ? [
             'Institutes',
