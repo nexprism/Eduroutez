@@ -115,6 +115,17 @@ console.log('user',user)
         };
       }
 
+      //check is_verified or not
+      if (!user.is_verified) {
+        throw {
+          message: "Your Account is not Activated", 
+        };
+      }
+
+      
+
+
+
       const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = await Token.generateTokens(user);
 
       Token.setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);

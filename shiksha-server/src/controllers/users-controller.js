@@ -3,9 +3,11 @@ import path from "path";
 import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import UserService from "../services/users-service.js";
+import InstituteService from "../services/institute-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 const singleUploader = FileUpload.upload.single("image");
 const userService = new UserService();
+const instituteService = new InstituteService();
 
 /**
  * GET : /user
@@ -144,6 +146,11 @@ export async function allowUser(req, res) {
     }
     payload.is_verified = true;
     const response = await userService.update(id, payload);
+
+    const instituteresponse = await instituteService.update(id, payload);
+
+
+
 
     return res.status(200).json({ message: 'User verified successfully', data: response });
   } catch (error) {

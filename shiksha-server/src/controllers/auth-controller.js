@@ -22,7 +22,17 @@ export const signup = async (req, res) => {
       });
     }
     // console.log('user', user);
-    // const userId = userResponse.user._id;
+    //contact number length check
+    if(req.body.contact_number.length !== 10){
+
+      return res.status(400).json({
+        message: "Contact number should be of 10 digits",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+
 
 
 
@@ -44,24 +54,23 @@ export const signup = async (req, res) => {
     );
 
     const userId = response.user._id;
-if(req.body.role === 'institute'){
+  if(req.body.role === 'institute'){
+    
     const institutePayload = {
-      ...req.body,
+      instituteName: req.body.name,
+      email: req.body.email,
+      institutePhone: req.body.contact_number,
+      password: req.body.password,
       _id: userId,
     };
 
-    // console.log('institutePayload', institutePayload);
+    console.log('institutePayload',institutePayload);
+
     const instituteResponse = await instituteService.create(institutePayload);
+
   }
 
-
   
-
-
-
-
-
-
     return res.status(201).json({
       success: true,
       message: "Successfully created a new "+req.body.role,
@@ -106,9 +115,10 @@ export const login = async (req, res) => {
       data: token,
       err: {},
     });
+    
   } catch (error) {
     return res.status(500).json({
-      message: "Something went wrong",
+      message: error.message,
       data: {},
       success: false,
       err: error,
