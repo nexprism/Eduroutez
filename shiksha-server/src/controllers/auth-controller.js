@@ -1,14 +1,35 @@
 import { FileUpload } from "../middlewares/index.js";
 import UserRefreshToken from "../models/UserRefreshToken.js";
 import UserService from "../services/user-service.js";
+import InstituteService from "../services/institute-service.js";
 const singleUploader = FileUpload.upload.single("image");
 
 const userService = new UserService();
+const instituteService = new InstituteService();
 
 export const signup = async (req, res) => {
   console.log(req.body);
   try {
-    console.log(req.body);
+    
+    //check email already exists
+    const user = await userService.getUserByEmail(req.body.email);
+    if (user) {
+      return res.status(400).json({
+        message: "Email already exists",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+    // console.log('user', user);
+    // const userId = userResponse.user._id;
+
+
+
+    
+    
+
+
     const response = await userService.signup(
       {
         name:req.body.name,
@@ -21,9 +42,29 @@ export const signup = async (req, res) => {
       },
       res
     );
+
+    const userId = response.user._id;
+if(req.body.role === 'institute'){
+    const institutePayload = {
+      ...req.body,
+      _id: userId,
+    };
+
+    // console.log('institutePayload', institutePayload);
+    const instituteResponse = await instituteService.create(institutePayload);
+  }
+
+
+  
+
+
+
+
+
+
     return res.status(201).json({
       success: true,
-      message: "Successfully created a new user",
+      message: "Successfully created a new "+req.body.role,
       data: response,
       err: {},
     });

@@ -77,6 +77,18 @@ const instituteSchema = new mongoose.Schema(
       type: String,
     },
 
+    fee: {
+      type: String,
+    },
+
+    ranking: {
+      type: String,
+    },
+
+    cutoff: {
+      type: String,
+    },
+
     campusInfo: {
       type: String,
     },

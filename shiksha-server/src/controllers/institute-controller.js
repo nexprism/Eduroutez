@@ -59,7 +59,7 @@ export const createInstitute = async (req, res) => {
       ...req.body,
       _id: userId,
     };
-console.log('institutePayload',institutePayload);
+    console.log('institutePayload',institutePayload);
     const instituteResponse = await instituteService.create(institutePayload);
 
     SuccessResponse.data = {
@@ -67,6 +67,8 @@ console.log('institutePayload',institutePayload);
       institute: instituteResponse,
     };
     SuccessResponse.message = "Successfully created an institute";
+
+    
 
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
@@ -201,7 +203,7 @@ export async function updateInstitute(req, res) {
       const instituteId = req.params.id;
       const payload = req.body;
       let oldImagePath;
-      console.log(req.files);
+      // console.log(req.files);
       // console.log(req.file);
       // Check if a new title is provided
       // if (req.body.title) {
@@ -210,21 +212,38 @@ export async function updateInstitute(req, res) {
 
       // console.log('hi')
       // Check if a new image is uploaded
-      if (req.file) {
-        const institute = await instituteService.get(instituteId);
+      // if (req.file) {
+      //   const institute = await instituteService.get(instituteId);
 
-        console.log(institute);
-        // Record the old image path if it exists
-        if (institute.image) {
-          oldImagePath = path.join("uploads", institute.image);
-        }
+      //   console.log(institute);
+      //   // Record the old image path if it exists
+      //   if (institute.image) {
+      //     oldImagePath = path.join("uploads", institute.image);
+      //   }
 
-        // Set the new image filename in payload
-        payload.image = req.file.filename;
+      //   // Set the new image filename in payload
+      //   payload.image = req.file.filename;
+      // }
+
+
+      if (req.files["instituteLogo"]) {
+        payload.instituteLogo = req.files["instituteLogo"][0].filename;
       }
+      if (req.files["coverImage"]) {
+        payload.coverImage = req.files["coverImage"][0].filename;
+      }
+      if (req.files["thumbnailImage"]) {
+        payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
+      }
+      if (req.files["brochure"]) {
+        payload.brochure = req.files["brochure"][0].filename;
+      }
+      // if (req.files["gallery"]) {
+      //   payload.gallery = req.files["gallery"].map((file) => file.filename);
+      // }
 
       // Update the institute with new data
-      // console.log(payload);
+      console.log(payload);
       const response = await instituteService.update(instituteId, payload);
       // console.log(response);
 
