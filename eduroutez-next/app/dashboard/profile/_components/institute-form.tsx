@@ -51,6 +51,9 @@ const orgTypes = [
   { value: 'private', label: 'Private' }
 ];
 
+
+const id = localStorage.getItem('instituteId');
+
 const formSchema = z.object({
   title: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
@@ -128,7 +131,11 @@ const formSchema = z.object({
   campusInfo: z.string().optional(),
 gallery:z.array(z.any()).optional(),
 facility: z.array(z.string()).optional(),
-scholarshipInfo: z.string().optional()
+scholarshipInfo: z.string().optional(),
+fee: z.string().optional(),
+ranking: z.string().optional(),
+cutoff: z.string().optional()
+
 });
 
 export default function CreateInstitute() {
@@ -167,7 +174,7 @@ export default function CreateInstitute() {
 
   const fetchInstituteData = async () => {
     try {
-      const id = localStorage.getItem('instituteId');
+      console.log('Fetching institute data...');
       const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
       console.log('Institute data:', instituteData);
@@ -208,9 +215,9 @@ export default function CreateInstitute() {
   };
   
   useEffect(() => {
-   
       setIsEdit(true);
       fetchInstituteData();
+    
   }, []);
 
   const handleFormSubmit = async () => {
@@ -218,7 +225,6 @@ export default function CreateInstitute() {
       const values = form.getValues();
   
 
-      const id = localStorage.getItem('instituteId');
       console.log('Form values:', values);
       const endpoint = `${apiUrl}/institute/${id}`;
       const response = await axiosInstance({
@@ -286,7 +292,6 @@ console.log('Error updating institute:', error.message); }
 
   const addFacility = async () => {
     try {
-      const id = localStorage.getItem('instituteId');
       console.log('Adding facility...');
       const values = form.getValues();
       console.log('Facility values:', values);
@@ -320,12 +325,11 @@ console.log('Error updating institute:', error.message); }
     }
   
     try {
-      const id = localStorage.getItem('instituteId');
       const response = await axiosInstance.post(`/addGallery/${id}`, formData, {
         withCredentials: true,
       });
   
-      console.log('Response image:', response.data);
+      console.log('Response:', response.data);
       if (response.data.data) {
         const imageUrls = await Promise.all(
           response.data.data.gallery.map(async (image: any) => {
@@ -334,7 +338,6 @@ console.log('Error updating institute:', error.message); }
               { responseType: 'blob' }
             );
             const imageUrl = URL.createObjectURL(imageResponse.data);
-            console.log('Image URL:', imageUrl);
             return imageUrl;
           })
           
@@ -348,8 +351,8 @@ console.log('Error updating institute:', error.message); }
         console.log('yest') 
         toast.success('Image Added Successfully!');
       }
-    } catch (error:any) {
-      console.error('Error uploading images:', error.message);
+    } catch (error) {
+      console.error('Error uploading images:', error);
       toast.error('Failed to upload images');
     }
   };
@@ -415,6 +418,9 @@ console.log('Error updating institute:', error.message); }
           <ResponsiveTabsTrigger value="scholarship">Scholarship</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="gallery">Gallery</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="campus">Campus</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="fee">Fee</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="ranking">Ranking</ResponsiveTabsTrigger>
+          <ResponsiveTabsTrigger value="cutoff">Cut-Offs</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="facility">Facility</ResponsiveTabsTrigger>
         </ResponsiveTabsList>
 
@@ -707,6 +713,116 @@ console.log('Error updating institute:', error.message); }
 </Form>
 </CardContent>
 </Card>
+</TabsContent>
+
+
+
+<TabsContent value="fee">
+  <Card>
+    <CardHeader>
+      <CardTitle>Fee Structure</CardTitle>
+      <p className="text-sm text-gray-600">
+        Add fee structure details for your institute.
+      </p>
+    </CardHeader>
+    <CardContent>
+      <Form {...form}>
+        <div className="space-y-6">
+          <FormField
+            control={form.control}
+            name="fee"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fee Structure</FormLabel>
+                <FormControl>
+                  <CustomEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="button" onClick={handleFormSubmit}>
+            Save & Update
+          </Button>
+        </div>
+      </Form>
+    </CardContent>
+  </Card>
+</TabsContent>
+
+<TabsContent value="ranking">
+  <Card>
+    <CardHeader>
+      <CardTitle>Ranking</CardTitle>
+      <p className="text-sm text-gray-600">
+        Add ranking details for your institute.
+      </p>
+    </CardHeader>
+    <CardContent>
+      <Form {...form}>
+        <div className="space-y-6">
+          <FormField
+            control={form.control}
+            name="ranking"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ranking</FormLabel>
+                <FormControl>
+                  <CustomEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="button" onClick={handleFormSubmit}>
+            Save & Update
+          </Button>
+        </div>
+      </Form>
+    </CardContent>
+  </Card>
+</TabsContent>
+
+<TabsContent value="cutoff">
+  <Card>
+    <CardHeader>
+      <CardTitle>Cut-Offs</CardTitle>
+      <p className="text-sm text-gray-600">
+        Add cut-off details for your institute.
+      </p>
+    </CardHeader>
+    <CardContent>
+      <Form {...form}>
+        <div className="space-y-6">
+          <FormField
+            control={form.control}
+            name="cutoff"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cut-Offs</FormLabel>
+                <FormControl>
+                  <CustomEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="button" onClick={handleFormSubmit}>
+            Save & Update
+          </Button>
+        </div>
+      </Form>
+    </CardContent>
+  </Card>
 </TabsContent>
 
         </Tabs>

@@ -213,7 +213,6 @@ const GeneralInfo = () => {
       setPreviewThumbnailUrl(null);
       setPreviewCoverUrl(null);
       setPreviewLogoUrl(null);
-      router.push('/dashboard/institute');
     },
     onError: () => {
       toast.error('Something went wrong');
