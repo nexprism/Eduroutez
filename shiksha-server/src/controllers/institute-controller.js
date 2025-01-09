@@ -49,6 +49,7 @@ export const createInstitute = async (req, res) => {
       email: req.body.email,
       password: req.body.password,
       role: "institute",
+      is_verifiedq: true,
     };
 
     const userResponse = await userService.signup(userPayload, res);
@@ -58,6 +59,7 @@ export const createInstitute = async (req, res) => {
     const institutePayload = {
       ...req.body,
       _id: userId,
+      is_verified: true,
     };
     console.log('institutePayload',institutePayload);
     const instituteResponse = await instituteService.create(institutePayload);
