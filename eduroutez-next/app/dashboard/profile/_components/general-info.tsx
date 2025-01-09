@@ -30,6 +30,8 @@ import * as z from 'zod';
 import { toast } from 'sonner';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const baseURL = "http://localhost:4001/api/uploads/";
+
 
 const courseTypes = [
   { value: 'live', label: 'Live' },
@@ -85,6 +87,8 @@ const formSchema = z.object({
   brochure: z.any().optional()
 });
 
+
+
 const GeneralInfo = () => {
   const [previewThumbnailUrl, setPreviewThumbnailUrl] = React.useState<
     string | null
@@ -129,7 +133,14 @@ const GeneralInfo = () => {
         highestPackage: instituteData.highestPackage,
         streams: instituteData.streams,
         specialization: instituteData.specialization,
+        thumbnail: instituteData.thumbnailImage,
+        cover: instituteData.coverImage,
+        logo: instituteData.instituteLogo,
       });
+      
+    setPreviewThumbnailUrl(`${baseURL}${instituteData.thumbnailImage}`);
+    setPreviewCoverUrl(`${baseURL}${instituteData.coverImage}`);
+    setPreviewLogoUrl(`${baseURL}${instituteData.instituteLogo}`);
     }})
 
 

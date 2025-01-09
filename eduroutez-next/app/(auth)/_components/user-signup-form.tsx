@@ -12,46 +12,59 @@ import { Input } from '@/components/ui/input';
 import axiosInstance from '@/lib/axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-  } from '@/components/ui/select';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useTransition, useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'; // Ensure this component is correctly imported
 
 const formSchema = z.object({
-  name: z.string(),
-  contact_number: z.string(),
-  role: z.string(),
-  email: z.string().email({ message: 'Enter a valid email address' }),
-  is_verified:z.boolean(),
-  password: z
+  name: z.string().nonempty({ message: 'Name is required' }),
+  contact_number: z
     .string()
-    .min(8, { message: 'Password must be at least 8 characters' }),
+    .regex(/^\d+$/, { message: 'Enter a valid phone number' })
+    .nonempty({ message: 'Contact number is required' }),
+  role: z.string().nonempty({ message: 'Role is required' }),
+  email: z.string().email({ message: 'Enter a valid email address' }),
+  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
   confirmPassword: z
     .string()
-    .min(8, { message: 'Password must be at least 8 characters' })
+    .min(8, { message: 'Password must be at least 8 characters' }),
+  is_verified: z.boolean().optional()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword']
 });
 
 const roleTypes = [
   { value: 'admin', label: 'Admin' },
-  // { value: 'student', label: 'Student' },
   { value: 'institute', label: 'University/College Institute' },
   { value: 'counsellor', label: 'Counsellor' }
 ];
 
 type UserFormValue = z.infer<typeof formSchema>;
 
-export default function UserSignupForm({ setToggle ,toggle}: any) {
+export default function UserSignupForm({ setToggle, toggle }: { setToggle: (value: boolean) => void; toggle: boolean }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const apiUrl = process.env.VITE_BASE_URL;
+  const [showAlert, setShowAlert] = useState(false);
+  const [role, setRole] = useState<string>('');
 
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
@@ -61,72 +74,84 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
       role: '',
       email: '',
       password: '',
-      is_verified:false
+      confirmPassword: '',
+      is_verified: false
     }
   });
 
-  // Mutation for login
-  const mutation: any = useMutation({
+  const mutation = useMutation({
     mutationFn: async (credentials: UserFormValue) => {
-      try {
-        const response = await axiosInstance.post(
-          `http://localhost:4001/api/v1//signup`,
-          credentials,
-          {
-            headers: {
-              'Content-Type': 'application/json'
-            }
+      const response = await axiosInstance.post(
+        'http://localhost:4001/api/v1/signup',
+        credentials,
+        {
+          headers: {
+            'Content-Type': 'application/json'
           }
-        );
-        return response.data;
-      } catch (error: any) {
-        // Handle error based on axios structure
-        const errorMessage = error.response?.data?.message || 'Failed to login';
-        throw new Error(errorMessage);
-      }
+        }
+      );
+      return response.data;
     },
     onSuccess: (data) => {
-      toast.success('Signed In Successfully!');
-      localStorage.setItem(
-        'accessToken',
-        JSON.stringify(data.data.accessToken)
-      );
-      localStorage.setItem(
-        'refreshToken',
-        JSON.stringify(data.data.refreshToken)
-      );
-
-      // Redirect to dashboard
-      startTransition(() => {
-        router.push('/');
-      });
+      toast.success('Signed Up Successfully!');
+      setShowAlert(true);
+      localStorage.setItem('accessToken', JSON.stringify(data.data.accessToken));
+      localStorage.setItem('refreshToken', JSON.stringify(data.data.refreshToken));
+      startTransition(() => router.push('/'));
     },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to login');
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || 'Failed to sign up';
+      toast.error(errorMessage);
     }
   });
 
-  // Form submit handler
   const onSubmit = (data: UserFormValue) => {
-    if(data?.password===data?.confirmPassword){
-        if (data?.role === 'counsellor') {
-          data.is_verified = true;
-        }
-        mutation.mutate(data);
-        alert(
-          'Your Request was sent to Admin!! You can Login when admin allow you'
-        );
-        setToggle(!toggle);
-        alert('Login to continue');
-    }else{
-        alert('Mismatched Password');
+    if (data.role === 'counsellor') {
+      data.is_verified = true;
     }
+    mutation.mutate(data);
   };
 
-  const handleToggle = () => {
-    setToggle(false);
-  };
+  const SignupAlert = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="bg-white border-2 border-red-500">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-2xl font-bold text-red-500">
+            Request Submitted Successfully
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-gray-700 text-lg">
+            Your request has been sent to the admin. You will be able to log in once your account is approved.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogAction
+            className="bg-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg"
+            onClick={() => {
+              onClose();
+              setToggle(!toggle);
+            }}
+          >
+            Continue to Login
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 
+  const isLoading = mutation.status === 'pending';
+
+  // Update role dynamically
+  useEffect(() => {
+    if (form.watch('role')) {
+      setRole(form.watch('role'));
+    }
+  }, [form.watch('role')]);
+
+  const roleSpecificLabel = role === 'institute'
+    ? 'Institute Name'
+    : role === 'counsellor'
+    ? 'Counsellor Name'
+    : 'Name';
 
   return (
     <Form {...form}>
@@ -136,12 +161,12 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>{roleSpecificLabel}</FormLabel>
               <FormControl>
                 <Input
-                  type="string"
-                  placeholder="Enter your name"
-                  disabled={mutation.isLoading || isPending}
+                  type="text"
+                  placeholder={`Enter your ${roleSpecificLabel.toLowerCase()}`}
+                  disabled={isLoading}
                   {...field}
                 />
               </FormControl>
@@ -157,9 +182,9 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
               <FormLabel>Phone No</FormLabel>
               <FormControl>
                 <Input
-                  type="number"
+                  type="text"
                   placeholder="Enter your Contact number"
-                  disabled={mutation.isLoading || isPending}
+                  disabled={isPending}
                   {...field}
                 />
               </FormControl>
@@ -177,7 +202,7 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
                 <Input
                   type="email"
                   placeholder="Enter your email..."
-                  disabled={mutation.isLoading || isPending}
+                  disabled={isPending}
                   {...field}
                 />
               </FormControl>
@@ -219,7 +244,7 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
                 <Input
                   type="password"
                   placeholder="Enter your password..."
-                  disabled={mutation.isLoading || isPending}
+                  disabled={isPending}
                   {...field}
                 />
               </FormControl>
@@ -237,7 +262,7 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
                 <Input
                   type="password"
                   placeholder="Enter your password..."
-                  disabled={mutation.isLoading || isPending}
+                  disabled={isPending}
                   {...field}
                 />
               </FormControl>
@@ -245,15 +270,16 @@ export default function UserSignupForm({ setToggle ,toggle}: any) {
             </FormItem>
           )}
         />
-        <button className='w-full justify-end text-blue-600 ml-0' onClick={()=>setToggle(!toggle)} type='button'>Already have account? Sign In</button>
+        <button className='w-full justify-end text-blue-600 ml-0' onClick={() => setToggle(!toggle)} type='button'>Already have an account? Sign In</button>
         <Button
-          disabled={mutation.isLoading || isPending}
+          disabled={isPending}
           className="ml-auto w-full"
           type="submit"
         >
-          {mutation.isLoading || isPending ? 'Signing In...' : 'Sign Up'}
+          {isPending ? 'Signing Up...' : 'Sign Up'}
         </Button>
       </form>
+      <SignupAlert isOpen={showAlert} onClose={() => setShowAlert(false)} />
     </Form>
   );
 }
