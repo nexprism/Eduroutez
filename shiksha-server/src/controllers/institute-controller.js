@@ -49,7 +49,7 @@ export const createInstitute = async (req, res) => {
       email: req.body.email,
       password: req.body.password,
       role: "institute",
-      is_verifiedq: true,
+      is_verified: true,
     };
 
     const userResponse = await userService.signup(userPayload, res);
