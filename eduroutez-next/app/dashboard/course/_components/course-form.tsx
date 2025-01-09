@@ -316,7 +316,7 @@ export default function CreateCourse() {
       formData.append('courseLevel', values.courseLevel);
       formData.append('category', values.category);
       formData.append('status', values.status);
-      formData.append('instituteCategory', values.category);
+      formData.append('instituteCategory', values.instituteCategory);
       formData.append('visibility', values.visibility);
       formData.append('language', values.language);
       if (values.examAccepted !== undefined) {
@@ -729,8 +729,7 @@ export default function CreateCourse() {
                             </FormControl>
 
                             <SelectContent>
-                              {instituteCategories &&
-                              instituteCategories?.data?.result?.length > 0
+                              {instituteCategories?.data?.result?.length > 0
                                 ? instituteCategories.data.result.map(
                                     (category: Institute) => (
                                       <SelectItem
@@ -741,7 +740,7 @@ export default function CreateCourse() {
                                       </SelectItem>
                                     )
                                   )
-                                : null}
+                                : <SelectItem value="">No Institutes Available</SelectItem>}
                             </SelectContent>
                           </Select>
                           <FormMessage />
