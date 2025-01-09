@@ -121,47 +121,49 @@ export async function getCourse(req, res) {
  */
 
 export async function updateCourse(req, res) {
-  singleUploader(req, res, async (err) => {
+  multiUploader(req, res, async (err) => {
     if (err) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }
 
     try {
       const courseId = req.params.id;
-      const payload = {};
-      let oldImagePath;
-
-      // Check if a new title is provided
-      if (req.body.title) {
-        payload.title = req.body.title;
-      }
-
-      // Check if a new image is uploaded
-      if (req.file) {
-        const course = await courseService.get(courseId);
-
-        // Record the old image path if it exists
-        if (course.image) {
-          oldImagePath = path.join("uploads", course.image);
+      const payload = { ...req.body };
+      let oldImagePaths = {};
+      console.log(req.files);
+      console.log(req.body);
+      const course = await courseService.get(courseId);
+      if (req.files["coursePreviewThumbnail"]) {
+        if (course.coursePreviewThumbnail) {
+          oldImagePaths.coursePreviewThumbnail = path.join("uploads", course.coursePreviewThumbnail);
         }
-
-        // Set the new image filename in payload
-        payload.image = req.file.filename;
+        payload.coursePreviewThumbnail = req.files["coursePreviewThumbnail"][0].filename;
       }
 
-      // Update the course with new data
+      if (req.files["coursePreviewCover"]) {
+        if (course.coursePreviewCover) {
+          oldImagePaths.coursePreviewCover = path.join("uploads", course.coursePreviewCover);
+        }
+        payload.coursePreviewCover = req.files["coursePreviewCover"][0].filename;
+      }
+
+      if (req.files["metaImage"]) {
+        if (course.metaImage) {
+          oldImagePaths.metaImage = path.join("uploads", course.metaImage);
+        }
+        payload.metaImage = req.files["metaImage"][0].filename;
+      }
+
       const response = await courseService.update(courseId, payload);
 
-      // Delete the old image only if the update is successful and old image exists
-      if (oldImagePath) {
+      for (const key in oldImagePaths) {
         try {
-          fs.unlink(oldImagePath);
+          await fs.unlink(oldImagePaths[key]);
         } catch (unlinkError) {
-          console.error("Error deleting old image:", unlinkError);
+          console.error(`Error deleting old ${key}:`, unlinkError);
         }
       }
 
-      // Return success response
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully updated the course";
       return res.status(StatusCodes.OK).json(SuccessResponse);

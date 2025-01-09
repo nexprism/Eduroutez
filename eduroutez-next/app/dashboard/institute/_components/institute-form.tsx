@@ -165,6 +165,7 @@ export default function CreateInstitute() {
     resolver: zodResolver(formSchema)
   });
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const baseURL = "http://localhost:4001/api/uploads/";
 
   const [galleryImages, setGalleryImages] = useState<string[]>([]); // Initialize state for gallery images
 
@@ -202,9 +203,16 @@ export default function CreateInstitute() {
         scholarshipInfo: instituteData.scholarshipInfo,
         fee: instituteData.fee,
         ranking: instituteData.ranking,
-        cutoff: instituteData.cutoff
+        cutoff: instituteData.cutoff,
+        thumbnail: instituteData.thumbnailImage,
+        cover: instituteData.coverImage,
+        logo: instituteData.instituteLogo,
         
       });
+      console.log("Form values:", );
+      setPreviewThumbnailUrl(`${baseURL}${instituteData.thumbnailImage}`);
+      setPreviewCoverUrl(`${baseURL}${instituteData.coverImage}`);
+      setPreviewLogoUrl(`${baseURL}${instituteData.instituteLogo}`);
   
       setGalleryImages(galleryUrls); // Set the full URLs for rendering
     } catch (error) {

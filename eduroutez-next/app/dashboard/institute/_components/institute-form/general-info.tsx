@@ -95,6 +95,7 @@ const GeneralInfo = () => {
   const [previewLogoUrl, setPreviewLogoUrl] = React.useState<string | null>(
     null
   );
+  const baseURL = "http://localhost:4001/api/uploads/";
 
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
@@ -127,8 +128,15 @@ const GeneralInfo = () => {
         highestPackage: instituteData.highestPackage,
         streams: instituteData.streams,
         specialization: instituteData.specialization,
+        thumbnail: instituteData.thumbnailImage,
+        cover: instituteData.coverImage,
+        logo: instituteData.instituteLogo,
       });
+      console.log('Institute fetch nb:', instituteData.thumbnailImage);
 
+      setPreviewThumbnailUrl(`${baseURL}${instituteData.thumbnailImage}`);
+      setPreviewCoverUrl(`${baseURL}${instituteData.coverImage}`);
+      setPreviewLogoUrl(`${baseURL}${instituteData.instituteLogo}`);
       console.log('Institute fetch successfully:', instituteData);
     } catch (error: any) {
       console.log('Error fetching institute:', error.message);
@@ -641,7 +649,7 @@ const GeneralInfo = () => {
                           ref={fileInputThumbnailRef} // Reference to reset input
                           className="hidden "
                         />
-
+      
                         {previewThumbnailUrl ? (
                           <div className="relative inline-block">
                             <Image

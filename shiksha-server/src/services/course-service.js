@@ -1,5 +1,6 @@
 
 import { CourseRepository } from "../repository/index.js";
+import { StatusCodes } from "http-status-codes";
 class CourseService {
   constructor() {
     this.courseRepository = new CourseRepository();
@@ -51,7 +52,8 @@ class CourseService {
 
       return courses;
     } catch (error) {
-      throw new AppError("Cannot fetch data of all the courses", StatusCodes.INTERNAL_SERVER_ERROR);
+
+      throw error;
     }
   }
 
@@ -61,7 +63,7 @@ class CourseService {
       const courses = await this.courseRepository.getPopularCourses();
       return courses;
     } catch (error) {
-      throw new AppError("Cannot fetch popular courses", StatusCodes.INTERNAL_SERVER_ERROR);
+      throw error;
     }
   }
   
@@ -77,8 +79,9 @@ class CourseService {
 
       return course;
     } catch (error) {
-      throw new AppError("Cannot update the course ", StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+      throw error;
+
+        }
   }
 
   async delete(id) {
@@ -87,9 +90,9 @@ class CourseService {
       return course;
     } catch (error) {
       if (error.statusCode === StatusCodes.NOT_FOUND) {
-        throw new AppError("The course you requested to delete is not present", error.statusCode);
+        throw error;
       }
-      throw new AppError("Cannot delete the course ", StatusCodes.INTERNAL_SERVER_ERROR);
+      throw error;
     }
   }
 }
