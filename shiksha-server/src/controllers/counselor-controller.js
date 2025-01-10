@@ -30,7 +30,19 @@ export const createCounselor = async (req, res) => {
       if (err) {
         return res.status(500).json({ error: err });
       }
+
+      //check email exists
+      const emailExists = await counselorService.getByEmail(req.body.email);
+      if (emailExists) {
+        return res.status(400).json({ error: "Email already exists" });
+      }
+
+
+
       const payload = { ...req.body };
+
+
+      
       // console.log(payload);
       if (req.files["profilePhoto"]) {
         payload.profilePicture = req.files["profilePhoto"][0].filename;

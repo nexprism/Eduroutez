@@ -1,9 +1,9 @@
-import Student from "../models/Student.js";
+import Counselor from "../models/Counselor.js";
 import CrudRepository from "./crud-repository.js";
 
 class CounselorRepository extends CrudRepository {
   constructor() {
-    super(Student);
+    super(Counselor);
   }
 
   async makeCounselor(data) {
@@ -23,6 +23,16 @@ class CounselorRepository extends CrudRepository {
   async get(email) {
     try {
       const result = await this.model.findOne({ email });
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //getByEmail
+  async getByEmail(email) {
+    try {
+      const result = await Counselor.find({ email: email });
       return result;
     } catch (error) {
       throw error;

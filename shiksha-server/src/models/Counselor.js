@@ -24,18 +24,18 @@ const counselorSchema = new mongoose.Schema(
     },
     dateOfBirth: {
       type: Date,
-      required: true,
+      // required: true,
     },
     gender: {
       type: String,
-      required: true,
+      // required: true,
     },
     address: {
       type: String,
     },
     country: {
       type: String,
-      required: true,
+      // required: true,
     },
     profilePicture: {
       type: String,
@@ -46,10 +46,11 @@ const counselorSchema = new mongoose.Schema(
     panCard: {
       type: String,
     }, // image
-    instituteEmail: {
-      type: String,
-      // ref: "InstItute",
+    instituteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      'ref': 'Institute',
     },
+    
     category: {
       type: String,
       // ref: "Category",
@@ -70,6 +71,18 @@ const counselorSchema = new mongoose.Schema(
       type: String,
       // ref: "Level",
     },
+    
+    points: {
+      type: Number,
+      default: 0,
+    },
+
+    level: {
+      type: String,
+      default: "Career Advisor",
+    },
+
+  
     bankName: { type: String },
     accountDetails: { type: String },
     ifscCode: { type: String },

@@ -15,7 +15,7 @@ class CounselorService {
 
   async create(data) {
     try {
-      const counselor = await this.counselorRepository.makeCounselor(data);
+      const counselor = await this.counselorRepository.create(data);
       return counselor;
     } catch (error) {
       throw error;
@@ -69,6 +69,12 @@ class CounselorService {
   }
   async get(email) {
     const counselor = await this.counselorRepository.get(email);
+    return counselor;
+  }
+
+  
+  async getByEmail(email) {
+    const counselor = await this.counselorRepository.getByEmail(email);
     return counselor;
   }
 

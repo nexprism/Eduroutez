@@ -81,7 +81,7 @@ export const createCourse = async (req, res) => {
       
       
       const response = await courseService.create(payload);
-      // const resp=await instituteService.addCourses(instituteCategory,response);
+      const resp=await instituteService.addCourses(instituteCategory,response);
       // console.log('good')
       // console.log(response)
       // console.log('good2');
