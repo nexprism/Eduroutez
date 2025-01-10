@@ -22,30 +22,49 @@ class InstituteRepository extends CrudRepository {
   //updateCourse
   async updateCourse(instituteId, courseId, data) {
     try {
-      // Find the institute by its ID
+      // First, find the institute and get the current courses
       const institute = await this.model.findById(instituteId);
-  
-      // If institute not found, throw an error
+
       if (!institute) {
         throw new Error("Institute not found");
       }
 
-    
-
-      const result = await this.model.findOneAndUpdate(
-        { _id: instituteId, 'courses._id': courseId },
-        { $set: { 'courses.$.updatedAt': new Date() } }, // Update only the updatedAt field
-        { new: true }
+      // Find the index of the course we want to update
+      const courseIndex = institute.courses.findIndex(
+        course => course._id.toString() === courseId.toString()
       );
 
-    return result;
+      if (courseIndex === -1) {
+        throw new Error("Course not found in institute");
+      }
 
+      // Create a courses array copy and update the specific course
+      const updatedCourses = [...institute.courses];
+      updatedCourses[courseIndex] = {
+        ...institute.courses[courseIndex].toObject(), // Convert to plain object
+        ...data,
+        _id: courseId, // Preserve the original ID
+        updatedAt: new Date()
+      };
 
-    
+      // Update the entire courses array
+      const result = await this.model.findByIdAndUpdate(
+        instituteId,
+        {
+          $set: { courses: updatedCourses }
+        },
+        {
+          new: true,
+          runValidators: true
+        }
+      );
+
+      console.log('Updated institute:', result);
+      return result;
     } catch (error) {
-      console.log(`Error updating course: ${error.message}`);
+      console.error(`Error updating course: ${error.message}`);
+      throw error;
     }
-
   }
 
 
