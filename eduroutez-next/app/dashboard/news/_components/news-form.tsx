@@ -27,6 +27,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
 import { toast } from 'sonner';
+import axiosInstance from '@/lib/axios';
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -34,9 +35,6 @@ const formSchema = z.object({
   }),
   description: z.string().min(10, {
     message: 'Description must be at least 10 characters.'
-  }),
-  institute: z.string().min(2, {
-    message: 'Institute name must be at least 2 characters.'
   }),
   date: z.date({
     required_error: "Please select a date.",
@@ -58,7 +56,6 @@ const formSchema = z.object({
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-
 const NewsForm = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -68,7 +65,6 @@ const NewsForm = () => {
     defaultValues: {
       title: '',
       description: '',
-      institute: '',
       date: new Date(),
     }
   });
@@ -99,18 +95,27 @@ const NewsForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      const instituteId = localStorage.getItem('instituteId');
+      if (!instituteId) {
+        toast.error('Institute ID is missing.');
+        return;
+      }
+      console.log('values', values);
+
       const formData = new FormData();
       formData.append('title', values.title);
       formData.append('description', values.description);
-      formData.append('institute', values.institute);
       formData.append('date', values.date.toISOString());
+      formData.append('instituteId', instituteId); // Adding instituteId to the form data
+
       if (values.image) {
-        formData.append('image', values.image);
+        formData.append('image', values.image.name);
       }
 
-      const response = await axios.post(`${apiUrl}/create-news`, formData, {
-       withCredentials: true,
-      });
+      const response = await axiosInstance.post(`${apiUrl}/create-news`, formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }        });
 
       toast.success('News article created successfully');
       form.reset();
@@ -208,20 +213,6 @@ const NewsForm = () => {
                       className="min-h-[150px]"
                       {...field}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="institute"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Institute</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter institute name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

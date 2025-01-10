@@ -230,6 +230,7 @@ router.delete("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", 
 //newsa
 router.post("/create-news", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createNews);
 router.get("/news", getNews);
+router.get("/news/:institute", getNewsByInstitute);
 router.get("/news/:id", getNewsById);
 router.get("/news-by-institute/:id", getNewsByInstitute);
 router.patch("/update-news/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateNews);

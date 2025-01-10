@@ -97,7 +97,8 @@ export async function getNewsById(req, res) {
 //getNewsByInstitute
 export async function getNewsByInstitute(req, res) {
   try {
-    const response = await newsService.getNewsByInstitute(req.params.id);
+    console.log("instituteId", req.params.institute);
+    const response = await newsService.getNewsByInstitute(req.params.institute);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the news article";
     return res.status(StatusCodes.OK).json(SuccessResponse);

@@ -1,66 +1,73 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import { Plus, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-
-const staticNewsData = [
-    {
-        id: 1,
-        title: 'News Article 1',
-        description: 'This is the description for news article 1.',
-        date: '2023-10-01',
-        image: '/path/to/image1.jpg', // Replace with your actual image paths
-    },
-    {
-        id: 2,
-        title: 'News Article 2',
-        description: 'This is the description for news article 2.',
-        date: '2023-10-02',
-        image: '/path/to/image2.jpg',
-    },
-    {
-        id: 3,
-        title: 'News Article 3',
-        description: 'This is the description for news article 3.',
-        date: '2023-10-03',
-        image: '/path/to/image3.jpg',
-    },
-    {
-        id: 4,
-        title: 'News Article 4',
-        description: 'This is the description for news article 4.',
-        date: '2023-10-04',
-        image: '/path/to/image4.jpg',
-    },
-    {
-        id: 5,
-        title: 'News Article 5',
-        description: 'This is the description for news article 5.',
-        date: '2023-10-05',
-        image: '/path/to/image5.jpg',
-    },
-    {
-        id: 6,
-        title: 'News Article 6',
-        description: 'This is the description for news article 6.',
-        date: '2023-10-06',
-        image: '/path/to/image6.jpg',
-    },
-];
+import axiosInstance from '@/lib/axios';
 
 const NewsListingPage: React.FC = () => {
-    const [newsData, setNewsData] = useState(staticNewsData);
+    interface News {
+        _id: number;
+        id: number;
+        image: string;
+        title: string;
+        description: string;
+        date: string;
+    }
+    
+    const [newsData, setNewsData] = useState<News[]>([]);
     const [page, setPage] = useState(1);
-    const [showOptions, setShowOptions] = useState<number | null>(null); // Track which article's options to show
+    const [isLoading, setIsLoading] = useState(true);
     const itemsPerPage = 3;
 
-    const totalItems = newsData.length;
+    // Fetch institute from local storage
+    const institute = typeof window !== 'undefined' ? localStorage.getItem('instituteId') : null;
+    console.log('Institute:', institute);
 
+    // Fetch news data from API
+    useEffect(() => {
+        const fetchNewsData = async () => {
+            if (!institute) {
+                console.error('Institute not found in local storage');
+                return;
+            }
+            
+            try {
+                setIsLoading(true);
+                const response = await axiosInstance.get(
+                    `http://localhost:4001/api/v1/news/${institute}`,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+
+                if (!response) {
+                    throw new Error('Failed to fetch news data');
+                }
+                console.log('News data:', response.data.data);
+                setNewsData(response.data.data);
+            } catch (error) {
+                console.error('Error fetching news:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchNewsData();
+    }, [institute]);
+
+    if (!newsData) {
+        return <p className="text-center">No news articles found</p>;
+    }
+
+    const totalItems = newsData.length;
+    
     const handleNextPage = () => {
         if (page * itemsPerPage < totalItems) {
             setPage(page + 1);
@@ -72,17 +79,27 @@ const NewsListingPage: React.FC = () => {
             setPage(page - 1);
         }
     };
+console.log('newsDatabn:', newsData);
 
     const paginatedNewsData = newsData.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
-    const handleDelete = (id: number) => {
-        setNewsData(newsData.filter(news => news.id !== id));
-        setShowOptions(null); // Close options menu after deletion
+    const handleDelete = async (id: number) => {
+        try {
+            const response = await axiosInstance.delete(`http://localhost:4001/api/v1/news/${id}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+            }});
+            if (!response) {
+                throw new Error('Failed to delete news article');
+            }
+            setNewsData(newsData.filter((news) => news._id !== id));
+        } catch (error) {
+            console.error('Error deleting news article:', error);
+        }
     };
 
     const handleUpdate = (id: number) => {
         alert(`Update functionality for article with ID: ${id}`);
-        setShowOptions(null); // Close options menu after update
     };
 
     return (
@@ -103,56 +120,66 @@ const NewsListingPage: React.FC = () => {
                 </div>
                 <Separator />
                 <div className="overflow-x-auto">
-                    <table className="min-w-full table-auto">
-                        <thead>
-                            <tr className="border-b">
-                                <th className="px-4 py-2 text-left">ID</th>
-                                <th className="px-4 py-2 text-left">Image</th>
-                                <th className="px-4 py-2 text-left">Title</th>
-                                <th className="px-4 py-2 text-left">Description</th>
-                                <th className="px-4 py-2 text-left">Date</th>
-                                <th className="px-4 py-2 text-left">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {paginatedNewsData.map((news) => (
-                                <tr key={news.id} className="border-b hover:bg-gray-100">
-                                    <td className="px-4 py-2">{news.id}</td>
-                                    <td className="px-4 py-2">
-                                        <img src={news.image} alt={news.title} className="w-16 h-16 object-cover" />
-                                    </td>
-                                    <td className="px-4 py-2">{news.title}</td>
-                                    <td className="px-4 py-2">{news.description}</td>
-                                    <td className="px-4 py-2">{news.date}</td>
-                                    <td className="px-4 py-2">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="sm">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem 
-                                                    onClick={() => handleUpdate(news.id)}
-                                                    className="flex items-center gap-2 cursor-pointer"
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                    Update
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem 
-                                                    onClick={() => handleDelete(news.id)}
-                                                    className="flex items-center gap-2 cursor-pointer text-red-600"
-                                                >
-                                                    <Trash className="h-4 w-4" />
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </td>
+                    {isLoading ? (
+                        <p className="text-center">Loading...</p>
+                    ) : (
+                        <table className="min-w-full table-auto">
+                            <thead>
+                                <tr className="border-b">
+                                    <th className="px-4 py-2 text-left">ID</th>
+                                    <th className="px-4 py-2 text-left">Image</th>
+                                    <th className="px-4 py-2 text-left">Title</th>
+                                    <th className="px-4 py-2 text-left">Description</th>
+                                    <th className="px-4 py-2 text-left">Date</th>
+                                    <th className="px-4 py-2 text-left">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+    {paginatedNewsData.map((news: News,index:any) => (
+        console.log('news:', news.image),
+        <tr key={news.id} className="border-b hover:bg-gray-100">
+           <td className="px-4 py-2">{index + 1}</td>
+               <td className="px-4 py-2">
+                <img 
+                    src={`http://localhost:4001/api/uploads/${news.image}`} 
+                    alt={news.title} 
+                    className="w-16 h-16 object-cover" 
+                />
+            </td>
+            <td className="px-4 py-2">{news.title}</td>
+            <td className="px-4 py-2">{news.description}</td>
+            <td className="px-4 py-2">{news.date}</td>
+            <td className="px-4 py-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                            onClick={() => handleUpdate(news.id)}
+                            className="flex items-center gap-2 cursor-pointer"
+                        >
+                            <Pencil className="h-4 w-4" />
+                            Update
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => handleDelete(news._id)}
+                            className="flex items-center gap-2 cursor-pointer text-red-600"
+                        >
+                            <Trash className="h-4 w-4" />
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </td>
+        </tr>
+    ))}
+</tbody>
+
+                        </table>
+                    )}
                 </div>
                 <div className="flex justify-between mt-4">
                     <Button

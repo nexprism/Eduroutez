@@ -19,7 +19,7 @@ class NewsService {
 
     async getAll(query) {
         try {
-            const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+            const { page = 1, limit = 100000, filters = "{}", searchFields = "{}", sort = "{}" } = query;
             const pageNum = parseInt(page);
             const limitNum = parseInt(limit);
 
@@ -72,6 +72,7 @@ class NewsService {
     //getNewsByInstitute
     async getNewsByInstitute(id) {
         try {
+          console.log("instituteId", id);
             const news = await this.newsRepository.getNewsByInstitute(id);
             return news;
         }
