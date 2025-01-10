@@ -29,7 +29,7 @@ import { createPayout, deletePayout, getPayout, getPayouts, updatePayout } from 
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
 import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer } from "../../controllers/question-answer-controller.js";
 import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishlist } from "../../controllers/wishlist-controller.js";
-import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar } from "../../controllers/webinar-controller.js";
+import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar,getWebinarsByInstitute } from "../../controllers/webinar-controller.js";
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
@@ -292,6 +292,7 @@ router.delete("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jw
  */
 router.post("/webinar", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createWebinar);
 router.get("/webinars", getWebinars);
+router.get("/webinars-by-institute/:instituteId", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinarsByInstitute);
 router.get("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinar);
 router.patch("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateWebinar);
 router.delete("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteWebinar);
