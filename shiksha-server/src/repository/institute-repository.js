@@ -19,6 +19,39 @@ class InstituteRepository extends CrudRepository {
     }
   }
 
+  //updateCourse
+  async updateCourse(instituteId, courseId, data) {
+    try {
+      // Find the institute by its ID
+      const institute = await this.model.findById(instituteId);
+  
+      // If institute not found, throw an error
+      if (!institute) {
+        throw new Error("Institute not found");
+      }
+
+    
+
+      const result = await this.model.findOneAndUpdate(
+        { _id: instituteId, 'courses._id': courseId },
+        { $set: { 'courses.$.updatedAt': new Date() } }, // Update only the updatedAt field
+        { new: true }
+      );
+
+    return result;
+
+
+    
+    } catch (error) {
+      console.log(`Error updating course: ${error.message}`);
+    }
+
+  }
+
+
+
+
+
   //addGallery
   async addGallery(id, data) {
     try {
