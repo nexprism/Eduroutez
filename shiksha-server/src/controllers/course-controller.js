@@ -209,6 +209,10 @@ export async function updateCourse(req, res) {
       }
 
       const response = await courseService.update(courseId, payload);
+      const resp = await instituteService.updateCourses(payload.instituteCategory, courseId, response);
+
+      //update courses in institute
+      
 
       for (const key in oldImagePaths) {
         try {

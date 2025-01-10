@@ -145,6 +145,18 @@ console.log('updatesInstitute',updatesInstitute);
     }
   }
 
+  //updateCourses
+  async updateCourses(id,courseId,data){
+    try {
+      const updatesInstitute = await this.instituteRepository.updateCourse(id,courseId, data);
+
+      return updatesInstitute;
+    } catch (error) {
+      throw new AppError("Cannot update the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+      
+
   async addReviews(id,data){
     try {
       const updatesInstitute = await this.instituteRepository.addReview(id, data);
