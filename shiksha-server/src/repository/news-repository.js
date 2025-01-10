@@ -17,6 +17,15 @@ class NewsRepository extends CrudRepository {
             throw error;
         }
     }
+
+    //delete    
+    async delete(id) {
+        try {
+            return await News.findByIdAndDelete(id);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export { NewsRepository };
