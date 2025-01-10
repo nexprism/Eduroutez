@@ -59,6 +59,19 @@ export async function getBlogs(req, res) {
   }
 }
 
+export async function getBlogsByInstitute(req, res) { 
+  try {
+    const response = await blogService.getAllByInstitute(req.params.instituteId);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched blogs";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Error creating blog:", error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 /**
  * GET : /blog/:id
  * req.body {}
@@ -82,7 +95,7 @@ export async function getBlog(req, res) {
  */
 
 export async function updateBlog(req, res) {
-  singleUploader(req, res, async (err) => {
+  multiUploader(req, res, async (err) => {
     if (err) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }

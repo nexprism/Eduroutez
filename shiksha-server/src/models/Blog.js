@@ -6,6 +6,10 @@ const blogSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    instituteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+    },
     image: {
       type: String,
       required: true,

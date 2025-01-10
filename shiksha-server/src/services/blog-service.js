@@ -60,6 +60,18 @@ class BlogService {
       throw new AppError("Cannot fetch data of all the blogs", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
+
+
+
+   async getAllByInstitute(instituteId) {
+    try {
+      const blogs = await this.blogRepository.getAllByInstitute(instituteId);
+      return blogs;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
   async update(id, data) {
     try {
       const blog = await this.blogRepository.update(id, data);

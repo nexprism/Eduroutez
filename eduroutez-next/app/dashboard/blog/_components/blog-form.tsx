@@ -1,10 +1,10 @@
 'use client';
+
 import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Controller } from 'react-hook-form';
 import CustomEditor from '@/components/custom-editor';
 import {
   Form,
@@ -22,27 +22,17 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import { CalendarIcon, Plus, X } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { Textarea } from '@/components/ui/textarea';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePathname, useRouter } from 'next/navigation';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
 
 const formSchema = z.object({
   title: z.string().min(2, {
-    message: 'Name must be at least 2 characters.'
+    message: 'Title must be at least 2 characters.'
   }),
   category: z
     .string()
@@ -56,7 +46,6 @@ const formSchema = z.object({
         message: 'Please select a category.'
       }
     ),
-  counselorType: z.string().optional(),
   image: z
     .instanceof(File)
     .optional()
@@ -70,17 +59,21 @@ const formSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
-  description: z.string()
+  description: z.string().min(1, { message: 'Description is required.' })
 });
+
+type FormValues = z.infer<typeof formSchema>;
+
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
-export default function CounselorForm() {
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+export default function BlogForm() {
   const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
-  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(
-    null
-  );
+  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
+  const router = useRouter();
 
   React.useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
@@ -88,24 +81,31 @@ export default function CounselorForm() {
     }
   }, [segments]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       category: '',
-      description: '',
-      // mode: undefined,
-      counselorType: ''
+      description: ''
     }
   });
-  const router = useRouter();
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Handle form submission here
+  function onSubmit(values: FormValues) {
+    const instituteId = localStorage.getItem('instituteId');
+    if (!instituteId) {
+      toast.error('Institute ID not found');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('category', values.category);
     formData.append('description', values.description);
+    formData.append('blogCreatedBy', instituteId);
+    if(instituteId) {
+      formData.append('instituteId', instituteId);
+    }
+    
     if (values.image) {
       formData.append('images', values.image);
     }
@@ -118,7 +118,7 @@ export default function CounselorForm() {
         ? `${apiUrl}/blog/${segments[4]}`
         : `${apiUrl}/blog`;
       const response = await axiosInstance({
-        url: `${endpoint}`,
+        url: endpoint,
         method: isEdit ? 'patch' : 'post',
         data: formData,
         headers: {
@@ -127,11 +127,10 @@ export default function CounselorForm() {
       });
       return response.data;
     },
-
     onSuccess: () => {
       const message = isEdit
-        ? 'Counselor updated successfully'
-        : 'Counselor created successfully';
+        ? 'Blog updated successfully'
+        : 'Blog created successfully';
       toast.success(message);
       form.reset();
       setPreviewImageUrl(null);
@@ -139,6 +138,7 @@ export default function CounselorForm() {
     },
     onError: (error) => {
       toast.error('Something went wrong');
+      console.error('Submission error:', error);
     }
   });
 
@@ -157,37 +157,19 @@ export default function CounselorForm() {
     }
   };
 
-  const triggerImageFileInput = () => {
-    fileInputImageRef.current?.click();
-  };
-
   const removeImage = () => {
     setPreviewImageUrl(null);
     form.setValue('image', undefined);
     if (fileInputImageRef.current) {
-      fileInputImageRef.current.value = ''; // Reset the file input
+      fileInputImageRef.current.value = '';
     }
   };
 
-  const triggerFileInput = () => {
+  const triggerImageFileInput = () => {
     fileInputImageRef.current?.click();
   };
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  // write code to get categories from serve by tanstack query
-  const {
-    data: categories,
-    isLoading,
-    isSuccess
-  } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/blogs`);
-      return response.data;
-    }
-  });
-
-  const { data: counselor } = useQuery({
+  const { data: blog } = useQuery({
     queryKey: ['blog', segments[4]],
     queryFn: async () => {
       const response = await axiosInstance.get(
@@ -195,31 +177,28 @@ export default function CounselorForm() {
       );
       return response.data;
     },
-    enabled: isEdit // Only fetch when in edit mode
+    enabled: isEdit
   });
 
   React.useEffect(() => {
-    if (counselor?.data) {
+    if (blog?.data) {
       form.reset({
-        title: counselor.data.name,
-        category: counselor.data.category[0],
-        description: counselor.data.description,
-        //  image: undefined // Handle image separately
-        counselorType: counselor?.data?.counselorType
+        title: blog.data.title,
+        category: blog.data.category,
+        description: blog.data.description,
       });
 
-      // Set preview URL for existing image
-      if (counselor.data.image) {
-        setPreviewImageUrl(`${IMAGE_URL}/${counselor.data.image}`);
+      if (blog.data.image) {
+        setPreviewImageUrl(`${IMAGE_URL}/${blog.data.image}`);
       }
     }
-  }, [counselor, form]);
+  }, [blog, form]);
 
   return (
     <Card className="mx-auto w-full">
       <CardHeader>
         <CardTitle className="text-left text-2xl font-bold">
-          Create Blog
+          {isEdit ? 'Update Blog' : 'Create Blog'}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -238,108 +217,106 @@ export default function CounselorForm() {
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Catogery</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a catogery" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={'MBA'}>MBA</SelectItem>
-                        <SelectItem value={'ENGINEERING'}>ENGINEERING</SelectItem>
-                        <SelectItem value={'MEDICAL'}>MEDICAL</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-1">
-              <FormField
-                control={form.control}
-                name="image"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image</FormLabel>
-                    <FormControl>
-                      <div className="space-y-4">
-                        <Input
-                          type="file"
-                          accept="image/png, image/jpeg, image/webp"
-                          onChange={handleImageChange}
-                          ref={fileInputImageRef} // Reference to reset input
-                          className="hidden "
-                        />
 
-                        {previewImageUrl ? (
-                          <div className="relative inline-block">
-                            <Image
-                              src={previewImageUrl}
-                              alt="Preview"
-                              className="max-h-[400px] max-w-full rounded-md object-cover"
-                              width={1200}
-                              height={400}
-                            />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute right-0 top-0 -mr-2 -mt-2"
-                              onClick={removeImage}
-                            >
-                              <X className="h-4 w-4" />
-                              <span className="sr-only">Remove image</span>
-                            </Button>
-                          </div>
-                        ) : (
-                          <div
-                            onClick={triggerImageFileInput}
-                            className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
-                          >
-                            <Plus className="text-grey-400 h-10 w-10" />
-                          </div>
-                        )}
-                      </div>
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <SelectContent>
+                      <SelectItem value="MBA">MBA</SelectItem>
+                      <SelectItem value="ENGINEERING">ENGINEERING</SelectItem>
+                      <SelectItem value="MEDICAL">MEDICAL</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Controller
-                        name="description"
-                        control={form.control}
-                        render={({ field }) => (
-                          <CustomEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        )}
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image</FormLabel>
+                  <FormControl>
+                    <div className="space-y-4">
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        onChange={handleImageChange}
+                        ref={fileInputImageRef}
+                        className="hidden"
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+
+                      {previewImageUrl ? (
+                        <div className="relative inline-block">
+                          <Image
+                            src={previewImageUrl}
+                            alt="Preview"
+                            className="max-h-[400px] max-w-full rounded-md object-cover"
+                            width={1200}
+                            height={400}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-0 top-0 -mr-2 -mt-2"
+                            onClick={removeImage}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove image</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={triggerImageFileInput}
+                          className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                        >
+                          <Plus className="text-grey-400 h-10 w-10" />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Controller
+                      name="description"
+                      control={form.control}
+                      render={({ field }) => (
+                        <CustomEditor
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      )}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <Button type="submit" disabled={isSubmitting}>
-              Submit
+              {isSubmitting ? 'Submitting...' : isEdit ? 'Update' : 'Submit'}
             </Button>
           </form>
         </Form>

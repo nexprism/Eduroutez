@@ -23,7 +23,7 @@ import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } 
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
 import { createReview, deleteReview, getReview, getReviews, updateReview } from "../../controllers/review-controller.js";
 import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCategory, updateBlogCategory } from "../../controllers/blog-category-controller.js";
-import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog } from "../../controllers/blog-controller.js";
+import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog,getBlogsByInstitute } from "../../controllers/blog-controller.js";
 import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, updateNews } from "../../controllers/news-controller.js";
 import { createPayout, deletePayout, getPayout, getPayouts, updatePayout } from "../../controllers/payout-controller.js";
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
@@ -221,6 +221,7 @@ router.delete("/blog-category/:id", accessTokenAutoRefresh, passport.authenticat
  */
 router.post("/blog", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBlog);
 router.get("/blogs", getBlogs);
+router.get("/blogs-by-institute/:instituteId", getBlogsByInstitute);    
 // router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
 router.get("/blog/:id", getBlog);
 
