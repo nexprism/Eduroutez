@@ -140,7 +140,7 @@ export async function updateNews(req, res) {
         payload.image = req.file.filename;
       }
 
-        const blog = await this.blogRepository.update(id, data);
+        const blog = await this.newsService.update(newsId, payload);
 
       if (oldImagePath) {
         try {
