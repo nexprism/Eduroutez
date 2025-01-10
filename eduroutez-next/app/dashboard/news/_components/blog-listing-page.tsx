@@ -11,42 +11,49 @@ import { useQuery } from '@tanstack/react-query';
 import { useBlogTableFilters } from './blog-tables/use-blog-table-filters';
 import axiosInstance from '@/lib/axios';
 
-interface Career {
+type News = {
   _id: string;
   title: string;
   image: string;
   description: string;
-  category: string;
-  eligibility: string;
-  jobRoles: string;
-  topColleges: string;
-  instituteId: string;
+  institute: string;
+  date: string;
+  viewCount: number;
   createdAt: string;
   updatedAt: string;
-}
+  __v: number;
+};
 
-interface CareerResponse {
+type NewsResponse = {
   success: boolean;
   message: string;
-  data: Career[];
-  error: Record<string, any>;
-}
+  data: News[];
+  error: Record<string, unknown>;
+};
 
-type TCareerListingPage = {};
+type TNewsListingPage = {};
 
-export default function CareerListingPage({}: TCareerListingPage) {
+export default function NewsListingPage({}: TNewsListingPage) {
   const { searchQuery, page, limit } = useBlogTableFilters();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const { data, isLoading, isSuccess } = useQuery<CareerResponse>({
-    queryKey: ['career', searchQuery],
+  const { data, isLoading, isSuccess, error } = useQuery<NewsResponse>({
+    queryKey: ['news', searchQuery],
     queryFn: async () => {
-      const institute = localStorage.getItem('instituteId');
-      if (!institute) {
-        throw new Error('Institute ID not found');
+      try {
+        const instituteId = localStorage.getItem('instituteId');
+        console.log('InstituteId from localStorage:', instituteId);
+
+        if (!instituteId) {
+          throw new Error('Institute ID not found in localStorage');
+        }
+
+        const response = await axiosInstance.get(`${apiUrl}/news/${instituteId}`);
+        return response.data;
+      } catch (error) {
+        console.error('Error in queryFn:', error);
+        throw error;
       }
-      const response = await axiosInstance.get(`${apiUrl}/career-by-institute/${institute}`);
-      return response.data;
     }
   });
 
@@ -54,23 +61,25 @@ export default function CareerListingPage({}: TCareerListingPage) {
     <PageContainer scrollable>
       {isLoading ? (
         <div>Loading...</div>
+      ) : error ? (
+        <div className="text-red-500">Error: {(error as Error).message}</div>
       ) : (
-        isSuccess && (
+        isSuccess && data && (
           <div className="space-y-4">
             <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
               <Heading
-                title={`Career (${data.data.length})`}
-                description="All careers online and offline are listed here."
+                title={`News (${data.data.length})`}
+                description="All news online and offline are listed here."
               />
               <div className="flex gap-4">
                 <Button asChild className="w-fit whitespace-nowrap px-2">
-                  <Link href="/dashboard/career/new">
-                    <Plus className="mr-1 h-4 w-4" /> Add New Career
+                  <Link href="/dashboard/news/new">
+                    <Plus className="mr-1 h-4 w-4" /> Add New News
                   </Link>
                 </Button>
                 <Button asChild className="w-fit whitespace-nowrap px-2">
-                  <Link href="/dashboard/career/blog-category">
-                    <Plus className="mr-1 h-4 w-4" /> Add New Career Category
+                  <Link href="/dashboard/news/news-category">
+                    <Plus className="mr-1 h-4 w-4" /> Add New News Category
                   </Link>
                 </Button>
               </div>

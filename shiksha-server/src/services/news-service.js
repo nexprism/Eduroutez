@@ -1,7 +1,7 @@
 import { NewsRepository } from "../repository/index.js";
 
 
-
+import News from "../models/news.js";
 
 class NewsService {
     constructor() {
@@ -63,7 +63,10 @@ class NewsService {
 
   async get(id) {
     try {
-      return await News.findById(id);
+      console.log("Fetching news article with id: ", id);
+      const data= await News.findById(id);
+      console.log("data",data);
+      return data;
     } catch (error) {
       throw new Error("Error fetching news article: " + error.message);
     }
@@ -83,6 +86,8 @@ class NewsService {
 
   async update(id, payload) {
     try {
+      console.log("Updating news article with id: ", id);
+      console.log("Payload: ", payload);
         return await News.findByIdAndUpdate(id, payload, { new: true });
     } catch (error) {
       throw new Error("Error updating news article: " + error.message);
