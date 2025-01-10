@@ -7,6 +7,19 @@ class CourseRepository extends CrudRepository {
     super(Course);
   }
 
+  //getCourseByInstitute
+  async getCourseByInstitute(instituteId) {
+    try {
+      console.log("instituteId", instituteId);
+      const courses = await Course.find({ instituteCategory: instituteId });
+      return courses;
+    }
+    catch (error) {
+      throw error;
+    }
+  }
+
+
 
 
 async getPopularCourses() {

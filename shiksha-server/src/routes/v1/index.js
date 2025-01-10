@@ -14,7 +14,7 @@ import { createCategory, deleteCategory, getCategories, getCategory, updateCateg
 import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
-import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses } from "../../controllers/course-controller.js";
+import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
 import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute,addGallery,addFacility,submitIssue } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
@@ -91,6 +91,9 @@ router.get("/course-category/:id", accessTokenAutoRefresh, passport.authenticate
 router.patch("/course-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCourseCategory);
 router.delete("/course-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCourseCategory);
 
+
+
+
 /**
  * course routes
  */
@@ -100,6 +103,7 @@ router.get("/popular-courses", getPopularCourses);
 router.get("/course/:id", getCourse);
 router.patch("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCourse);
 router.delete("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCourse);
+router.get("/course-by-institute/:id", getCourseByInstitute);
 
 /**
  * query routes

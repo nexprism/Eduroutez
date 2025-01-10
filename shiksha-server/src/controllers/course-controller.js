@@ -5,6 +5,7 @@ import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CourseService from "../services/course-service.js";
 import InstituteService from "../services/institute-service.js";
+import UserService from "../services/user-service.js";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "coursePreviewThumbnail",
@@ -21,6 +22,7 @@ const multiUploader = FileUpload.upload.fields([
 ]);
 const courseService = new CourseService();
 const instituteService=new InstituteService();
+const userService=new UserService();
 
 /**
  * POST : /course
@@ -50,7 +52,7 @@ export const createCourse = async (req, res) => {
       }
 
 
-      
+
       console.log('payload',payload);
 
 
@@ -104,6 +106,9 @@ export const createCourse = async (req, res) => {
 
 export async function getCourses(req, res) {
   try {
+
+    const user = req.user;
+    
     const response = await courseService.getAll(req.query);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched courses";
@@ -113,6 +118,8 @@ export async function getCourses(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+
+
 
 
 
@@ -128,6 +135,7 @@ export async function getPopularCourses(req, res) {
   }
 }
 
+
 /**
  * GET : /course/:id
  * req.body {}
@@ -137,6 +145,21 @@ export async function getCourse(req, res) {
   try {
     // console.log(req.params.id);
     const response = await courseService.get(req.params.id);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the course";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+
+//getCourseByInstitute
+
+export async function getCourseByInstitute(req, res) {
+  try {
+    const response = await courseService.getCourseByInstitute(req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the course";
     return res.status(StatusCodes.OK).json(SuccessResponse);
@@ -227,7 +250,7 @@ export async function deleteCourse(req, res) {
 
 
     // Remove the course from the associated institute
-    const log=await instituteService.deleteCourse(instituteCategory,req.params.id);
+    const log=await courseService.delete(req.params.id);
     // console.log(log);
 
     const response = await courseService.delete(req.params.id);

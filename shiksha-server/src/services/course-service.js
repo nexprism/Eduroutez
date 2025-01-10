@@ -57,6 +57,16 @@ class CourseService {
     }
   }
 
+  //getCourseByInstitute
+  async getCourseByInstitute(instituteId) {
+    try {
+      const courses = await this.courseRepository.getCourseByInstitute(instituteId);
+      return courses;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   //getPopularCourses
   async getPopularCourses() {
     try {
@@ -75,6 +85,7 @@ class CourseService {
 
   async update(id, data) {
     try {
+      console.log("data", data);
       const course = await this.courseRepository.update(id, data);
 
       return course;
