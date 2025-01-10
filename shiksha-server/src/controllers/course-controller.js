@@ -27,7 +27,7 @@ const instituteService=new InstituteService();
  * req.body {}
  */
 export const createCourse = async (req, res) => {
-  console.log(req.body);
+  // console.log('course_data',{...req.body});
   try {
     multiUploader(req, res, async function (err, data) {
       if (err) {
@@ -36,6 +36,8 @@ export const createCourse = async (req, res) => {
 
       const payload = { ...req.body };
       const {instituteCategory,...rest}=payload;
+
+
 
       if (req.files["coursePreviewThumbnail"]) {
         payload.coursePreviewThumbnail = req.files["coursePreviewThumbnail"][0].filename;
@@ -46,9 +48,38 @@ export const createCourse = async (req, res) => {
       if (req.files["metaImage"]) {
         payload.metaImage = req.files["metaImage"][0].filename;
       }
+
+
+      
+      console.log('payload',payload);
+
+
+      //add validation for courseTitle,shortDescription,category,isCourseFree
+      
+      if(!payload.courseTitle){
+        return res.status(400).json({error:"Course Title is required"});
+      }
+
+      if(!payload.shortDescription){
+        return res.status(400).json({error:"Short Description is required"});
+      }
+
+      if(!payload.category){
+        return res.status(400).json({error:"Category is required"});
+      }
+
+      if(!payload.isCourseFree){
+        return res.status(400).json({error:"Course Type is required"});
+      }
+
+     
+      
+      
+      
+      
       
       const response = await courseService.create(payload);
-      const resp=await instituteService.addCourses(instituteCategory,response);
+      // const resp=await instituteService.addCourses(instituteCategory,response);
       // console.log('good')
       // console.log(response)
       // console.log('good2');

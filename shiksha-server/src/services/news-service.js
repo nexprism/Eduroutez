@@ -90,7 +90,8 @@ class NewsService {
 
   async delete(id) {
     try {
-      return await News.findByIdAndDelete(id);
+      console.log("Deleting news article with id: ", id);
+      const news = await this.newsRepository.delete(id);
     } catch (error) {
       throw new Error("Error deleting news article: " + error.message);
     }
