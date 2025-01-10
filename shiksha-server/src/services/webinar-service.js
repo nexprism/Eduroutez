@@ -17,6 +17,18 @@ class WebinarService {
     const webinar = await this.webinarRepository.get(id);
     return webinar;
   }
+
+  async getAllByUser(userId) {
+    try {
+      console.log("userId", userId);
+      const webinars = await this.webinarRepository.get({ webinarCreatedBy: userId });
+      console.log("webinars", webinars);
+      return webinars;
+    } catch (error) {
+      throw new Error("Cannot fetch webinars for the user");
+    }
+  }
+
   async getAll(query) {
     try {
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;

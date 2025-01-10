@@ -93,6 +93,7 @@ export default function CourseCategoryForm() {
       duration: '',
       webinarLink: '',
       description: '',
+      webinarCreatedBy:'',
       image: undefined
     }
   });
@@ -104,10 +105,16 @@ export default function CourseCategoryForm() {
     formData.append('duration', values.duration);
     formData.append('webinarLink', values.webinarLink);
     formData.append('description', values.description);
+
     formData.append('title', values.title);
     if (values.image) {
-      formData.append('images', values.image);
+      formData.append('image', values.image);
     }
+
+    const webinarCreatedBy = localStorage.getItem('instituteId');
+  if (webinarCreatedBy) {
+    formData.append('webinarCreatedBy', webinarCreatedBy);
+  }
 
     mutate(formData);
   }

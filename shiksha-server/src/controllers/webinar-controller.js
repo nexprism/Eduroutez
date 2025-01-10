@@ -53,6 +53,21 @@ export async function getWebinars(req, res) {
   }
 }
 
+
+export async function getWebinarsByInstitute(req, res) {
+  try {
+    const { instituteId } = req.params;
+    const response = await webinarService.getAllByUser(instituteId);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched webinars";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Error fetching webinar:", error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 /**
  * GET : /webinar/:id
  * req.body {}
