@@ -61,10 +61,7 @@ export const createCounselor = async (req, res) => {
         };
 
       }
-    const emailExists = await counselorService.getByEmail(req.body.email);
-    if (emailExists) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
+
 
       // counselorpayload = {
       //   ...payload,
