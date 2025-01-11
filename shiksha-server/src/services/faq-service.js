@@ -57,6 +57,7 @@ class faqService {
   }
 
   async get(id) {
+    console.log(id);
     const questionAnswer = await this.questionAnswerRepository.get(id);
     return questionAnswer;
   }
@@ -73,6 +74,7 @@ class faqService {
 
   async getAllByInstitute(instituteId) {
     try {
+      console.log(instituteId);
       const questionAnswers = await this.questionAnswerRepository.getAllByInstitute(instituteId);
       return questionAnswers;
     } catch (error) {
@@ -82,7 +84,7 @@ class faqService {
 
   async delete(id) {
     try {
-      const questionAnswer = await this.questionAnswerRepository.destroy(id);
+      const questionAnswer = await this.questionAnswerRepository.destroyid(id);
       return questionAnswer;
     } catch (error) {
       if (error.statusCode === StatusCodes.NOT_FOUND) {

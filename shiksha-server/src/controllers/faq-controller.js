@@ -49,6 +49,7 @@ export async function getFAQs(req, res) {
 
 export async function getFAQ(req, res) {
   try {
+    console.log(req.params.id);
     const response = await questionAnswerService.get(req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the question and answer";
@@ -69,8 +70,11 @@ export async function updateFAQ(req, res) {
     const questionAnswerId = req.params.id;
     const payload = {};
 
-    if (req.body.title) {
-      payload.title = req.body.title;
+    if (req.body.question) {
+      payload.question = req.body.question;
+    }
+    if(req.body.answer){
+      payload.answer = req.body.answer;
     }
 
     const response = await questionAnswerService.update(questionAnswerId, payload);
@@ -88,7 +92,8 @@ export async function updateFAQ(req, res) {
 
 export async function getFAQsByInstitute(req, res) {
   try {
-    const response = await questionAnswerService.getAllByInstitute(req.params.instituteId);
+    console.log(req.params.instituteId);
+    const response = await questionAnswerService.getAllByInstitute(req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched question and answer";
     return res.status(StatusCodes.OK).json(SuccessResponse);
@@ -104,7 +109,8 @@ export async function getFAQsByInstitute(req, res) {
  */
 
 export async function deleteFAQ(req, res) {
-  try {
+  try { 
+    console.log('bhjnk',req.params.id);
     const response = await questionAnswerService.delete(req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully deleted the question and answer";

@@ -22,18 +22,14 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['question-answers', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/faq`, {
-        params: {
-          searchFields: JSON.stringify({}),
-          sort: JSON.stringify({ createdAt: 'desc' }),
-          page: page,
-          limit: limit
-        }
-      });
-      return response.data;
+      const institutionId = localStorage.getItem('instituteId');
+      console.log('institutionId', institutionId);
+      const response = await axiosInstance.get(`${apiUrl}//faq-by-institute/${institutionId}`);
+      console.log('response', response);
+      return response.data.data;
     }
   });
-  console.log(data?.data)
+
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -43,7 +39,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Question And Answer (${data.data.totalDocuments})`}
+                title={`Question And Answer`}
                 description="All question and answers are listed here."
               />
               <Button asChild className="w-fit whitespace-nowrap px-2">
@@ -53,10 +49,14 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
               </Button>
             </div>
             <Separator />
-            <QuestionAnswerTable
-              data={data.data.result}
-              totalData={data.data.totalDocuments}
-            />
+            {data && data.length > 0 ? (
+              <QuestionAnswerTable
+                data={data}
+                totalData={data.totalDocuments}
+              />
+            ) : (
+              <div>No Frequently asked Question Found found.</div>
+            )}
           </div>
         )
       )}

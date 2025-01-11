@@ -16,6 +16,17 @@ class FAQRepository extends CrudRepository {
     }
   }
 
+  async destroyid(id) {
+    try {
+      console.log('dfgtyhutre',id);
+      const result = await this.model.findByIdAndDelete(id);
+      return result;
+      console.log('result',result);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getAll(filter, sort, page, limit) {
     try {
       const questionAnswers = await this.model.find(filter).sort(sort).skip((page - 1) * limit).limit(limit).exec();
@@ -32,7 +43,7 @@ class FAQRepository extends CrudRepository {
 
   async getAllByInstitute(instituteId) {
     try {
-      console.log('id',instituteId);
+      console.log('iddfrt',instituteId);
       const faqs = await FAQ.find({ instituteId:instituteId });
       console.log(faqs);
       return faqs;

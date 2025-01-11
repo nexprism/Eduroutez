@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface CellActionProps {
   data: QuestionAnswer;
@@ -27,8 +28,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const deleteQuestionAnswerMutation = useMutation({
     mutationFn: async (questionAnswerId: string) => {
+      console.log('questionAnswerId', questionAnswerId);
       const response = await axiosInstance({
-        url: `${apiUrl}/question-answer/${questionAnswerId}`,
+        url: `${apiUrl}//faq/${questionAnswerId}`,
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -39,6 +41,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['question-answers'] });
+      toast.success('FAQ deleted successfully');
       router.push('/dashboard/question-answer');
     },
     onSettled: () => {
@@ -48,9 +51,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   });
 
   const onConfirm = async () => {
-    setLoading(true);
-    deleteQuestionAnswerMutation.mutate(data._id);
-  };
+      setLoading(true);
+      await deleteQuestionAnswerMutation.mutateAsync(data._id);
+    };
 
   return (
     <>

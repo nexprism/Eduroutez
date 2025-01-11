@@ -43,7 +43,8 @@ import CustomEditor from '@/components/custom-editor';
 const formSchema = z.object({
   question: z.string().nonempty('Question is required'),
   answer: z.string().nonempty('Answer is required'),
-  email: z.string().optional()
+  email: z.string().optional(),
+  instituteId: z.string().optional()
 });
 
 export default function CounselorForm() {
@@ -70,7 +71,8 @@ export default function CounselorForm() {
     mutate({
       question: values.question,
       answer: values.answer,
-      email: localStorage.getItem('email') ?? ''
+      email: localStorage.getItem('email') ?? '',
+      instituteId: localStorage.getItem('instituteId') ?? ''
     });
   }
 

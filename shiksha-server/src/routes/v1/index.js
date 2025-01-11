@@ -37,7 +37,7 @@ import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePr
 import { createCounselorSlots, getCounselorSlot, updateCounselorSlot } from "../../controllers/counselorSlot-controller.js";
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
 import { createQuery, deleteQuery, getQueries, getQuery, updateQuery } from "../../controllers/query-controller.js";
-import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ } from "../../controllers/faq-controller.js";
+import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ ,getFAQsByInstitute} from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage } from "../../controllers/customPage-controller.js";
 import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
@@ -290,6 +290,7 @@ router.get("/faq", getFAQs);
 router.get("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getFAQ);
 router.patch("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  updateFAQ);
 router.delete("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  deleteFAQ);
+router.get("/faq-by-institute/:id", getFAQsByInstitute);
 
 /**
  * wishlist routes
