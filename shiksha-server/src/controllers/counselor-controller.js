@@ -29,34 +29,31 @@ const userService = new UserService();
  */
 export const createCounselor = async (req, res) => {
   try {
-      
+    console.log('Incoming data:', req.body); // Debugging
 
-      const payload = { ...req.body };
+    const emailExists = await userService.getUserByEmail(req.body.email);
+    if (emailExists) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
 
-      let counselorpayload = {};
+    const payload = { ...req.body };
+    let counselorpayload = { ...payload };
 
-    counselorpayload = {
-      ...payload,
-    };
-
-      if (req.body.password) {
+    if (req.body.password) {
         const emailExists = await userService.getUserByEmail(req.body.email);
         if (emailExists) {
           return res.status(400).json({ error: "Email already exists" });
         }
-        
-        const userPayload = {
-          name: req.body.firstname + " " + req.body.lastname,
-          email: req.body.email,
-          password: req.body.password,
-          role: "counsellor",
-          is_verified: true,
-        };
+      const userPayload = {
+        name: `${req.body.firstname} ${req.body.lastname}`,
+        email: req.body.email,
+        password: req.body.password,
+        role: "counsellor",
+        is_verified: true,
+      };
 
-
-        const userResponse = await userService.signup(userPayload, res);
-        console.log('userResponse', userResponse);
-        const userId = userResponse.user._id;
+      const userResponse = await userService.signup(userPayload, res);
+      const userId = userResponse.user._id;
 
 
         counselorpayload = {
@@ -65,10 +62,7 @@ export const createCounselor = async (req, res) => {
         };
 
       }
-    const emailExists = await counselorService.getByEmail(req.body.email);
-    if (emailExists) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
+
 
       // counselorpayload = {
       //   ...payload,
@@ -82,18 +76,18 @@ export const createCounselor = async (req, res) => {
       // const user = await counselorService.make(req.body.email, payload);
 
 
-      SuccessResponse.data = response;
-      SuccessResponse.message = "Successfully created a counselor";
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully created a counselor";
 
-      return res.status(StatusCodes.CREATED).json(SuccessResponse);
-    
+    return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
     console.log(error.message);
 
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 };
+
 
 /**
  * GET : /counselor
@@ -152,16 +146,20 @@ export async function getCounselor(req, res) {
  */
 
 export async function updateCounselor(req, res) {
-  try {
-    console.log('req.body', req.body); // Debug form data
-    console.log('req.files', req.files); // Debug file data
-
-    const counselorId = req.params.id;
-    const payload = {};
-
-    if (req.body.firstname) {
-      payload.firstname = req.body.firstname;
+  multiUploader(req, res, async (err) => {
+    if (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }
+
+    try {
+      const counselorId = req.params.id;
+      const payload = {};
+      let oldImagePath;
+
+      // Check if a new title is provided
+      if (req.body.title) {
+        payload.title = req.body.title;
+      }
 
     // Check and set uploaded files
     if (req.files) {
