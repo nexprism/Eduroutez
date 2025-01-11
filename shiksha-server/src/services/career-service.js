@@ -12,6 +12,18 @@ class CareerService {
       throw error;
     }
   }
+
+async getCareerByinstituteId(instituteId) {
+
+    try {
+      const careers = await this.careerRepository.getCareer(instituteId);
+      return careers;
+    } catch (error) {
+      throw new AppError("Cannot fetch data of all the careers", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
   async getAll(query) {
     try {
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;

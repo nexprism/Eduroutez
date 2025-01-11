@@ -22,19 +22,9 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import { CalendarIcon, Plus, X } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { Textarea } from '@/components/ui/textarea';
+import { Plus, X } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { usePathname, useRouter } from 'next/navigation';
@@ -70,18 +60,19 @@ const formSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
-    eligibility:z.string(),
-    jobRoles:z.string(),
-    oppertunity:z.string(),
-    topColleges:z.string(),
-    description: z.string()
+  eligibility: z.string(),
+  jobRoles: z.string(),
+  oppertunity: z.string(),
+  topColleges: z.string(),
+  description: z.string()
 });
+
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 export default function CounselorForm() {
   const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
-  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(
-    null
-  );
+  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
@@ -102,15 +93,26 @@ export default function CounselorForm() {
       jobRoles: '',
       oppertunity: '',
       topColleges: '',
-      // mode: undefined,
       counselorType: ''
     }
   });
+
   const router = useRouter();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Handle form submission here
     const formData = new FormData();
+    // Get instituteId from localStorage
+    const instituteId = localStorage.getItem('instituteId');
+    
+    if (!instituteId) {
+      toast.error('Institute ID not found. Please login again.');
+      return;
+    }
+
+    // Append instituteId to formData
+    if(instituteId){
+    formData.append('instituteId', instituteId);
+    }
     formData.append('title', values.title);
     formData.append('category', values.category);
     formData.append('description', values.description);
@@ -139,7 +141,6 @@ export default function CounselorForm() {
       });
       return response.data;
     },
-
     onSuccess: () => {
       const message = isEdit
         ? 'Career updated successfully'
@@ -177,27 +178,9 @@ export default function CounselorForm() {
     setPreviewImageUrl(null);
     form.setValue('image', undefined);
     if (fileInputImageRef.current) {
-      fileInputImageRef.current.value = ''; // Reset the file input
+      fileInputImageRef.current.value = '';
     }
   };
-
-  const triggerFileInput = () => {
-    fileInputImageRef.current?.click();
-  };
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  // write code to get categories from serve by tanstack query
-  const {
-    data: categories,
-    isLoading,
-    isSuccess
-  } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/career`);
-      return response.data;
-    }
-  });
 
   const { data: counselor } = useQuery({
     queryKey: ['career', segments[4]],
@@ -207,7 +190,7 @@ export default function CounselorForm() {
       );
       return response.data;
     },
-    enabled: isEdit // Only fetch when in edit mode
+    enabled: isEdit
   });
 
   React.useEffect(() => {
@@ -216,7 +199,7 @@ export default function CounselorForm() {
         title: counselor.data.name,
         category: counselor.data.category[0],
         description: counselor.data.description,
-        image: undefined, // Handle image separately
+        image: undefined,
         eligibility: counselor.data.eligibility,
         jobRoles: counselor.data.jobRoles,
         oppertunity: counselor.data.oppertunity,
@@ -224,7 +207,6 @@ export default function CounselorForm() {
         counselorType: counselor?.data?.counselorType
       });
 
-      // Set preview URL for existing image
       if (counselor.data.image) {
         setPreviewImageUrl(`${IMAGE_URL}/${counselor.data.image}`);
       }
@@ -260,11 +242,11 @@ export default function CounselorForm() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Catogery</FormLabel>
+                    <FormLabel>Category</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a catogery" />
+                          <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -291,8 +273,8 @@ export default function CounselorForm() {
                           type="file"
                           accept="image/png, image/jpeg, image/webp"
                           onChange={handleImageChange}
-                          ref={fileInputImageRef} // Reference to reset input
-                          className="hidden "
+                          ref={fileInputImageRef}
+                          className="hidden"
                         />
 
                         {previewImageUrl ? (
@@ -352,6 +334,7 @@ export default function CounselorForm() {
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="eligibility"
@@ -374,12 +357,13 @@ export default function CounselorForm() {
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="jobRoles"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>jobRoles</FormLabel>
+                    <FormLabel>Job Roles</FormLabel>
                     <FormControl>
                       <Controller
                         name="jobRoles"
@@ -396,12 +380,13 @@ export default function CounselorForm() {
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="oppertunity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Oppertunity</FormLabel>
+                    <FormLabel>Opportunity</FormLabel>
                     <FormControl>
                       <Controller
                         name="oppertunity"
@@ -418,6 +403,7 @@ export default function CounselorForm() {
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="topColleges"

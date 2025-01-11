@@ -16,14 +16,14 @@ import { createSubscription, deleteSubscription, getSubscription, getSubscriptio
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
 import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute,addGallery,addFacility,submitIssue } from "../../controllers/institute-controller.js";
-import { createCareer, deleteCareer, getCareer, getCareers, updateCareer } from "../../controllers/career-controller.js";
+import { createCareer, deleteCareer, getCareer, getCareers, updateCareer ,getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
 import { createReview, deleteReview, getReview, getReviews, updateReview } from "../../controllers/review-controller.js";
 import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCategory, updateBlogCategory } from "../../controllers/blog-category-controller.js";
-import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog } from "../../controllers/blog-controller.js";
+import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog,getBlogsByInstitute } from "../../controllers/blog-controller.js";
 import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, updateNews } from "../../controllers/news-controller.js";
 import { createPayout, deletePayout, getPayout, getPayouts, updatePayout } from "../../controllers/payout-controller.js";
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
@@ -151,6 +151,7 @@ router.post("/career", accessTokenAutoRefresh, passport.authenticate("jwt", { se
 router.get("/careers", getCareers);
 //router.get("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCareer);
 router.get("/career/:id", getCareer);
+router.get("/career-by-institute/:instituteId", getCareerByinstituteId);
 router.patch("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCareer);
 router.delete("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCareer);
 
@@ -223,6 +224,7 @@ router.delete("/blog-category/:id", accessTokenAutoRefresh, passport.authenticat
  */
 router.post("/blog", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBlog);
 router.get("/blogs", getBlogs);
+router.get("/blogs-by-institute/:instituteId", getBlogsByInstitute);    
 // router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
 router.get("/blog/:id", getBlog);
 
@@ -237,7 +239,7 @@ router.delete("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", 
 router.post("/create-news", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createNews);
 router.get("/news", getNews);
 router.get("/news/:institute", getNewsByInstitute);
-router.get("/news/:id", getNewsById);
+router.get("/news/data/:id", getNewsById);
 router.get("/news-by-institute/:id", getNewsByInstitute);
 router.patch("/update-news/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateNews);
 router.delete("/news/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteNews);

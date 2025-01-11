@@ -83,6 +83,7 @@ export async function getNews(req, res) {
  */
 export async function getNewsById(req, res) {
   try {
+    
     const response = await newsService.get(req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the news article";
@@ -113,13 +114,14 @@ export async function getNewsByInstitute(req, res) {
  * req.body {title: "New Title"}
  */
 export async function updateNews(req, res) {
-  singleUploader(req, res, async (err) => {
+  multiUploader(req, res, async (err) => {
     if (err) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }
 
     try {
       const newsId = req.params.id;
+      const instituteId = req.user;
       const payload = {};
       let oldImagePath;
 
@@ -130,17 +132,13 @@ export async function updateNews(req, res) {
         payload.description = req.body.description;
       }
 
-      if (req.file) {
-        const news = await newsService.get(newsId);
-
-        if (news.image) {
-          oldImagePath = path.join("uploads", news.image);
-        }
-
-        payload.image = req.file.filename;
+       if (req.files && req.files["image"]) {
+            payload.image = req.files["image"][0].filename;
       }
 
-        const blog = await this.newsService.update(newsId, payload);
+      payload.institute = instituteId;
+
+        const news = await newsService.update(newsId, payload);
 
       if (oldImagePath) {
         try {
@@ -150,11 +148,11 @@ export async function updateNews(req, res) {
         }
       }
 
-      SuccessResponse.data = response;
+      SuccessResponse.data = news;
       SuccessResponse.message = "Successfully updated the news article";
       return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
-      console.error("Update news error:", error);
+      console.error("Update news error:", error.message);
       ErrorResponse.error = error;
       return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
     }

@@ -44,6 +44,20 @@ export const createCareer = async (req, res) => {
   }
 };
 
+
+
+export const getCareerByinstituteId = async (req, res) => {
+  try {
+    const response = await careerService.getCareerByinstituteId(req.params.instituteId);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched careers";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 /**
  * GET : /career
  * req.body {}

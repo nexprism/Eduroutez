@@ -1,4 +1,5 @@
 'use client';
+
 import PageContainer from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
@@ -7,33 +8,48 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import BlogTable from './blog-tables';
 import { useQuery } from '@tanstack/react-query';
-
 import { useBlogTableFilters } from './blog-tables/use-blog-table-filters';
 import axiosInstance from '@/lib/axios';
 
-type TBlogListingPage = {};
+interface Career {
+  _id: string;
+  title: string;
+  image: string;
+  description: string;
+  category: string;
+  eligibility: string;
+  jobRoles: string;
+  topColleges: string;
+  instituteId: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-export default function BlogListingPage({}: TBlogListingPage) {
-  // const queryClient = useQueryClient()
+interface CareerResponse {
+  success: boolean;
+  message: string;
+  data: Career[];
+  error: Record<string, any>;
+}
+
+type TCareerListingPage = {};
+
+export default function CareerListingPage({}: TCareerListingPage) {
   const { searchQuery, page, limit } = useBlogTableFilters();
-
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const { data, isLoading, isSuccess } = useQuery({
+  const { data, isLoading, isSuccess } = useQuery<CareerResponse>({
     queryKey: ['career', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/careers`, {
-        params: {
-          searchFields: JSON.stringify({}),
-          sort: JSON.stringify({ createdAt: 'desc' }),
-          page: page,
-          limit: limit
-        }
-      });
+      const institute = localStorage.getItem('instituteId');
+      if (!institute) {
+        throw new Error('Institute ID not found');
+      }
+      const response = await axiosInstance.get(`${apiUrl}/career-by-institute/${institute}`);
       return response.data;
     }
   });
-  console.log(data?.data);
+
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -43,8 +59,8 @@ export default function BlogListingPage({}: TBlogListingPage) {
           <div className="space-y-4">
             <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
               <Heading
-                title={`Carrer (${data.data.totalDocuments})`}
-                description="All career online and offline are listed here."
+                title={`Career (${data.data.length})`}
+                description="All careers online and offline are listed here."
               />
               <div className="flex gap-4">
                 <Button asChild className="w-fit whitespace-nowrap px-2">
@@ -61,8 +77,8 @@ export default function BlogListingPage({}: TBlogListingPage) {
             </div>
             <Separator />
             <BlogTable
-              data={data.data.result}
-              totalData={data.data.totalDocuments}
+              data={data.data}
+              totalData={data.data.length}
             />
           </div>
         )
