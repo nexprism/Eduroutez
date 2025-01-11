@@ -189,6 +189,8 @@ export async function updateCounselor(req, res) {
     });
   }
 }
+  );
+} 
 
 /**
  * DELETE : /counselor/:id
@@ -236,4 +238,5 @@ export const markSlot = async (req, res) => {
     ErrorResponse.error = error;
     return res.status(500).json(ErrorResponse);
   }
-};
+
+}

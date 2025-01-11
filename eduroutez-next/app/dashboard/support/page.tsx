@@ -9,6 +9,8 @@ import {
   FileQuestion,
   CheckCircle2
 } from 'lucide-react';
+import axiosInstance from '@/lib/axios';
+import { toast } from 'sonner';
 
 const SupportPage = () => {
   const [title, setTitle] = useState('');
@@ -17,9 +19,44 @@ const SupportPage = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [category, setCategory] = useState('general');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ title, description, image, category });
+
+
+
+    const formData = new FormData();
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const instituteId = localStorage.getItem('instituteId');
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('category', category);
+    if (image) {
+      formData.append('image', image);
+    }
+    if (instituteId) {
+      formData.append('instituteId', instituteId);
+    }
+
+    try {
+      const response = await axiosInstance(`${apiUrl}/submitIssue`, {
+        method: 'POST',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (!response) {
+        throw new Error('Network response was not ok');
+      }
+
+      const result = response.data;
+      toast.success('Issue submitted successfully');
+      console.log('Issue submitted successfully:', result);
+    } catch (error) {
+      console.error('Error submitting issue:', error);
+      toast.error('Error submitting issue');
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
