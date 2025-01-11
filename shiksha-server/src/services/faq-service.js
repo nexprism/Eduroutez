@@ -71,6 +71,15 @@ class faqService {
     }
   }
 
+  async getAllByInstitute(instituteId) {
+    try {
+      const questionAnswers = await this.questionAnswerRepository.getAllByInstitute(instituteId);
+      return questionAnswers;
+    } catch (error) {
+      throw new AppError("Cannot fetch data of all the questionAnswers", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async delete(id) {
     try {
       const questionAnswer = await this.questionAnswerRepository.destroy(id);

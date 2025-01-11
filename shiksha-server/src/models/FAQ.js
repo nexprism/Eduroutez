@@ -10,7 +10,10 @@ const questionAnswerSchema = new mongoose.Schema(
     },
     email:{
       type:String,
-    }
+    },
+    instituteId:{
+      type:String,
+    },
   },
   { timestamps: true }
 );
