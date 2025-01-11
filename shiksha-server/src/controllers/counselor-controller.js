@@ -5,6 +5,7 @@ import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CounselorService from "../services/counselor-service.js";
 import UserService from "../services/user-service.js";
+const singleUploader = FileUpload.upload.single("image");
 const multiUploader = FileUpload.upload.fields([
   {
     name: "profilePhoto",
@@ -160,41 +161,33 @@ export async function updateCounselor(req, res) {
         payload.title = req.body.title;
       }
 
-      // Check if a new image is uploaded
-      if (req.file) {
-        const counselor = await counselorService.get(counselorId);
-
-        // Record the old image path if it exists
-        if (counselor.image) {
-          oldImagePath = path.join("uploads", counselor.image);
-        }
-
-        // Set the new image filename in payload
-        payload.image = req.file.filename;
+    // Check and set uploaded files
+    if (req.files) {
+      if (req.files.profilePhoto) {
+        payload.profilePhoto = req.files.profilePhoto[0].filename;
       }
-
-      // Update the counselor with new data
-      const response = await counselorService.update(counselorId, payload);
-
-      // Delete the old image only if the update is successful and old image exists
-      if (oldImagePath) {
-        try {
-          fs.unlink(oldImagePath);
-        } catch (unlinkError) {
-          console.error("Error deleting old image:", unlinkError);
-        }
+      if (req.files.adharCard) {
+        payload.adharCard = req.files.adharCard[0].filename;
       }
-
-      // Return success response
-      SuccessResponse.data = response;
-      SuccessResponse.message = "Successfully updated the counselor";
-      return res.status(StatusCodes.OK).json(SuccessResponse);
-    } catch (error) {
-      console.error("Update counselor error:", error);
-      ErrorResponse.error = error;
-      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+      if (req.files.panCard) {
+        payload.panCard = req.files.panCard[0].filename;
+      }
     }
-  });
+
+    const response = await counselorService.update(counselorId, payload);
+
+    // Return success response
+    return res.status(StatusCodes.OK).json({
+      message: "Successfully updated the counselor",
+      data: response,
+    });
+
+  } catch (error) {
+    console.error("Update counselor error:", error);
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: error.message,
+    });
+  }
 }
 
 /**
