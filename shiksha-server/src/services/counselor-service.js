@@ -74,6 +74,7 @@ class CounselorService {
 
   
   async getByEmail(email) {
+    // console.log('email',email);
     const counselor = await this.counselorRepository.getByEmail(email);
     return counselor;
   }
@@ -83,6 +84,17 @@ class CounselorService {
     const questionAnswer = await this.counselorRepository.book(email,data);
     return questionAnswer;
   }
+
+  //getCounselorsByInstitute
+  async getCounselorsByInstitute(instituteId) {
+    try {
+      const counselors = await this.counselorRepository.getCounselorsByInstitute(instituteId);
+      return counselors;
+    } catch (error) {
+      throw error;
+    }
+  }
+
 
   async mark(data) {
     // console.log('hi',email,data);

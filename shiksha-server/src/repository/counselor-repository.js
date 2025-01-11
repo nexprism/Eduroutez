@@ -32,12 +32,24 @@ class CounselorRepository extends CrudRepository {
   //getByEmail
   async getByEmail(email) {
     try {
-      const result = await Counselor.find({ email: email });
+      const result = await Counselor.findOne({ email });
+      console.log('result',result);
       return result;
     } catch (error) {
       throw error;
     }
   }
+
+  //getCounselorsByInstitute
+  async getCounselorsByInstitute(instituteId) {
+    try {
+      const counselors = await this.model.find({ instituteId: instituteId });
+      return counselors;
+    } catch (error) {
+      throw new Error("Cannot fetch data of all the counselors");
+    }
+  }
+
 
   async book(email, studentData) {
     try {
