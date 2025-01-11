@@ -28,70 +28,45 @@ const userService = new UserService();
  */
 export const createCounselor = async (req, res) => {
   try {
-    
+    console.log('Incoming data:', req.body); // Debugging
+
     const emailExists = await userService.getUserByEmail(req.body.email);
-    //  console.log(emailExists);
-      if (emailExists) {
-        return res.status(400).json({ error: "Email already exists" });
-      }
+    if (emailExists) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
 
-      const payload = { ...req.body };
+    const payload = { ...req.body };
+    let counselorpayload = { ...payload };
 
-      let counselorpayload = {};
+    if (req.body.password) {
+      const userPayload = {
+        name: `${req.body.firstname} ${req.body.lastname}`,
+        email: req.body.email,
+        password: req.body.password,
+        role: "counsellor",
+        is_verified: true,
+      };
 
-    counselorpayload = {
-      ...payload,
-    };
+      const userResponse = await userService.signup(userPayload, res);
+      const userId = userResponse.user._id;
 
-      if (req.body.password) {
-        
-        const userPayload = {
-          name: req.body.firstname + " " + req.body.lastname,
-          email: req.body.email,
-          password: req.body.password,
-          role: "counsellor",
-          is_verified: true,
-        };
+      counselorpayload.userId = userId;
+    }
 
+    const response = await counselorService.create(counselorpayload);
 
-        const userResponse = await userService.signup(userPayload, res);
-        console.log('userResponse', userResponse);
-        const userId = userResponse.user._id;
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully created a counselor";
 
-
-        counselorpayload = {
-          ...payload,
-          userId: userId,
-        };
-
-      }
-
-      
-
-      // counselorpayload = {
-      //   ...payload,
-      //   userId: userId,
-      // };
-
-      
-      const response = await counselorService.create(counselorpayload);
-      //if password get from body then add it payload and save in user model
-
-      // const user = await counselorService.make(req.body.email, payload);
-
-
-      SuccessResponse.data = response;
-      SuccessResponse.message = "Successfully created a counselor";
-
-      return res.status(StatusCodes.CREATED).json(SuccessResponse);
-    
+    return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
     console.log(error.message);
 
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 };
+
 
 /**
  * GET : /counselor
@@ -150,7 +125,7 @@ export async function getCounselor(req, res) {
  */
 
 export async function updateCounselor(req, res) {
-  singleUploader(req, res, async (err) => {
+  multiUploader(req, res, async (err) => {
     if (err) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }

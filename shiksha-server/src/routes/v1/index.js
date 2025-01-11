@@ -38,7 +38,7 @@ import { createCounselorSlots, getCounselorSlot, updateCounselorSlot } from "../
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
 import { createQuery, deleteQuery, getQueries, getQuery, updateQuery } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ } from "../../controllers/faq-controller.js";
-
+import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
 
 /**
@@ -158,8 +158,16 @@ router.delete("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt"
 /**
  * counselor routes
  */
-router.post("/counselor", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCounselor);
-//get couselor by institute
+router.post(
+    '/counselor',
+    (req, res, next) => {
+      console.log('Headers:', req.headers);
+      console.log('Body:', req.body); // Will show parsed form-data fields
+      next();
+    },
+    upload.none(),
+    createCounselor
+  );//get couselor by institute
 router.get("/counselors-by-institute/:institute", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorsByInstitute);
 router.get("/counselors", getCounselors);
 router.get("/counselor/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselor);
