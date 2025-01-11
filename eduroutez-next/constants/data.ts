@@ -254,6 +254,13 @@ export const navItems: NavItem[] = [
   isActive: false,
   items: [] // No child items
 },
+{
+  title: 'Redeem',
+    url: '/dashboard/redeem',
+    icon: 'receipt-indian-rupee',
+   isActive: false,
+   items: [] // No child items
+ },
   {
     title: 'Settings',
     url: '/dashboard/setting',
