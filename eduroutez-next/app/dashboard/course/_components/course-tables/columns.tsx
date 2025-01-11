@@ -37,23 +37,14 @@ export const columns: ColumnDef<Course>[] = [
     header: 'CATEGORY',
     cell: ({ row }) => <div>{`${row.original.category}`}</div>
   },
-  {
-    header: 'INSTRUCTOR',
-    cell: ({ row }) => <div>{`${row.original.instructor}`}</div>
-  },
-  {
-    header: 'CONTENT',
-    cell: ({ row }) => <div>{`${row.original.instructor}`}</div>
-  },
-  {
-    header: 'ENROLLMENT',
-    cell: ({ row }) => <div>{`${row.original.instructor}`}</div>
-  },
-
+ 
   {
     header: 'PRICE',
-    cell: ({ row }) => <div>{`${row.original.coursePrice}`}</div>
+    cell: ({ row }) => (
+      <div>{row.original.coursePrice ? `${row.original.coursePrice}` : 'Free'}</div>
+    )
   },
+  
 
   {
     accessorKey: 'status',

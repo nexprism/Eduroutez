@@ -18,7 +18,7 @@ import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPop
 import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute,addGallery,addFacility,submitIssue } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer ,getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
-import {  bookSlots,createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor } from "../../controllers/counselor-controller.js";
+import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
 import { createReview, deleteReview, getReview, getReviews, updateReview } from "../../controllers/review-controller.js";
@@ -39,7 +39,7 @@ import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../.
 import { createQuery, deleteQuery, getQueries, getQuery, updateQuery } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ } from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage } from "../../controllers/customPage-controller.js";
-
+import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
 
 /**
@@ -159,7 +159,17 @@ router.delete("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt"
 /**
  * counselor routes
  */
-router.post("/counselor", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCounselor);
+router.post(
+    '/counselor',
+    (req, res, next) => {
+      console.log('Headers:', req.headers);
+      console.log('Body:', req.body); // Will show parsed form-data fields
+      next();
+    },
+    upload.none(),
+    createCounselor
+  );//get couselor by institute
+router.get("/counselors-by-institute/:institute", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorsByInstitute);
 router.get("/counselors", getCounselors);
 router.get("/counselor/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselor);
 router.patch("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselor);

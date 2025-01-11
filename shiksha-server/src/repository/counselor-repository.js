@@ -1,3 +1,4 @@
+import { console } from "inspector";
 import Counselor from "../models/Counselor.js";
 import CrudRepository from "./crud-repository.js";
 
@@ -29,15 +30,37 @@ class CounselorRepository extends CrudRepository {
     }
   }
 
+  async getByid(id) {
+    console.log('result',id);
+    try {
+      const result = await this.model.findOne({ _id: id });
+      return result;
+    } catch (error) {
+      console.log('error',error.message);
+    }
+  }
+
   //getByEmail
   async getByEmail(email) {
     try {
-      const result = await Counselor.find({ email: email });
+      const result = await Counselor.findOne({ email });
+      console.log('result',result);
       return result;
     } catch (error) {
       throw error;
     }
   }
+
+  //getCounselorsByInstitute
+  async getCounselorsByInstitute(instituteId) {
+    try {
+      const counselors = await this.model.find({ instituteId: instituteId });
+      return counselors;
+    } catch (error) {
+      throw new Error("Cannot fetch data of all the counselors");
+    }
+  }
+
 
   async book(email, studentData) {
     try {
@@ -54,6 +77,24 @@ class CounselorRepository extends CrudRepository {
       return result; // Return the updated document
     } catch (error) {
       console.error("Error in book function:", error);
+      throw error;
+    }
+  }
+
+  //update
+  async update(id, data) {
+    try {
+  //fetch counselor by id
+
+  const counselor = await this.model.findOne({ _id: id });
+  if (!counselor) {
+    throw new Error('Counselor with the given id not found');
+  }
+      const result = await this.model.findOneAndUpdate({ _id: id }, data, { new: true });
+      return result;
+    }
+    catch (error) {
+      console.log('error', error.message);
       throw error;
     }
   }

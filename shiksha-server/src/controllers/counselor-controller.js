@@ -4,6 +4,8 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CounselorService from "../services/counselor-service.js";
+import UserService from "../services/user-service.js";
+const singleUploader = FileUpload.upload.single("image");
 const multiUploader = FileUpload.upload.fields([
   {
     name: "profilePhoto",
@@ -19,6 +21,7 @@ const multiUploader = FileUpload.upload.fields([
   },
 ]);
 const counselorService = new CounselorService();
+const userService = new UserService();
 
 /**
  * POST : /counselor
@@ -26,54 +29,87 @@ const counselorService = new CounselorService();
  */
 export const createCounselor = async (req, res) => {
   try {
-    multiUploader(req, res, async function (err, data) {
-      if (err) {
-        return res.status(500).json({ error: err });
+    console.log('Incoming data:', req.body); // Debugging
+
+    const emailExists = await userService.getUserByEmail(req.body.email);
+    if (emailExists) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
+
+    const payload = { ...req.body };
+    let counselorpayload = { ...payload };
+
+    if (req.body.password) {
+        const emailExists = await userService.getUserByEmail(req.body.email);
+        if (emailExists) {
+          return res.status(400).json({ error: "Email already exists" });
+        }
+      const userPayload = {
+        name: `${req.body.firstname} ${req.body.lastname}`,
+        email: req.body.email,
+        password: req.body.password,
+        role: "counsellor",
+        is_verified: true,
+      };
+
+      const userResponse = await userService.signup(userPayload, res);
+      const userId = userResponse.user._id;
+
+
+        counselorpayload = {
+          ...payload,
+          userId: userId,
+        };
+
       }
 
-      //check email exists
-      const emailExists = await counselorService.getByEmail(req.body.email);
-      if (emailExists) {
-        return res.status(400).json({ error: "Email already exists" });
-      }
 
-
-
-      const payload = { ...req.body };
-
+      // counselorpayload = {
+      //   ...payload,
+      //   userId: userId,
+      // };
 
       
-      // console.log(payload);
-      if (req.files["profilePhoto"]) {
-        payload.profilePicture = req.files["profilePhoto"][0].filename;
-      }
+      const response = await counselorService.create(counselorpayload);
+      //if password get from body then add it payload and save in user model
 
-      if (req.files["adharCard"]) {
-        payload.adharCard = req.files["adharCard"][0].filename;
-      }
+      // const user = await counselorService.make(req.body.email, payload);
 
-      if (req.files["panCard"]) {
-        payload.panCard = req.files["panCard"][0].filename;
-      }
 
-      const response = await counselorService.create(payload);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully created a counselor";
 
-      SuccessResponse.data = response;
-      SuccessResponse.message = "Successfully created a counselor";
-
-      return res.status(StatusCodes.CREATED).json(SuccessResponse);
-    });
+    return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
+    console.log(error.message);
 
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 };
+
 
 /**
  * GET : /counselor
  * req.body {}
  */
+
+
+//getCouselorsByInstitute
+export const getCounselorsByInstitute = async (req, res) => { 
+  try {
+    const instituteId = req.params.institute;
+    const response = await counselorService.getCounselorsByInstitute(instituteId);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched counselors";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  } 
+};
+
+
 
 export async function getCounselors(req, res) {
   try {
@@ -109,58 +145,54 @@ export async function getCounselor(req, res) {
  * req.body {capacity:200}
  */
 
-export async function updateCounselor(req, res) {
-  singleUploader(req, res, async (err) => {
-    if (err) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
+//updateCounselor with images
+export const updateCounselor = async (req, res) => {
+  try {
+    // Wrap multiUploader in a Promise to handle it properly
+    await new Promise((resolve, reject) => {
+      multiUploader(req, res, (err) => {
+        if (err) {
+          console.error("Multer upload error:", err);
+          reject(err);
+        }
+        resolve();
+      });
+    });
+
+    
+
+    const { id } = req.params;
+    const payload = { ...req.body };
+
+    // Handle file uploads
+    if (req.files) {
+      if (req.files.profilePhoto && req.files.profilePhoto[0]) {
+        payload.profilePhoto = req.files.profilePhoto[0].path;
+      }
+
+      if (req.files.adharCard && req.files.adharCard[0]) {
+        payload.adharCard = req.files.adharCard[0].path;
+      }
+
+      if (req.files.panCard && req.files.panCard[0]) {
+        payload.panCard = req.files.panCard[0].path;
+      }
     }
 
-    try {
-      const counselorId = req.params.id;
-      const payload = {};
-      let oldImagePath;
+    // console.log("Payload:", payload);
 
-      // Check if a new title is provided
-      if (req.body.title) {
-        payload.title = req.body.title;
-      }
+    const response = await counselorService.update(id, payload);
+    console.log("Response:", response);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully updated the counselor";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
 
-      // Check if a new image is uploaded
-      if (req.file) {
-        const counselor = await counselorService.get(counselorId);
-
-        // Record the old image path if it exists
-        if (counselor.image) {
-          oldImagePath = path.join("uploads", counselor.image);
-        }
-
-        // Set the new image filename in payload
-        payload.image = req.file.filename;
-      }
-
-      // Update the counselor with new data
-      const response = await counselorService.update(counselorId, payload);
-
-      // Delete the old image only if the update is successful and old image exists
-      if (oldImagePath) {
-        try {
-          fs.unlink(oldImagePath);
-        } catch (unlinkError) {
-          console.error("Error deleting old image:", unlinkError);
-        }
-      }
-
-      // Return success response
-      SuccessResponse.data = response;
-      SuccessResponse.message = "Successfully updated the counselor";
-      return res.status(StatusCodes.OK).json(SuccessResponse);
-    } catch (error) {
-      console.error("Update counselor error:", error);
-      ErrorResponse.error = error;
-      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
-    }
-  });
+  } catch (error) {
+    console.error("Error in updateCounselor:", error.message);
+    return res.status(error.statusCode || 500).json({ ...ErrorResponse, error });
+  }
 }
+
 
 /**
  * DELETE : /counselor/:id
@@ -208,4 +240,5 @@ export const markSlot = async (req, res) => {
     ErrorResponse.error = error;
     return res.status(500).json(ErrorResponse);
   }
-};
+
+}

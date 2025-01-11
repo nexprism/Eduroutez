@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import FAQService from "../services/faq-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
+import { get } from "mongoose";
 const questionAnswerService = new FAQService();
 
 /**
@@ -85,6 +86,18 @@ export async function updateFAQ(req, res) {
   }
 }
 
+export async function getFAQsByInstitute(req, res) {
+  try {
+    const response = await questionAnswerService.getAllByInstitute(req.params.instituteId);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched question and answer";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 /**
  * DELETE : /question-answer/:id
  * req.body {}
@@ -101,3 +114,4 @@ export async function deleteFAQ(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+

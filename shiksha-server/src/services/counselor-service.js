@@ -1,4 +1,5 @@
 import { ServerConfig } from "../config/index.js";
+import { courseSchema } from "../models/Course.js";
 import { CounselorRepository } from "../repository/index.js";
 import bcrypt from "bcrypt";
 
@@ -74,6 +75,7 @@ class CounselorService {
 
   
   async getByEmail(email) {
+    // console.log('email',email);
     const counselor = await this.counselorRepository.getByEmail(email);
     return counselor;
   }
@@ -84,6 +86,18 @@ class CounselorService {
     return questionAnswer;
   }
 
+  //getCounselorsByInstitute
+  async getCounselorsByInstitute(instituteId) {
+    try {
+      const counselors = await this.counselorRepository.getCounselorsByInstitute(instituteId);
+      console.log('counselors',counselors);
+      return counselors;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
   async mark(data) {
     // console.log('hi',email,data);
     const questionAnswer = await this.counselorRepository.mark(data);
@@ -92,9 +106,19 @@ class CounselorService {
 
   async update(id, data) {
     try {
+
+      //fetch counselor by id
+      console.log('id', id);
+      const counselordata = await this.counselorRepository.getByid(id);
+      if (!counselordata) {
+        throw new Error("Counselor not found");
+        
+      }
+
       const counselor = await this.counselorRepository.update(id, data);
       return counselor;
     } catch (error) {
+      console.log('error', error.message);
       throw error;
     }
   }

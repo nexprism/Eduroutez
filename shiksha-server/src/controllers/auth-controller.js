@@ -2,13 +2,17 @@ import { FileUpload } from "../middlewares/index.js";
 import UserRefreshToken from "../models/UserRefreshToken.js";
 import UserService from "../services/user-service.js";
 import InstituteService from "../services/institute-service.js";
+import CounselorService from "../services/counselor-service.js";
 const singleUploader = FileUpload.upload.single("image");
 
 const userService = new UserService();
 const instituteService = new InstituteService();
+const counselorService = new CounselorService();
 
 export const signup = async (req, res) => {
   console.log(req.body);
+  //req parms refercode
+
   try {
     
     //check email already exists
@@ -35,8 +39,48 @@ export const signup = async (req, res) => {
 
 
 
-
+    var is_verified = true;
+    //generate random referalCode
+    var referalCode = Math.random().toString(36).substring(7);
     
+    
+
+
+
+
+    if (req.body.role === 'institute'){
+      is_verified = false;
+    }
+
+    var referdata = {};
+    
+
+    if(req.body.referal_Code){
+      const referalUser = await userService.getUserByReferalCode(req.body.referal_Code);
+      if(!referalUser){
+        return res.status(400).json({
+          message: "Referal code Invalid",
+          data: {},
+          success: false,
+          err: {},
+        });
+      }
+      
+      const my_referrals = {};
+      my_referrals.push(referalUser._id);
+
+      var referdata = {
+        refer_by: referalUser._id,
+        my_referrals: my_referrals,
+      };
+
+
+      
+
+    }
+
+
+
     
 
 
@@ -48,7 +92,10 @@ export const signup = async (req, res) => {
         password: req.body.password,
         role: req.body?.role,
         city:req.body.city,
-        state:req.body.state
+        state:req.body.state,
+        is_verified: is_verified,
+        referalCode: referalCode,
+      ...referdata  
       },
       res
     );
@@ -69,6 +116,20 @@ export const signup = async (req, res) => {
     const instituteResponse = await instituteService.create(institutePayload);
 
   }
+
+    if (req.body.role === 'counsellor') {
+
+      const counsellorpayload = {
+        firstname: req.body.name,
+        lastname: req.body.name,
+        email: req.body.email,
+        contactno: req.body.contact_number,
+        _id: userId,
+      };
+    
+      const counselorResponse = await counselorService.create(counsellorpayload);
+
+    }
 
   
     return res.status(201).json({
