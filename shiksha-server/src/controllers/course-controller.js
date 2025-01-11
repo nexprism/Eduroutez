@@ -258,10 +258,12 @@ export async function deleteCourse(req, res) {
     // console.log(log);
 
     const response = await courseService.delete(req.params.id);
+    const resp = await instituteService.deleteCourse(instituteCategory, req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully deleted the course";
     return res.status(200).json(SuccessResponse);
   } catch (error) {
+    console.log('error',error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }
