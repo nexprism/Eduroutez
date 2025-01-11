@@ -38,6 +38,7 @@ import { createCounselorSlots, getCounselorSlot, updateCounselorSlot } from "../
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
 import { createQuery, deleteQuery, getQueries, getQuery, updateQuery } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ } from "../../controllers/faq-controller.js";
+import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage } from "../../controllers/customPage-controller.js";
 import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
 
@@ -383,5 +384,19 @@ router.get("/media", accessTokenAutoRefresh, passport.authenticate("jwt", { sess
 router.get("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMedia);
 router.patch("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateMedia);
 router.delete("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteMedia);
+
+router.post("/page", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createPage);
+router.get("/page", getPages);
+router.get("/page-by-institute/:instituteId", getPagesByInstitute);    
+// router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
+router.get("/page/:id", getPage);
+
+
+
+
+router.patch("/page/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updatePage);
+router.delete("/page/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deletePage);
+
+
 
 export default router;
