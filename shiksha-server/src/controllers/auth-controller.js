@@ -39,7 +39,7 @@ export const signup = async (req, res) => {
 
 
 
-    var is_verified = false;
+    var is_verified = true;
     //generate random referalCode
     var referalCode = Math.random().toString(36).substring(7);
     
@@ -48,8 +48,8 @@ export const signup = async (req, res) => {
 
 
 
-    if (req.body.role === 'counsellor' || req.body.role === 'student'){
-      is_verified = true;
+    if (req.body.role === 'institute'){
+      is_verified = false;
     }
 
     var referdata = {};
