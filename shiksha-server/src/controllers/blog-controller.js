@@ -114,7 +114,8 @@ export async function updateBlog(req, res) {
       }
 
       // Check if a new image is uploaded
-      if (req.file) {
+      console.log("req.file", req.file);
+      if (req.files && req.files["images"]) {
         const blog = await blogService.get(blogId);
 
         // Record the old image path if it exists
@@ -122,8 +123,9 @@ export async function updateBlog(req, res) {
           oldImagePath = path.join("uploads", blog.image);
         }
 
+console.log("oldImagePath", oldImagePath);
         // Set the new image filename in payload
-        payload.image = req.file.filename;
+        payload.image = req.files["images"][0].filename;
       }
 
       // Update the blog with new data
