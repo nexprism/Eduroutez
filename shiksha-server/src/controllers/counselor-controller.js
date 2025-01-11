@@ -28,12 +28,7 @@ const userService = new UserService();
  */
 export const createCounselor = async (req, res) => {
   try {
-    
-    const emailExists = await userService.getUserByEmail(req.body.email);
-    //  console.log(emailExists);
-      if (emailExists) {
-        return res.status(400).json({ error: "Email already exists" });
-      }
+      
 
       const payload = { ...req.body };
 
@@ -44,6 +39,10 @@ export const createCounselor = async (req, res) => {
     };
 
       if (req.body.password) {
+        const emailExists = await userService.getUserByEmail(req.body.email);
+        if (emailExists) {
+          return res.status(400).json({ error: "Email already exists" });
+        }
         
         const userPayload = {
           name: req.body.firstname + " " + req.body.lastname,
@@ -65,8 +64,10 @@ export const createCounselor = async (req, res) => {
         };
 
       }
-
-      
+    const emailExists = await counselorService.getByEmail(req.body.email);
+    if (emailExists) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
 
       // counselorpayload = {
       //   ...payload,
@@ -103,7 +104,7 @@ export const createCounselor = async (req, res) => {
 export const getCounselorsByInstitute = async (req, res) => { 
   try {
     const instituteId = req.params.institute;
-    const response = await counselorService.getCounselorsByInstitute(req.query);
+    const response = await counselorService.getCounselorsByInstitute(instituteId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched counselors";
     return res.status(StatusCodes.OK).json(SuccessResponse);

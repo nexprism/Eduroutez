@@ -89,6 +89,7 @@ class CounselorService {
   async getCounselorsByInstitute(instituteId) {
     try {
       const counselors = await this.counselorRepository.getCounselorsByInstitute(instituteId);
+      console.log('counselors',counselors);
       return counselors;
     } catch (error) {
       throw error;
