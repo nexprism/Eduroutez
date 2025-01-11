@@ -16,13 +16,17 @@ export const columns: ColumnDef<Counselor>[] = [
     cell: ({ row }) => <div>{`${row.original.firstname} ${row.original.lastname}`}</div>
   },
   {
-    header: 'CATEGORY',
-    cell: ({ row }) => <div>{row.original.category}</div>
+    header: 'Email',
+    cell: ({ row }) => <div>{row.original.email}</div>
   },
   {
-      header: 'Icon',
-      cell: ({ row }) => <img className='w-[2.5rem] h-[2rem] rounded-full' src={`${IMAGE_URL}/${row.original.profilePicture}`} alt="Icon" />
-  },
+      header: 'Phone Number',
+      cell: ({ row }) => <div>{row.original.contactno}</div>
+    },
+    {
+      header: 'Level',
+      cell: ({ row }) => <div>{row.original.level}</div>
+    },
   {
     header: 'CREATED AT',
     cell: ({ row }) => {

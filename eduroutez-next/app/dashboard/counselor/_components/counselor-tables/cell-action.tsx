@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface CellActionProps {
   data: Counselor;
@@ -34,12 +35,14 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           'Content-Type': 'application/json'
         }
       });
+      
 
       return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['counselors'] });
-      router.push('/dashboard/counselor');
+      toast.success('Counselor deleted successfully');
+    window.location.reload();
     },
     onSettled: () => {
       setOpen(false);
