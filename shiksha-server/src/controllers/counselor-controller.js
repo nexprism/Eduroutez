@@ -39,6 +39,10 @@ export const createCounselor = async (req, res) => {
     let counselorpayload = { ...payload };
 
     if (req.body.password) {
+        const emailExists = await userService.getUserByEmail(req.body.email);
+        if (emailExists) {
+          return res.status(400).json({ error: "Email already exists" });
+        }
       const userPayload = {
         name: `${req.body.firstname} ${req.body.lastname}`,
         email: req.body.email,
@@ -50,10 +54,29 @@ export const createCounselor = async (req, res) => {
       const userResponse = await userService.signup(userPayload, res);
       const userId = userResponse.user._id;
 
-      counselorpayload.userId = userId;
+
+        counselorpayload = {
+          ...payload,
+          userId: userId,
+        };
+
+      }
+    const emailExists = await counselorService.getByEmail(req.body.email);
+    if (emailExists) {
+      return res.status(400).json({ error: "Email already exists" });
     }
 
-    const response = await counselorService.create(counselorpayload);
+      // counselorpayload = {
+      //   ...payload,
+      //   userId: userId,
+      // };
+
+      
+      const response = await counselorService.create(counselorpayload);
+      //if password get from body then add it payload and save in user model
+
+      // const user = await counselorService.make(req.body.email, payload);
+
 
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully created a counselor";
@@ -78,7 +101,7 @@ export const createCounselor = async (req, res) => {
 export const getCounselorsByInstitute = async (req, res) => { 
   try {
     const instituteId = req.params.institute;
-    const response = await counselorService.getCounselorsByInstitute(req.query);
+    const response = await counselorService.getCounselorsByInstitute(instituteId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched counselors";
     return res.status(StatusCodes.OK).json(SuccessResponse);
