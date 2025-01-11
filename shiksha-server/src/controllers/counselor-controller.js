@@ -191,7 +191,9 @@ export const updateCounselor = async (req, res) => {
     console.error("Error in updateCounselor:", error.message);
     return res.status(error.statusCode || 500).json({ ...ErrorResponse, error });
   }
-};
+}
+
+
 /**
  * DELETE : /counselor/:id
  * req.body {}
@@ -238,4 +240,5 @@ export const markSlot = async (req, res) => {
     ErrorResponse.error = error;
     return res.status(500).json(ErrorResponse);
   }
-};
+
+}
