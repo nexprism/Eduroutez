@@ -1,3 +1,4 @@
+import { console } from "inspector";
 import Counselor from "../models/Counselor.js";
 import CrudRepository from "./crud-repository.js";
 
@@ -26,6 +27,16 @@ class CounselorRepository extends CrudRepository {
       return result;
     } catch (error) {
       throw error;
+    }
+  }
+
+  async getByid(id) {
+    console.log('result',id);
+    try {
+      const result = await this.model.findOne({ _id: id });
+      return result;
+    } catch (error) {
+      console.log('error',error.message);
     }
   }
 
@@ -66,6 +77,24 @@ class CounselorRepository extends CrudRepository {
       return result; // Return the updated document
     } catch (error) {
       console.error("Error in book function:", error);
+      throw error;
+    }
+  }
+
+  //update
+  async update(id, data) {
+    try {
+  //fetch counselor by id
+
+  const counselor = await this.model.findOne({ _id: id });
+  if (!counselor) {
+    throw new Error('Counselor with the given id not found');
+  }
+      const result = await this.model.findOneAndUpdate({ _id: id }, data, { new: true });
+      return result;
+    }
+    catch (error) {
+      console.log('error', error.message);
       throw error;
     }
   }
