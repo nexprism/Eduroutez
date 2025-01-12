@@ -336,6 +336,7 @@ router.get("/user", accessTokenAutoRefresh, passport.authenticate("jwt", { sessi
 router.patch("/user/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateUser);
 router.get("/users", UserMiddleware.validateGetAllRequest, accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getUsers);
 //get my refferal api
+router.get("/counselors", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselors);
 router.get("/my-refferal", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyRefferal);
 router.post("/redeem-points", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), redeemPoints);
 //redeem history

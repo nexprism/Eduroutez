@@ -7,6 +7,15 @@ class UserService {
     this.reddemHistryRepository = new ReddemHistryRepository();
   }
 
+  async getlist() {
+    try {
+      const users = await this.userRepository.getALL();
+      return users;
+    } catch (error) {
+      throw new AppError("Cannot fetch data of all the users", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async create(data) {
     try {
       const user = await this.userRepository.create(data);
@@ -57,119 +66,20 @@ class UserService {
     }
   }
 
+async getCounselors() {
+  try {
+    // Add role filter for counselors
+    const filterConditions = { role: "counselor" };
 
-  async getUserByReferalCode(referalCode) {
-    try {
-      const user = await this.userRepository.findBy({ referalCode });
-      return user;
-    } catch (error) {
-      throw error;
-    }
+    // Execute query without sorting and pagination
+    const counselors = await this.userRepository.getlist(filterConditions);
+
+    return counselors;
+  } catch (error) {
+    throw new AppError("Cannot fetch data of all the counselors", StatusCodes.INTERNAL_SERVER_ERROR);
   }
+}
 
-
-  ////update referalUser my_referrals
-  async updateReferalUser(referalUser, userId) {
-    try {
-      const my_referrals = [];
-      if (referalUser.my_referrals) {
-        my_referrals.push(userId);
-      }
-
-      const referdata = {
-        my_referrals: my_referrals,
-        points: referalUser.points + 50,
-      };
-
-      const referalUserPayload = { ...referdata };
-
-      // console.log('referalUserPayload',referalUserPayload)
-
-      const referalUserResponse = await this.userRepository.update(referalUser._id, referalUserPayload);
-
-      return referalUserResponse;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async redeemPoints(userId, points) {
-    try {
-
-      const user = await this.userRepository.get(userId);
-  
-      const updatedPoints = user.points - points;
-      const updatedBalance = user.balance + points / 2;
-
-      const payload = {
-        points: updatedPoints,
-        balance: updatedBalance,
-      };
-
-      const reddemHistryPayload = {
-        user: userId,
-        points: points,
-        remarks: points + " points redeemed",
-      };
-
-      const response = await this.userRepository.update(userId, payload);
-
-      const reddemHistryResponse = await this.reddemHistryRepository.create(reddemHistryPayload);
-
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-
-  //getRedeemHistory
-  async getRedeemHistory(userId) {
-    try {
-      const response = await this.reddemHistryRepository.getAll({ user: userId });
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  }
-  
-
-  //getMyRefferal
-  async getMyRefferal(id) {
-    try {
-      const refferal = await this.userRepository.getAll({ refer_by: id });
-      return refferal;
-    } catch (error) {
-      throw new AppError("Cannot fetch data of all the users", StatusCodes.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  async get(id) {
-    const user = await this.userRepository.get(id);
-    return user;
-  }
-
-  async update(id, data) {
-    try {
-      const user = await this.userRepository.update(id, data);
-
-      return user;
-    } catch (error) {
-      throw new AppError("Cannot update the user ", StatusCodes.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  async delete(id) {
-    try {
-      const user = await this.userRepository.destroy(id);
-      return user;
-    } catch (error) {
-      if (error.statusCode === StatusCodes.NOT_FOUND) {
-        throw new AppError("The user you requested to delete is not present", error.statusCode);
-      }
-      throw new AppError("Cannot delete the user ", StatusCodes.INTERNAL_SERVER_ERROR);
-    }
-  }
 }
 
 export default UserService;

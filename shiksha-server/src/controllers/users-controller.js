@@ -26,6 +26,20 @@ export async function getUsers(req, res) {
   }
 }
 
+
+
+export async function getcounselers(req, res) { 
+  try {
+    const response = await userService.getcounselers(req.query);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched users";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 /**
  * GET : /user/:id
  * req.body {}
@@ -162,7 +176,7 @@ export async function allowUser(req, res) {
 //getMyRefferal
 export async function getMyRefferal(req, res) {
   try {
-    userId = req.user._id;
+   const userId = req.user._id;
     const response = await userService.getMyRefferal(userId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the user";
