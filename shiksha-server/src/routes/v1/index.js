@@ -10,7 +10,7 @@ import { createTransaction, getTransactions } from "../../controllers/transactio
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
 import { getUsers, updateUser, allowUser, getMyRefferal, redeemPoints, getRedeemHistory } from "../../controllers/users-controller.js";
-import { createCategory, deleteCategory, getCategories, getCategory, updateCategory } from "../../controllers/category-controller.js";
+import { createCategory, deleteCategory,getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";

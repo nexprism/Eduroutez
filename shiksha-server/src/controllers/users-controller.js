@@ -200,6 +200,8 @@ export async function redeemPoints(req, res) {
     console.log('user:', user.points);
     const points = req.body.points;
     const userpoints = req.user.points;
+    console.log('user:', user);
+    console.log('points:', points);
 
     if(user.role == 'cousellor'){
       const counsellor = await counselorService.get(user.email);
@@ -210,12 +212,14 @@ export async function redeemPoints(req, res) {
       return res.status(400).json({ status: "failed", message: "minimum points required to redeem is 100" });
     }
 
+    console.log('userpoints:', userpoints);
+
     if (userpoints < points) {
       return res.status(400).json({ status: "failed", message: "Insufficient points to redeem" });
     }
 
 
-    const response = await userService.redeemPoints(userId, userpoints);
+    const response = await userService.redeemPoints(userId, points);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the user";
     return res.status(StatusCodes.OK).json(SuccessResponse);

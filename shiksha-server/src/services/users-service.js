@@ -147,21 +147,20 @@ async redeemPoints(userId, points) {
       remarks: points + " points redeemed",
     };
 
-   
-
-    if (user.points < points) {
-      throw new AppError("You don't have enough points to redeem", StatusCodes.BAD_REQUEST);
-    }
-    
     if (user.role == 'cousellor') {
-      const counsellor = await this.counsellorRepository.update(userId, payload);
+      // console.log('user.role:', user.role);
+      const response = await this.counsellorRepository.update(userId, payload);
+      const reddemHistryResponse = await this.reddemHistryRepository.create(reddemHistryPayload);
+      return response;
     }else{
      const response = await this.userRepository.update(userId, payload);
+    //  console.log('response:', response);
+     const reddemHistryResponse = await this.reddemHistryRepository.create(reddemHistryPayload);
+     return response;
     }
+    
 
-    const reddemHistryResponse = await this.reddemHistryRepository.create(reddemHistryPayload);
 
-    return response;
   } catch (error) {
     throw error;
   }
