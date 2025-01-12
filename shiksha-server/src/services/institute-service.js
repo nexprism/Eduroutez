@@ -67,7 +67,14 @@ console.log('updatesInstitute',updatesInstitute);
       const filterConditions = {};
 
       for (const [key, value] of Object.entries(parsedFilters)) {
-        filterConditions[key] = value;
+        if (value === "true") {
+          filterConditions[key] = true;
+        } else if (value === "false") {
+          filterConditions[key] = false;
+        } else {
+          filterConditions[key] = value;
+        }
+
       }
 
       // Build search conditions for multiple fields with partial matching
@@ -100,6 +107,17 @@ console.log('updatesInstitute',updatesInstitute);
     const institute = await this.instituteRepository.get(id);
     return institute;
   }
+
+  //bestRatedInstitute
+  async bestRatedInstitute() {
+    try {
+      const institute = await this.instituteRepository.bestRatedInstitute();
+      return institute;
+    } catch (error) {
+      throw new AppError("Cannot fetch best rated institute", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+  
 
 //addGallery
   async addGallery(id,data){

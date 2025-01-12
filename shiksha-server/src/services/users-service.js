@@ -1,10 +1,13 @@
 import e from "express";
 import { UserRepository } from "../repository/index.js";
 import { ReddemHistryRepository } from "../repository/index.js";
+import { CounselorRepository } from "../repository/index.js";
 class UserService {
   constructor() {
     this.userRepository = new UserRepository();
     this.reddemHistryRepository = new ReddemHistryRepository();
+    this.counsellorRepository = new CounselorRepository();
+    
   }
 
   async create(data) {
@@ -112,7 +115,17 @@ class UserService {
         remarks: points + " points redeemed",
       };
 
-      const response = await this.userRepository.update(userId, payload);
+     
+
+      if (user.points < points) {
+        throw new AppError("You don't have enough points to redeem", StatusCodes.BAD_REQUEST);
+      }
+      
+      if (user.role == 'cousellor') {
+        const counsellor = await this.counsellorRepository.update(userId, payload);
+      }else{
+       const response = await this.userRepository.update(userId, payload);
+      }
 
       const reddemHistryResponse = await this.reddemHistryRepository.create(reddemHistryPayload);
 
@@ -132,7 +145,7 @@ class UserService {
       throw error;
     }
   }
-  
+
 
   //getMyRefferal
   async getMyRefferal(id) {

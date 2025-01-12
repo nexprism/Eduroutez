@@ -76,6 +76,10 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    level: {
+      type: String,
+      default: "Well Wisher",
+    },
     balance: {
       type: Number,
       default: 0,

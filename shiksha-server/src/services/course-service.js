@@ -29,7 +29,14 @@ class CourseService {
       const filterConditions = {};
 
       for (const [key, value] of Object.entries(parsedFilters)) {
-        filterConditions[key] = value;
+        if(value === "true" ) {
+          filterConditions[key] =  true;
+        }else if(value === "false") {
+          filterConditions[key] = false;
+        }else {
+          filterConditions[key] = value;
+        }
+        
       }
 
       // Build search conditions for multiple fields with partial matching
@@ -47,6 +54,7 @@ class CourseService {
         sortConditions[field] = direction === "asc" ? 1 : -1;
       }
 
+      console.log("filterConditions", filterConditions);
       // Execute query with dynamic filters, sorting, and pagination
       const courses = await this.courseRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
 
