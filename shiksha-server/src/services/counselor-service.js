@@ -109,11 +109,7 @@ class CounselorService {
 
       //fetch counselor by id
       console.log('id', id);
-      const counselordata = await this.counselorRepository.getByid(id);
-      if (!counselordata) {
-        throw new Error("Counselor not found");
-        
-      }
+     
 
       const counselor = await this.counselorRepository.update(id, data);
       return counselor;

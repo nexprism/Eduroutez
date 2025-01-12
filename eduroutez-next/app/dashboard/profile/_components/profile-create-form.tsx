@@ -301,13 +301,14 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       formData.append('instituteEmail', values.instituteEmail);
       formData.append('language', values.language);
       formData.append('ExperienceYear', values.ExperienceYear);
-      values.experiences.forEach((job, index) => {
-        formData.append(`jobs[${index}][title]`, job.title);
-        formData.append(`jobs[${index}][employmentType]`, job.employmentType);
-        formData.append(`jobs[${index}][startdate]`, job.startdate);
-        formData.append(`jobs[${index}][enddate]`, job.enddate);
-        formData.append(`jobs[${index}][location]`, job.location || '');
-        formData.append(`jobs[${index}][description]`, job.description || '');
+      values.experiences.forEach((exp, index) => {
+        formData.append(`experiences[${index}][title]`, exp.title);
+        formData.append(`experiences[${index}][employmentType]`, exp.employmentType);
+        formData.append(`experiences[${index}][startdate]`, exp.startdate);
+        formData.append(`experiences[${index}][enddate]`, exp.enddate);
+        formData.append(`experiences[${index}][location]`, exp.location || '');
+        formData.append(`experiences[${index}][description]`, exp.description || '');
+        formData.append(`experiences[${index}][companyName]`, exp.companyName);
       });
       if (values.panCard) {
         formData.append('panCard', values.panCard);
@@ -333,10 +334,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: any) => {
-      const endpoint =`${apiUrl}/counselor` 
+      const Institute=localStorage.getItem('instituteId') || '';
+      const endpoint =`${apiUrl}/counselor/${Institute}`; 
       const response = await axiosInstance({
         url: `${endpoint}`,
-        method:'post',
+        method:'patch',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -458,7 +460,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     },
   // Only fetch when in edit mode
   });
-  const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+  const IMAGE_URL = 'http://localhost:4001/api/';
+
 
   React.useEffect(() => {
     if (counselor?.data) {
@@ -473,13 +476,13 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         instituteEmail: counselor.data?.instituteEmail,
         city: counselor.data?.city,
         gender: counselor.data?.gender,
-        dateOfBirth: counselor.data?.dateOfBirth || '',
+        dateOfBirth: counselor.data?.dateOfBirth.split('T')[0], // Format date
         experiences: counselor.data?.experiences,
         bankName: counselor.data?.bankName,
         accountDetails: counselor.data?.accountDetails,
         ifscCode: counselor.data?.ifscCode,
-        language:counselor.data?.language,
-        ExperienceYear:counselor.data?.ExperienceYear
+        language: counselor.data?.language,
+        ExperienceYear: counselor.data?.ExperienceYear
       });
       if (counselor.data.panCard) {
         setPreviewPanCardUrl(`${IMAGE_URL}/${counselor.data?.panCard}`);
@@ -487,8 +490,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       if (counselor.data.adharCard) {
         setPreviewAdharCardUrl(`${IMAGE_URL}/${counselor.data?.adharCard}`);
       }
-      if (counselor.data.profilePicture) {
-        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.data?.profilePicture}`);
+      if (counselor.data.profilePhoto) {
+        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.data?.profilePhoto}`);
       }
       // console.log(datOfBirth);
     }

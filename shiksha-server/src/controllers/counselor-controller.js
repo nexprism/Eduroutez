@@ -165,6 +165,7 @@ export const updateCounselor = async (req, res) => {
     const payload = { ...req.body };
 
     // Handle file uploads
+    console.log("Files:", payload);
     if (req.files) {
       if (req.files.profilePhoto && req.files.profilePhoto[0]) {
         payload.profilePhoto = req.files.profilePhoto[0].path;

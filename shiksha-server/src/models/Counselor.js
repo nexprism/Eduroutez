@@ -37,7 +37,7 @@ const counselorSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
-    profilePicture: {
+    profilePhoto: {
       type: String,
     }, // image
     adharCard: {
@@ -148,6 +148,10 @@ const counselorSchema = new mongoose.Schema(
         },
       },
     ],
+    instituteEmail: {
+      type: String,
+      // required: true,
+    },
     students: [
       {
         studentEmail: {
