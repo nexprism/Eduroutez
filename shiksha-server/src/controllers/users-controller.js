@@ -4,12 +4,14 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import UserService from "../services/users-service.js";
 import InstituteService from "../services/institute-service.js";
+import StudentService from "../services/student-service.js";
 import CounselorService from "../services/counselor-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 const singleUploader = FileUpload.upload.single("image");
 const userService = new UserService();
 const instituteService = new InstituteService();
 const counselorService = new CounselorService();
+const studentService = new StudentService();
 
 /**
  * GET : /user
@@ -114,7 +116,7 @@ export async function updateUser(req, res) {
       }
 
       if (req.file) {
-        const user = await userService.get(userId);
+        const user = await studentService.get(userId);
 
         // Record the old image path if it exists
         if (user.image) {
@@ -126,7 +128,7 @@ export async function updateUser(req, res) {
       }
 
       // Update the user with new data
-      const response = await userService.update(userId, payload);
+      const response = await studentService.update(userId, payload);
 
       // Delete the old image only if the update is successful and old image exists
       if (oldImagePath) {

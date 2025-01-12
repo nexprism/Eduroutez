@@ -1,6 +1,7 @@
 import { FileUpload } from "../middlewares/index.js";
 import UserRefreshToken from "../models/UserRefreshToken.js";
 import UserService from "../services/user-service.js";
+import StudentService from "../services/student-service.js";
 import InstituteService from "../services/institute-service.js";
 import CounselorService from "../services/counselor-service.js";
 const singleUploader = FileUpload.upload.single("image");
@@ -8,6 +9,7 @@ const singleUploader = FileUpload.upload.single("image");
 const userService = new UserService();
 const instituteService = new InstituteService();
 const counselorService = new CounselorService();
+const studentService = new StudentService();
 
 export const signup = async (req, res) => {
   console.log(req.body);
@@ -118,6 +120,23 @@ if(req.body.referal_Code){
 }
 
 }
+
+
+//save in student table
+
+  const studentPayload = {
+    name: req.body.name,
+    email: req.body.email,
+    phone: req.body.contact_number,
+  };
+
+const studentResponse = await studentService.create(studentPayload);
+
+    
+
+
+
+
 }
 
 
