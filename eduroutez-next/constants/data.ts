@@ -165,6 +165,13 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Manage Pages',
+    url: '/dashboard/manage-page',
+    icon: 'scroll-text',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
     title: 'Queries',
     url: '/dashboard/query',
     icon: 'rocket',
@@ -231,6 +238,7 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: [] // No child items
   },
+  
 
   {
     title: 'Online counselling',
@@ -247,6 +255,7 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: [] // No child items
   },
+
    {
  title: 'Refer and Earn',
    url: '/dashboard/refer-earn',
