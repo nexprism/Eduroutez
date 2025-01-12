@@ -72,6 +72,17 @@ class NewsService {
     }
   }
 
+  //getAllNews
+  async getAllNews() {
+    try {
+      const news = await this.newsRepository.getAllNews();
+      return news;
+    } catch (error) {
+      throw new Error("Error fetching news article: " + error.message);
+    }
+  }
+    
+
     //getNewsByInstitute
     async getNewsByInstitute(id) {
         try {

@@ -6,6 +6,17 @@ class BlogRepository extends CrudRepository {
     super(Blog);
   }
 
+  //getall()
+  async getAll() {
+    try {
+      const blogs = await Blog.find();
+      return blogs;
+    } catch (error) {
+      console.error('Error in BlogRepository.getAll:', error.message);
+      throw error;
+    }
+  }
+
 
   async getAllByInstitute(instituteId) {
     try {

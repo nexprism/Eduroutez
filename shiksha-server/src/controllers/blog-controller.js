@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import BlogService from "../services/blog-service.js";
+import UserService from "../services/users-service.js";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "images",
@@ -11,6 +12,7 @@ const multiUploader = FileUpload.upload.fields([
   }
 ]);
 const blogService = new BlogService();
+const usersevice = new UserService();
 
 /**
  * POST : /blog
@@ -61,10 +63,29 @@ export async function getBlogs(req, res) {
 
 export async function getBlogsByInstitute(req, res) { 
   try {
+   
+    const user = await usersevice.get(req.params.instituteId);
+
+    console.log("user", user);
+
+    if(user.role !== 'institute'){
+
+      const response = await blogService.getAllBlogs();
+      SuccessResponse.data = response;
+      SuccessResponse.message = "Successfully fetched blogs";
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+
+    }else{
+
+    
+    
     const response = await blogService.getAllByInstitute(req.params.instituteId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched blogs";
     return res.status(StatusCodes.OK).json(SuccessResponse);
+    }
+    
+
   } catch (error) {
     console.error("Error creating blog:", error);
     ErrorResponse.error = error;

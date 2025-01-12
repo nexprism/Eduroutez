@@ -78,6 +78,8 @@ class UserService {
     }
   }
 
+  
+
 async getCounselors() {
   try {
     // Add role filter for counselors

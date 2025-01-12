@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import NewsService from "../services/news-service.js";
+import UserService from "../services/user-service.js";
 // import InstituteService from "../services/institute-service.js";
 
 const multiUploader = FileUpload.upload.fields([
@@ -13,6 +14,7 @@ const multiUploader = FileUpload.upload.fields([
   }
 ]);
 const newsService = new NewsService();
+const usersevice = new UserService();
 
 /**
  * POST : /blog
@@ -98,13 +100,22 @@ export async function getNewsById(req, res) {
 //getNewsByInstitute
 export async function getNewsByInstitute(req, res) {
   try {
-    console.log("instituteId", req.params.institute);
-    const response = await newsService.getNewsByInstitute(req.params.institute);
+    
+    const user = await usersevice.getUserById(req.params.institute);
+    if(user.role !== 'institute'){
+      const response = await newsService.getAllNews();
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the news article";
     return res.status(StatusCodes.OK).json(SuccessResponse);
+    }else{
+      const response = await newsService.getNewsByInstitute(req.params.institute);
+      SuccessResponse.data = response;
+      SuccessResponse.message = "Successfully fetched the news article";
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+    }
   } catch (error) {
     ErrorResponse.error = error;
+    console.log('error',error.message);
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }

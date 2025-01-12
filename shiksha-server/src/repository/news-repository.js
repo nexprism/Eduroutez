@@ -18,6 +18,16 @@ class NewsRepository extends CrudRepository {
         }
     }
 
+    //getAllNews
+    async getAllNews() {
+        try {
+            const news = await News.find();
+            return news;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     //delete    
     async delete(id) {
         try {
