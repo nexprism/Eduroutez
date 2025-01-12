@@ -15,12 +15,11 @@ const pageSchema = new mongoose.Schema(
       required: true,
     },
     status:{
-        type: Boolean,
+        type: String,
         required: true,
     },
     section: {
         type: String,
-        required: true,
       },
   },
   { timestamps: true }

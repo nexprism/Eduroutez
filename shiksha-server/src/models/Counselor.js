@@ -8,7 +8,6 @@ const counselorSchema = new mongoose.Schema(
     },
     lastname: {
       type: String,
-      required: true,
     },
     contactno: {
       type: String,
