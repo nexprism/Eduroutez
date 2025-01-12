@@ -1,6 +1,7 @@
 import { console } from "inspector";
 import Counselor from "../models/Counselor.js";
 import CrudRepository from "./crud-repository.js";
+import User from "../models/User.js";
 
 class CounselorRepository extends CrudRepository {
   constructor() {
@@ -81,19 +82,35 @@ class CounselorRepository extends CrudRepository {
     }
   }
 
-  //update
   async update(id, data) {
     try {
-  //fetch counselor by id
-
-  const counselor = await this.model.findOne({ _id: id });
-  if (!counselor) {
-    throw new Error('Counselor with the given id not found');
-  }
-      const result = await this.model.findOneAndUpdate({ _id: id }, data, { new: true });
-      return result;
-    }
-    catch (error) {
+      // First check if counselor exists in User table
+      const user = await User.findOne({ _id: id });
+      if (!user) {
+        throw new Error('User with the given id not found');
+      }
+  
+      // Check if counselor already exists in Counselor table
+      let counselor = await this.model.findOne({ _id: id });
+  
+      if (!counselor) {
+        // If counselor doesn't exist, create new entry
+        counselor = await this.model.create({
+          _id: id,  // Use same ID as user table
+          ...data
+        });
+      } else {
+        // If counselor exists, update the existing entry
+        counselor = await this.model.findOneAndUpdate(
+          { _id: id },
+          data,
+          { new: true }
+        );
+      }
+  
+      return counselor;
+  
+    } catch (error) {
       console.log('error', error.message);
       throw error;
     }

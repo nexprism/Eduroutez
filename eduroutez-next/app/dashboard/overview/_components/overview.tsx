@@ -1,4 +1,6 @@
-'use client'
+'use client';
+
+import { useEffect, useState } from 'react';
 import { AreaGraph } from './area-graph';
 import { BarGraph } from './bar-graph';
 import { PieGraph } from './pie-graph';
@@ -6,30 +8,100 @@ import { CalendarDateRangePicker } from '@/components/date-range-picker';
 import PageContainer from '@/components/layout/page-container';
 import { RecentSales } from './recent-sales';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
+import { Trophy } from 'lucide-react';
 
 export default function OverViewPage() {
-  const [role, setrole] = useState(localStorage.getItem('role'));
+  const [role, setRole] = useState('');
+  const [level, setLevel] = useState(0);
+  const [designation, setDesignation] = useState('');
+
+  // Determine designation based on level
+  const determineDesignation = (level) => {
+    if (level >= 0 && level <= 500) return 'Career Advisor';
+    if (level >= 501 && level <= 2000) return 'Senior Career Advisor';
+    if (level >= 2001 && level <= 5000) return 'Career Consultant';
+    if (level >= 5001 && level <= 10000) return 'Career Consultant Specialist';
+    if (level >= 10001 && level <= 50000) return 'Lead Career Consultant';
+    return 'Unknown Designation';
+  };
+
+  // Calculate level progress
+  const calculateProgress = (level) => {
+    if (level <= 500) return (level / 500) * 100;
+    if (level <= 2000) return ((level - 500) / 1500) * 100;
+    if (level <= 5000) return ((level - 2000) / 3000) * 100;
+    if (level <= 10000) return ((level - 5000) / 5000) * 100;
+    if (level <= 50000) return ((level - 10000) / 40000) * 100;
+    return 100;
+  };
+
+  // Get next level threshold
+  const getNextLevel = (level) => {
+    if (level <= 500) return 500;
+    if (level <= 2000) return 2000;
+    if (level <= 5000) return 5000;
+    if (level <= 10000) return 10000;
+    return 50000;
+  };
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem('role');
+    const storedLevel = parseInt(localStorage.getItem('level'), 10) || 0;
+    if (storedRole) setRole(storedRole);
+    setLevel(storedLevel);
+    setDesignation(determineDesignation(storedLevel));
+  }, []);
+
   return (
     <PageContainer scrollable>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight">
-            Hi, Welcome back {role} 👋
-          </h2>
+      <div className="space-y-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold tracking-tight">
+              Hi, Welcome back {role} 👋
+            </h2>
+          </div>
+          
+          <Card className="w-full md:w-auto">
+            <CardContent className="flex items-center gap-4 p-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <Trophy className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Level {level}</p>
+                  <span className="text-xs text-muted-foreground">
+                    {level} / {getNextLevel(level)}
+                  </span>
+                </div>
+                <Progress value={calculateProgress(level)} className="h-2" />
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-primary">
+                    {designation}
+                  </p>
+                  <span className="text-xs text-muted-foreground">
+                    {Math.round(calculateProgress(level))}% to next level
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="hidden items-center space-x-2 md:flex">
             <CalendarDateRangePicker />
             <Button>Download</Button>
           </div>
         </div>
+
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
