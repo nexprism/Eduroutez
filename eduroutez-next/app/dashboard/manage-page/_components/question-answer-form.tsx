@@ -1,0 +1,230 @@
+'use client';
+import * as React from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import { Controller } from 'react-hook-form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import Image from 'next/image';
+import { CalendarIcon, Plus, X } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { Textarea } from '@/components/ui/textarea';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { usePathname, useRouter } from 'next/navigation';
+import axiosInstance from '@/lib/axios';
+import CustomEditor from '@/components/custom-editor';
+
+const formSchema = z.object({
+  title: z.string().nonempty('Title is required'),
+  status: z.string().optional(),
+  description: z.string().nonempty('Content is required'),
+});
+
+export default function CounselorForm() {
+  const pathname = usePathname();
+  const segments = pathname.split('/');
+  const [isEdit, setIsEdit] = React.useState(false);
+
+  React.useEffect(() => {
+    if (segments.length === 5 && segments[3] === 'update') {
+      setIsEdit(true);
+    }
+  }, [segments]);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title:'',
+      description:'',
+      status:''
+    }
+  });
+  const router = useRouter();
+  const statuses = [
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' }
+  ];
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    mutate({
+      title: values.title,
+      description: values.description,
+      status: values.status,
+    });
+  }
+
+  const { mutate, isPending: isSubmitting } = useMutation({
+    mutationFn: async (formData: z.infer<typeof formSchema>) => {
+      const endpoint = isEdit
+        ? `${apiUrl}/page/${segments[4]}`
+        : `${apiUrl}/page`;
+      const response = await axiosInstance({
+        url: `${endpoint}`,
+        method: isEdit ? 'patch' : 'post',
+        data: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      return response.data;
+    },
+
+    onSuccess: () => {
+      const message = isEdit
+        ? 'Page updated successfully'
+        : 'Page created successfully';
+      toast.success(message);
+      form.reset();
+      router.push('/dashboard/manage-page');
+    },
+    onError: (error) => {
+      toast.error('Something went wrong');
+    }
+  });
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  // write code to get categories from serve by tanstack query
+
+  const { data: faq } = useQuery({
+    queryKey: ['answer', segments[4]],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/page/${segments[4]}`);
+      return response.data;
+    },
+    enabled: isEdit // Only fetch when in edit mode
+  });
+
+  React.useEffect(() => {
+    if (faq?.data) {
+      form.reset({
+        title: faq.data.title,
+        description: faq.data.description,
+        status:faq.data.status
+      });
+    }
+  }, [faq, form]);
+
+  return (
+    <Card className="mx-auto w-full">
+      <CardHeader>
+        <CardTitle className="text-left text-2xl font-bold">
+          Add Pages
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit, (errors) => {
+              if (Object.keys(errors).length > 0) {
+                console.log('hi2');
+                console.log(errors);
+                console.log(form);
+                toast.error(
+                  'Please correct the errors in the form before submitting.'
+                );
+              }
+            })}
+            className="space-y-8"
+          >
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Write  title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {statuses.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Content</FormLabel>
+                    <FormControl>
+                      <Controller
+                        name="description"
+                        control={form.control}
+                        render={({ field }) => (
+                          <CustomEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Button type="submit" disabled={isSubmitting}>
+              Submit
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}
