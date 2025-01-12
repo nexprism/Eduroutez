@@ -66,7 +66,7 @@ class BlogService {
 
 async getAllBlogs() {
   try {
-    const blogs = await this.blogRepository.getAllNews();
+    const blogs = await this.blogRepository.getAll();
     return blogs;
   }
   catch (error) {

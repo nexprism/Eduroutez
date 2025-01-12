@@ -255,6 +255,7 @@ export const logout = async (req, res) => {
     res.clearCookie("refreshToken");
     res.clearCookie("is_auth");
 
+  
     if (refreshToken) {
       await UserRefreshToken.findOneAndDelete({ token: refreshToken });
     }

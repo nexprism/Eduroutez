@@ -7,7 +7,7 @@ class UserRepository extends CrudRepository {
   }
 
   async get(id) {
-    const student = await this.studentRepository.get(id);
+    const student = await User.findById(id);
     return student;
   }
 

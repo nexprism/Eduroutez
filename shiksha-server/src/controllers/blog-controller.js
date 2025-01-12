@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import BlogService from "../services/blog-service.js";
-import UserService from "../services/users-service.js";
+import UserService from "../services/user-service.js";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "images",
@@ -64,7 +64,7 @@ export async function getBlogs(req, res) {
 export async function getBlogsByInstitute(req, res) { 
   try {
    
-    const user = await usersevice.get(req.params.instituteId);
+    const user = await usersevice.getUserById(req.params.instituteId);
 
     console.log("user", user);
 
