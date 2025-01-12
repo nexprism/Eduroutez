@@ -327,6 +327,16 @@ export type QuestionAnswer = {
   status?: boolean;
   _id: string;
 };
+
+export type ManagePages = {
+  title?: string;
+  description?: string;
+  status?: boolean;
+  createdAt?: string;
+  _id: string;
+};
+
+
 export type Answer = {
   question?: string;
   answer?: string;
