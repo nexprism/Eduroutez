@@ -7,6 +7,16 @@ class WebinarRepository extends CrudRepository {
     super(Webinar);
   }
 
+  async getAll() {
+    try {
+      const blogs = await Webinar.find();
+      return blogs;
+    } catch (error) {
+      console.error('Error in BlogRepository.getAll:', error.message);
+      throw error;
+    }
+  }
+
   async get(userId) {
     try {
       // Log the received userId
@@ -43,5 +53,7 @@ class WebinarRepository extends CrudRepository {
     }
   }
 }
+
+
 
 export { WebinarRepository };

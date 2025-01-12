@@ -18,6 +18,17 @@ class WebinarService {
     return webinar;
   }
 
+  async getAllWebinar() {
+    try {
+      const blogs = await this.webinarRepository.getAll();
+      return blogs;
+    }
+    catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
   async getAllByUser(userId) {
     try {
       console.log("userId", userId);

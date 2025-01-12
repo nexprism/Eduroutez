@@ -4,8 +4,10 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import WebinarService from "../services/webinar-service.js";
+import UserService from "../services/user-service.js";
 const singleUploader = FileUpload.upload.single("image");
 const webinarService = new WebinarService();
+const usersevice = new UserService();
 
 /**
  * POST : /webinar
@@ -57,10 +59,22 @@ export async function getWebinars(req, res) {
 export async function getWebinarsByInstitute(req, res) {
   try {
     const { instituteId } = req.params;
+
+    const user = await usersevice.getUserById(instituteId);
+
+    if (user.role !== "institute") {
+      const response = await webinarService.getAllWebinar();
+      SuccessResponse.data = response;
+      SuccessResponse.message = "Successfully fetched webinars";
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+    }else{
+
+    
     const response = await webinarService.getAllByUser(instituteId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched webinars";
     return res.status(StatusCodes.OK).json(SuccessResponse);
+    }
   } catch (error) {
     console.error("Error fetching webinar:", error.message);
     ErrorResponse.error = error;
