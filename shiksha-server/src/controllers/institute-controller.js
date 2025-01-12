@@ -159,6 +159,34 @@ export async function getInstitutes(req, res) {
   }
 }
 
+//bestRatedInstitute
+export async function bestRatedInstitute(req, res) {
+  try {
+    const response = await instituteService.bestRatedInstitute();
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched institutes";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Get institutes error:", error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || 500).json(ErrorResponse);
+  }
+}
+
+//trendingInstitute
+export async function trendingInstitute(req, res) {
+  try {
+    const response = await instituteService.trendingInstitute();
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched institutes";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Get institutes error:", error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || 500).json(ErrorResponse);
+  }
+}
+
 /**
  * GET : /institute/:id
  * req.body {}

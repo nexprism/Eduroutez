@@ -74,6 +74,14 @@ const courseSchema = new mongoose.Schema(
     isCourseFree: {
       type: String,
     },
+    isCoursePopular: {
+      type: Boolean,
+      default: false,
+    },
+    isCourseTreanding: {
+      type: Boolean,
+      default: false,
+    },
     coursePrice: {
       type: Number,
     },

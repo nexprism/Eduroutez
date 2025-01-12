@@ -64,7 +64,10 @@ const instituteSchema = new mongoose.Schema(
     collegeInfo: {
       type: String,
     },
-
+    isTrending: {
+      type: Boolean,
+      default: false,
+    },
     courseInfo: {
       type: String,
     },

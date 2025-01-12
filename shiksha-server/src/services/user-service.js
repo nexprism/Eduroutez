@@ -56,6 +56,44 @@ console.log('user',user)
     }
   }
 
+  //getUserByReferalCode
+  async getUserByReferalCode(referalCode) {
+    try {
+      const user = await this.userRepository.findBy({ referalCode });
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+
+  ////update referalUser my_referrals
+  async updateReferalUser(referalUser, userId) {
+    try {
+      const my_referrals = [];
+      if (referalUser.my_referrals) {
+        my_referrals.push(userId);
+      }
+
+      const referdata = {
+        my_referrals: my_referrals,
+        points: referalUser.points + 50,
+      };
+
+      const referalUserPayload = {  ...referdata };
+
+      // console.log('referalUserPayload',referalUserPayload)
+
+      const referalUserResponse = await this.userRepository.update(referalUser._id, referalUserPayload);
+
+      return referalUserResponse;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  
+
   async verifyEmail(email, otp) {
     const existingUser = await this.userRepository.getUserByEmail(email);
 

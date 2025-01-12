@@ -1,11 +1,13 @@
 import { ServerConfig } from "../config/index.js";
 import { courseSchema } from "../models/Course.js";
 import { CounselorRepository } from "../repository/index.js";
+import { UserRepository } from "../repository/index.js";
 import bcrypt from "bcrypt";
 
 class CounselorService {
   constructor() {
     this.counselorRepository = new CounselorRepository();
+    this.userRepository = new UserRepository();
   }
 
   hashPassword(password) {
@@ -70,7 +72,19 @@ class CounselorService {
   }
   async get(email) {
     const counselor = await this.counselorRepository.get(email);
-    return counselor;
+    if(!counselor) {
+      //find in user by email
+      const user = await this.userRepository.get(email);
+      if(user) {
+        
+        //create counselor
+        const counselor = await this.create({userId:user._id,email:user.email,firstname:user.name,lastname:user.lastname});
+        return counselor;
+      }
+    }
+
+
+
   }
 
   

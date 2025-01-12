@@ -76,6 +76,10 @@ const counselorSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    balance: {
+      type: Number,
+      default: 0,
+    },
 
     level: {
       type: String,

@@ -115,6 +115,7 @@ export async function getCourses(req, res) {
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
+    console.log('error',error.message);
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
@@ -125,12 +126,19 @@ export async function getCourses(req, res) {
 
 export async function getPopularCourses(req, res) {
   try {
-    const response = await courseService.getPopularCourses();
+    
+    const query = { ...req.query };
+    
+    query.filters = { isCourseFree: 'free' }
+
+    
+    const response = await courseService.getAll(query);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched popular courses";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
+    console.log('error',error.message);
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }

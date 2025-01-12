@@ -4,10 +4,12 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import UserService from "../services/users-service.js";
 import InstituteService from "../services/institute-service.js";
+import CounselorService from "../services/counselor-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 const singleUploader = FileUpload.upload.single("image");
 const userService = new UserService();
 const instituteService = new InstituteService();
+const counselorService = new CounselorService();
 
 /**
  * GET : /user
@@ -176,13 +178,15 @@ export async function allowUser(req, res) {
 //getMyRefferal
 export async function getMyRefferal(req, res) {
   try {
-   const userId = req.user._id;
+    const userId = req.user._id;
     const response = await userService.getMyRefferal(userId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the user";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
+    console.error('Error in getMyRefferal:', error.message);
+
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
@@ -195,17 +199,23 @@ export async function redeemPoints(req, res) {
     const userId = req.user._id;
     console.log('user:', user.points);
     const points = req.body.points;
+    const userpoints = req.user.points;
+
+    if(user.role == 'cousellor'){
+      const counsellor = await counselorService.get(user.email);
+      userpoints = counsellor.points;
+    }
 
     if (points < 100){
       return res.status(400).json({ status: "failed", message: "minimum points required to redeem is 100" });
     }
 
-    if (user.points < points) {
+    if (userpoints < points) {
       return res.status(400).json({ status: "failed", message: "Insufficient points to redeem" });
     }
 
 
-    const response = await userService.redeemPoints(userId, points);
+    const response = await userService.redeemPoints(userId, userpoints);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the user";
     return res.status(StatusCodes.OK).json(SuccessResponse);
