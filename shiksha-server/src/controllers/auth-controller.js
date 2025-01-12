@@ -65,19 +65,16 @@ export const signup = async (req, res) => {
           err: {},
         });
       }
-      
-      const my_referrals = {};
-      my_referrals.push(referalUser._id);
-
-      var referdata = {
+     
+     var referdata = {
         refer_by: referalUser._id,
-        my_referrals: my_referrals,
       };
 
 
-      
-
     }
+
+    
+
 
 
 
@@ -101,6 +98,29 @@ export const signup = async (req, res) => {
     );
 
     const userId = response.user._id;
+    if (response.user.role === 'student') {
+if(req.body.referal_Code){
+
+  if (req.body.referal_Code) {
+    const referalUser = await userService.getUserByReferalCode(req.body.referal_Code);
+    if (!referalUser) {
+      return res.status(400).json({
+        message: "Referal code Invalid",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+
+    console.log('referalUser',referalUser);
+
+    const referalUserResponse = await userService.updateReferalUser(referalUser, userId);
+}
+
+}
+}
+
+
   if(req.body.role === 'institute'){
     
     const institutePayload = {

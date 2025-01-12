@@ -72,7 +72,15 @@ const userSchema = new mongoose.Schema(
     designation: {
       type: String,
     },
-    about: {
+    points: {
+      type: Number,
+      default: 0,
+    },
+    balance: {
+      type: Number,
+      default: 0,
+    },
+  about: {
       type: String,
     },
     course_wishlist: [

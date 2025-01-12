@@ -9,7 +9,7 @@ import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from 
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
-import { getUsers, updateUser, allowUser, getMyRefferal } from "../../controllers/users-controller.js";
+import { getUsers, updateUser, allowUser, getMyRefferal, redeemPoints, getRedeemHistory } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory, getCategories, getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
@@ -337,6 +337,11 @@ router.patch("/user/:id", accessTokenAutoRefresh, passport.authenticate("jwt", {
 router.get("/users", UserMiddleware.validateGetAllRequest, accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getUsers);
 //get my refferal api
 router.get("/my-refferal", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyRefferal);
+router.post("/redeem-points", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), redeemPoints);
+//redeem history
+router.get("/redeem-history", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getRedeemHistory);
+
+
 
 
 

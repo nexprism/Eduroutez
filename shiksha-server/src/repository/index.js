@@ -2,6 +2,7 @@ export { UserRepository } from "./user-repository.js";
 export { EmailVerificationRepository } from "./email-verification-repository.js";
 export { CouponRepository } from "./coupon-repository.js";
 export { TransactionRepository } from "./transaction-repository.js";
+export { ReddemHistryRepository } from "./reddem-histry-repository.js";
 export { TemplateRepository } from "./template-repository.js";
 export { RoleRepository } from "./role-repository.js";
 export { SubscriptionRepository } from "./subscription-repository.js";

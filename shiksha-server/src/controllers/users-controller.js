@@ -162,11 +162,56 @@ export async function allowUser(req, res) {
 //getMyRefferal
 export async function getMyRefferal(req, res) {
   try {
-    const response = await userService.getMyRefferal(req.params.id);
+    userId = req.user._id;
+    const response = await userService.getMyRefferal(userId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the user";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+
+//redeemPoints
+export async function redeemPoints(req, res) {
+  try {
+    const user = req.user;
+    const userId = req.user._id;
+    console.log('user:', user.points);
+    const points = req.body.points;
+
+    if (points < 100){
+      return res.status(400).json({ status: "failed", message: "minimum points required to redeem is 100" });
+    }
+
+    if (user.points < points) {
+      return res.status(400).json({ status: "failed", message: "Insufficient points to redeem" });
+    }
+
+
+    const response = await userService.redeemPoints(userId, points);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the user";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.error('Error in redeemPoints:', error.message);
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+//getRedeemHistory
+export async function getRedeemHistory(req, res) {
+  try {
+    const userId = req.user._id;
+    const response = await userService.getRedeemHistory(userId);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the user";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error('Error in getRedeemHistory:', error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }

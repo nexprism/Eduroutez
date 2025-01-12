@@ -1,7 +1,10 @@
+import e from "express";
 import { UserRepository } from "../repository/index.js";
+import { ReddemHistryRepository } from "../repository/index.js";
 class UserService {
   constructor() {
     this.userRepository = new UserRepository();
+    this.reddemHistryRepository = new ReddemHistryRepository();
   }
 
   async create(data) {
@@ -53,6 +56,83 @@ class UserService {
       throw new AppError("Cannot fetch data of all the users", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
+
+
+  async getUserByReferalCode(referalCode) {
+    try {
+      const user = await this.userRepository.findBy({ referalCode });
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  ////update referalUser my_referrals
+  async updateReferalUser(referalUser, userId) {
+    try {
+      const my_referrals = [];
+      if (referalUser.my_referrals) {
+        my_referrals.push(userId);
+      }
+
+      const referdata = {
+        my_referrals: my_referrals,
+        points: referalUser.points + 50,
+      };
+
+      const referalUserPayload = { ...referdata };
+
+      // console.log('referalUserPayload',referalUserPayload)
+
+      const referalUserResponse = await this.userRepository.update(referalUser._id, referalUserPayload);
+
+      return referalUserResponse;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async redeemPoints(userId, points) {
+    try {
+
+      const user = await this.userRepository.get(userId);
+  
+      const updatedPoints = user.points - points;
+      const updatedBalance = user.balance + points / 2;
+
+      const payload = {
+        points: updatedPoints,
+        balance: updatedBalance,
+      };
+
+      const reddemHistryPayload = {
+        user: userId,
+        points: points,
+        remarks: points + " points redeemed",
+      };
+
+      const response = await this.userRepository.update(userId, payload);
+
+      const reddemHistryResponse = await this.reddemHistryRepository.create(reddemHistryPayload);
+
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  //getRedeemHistory
+  async getRedeemHistory(userId) {
+    try {
+      const response = await this.reddemHistryRepository.getAll({ user: userId });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
 
   //getMyRefferal
   async getMyRefferal(id) {
