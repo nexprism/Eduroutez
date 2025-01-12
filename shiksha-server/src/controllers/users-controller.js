@@ -159,6 +159,21 @@ export async function allowUser(req, res) {
   }
 }
 
+//getMyRefferal
+export async function getMyRefferal(req, res) {
+  try {
+    const response = await userService.getMyRefferal(req.params.id);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the user";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+
+
 
 /**
  * DELETE : /user/:id

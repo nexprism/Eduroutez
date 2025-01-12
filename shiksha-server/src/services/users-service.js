@@ -54,6 +54,16 @@ class UserService {
     }
   }
 
+  //getMyRefferal
+  async getMyRefferal(id) {
+    try {
+      const refferal = await this.userRepository.getAll({ refer_by: id });
+      return refferal;
+    } catch (error) {
+      throw new AppError("Cannot fetch data of all the users", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async get(id) {
     const user = await this.userRepository.get(id);
     return user;
