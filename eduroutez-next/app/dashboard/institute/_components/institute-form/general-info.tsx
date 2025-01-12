@@ -95,11 +95,16 @@ const GeneralInfo = () => {
   const [previewLogoUrl, setPreviewLogoUrl] = React.useState<string | null>(
     null
   );
+    const [previewbrochure, setPreviewbrochure] = React.useState<string | null>(
+      null
+    );
   const baseURL = "http://localhost:4001/api/uploads/";
 
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
+    const fileInputBrochureRef = React.useRef<HTMLInputElement | null>(null);
+
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
@@ -131,12 +136,14 @@ const GeneralInfo = () => {
         thumbnail: instituteData.thumbnailImage,
         cover: instituteData.coverImage,
         logo: instituteData.instituteLogo,
+        brochure: instituteData.brochure
       });
       console.log('Institute fetch nb:', instituteData.thumbnailImage);
 
       setPreviewThumbnailUrl(`${baseURL}${instituteData.thumbnailImage}`);
       setPreviewCoverUrl(`${baseURL}${instituteData.coverImage}`);
       setPreviewLogoUrl(`${baseURL}${instituteData.instituteLogo}`);
+      setPreviewbrochure(`${baseURL}${instituteData.brochure}`);
       console.log('Institute fetch successfully:', instituteData);
     } catch (error: any) {
       console.log('Error fetching institute:', error.message);
@@ -235,6 +242,22 @@ const GeneralInfo = () => {
       toast.error('Something went wrong');
     }
   });
+
+   const handleBrochureChange = (e: React.ChangeEvent<HTMLInputElement>) => {  
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviewbrochure(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+        form.setValue('brochure', file);
+      } else {
+        setPreviewbrochure(null);
+        form.setValue('brochure', undefined);
+      }
+    };
+
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -291,6 +314,11 @@ const GeneralInfo = () => {
   const triggerCoverFileInput = () => {
     fileInputCoverRef.current?.click();
   };
+
+  const triggerBrochureFileInput = () => {
+    fileInputBrochureRef.current?.click();
+  };
+
   const removeThumbnailImage = () => {
     setPreviewThumbnailUrl(null);
     form.setValue('thumbnail', undefined);
@@ -314,6 +342,14 @@ const GeneralInfo = () => {
       fileInputLogoRef.current.value = ''; // Reset the file input
     }
   };
+
+  const removeBrochure = () => {
+    setPreviewbrochure(null);
+    form.setValue('brochure', undefined);
+    if (fileInputBrochureRef.current) {
+      fileInputBrochureRef.current.value = ''; // Reset the file input
+    }
+  }
 
   return (
     <Card className="mx-auto w-full">
@@ -736,56 +772,56 @@ const GeneralInfo = () => {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="brochure"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Brochure</FormLabel>
-                  <FormControl>
-                    <div className="space-y-4">
-                      <Input
-                        type="file"
-                        accept="image/png, image/jpeg, image/webp"
-                        onChange={handleLogoChange}
-                        ref={fileInputLogoRef} // Reference to reset input
-                        className="hidden "
-                      />
-
-                      {previewLogoUrl ? (
-                        <div className="relative inline-block">
-                          <Image
-                            src={previewLogoUrl}
-                            alt="Preview"
-                            className="max-h-[200px] max-w-full rounded-md object-cover"
-                            width={1200}
-                            height={1200}
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute right-0 top-0 -mr-2 -mt-2"
-                            onClick={removeLogo}
-                          >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove image</span>
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={triggerLogoFileInput}
-                          className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
-                        >
-                          <Plus className="text-grey-400 h-10 w-10" />
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+           <FormField
+                         control={form.control}
+                         name="brochure"
+                         render={({ field }) => (
+                           <FormItem>
+                             <FormLabel>Brochure</FormLabel>
+                             <FormControl>
+                               <div className="space-y-4">
+                                 <Input
+                                   type="file"
+                                   accept="image/png, image/jpeg, image/webp"
+                                   onChange={handleBrochureChange}
+                                   ref={fileInputBrochureRef} // Reference to reset input
+                                   className="hidden "
+                                 />
+           
+                                 {previewbrochure ? (
+                                   <div className="relative inline-block">
+                                     <Image
+                                       src={previewbrochure}
+                                       alt="Preview"
+                                       className="max-h-[200px] max-w-full rounded-md object-cover"
+                                       width={1200}
+                                       height={1200}
+                                     />
+                                     <Button
+                                       type="button"
+                                       variant="destructive"
+                                       size="icon"
+                                       className="absolute right-0 top-0 -mr-2 -mt-2"
+                                       onClick={removeBrochure}
+                                     >
+                                       <X className="h-4 w-4" />
+                                       <span className="sr-only">Remove image</span>
+                                     </Button>
+                                   </div>
+                                 ) : (
+                                   <div
+                                     onClick={triggerBrochureFileInput}
+                                     className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                                   >
+                                     <Plus className="text-grey-400 h-10 w-10" />
+                                   </div>
+                                 )}
+                               </div>
+                             </FormControl>
+                             <FormMessage />
+                           </FormItem>
+                         )}
+                       />
 
             <div className="flex justify-end">
               <Button type="submit">Save & Update</Button>
