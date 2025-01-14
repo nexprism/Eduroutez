@@ -229,7 +229,7 @@ console.log('updatesInstitute',updatesInstitute);
       };
 
       console.log('data', payload);
-      const issue = await this.instituteIssuesRepository.create(payload);
+      const issue = await this.instituteIssuesRepository.createIssue(payload);
       return issue;
     } catch (error) {
       console.log('error',error.message);

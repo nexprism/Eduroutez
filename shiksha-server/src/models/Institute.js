@@ -153,7 +153,13 @@ const instituteSchema = new mongoose.Schema(
     planName:{
       type:String,
       default:"Standard"
-    }
+    },
+    issues: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Issue",
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -137,6 +137,7 @@ router.post("/addGallery/:id", accessTokenAutoRefresh, passport.authenticate("jw
 
 //submitIssue
 router.post("/submitIssue", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitIssue);
+//router.get("/issues-list", HelpList);
 
 
 /**

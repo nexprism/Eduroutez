@@ -284,6 +284,13 @@ export const navItems: NavItem[] = [
    isActive: false,
    items: [] // No child items
  },
+ {
+  title: 'Help And Support',
+  url: '/dashboard/help-support',
+  icon: 'school',
+  isActive: false,
+  items: [] // No child items
+},
   {
     title: 'Settings',
     url: '/dashboard/setting',

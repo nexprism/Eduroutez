@@ -439,6 +439,20 @@ export const submitIssue = async (req, res) => {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 };
+
+
+/**export async function getHelpList(req, res) {
+  try {
+    const response = await instituteService.getHelpList();
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched help list";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+}**/
+
 // export async function submitIssue(req, res) {
 //   try {
 //     const instituteId = req.user;
