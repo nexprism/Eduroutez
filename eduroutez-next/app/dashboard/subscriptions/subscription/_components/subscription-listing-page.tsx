@@ -8,7 +8,6 @@ import PageContainer from '@/components/layout/page-container';
 import { Separator } from '@/components/ui/separator';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
-import loadRazorpayScript from '@/lib/razorpay';
 
 const PricingPage = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -27,45 +26,6 @@ const PricingPage = () => {
       return response.data;
     }
   });
-
-
-  const handlePayment = async (plan:any) => {
-    const isScriptLoaded = await loadRazorpayScript();
-
-    if (!isScriptLoaded) {
-      alert('Failed to load Razorpay SDK. Please try again later.');
-      return;
-    }
-    const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-    if (!key) {
-      alert('Razorpay Key ID is missing. Please check your environment variables.');
-      return;
-    }
-    console.log(key);
-
-    const options = {
-      key_id: "rzp_live_aUNJSDsE0jsZIE", // Replace with your Key ID
-      key: key, // Use the environment variable for Key ID
-      currency: 'INR',
-      name: 'Your Company Name',
-      description: plan.name,
-      handler: () => {
-        alert('Razorpay payment panel opened');
-      },
-      prefill: {
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        contact: '9999999999',
-      },
-      theme: {
-        color: '#3399cc',
-      },
-    };
-
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
-  };
-  
 
   if (isLoading) {
     return (
@@ -161,15 +121,14 @@ const PricingPage = () => {
                   })}
                 </ul>
                 
-                <Button
-  className={`mt-6 w-full ${
-    plan.subscriptionType === 'POPULAR' ? 'bg-primary' : ''
-  }`}
-  onClick={() => handlePayment(plan)}
->
-  Choose {plan.name}
-</Button>
-
+                <Button 
+                  className={`mt-6 w-full ${
+                    plan.subscriptionType === 'POPULAR' ? 'bg-primary' : ''
+                  }`}
+                  onClick={() =>  window.location.href = 'https://razorpay.com/'}
+                >
+                  Choose {plan.name}
+                </Button>
               </CardContent>
             </Card>
           ))}

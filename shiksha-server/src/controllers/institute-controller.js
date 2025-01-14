@@ -6,8 +6,15 @@ import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import InstituteService from "../services/institute-service.js";
 import UserService from "../services/user-service.js";
 import { UserRepository } from "../repository/user-repository.js";
+import xlsx from "xlsx";
+import mongoose from "mongoose";
+import Institute from "../models/Institute.js";
+import { cp } from "fs";
+import multer from "multer";
 
 const singleUploader = FileUpload.upload.single("image");
+const fileUploader = FileUpload.upload.single("file");
+
 const multiUploader = FileUpload.upload.fields([
   {
     name: "instituteLogo",
@@ -32,7 +39,12 @@ const multiUploader = FileUpload.upload.fields([
   {
     name: "image",
     maxCount: 1,
-  }
+  },
+  {
+    name: "file",
+    maxCount: 1,
+  },
+
 ]);
 const instituteService = new InstituteService();
 const userService = new UserService();
@@ -186,6 +198,85 @@ export async function trendingInstitute(req, res) {
     return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 }
+
+
+export const bulkAddInstitutes = async (req, res) => {
+  fileUploader(req, res, async function (err) {
+    if (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
+    }
+
+    try {
+      const file = req.file;
+      console.log(file,'fghjk');
+      if (!file) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ error: "No file uploaded" });
+      }
+
+      const workbook = xlsx.readFile(file.path);
+      console.log(workbook.SheetNames[0]);
+      const sheetName = workbook.SheetNames[0];
+console.log(sheetName);
+      const sheet = workbook.Sheets[sheetName];
+      await fs.writeFile('sheet.xlsx', xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' }));
+      const data = xlsx.utils.sheet_to_json(sheet);
+      console.log(data);
+
+      const institutes = data.map((row) => ({
+        _id: new mongoose.Types.ObjectId(),
+        instituteName: row.instituteName,
+        email: row.email,
+        institutePhone: row.institutePhone,
+        address: row.address,
+        state: row.state,
+        city: row.city,
+        establishedYear: row.establishedYear,
+        website: row.website,
+        about: row.about,
+        instituteLogo: row.instituteLogo,
+        coverImage: row.coverImage,
+        thumbnailImage: row.thumbnailImage,
+        organisationType: row.organisationType,
+        brochure: row.brochure,
+        subscriptionType: row.subscriptionType,
+        courses: row.courses,
+        collegeInfo: row.collegeInfo,
+        isTrending: row.isTrending,
+        courseInfo: row.courseInfo,
+        admissionInfo: row.admissionInfo,
+        placementInfo: row.placementInfo,
+        fee: row.fee,
+        ranking: row.ranking,
+        cutoff: row.cutoff,
+        campusInfo: row.campusInfo,
+        scholarshipInfo: row.scholarshipInfo,
+        minFees: row.minFees,
+        maxFees: row.maxFees,
+        affiliation: row.affiliation,
+        highestPackage: row.highestPackage,
+        reviews: row.reviews,
+        streams: row.streams,
+        specialization: row.specialization,
+        gallery: row.gallery,
+        facilities: row.facilities,
+        password: row.password,
+        status: row.status,
+        plan: row.plan,
+        planName: row.planName,
+      }));
+
+      await Institute.insertMany(institutes);
+
+      SuccessResponse.data = institutes;
+      SuccessResponse.message = "Successfully added institutes in bulk";
+      return res.status(StatusCodes.CREATED).json(SuccessResponse);
+    } catch (error) {
+      console.error("Bulk add institutes error:", error.message);
+      ErrorResponse.error = error;
+      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+    }
+  });
+};
 
 /**
  * GET : /institute/:id

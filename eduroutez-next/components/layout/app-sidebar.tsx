@@ -55,7 +55,7 @@ export default function AppSidebar({
     const role = localStorage.getItem('role');
     const excludedTitles =
       role === 'institute'
-        ? ['Institutes', 'Admins','Refer and Earn','Earnings','Payouts','Promotions', 'Streams','Redeem','Students', 'Sales','Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
+        ? ['Institutes', 'Admins','Refer and Earn','Bulk Institute Upload','Earnings','Payouts','Promotions', 'Streams','Redeem','Students', 'Sales','Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
         : role === 'counsellor'
         ? [
             'Institutes',
@@ -69,6 +69,7 @@ export default function AppSidebar({
             'Subscription',
             'Courses',
             'Streams',
+            'Manage Pages',
             'Counselors',
             'Admins',
             'Students',
@@ -78,11 +79,13 @@ export default function AppSidebar({
             'Promotions',
             'Blogs',
             'Career',
+           'Subscriptions',
+           'Bulk Institute Upload',
             'Questions and Answers',
             'Online counselling list',
             'Webinars'
           ] // Titles to exclude for 'counsellor'
-        : ['Online counselling','Slots','Profile','Support','Redeem']; // Default: no exclusions
+        : ['Online counselling','Slots','Subscription','Profile','Support','Redeem']; // Default: no exclusions
 
     const filteredItems = navItems.filter(
       (item) => !excludedTitles.includes(item.title)

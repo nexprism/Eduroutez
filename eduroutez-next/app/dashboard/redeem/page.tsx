@@ -4,53 +4,114 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Coins, Gift, History } from "lucide-react";
-import axios from "axios";
 import axiosInstance from "@/lib/axios";
+
+interface RedeemHistoryItem {
+  id: number;
+  date: string;
+  coins: number;
+  reward: string;
+}
 
 const RedeemPage = () => {
   const [coins, setCoins] = useState("");
-  interface RedeemHistoryItem {
-    id: number;
-    date: string;
-    coins: number;
-    reward: string;
-  }
-
   const [redeemHistory, setRedeemHistory] = useState<RedeemHistoryItem[]>([]);
   const [availableCoins, setAvailableCoins] = useState(1000);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     fetchRedeemHistory();
   }, []);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const fetchRedeemHistory = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const response = await axiosInstance.get(`${apiUrl}/redeem-history`);
-
-      setRedeemHistory(response.data);
+      
+      // Validate that response.data is an array
+      if (Array.isArray(response.data)) {
+        setRedeemHistory(response.data);
+      } else {
+        setRedeemHistory([]);
+        setError("Invalid history data received");
+      }
     } catch (error) {
       console.error("Failed to fetch redeem history:", error);
+      setError("Failed to load redemption history");
+      setRedeemHistory([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRedeem = async (e:any) => {
+  const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-     const response= await axiosInstance.post(`${apiUrl}/redeem-points`, { points: Number(coins) });
+      const response = await axiosInstance.post(`${apiUrl}/redeem-points`, { points: Number(coins) });
       setCoins("");
       setAvailableCoins(availableCoins - Number(coins));
-
       fetchRedeemHistory();
       console.log(response);
     } catch (error) {
       console.error("Failed to redeem points:", error);
+      setError("Failed to redeem points. Please try again.");
     }
+  };
+
+  const renderHistoryTable = () => {
+    if (isLoading) {
+      return <div className="text-center py-4 text-purple-600">Loading history...</div>;
+    }
+
+    if (error) {
+      return <div className="text-center py-4 text-red-600">No redemption history available</div>;
+    }
+
+    if (redeemHistory.length === 0) {
+      return <div className="text-center py-4 text-purple-600">No redemption history available</div>;
+    }
+
+    return (
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-purple-200">
+            <th className="px-4 py-3 text-left text-sm font-medium text-purple-700">Date</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-purple-700">Coins</th>
+            <th className="px-4 py-3 text-left text-sm font-medium text-purple-700">Reward</th>
+          </tr>
+        </thead>
+        <tbody>
+          {redeemHistory.map((item, index) => (
+            <tr 
+              key={item.id} 
+              className={`
+                border-b border-purple-100
+                ${index % 2 === 0 ? 'bg-purple-50' : 'bg-white'}
+                hover:bg-purple-100 transition-colors
+              `}
+            >
+              <td className="px-4 py-3 text-sm text-purple-900">
+                {new Date(item.date).toLocaleDateString()}
+              </td>
+              <td className="px-4 py-3 text-sm font-medium text-purple-900">
+                {item.coins}
+              </td>
+              <td className="px-4 py-3 text-sm text-purple-900">
+                {item.reward}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 to-white p-6">
-      {/* Header Section */}
       <div className="text-center mb-8 space-y-2">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-purple-900 bg-clip-text text-transparent">
           Redeem Your Coins
@@ -61,7 +122,6 @@ const RedeemPage = () => {
       </div>
 
       <div className="max-w-7xl mx-auto grid gap-6 md:grid-cols-2">
-        {/* Redeem Form Card */}
         <Card className="shadow-xl border-purple-100">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -91,6 +151,7 @@ const RedeemPage = () => {
               <Button 
                 type="submit" 
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                disabled={isLoading}
               >
                 <Gift className="mr-2 h-4 w-4" />
                 Redeem Now
@@ -99,7 +160,6 @@ const RedeemPage = () => {
           </CardContent>
         </Card>
 
-        {/* History Card */}
         <Card className="shadow-xl border-purple-100">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -109,43 +169,7 @@ const RedeemPage = () => {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-purple-200">
-                    <th className="px-4 py-3 text-left text-sm font-medium text-purple-700">
-                      Date
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-purple-700">
-                      Coins
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-purple-700">
-                      Reward
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {redeemHistory.map((item, index) => (
-                    <tr 
-                      key={item.id} 
-                      className={`
-                        border-b border-purple-100
-                        ${index % 2 === 0 ? 'bg-purple-50' : 'bg-white'}
-                        hover:bg-purple-100 transition-colors
-                      `}
-                    >
-                      <td className="px-4 py-3 text-sm text-purple-900">
-                        {new Date(item.date).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-purple-900">
-                        {item.coins}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-purple-900">
-                        {item.reward}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {renderHistoryTable()}
             </div>
           </CardContent>
         </Card>

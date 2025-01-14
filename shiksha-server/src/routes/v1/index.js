@@ -15,7 +15,7 @@ import { createStream, deleteStream, getStream, getStreams, updateStream } from 
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, addFacility, submitIssue, bestRatedInstitute } from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, addFacility, submitIssue, bestRatedInstitute ,bulkAddInstitutes } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer ,getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute } from "../../controllers/counselor-controller.js";
@@ -123,6 +123,7 @@ router.post("/instituteUpgrade/:email", accessTokenAutoRefresh, passport.authent
 router.post("/institute/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), makeInstitute);
 router.get("/institutes", getInstitutes);
 router.get("/institute/:id", getInstitute);
+router.post("/bulkAddInstitutes", bulkAddInstitutes);
 router.get("/institutes/:email", getInstituteByEmail);
 router.patch("/institute/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateInstitute);
 router.delete("/institute/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteInstitute);
@@ -402,6 +403,7 @@ router.delete("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt",
 router.post("/page", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createPage);
 router.get("/page", getPages);
 router.get("/page-by-institute/:instituteId", getPagesByInstitute);    
+
 // router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
 router.get("/page/:id", getPage);
 

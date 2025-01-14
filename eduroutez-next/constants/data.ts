@@ -26,6 +26,13 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Subscriptions',
+    url: '/dashboard/subscriptions',
+    icon: 'award',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
     title: 'Streams',
     url: '/dashboard/stream',
     icon: 'microscope',
@@ -47,6 +54,13 @@ export const navItems: NavItem[] = [
         url: '/dashboard/course-category'
       }
     ]
+  },
+  {
+    title: 'Bulk Institute Upload',
+    url: '/dashboard/bulk-institute-upload',
+    icon: 'school',
+    isActive: false,
+    items: [] // No child items
   },
   {
     title: 'Institutes',
@@ -242,7 +256,7 @@ export const navItems: NavItem[] = [
 
   {
     title: 'Online counselling',
-    url: '/dashboard/online-counselling',
+    url: '/dashboard/online-counselling-list',
     icon: 'scroll-text',
     isActive: false,
     items: [
