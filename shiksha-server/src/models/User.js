@@ -24,6 +24,18 @@ const userSchema = new mongoose.Schema(
     image: {
       type: String,
     },
+    plan:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Subscription",
+          default:"676d7f071e0e1af8cb5344d7"
+        },
+    planName: {
+      type: String,
+      default: "Standard"
+    },
+    expiryDate: {
+      type: Date,
+    },
     role: {
       type: String,
       enum: ["admin", "SUPER_ADMIN","student","institute","counsellor"], // "STUDENT", "COUNSELOR", "INSTITUTE",  they have thier different tables

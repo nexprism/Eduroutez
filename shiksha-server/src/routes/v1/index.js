@@ -12,7 +12,7 @@ import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
 import { getUsers, updateUser, allowUser, getMyRefferal, redeemPoints, getRedeemHistory } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory,getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
-import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription } from "../../controllers/subscription-controller.js";
+import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
 import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, addFacility, submitIssue, bestRatedInstitute ,bulkAddInstitutes } from "../../controllers/institute-controller.js";
@@ -345,6 +345,9 @@ router.get("/my-refferal", accessTokenAutoRefresh, passport.authenticate("jwt", 
 router.post("/redeem-points", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), redeemPoints);
 //redeem history
 router.get("/redeem-history", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getRedeemHistory);
+
+//razorpay create order
+router.post("/purchase-plan", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), purchasePlan);
 
 
 
