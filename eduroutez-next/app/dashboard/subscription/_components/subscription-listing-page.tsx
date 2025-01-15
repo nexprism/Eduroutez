@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
 import loadRazorpayScript from '@/lib/razorpay';
+import { toast } from 'sonner';
 
 const PricingPage = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -29,7 +30,8 @@ const PricingPage = () => {
   });
 
 
-  const handlePayment = async (plan:any) => {
+  const handlePayment = async (plan: any) => {
+    console.log('Selected plan:', plan);
     const isScriptLoaded = await loadRazorpayScript();
 
     if (!isScriptLoaded) {
@@ -41,21 +43,34 @@ const PricingPage = () => {
       alert('Razorpay Key ID is missing. Please check your environment variables.');
       return;
     }
-    console.log(key);
 
     const options = {
-      key_id: "rzp_live_aUNJSDsE0jsZIE", // Replace with your Key ID
-      key: key, // Use the environment variable for Key ID
+      key: key,
       currency: 'INR',
-      name: 'Your Company Name',
+      name: 'Eduroutez',
       description: plan.name,
-      handler: () => {
-        alert('Razorpay payment panel opened');
-      },
-      prefill: {
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        contact: '9999999999',
+      amount: parseInt(plan.price) * 100,
+      handler: async (response: any) => {
+        console.log('Payment response:', response);
+        if (response.error) {
+          console.error('Payment failed', response.error.message);
+          alert(`Payment failed: ${response.error.description}`);
+        } else {
+          console.log('Payment successful', response);
+          toast.success('Payment successful 🎉');
+          alert(`Payment successful: ${response.razorpay_payment_id}`);
+
+          try {
+            const purchaseResponse = await axiosInstance.post('http://localhost:4001/api/v1/purchase-plan', {
+              plan_id: plan._id,
+              payment_id: response.razorpay_payment_id,
+            });
+            console.log('Purchasefghbjn response:', purchaseResponse);
+          } catch (error) {
+            console.error('Failed to record purchase', error);
+            alert('Failed to record purchase. Please contact support.');
+          }
+        }
       },
       theme: {
         color: '#3399cc',
@@ -65,7 +80,7 @@ const PricingPage = () => {
     const rzp = new (window as any).Razorpay(options);
     rzp.open();
   };
-  
+
 
   if (isLoading) {
     return (

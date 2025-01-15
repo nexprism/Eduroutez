@@ -15,5 +15,14 @@ class InstituteIssuesRepository extends CrudRepository {
       throw error;
     }
   }
+
+    async getHelpList() {
+      try {
+        const issues = await InstituteIssues.find().populate("institute");
+        return issues;
+      } catch (error) {
+        throw error;
+      }
+    }
 }
 export { InstituteIssuesRepository };
