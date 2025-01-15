@@ -9,6 +9,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'eduroutez.nexprism.in',
+        port: ''
+      },
+      {
+        protocol: 'https',
         hostname: 'api.slingacademy.com',
         port: ''
       },
