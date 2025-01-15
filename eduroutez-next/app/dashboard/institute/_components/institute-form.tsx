@@ -169,7 +169,6 @@ export default function CreateInstitute() {
 
 
   const [galleryImages, setGalleryImages] = useState<string[]>([]); // Initialize state for gallery images
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 
 

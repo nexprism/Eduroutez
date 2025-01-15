@@ -173,7 +173,6 @@ export default function CreateInstitute() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema)
   });
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const [galleryImages, setGalleryImages] = useState<string[]>([]); // Initialize state for gallery images
 
