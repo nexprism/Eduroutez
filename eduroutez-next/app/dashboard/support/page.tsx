@@ -86,7 +86,7 @@ const SupportPage = () => {
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
                 <h2 className="text-2xl font-bold text-white">Submit a Support Request</h2>
-                <p className="text-purple-100 mt-2">We'll get back to you as soon as possible.</p>
+                <p className="text-purple-100 mt-2">We&apos;ll get back to you as soon as possible.</p>
               </div>
               
               <form onSubmit={handleSubmit} className="p-6 space-y-6">
