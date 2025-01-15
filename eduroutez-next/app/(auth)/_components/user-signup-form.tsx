@@ -65,6 +65,7 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
   const router = useRouter();
   const [showAlert, setShowAlert] = useState(false);
   const [role, setRole] = useState<string>('');
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
@@ -82,7 +83,7 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
   const mutation = useMutation({
     mutationFn: async (credentials: UserFormValue) => {
       const response = await axiosInstance.post(
-        'http://localhost:4001/api/v1/signup',
+        `${apiUrl}/signup`,
         credentials,
         {
           headers: {

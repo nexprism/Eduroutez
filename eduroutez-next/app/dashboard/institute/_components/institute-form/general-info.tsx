@@ -98,7 +98,8 @@ const GeneralInfo = () => {
     const [previewbrochure, setPreviewbrochure] = React.useState<string | null>(
       null
     );
-  const baseURL = "http://localhost:4001/api/uploads/";
+  const baseURL = process.env.NEXT_PUBLIC_NEW_IMAGES;
+  ;
 
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);

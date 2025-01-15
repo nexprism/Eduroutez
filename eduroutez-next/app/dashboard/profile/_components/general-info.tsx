@@ -31,7 +31,8 @@ import { toast } from 'sonner';
 import tr from 'date-fns/esm/locale/tr/index';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-const baseURL = "http://localhost:4001/api/uploads/";
+const baseURL =process.env.NEXT_PUBLIC_NEW_IMAGES;
+;
 
 
 const courseTypes = [

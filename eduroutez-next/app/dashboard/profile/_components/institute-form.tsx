@@ -158,6 +158,10 @@ export default function CreateInstitute() {
   
   const pathname = usePathname();
   const segments = pathname.split('/');
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const ImageUrl = process.env.NEXT_PUBLIC_NEW_IMAGES;
+
+
   const [isEdit, setIsEdit] = React.useState(false);
 
   React.useEffect(() => {
@@ -182,7 +186,7 @@ export default function CreateInstitute() {
   
       // Convert filenames to URLs for rendering in the frontend
       const galleryUrls = instituteData.gallery.map(
-        (filename: string) => `http://localhost:4001/api/uploads/${filename}`
+        (filename: string) => `${ImageUrl}/${filename}`
       );
   
       console.log("Gallery URLs for rendering:", galleryUrls);
@@ -300,7 +304,7 @@ console.log('Error updating institute:', error.message); }
       const values = form.getValues();
       console.log('Facility values:', values);
       const response = await axiosInstance.post(
-        `http://localhost:4001/api/v1/addfacility/${id}`,
+        `${apiUrl}/addfacility/${id}`,
         { title: values.facility }
       );
       console.log('Facility added successfully:', response.data);

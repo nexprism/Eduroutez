@@ -60,7 +60,7 @@ const PricingPage = () => {
           toast.success('Payment successful 🎉');
 
           try {
-            const purchaseResponse = await axiosInstance.post('http://localhost:4001/api/v1/purchase-plan', {
+            const purchaseResponse = await axiosInstance.post(`${apiUrl}/purchase-plan', {
               plan: plan._id,
               paymentId: response.razorpay_payment_id,
             });
