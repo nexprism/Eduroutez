@@ -62,8 +62,8 @@ const PricingPage = () => {
 
           try {
             const purchaseResponse = await axiosInstance.post('http://localhost:4001/api/v1/purchase-plan', {
-              plan_id: plan._id,
-              payment_id: response.razorpay_payment_id,
+              plan: plan._id,
+              paymentId: response.razorpay_payment_id,
             });
             console.log('Purchasefghbjn response:', purchaseResponse);
           } catch (error) {
