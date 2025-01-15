@@ -169,6 +169,21 @@ export async function updateStudent(req, res) {
       // Update the student with new data
       const response = await studentService.update(studentId, payload);
 
+      const user_payload = {};
+      if (req.body.email) {
+        user_payload.email = req.body.email;
+      } 
+
+      if (req.body.name) {
+        user_payload.name = req.body.name;
+      }
+
+      if (req.body.phone) {
+        user_payload.contact_number = req.body.phone;
+      }
+
+      const user = await userService.update(studentId, user_payload);
+
       // Delete the old image only if the update is successful and old image exists
       if (oldImagePath) {
         try {
