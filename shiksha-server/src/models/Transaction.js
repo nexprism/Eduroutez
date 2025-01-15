@@ -7,11 +7,11 @@ const transactionSchema = new mongoose.Schema(
       ref: "User", // Reference to the user who made the transaction
       required: true,
     },
-    // coupon: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: "Coupon", // Reference to the coupon associated with the transaction
-    //   required: true,
-    // },
+    subscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription", // Reference to the subscription purchased
+      required: true,
+    },
     amount: {
       type: Number,
       required: true,
@@ -19,6 +19,12 @@ const transactionSchema = new mongoose.Schema(
     transactionDate: {
       type: Date,
       default: Date.now,
+    },
+    remarks: {
+      type: String,
+    },
+    paymentId: {
+      type: String,
     },
     status: {
       type: String,

@@ -154,6 +154,9 @@ const instituteSchema = new mongoose.Schema(
       type:String,
       default:"Standard"
     },
+    expiryDate:{
+      type:Date,
+    },
     issues: [
       {
         type: mongoose.Schema.Types.ObjectId,

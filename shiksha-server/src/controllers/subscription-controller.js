@@ -114,3 +114,36 @@ export async function deleteSubscription(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+
+
+//purchasePlan
+export async function purchasePlan(req, res) {
+  try {
+
+    const user = req.user;
+    const plan = req.body.plan;
+    // console.log('user',req.user);
+
+    const payload = {
+      plan: plan,
+      user: user._id,
+      paymentId: req.body.paymentId,
+      type: req.body.type
+    };
+
+   
+  
+
+  // console.log('payload',payload);
+
+
+  const response = await subscriptionService.purchasePlan(payload);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully " + req.body.type +" plan";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.log('error',error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}   

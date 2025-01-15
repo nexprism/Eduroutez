@@ -1,7 +1,13 @@
 import { SubscriptionRepository } from "../repository/index.js";
+import { UserRepository } from "../repository/index.js";
+import { InstituteRepository } from "../repository/index.js";
+import { TransactionRepository } from "../repository/index.js";
 class SubscriptionService {
   constructor() {
     this.subscriptionRepository = new SubscriptionRepository();
+    this.userRepository = new UserRepository();
+    this.instituteRepository = new InstituteRepository();
+    this.transactionRepository = new TransactionRepository();
   }
 
   async create(data) {
@@ -80,6 +86,73 @@ class SubscriptionService {
       throw new AppError("Cannot delete the subscription ", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
+
+  //purchasePlan
+  async purchasePlan(data) {
+    try {
+
+      
+    //fetch subscription by data.plan
+    const subscription = await this.subscriptionRepository.get(data.plan);
+    if(!subscription){
+      throw new AppError("Subscription not found", StatusCodes.NOT_FOUND);
+    }
+
+    console.log('subscription', subscription);
+
+
+    //expiry date count base on plan suration type and suration
+    let expiryDate = new Date();
+      if (subscription.durationType == "month"){
+        expiryDate.setMonth(expiryDate.getMonth() + subscription.duration);
+      }else if(subscription.durationType == "year"){
+        expiryDate.setFullYear(expiryDate.getFullYear() + subscription.duration);
+      }
+
+    //set plan to user
+    const user = await this.userRepository.get(data.user);
+    if(!user){
+      throw new AppError("User not found", StatusCodes.NOT_FOUND);
+    }
+    user.plan = subscription._id;
+    user.planName = subscription.name;
+    user.expiryDate = expiryDate;
+    await user.save();
+
+    //same save in institute
+    if(user.role == "institute"){
+      const institute = await this.instituteRepository.get({ _id:user._id});
+      if(!institute){
+        throw new AppError("Institute not found", StatusCodes.NOT_FOUND);
+      }
+
+      institute.plan = subscription;
+      institute.planName = subscription.name;
+      institute.expiryDate = expiryDate;
+      await institute.save();
+
+    }
+
+    //save transaction
+
+    console.log('data',data);
+
+    const transaction = await this.transactionRepository.create({
+      user: data.user,
+      subscription: data.plan,
+      amount: subscription.price,
+      transactionDate: new Date(),
+      remarks: (data.type == "new") ? "New Subscription" : "Renew Subscription",
+      paymentId:data.paymentId,
+      status: "COMPLETED"
+    });
+    return transaction;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+
 }
 
 export default SubscriptionService;
