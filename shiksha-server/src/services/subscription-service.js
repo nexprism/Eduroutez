@@ -2,7 +2,6 @@ import { SubscriptionRepository } from "../repository/index.js";
 import { UserRepository } from "../repository/index.js";
 import { InstituteRepository } from "../repository/index.js";
 import { TransactionRepository } from "../repository/index.js";
-import AppError from "../utils/appError.js";
 class SubscriptionService {
   constructor() {
     this.subscriptionRepository = new SubscriptionRepository();
