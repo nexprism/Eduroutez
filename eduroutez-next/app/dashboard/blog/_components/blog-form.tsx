@@ -237,65 +237,68 @@ export default function BlogForm() {
                     </SelectContent>
                   </Select>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Image</FormLabel>
-                  <FormControl>
-                    <div className="space-y-4">
-                      <Input
-                        type="file"
-                        accept="image/png, image/jpeg, image/webp"
-                        onChange={handleImageChange}
-                        ref={fileInputImageRef}
-                        className="hidden"
+                        )}
                       />
 
-                      {previewImageUrl ? (
-                        <div className="relative inline-block">
-                          <Image
-                            src={previewImageUrl}
-                            alt="Preview"
-                            className="max-h-[400px] max-w-full rounded-md object-cover"
-                            width={1200}
-                            height={400}
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute right-0 top-0 -mr-2 -mt-2"
-                            onClick={removeImage}
-                          >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove image</span>
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={triggerImageFileInput}
-                          className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
-                        >
-                          <Plus className="text-grey-400 h-10 w-10" />
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <FormField
+                        control={form.control}
+                        name="image"
+                        render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Image</FormLabel>
+                          <FormControl>
+                          <div className="space-y-4">
+                            <Input
+                            type="file"
+                            accept="image/png, image/jpeg, image/webp"
+                            onChange={handleImageChange}
+                            ref={fileInputImageRef}
+                            className="hidden"
+                            />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
+                            {previewImageUrl ? (
+                            <div className="relative inline-block">
+                              <Image
+                              src={previewImageUrl}
+                              alt="Preview"
+                              className="max-h-[400px] max-w-full rounded-md object-cover"
+                              width={1200}
+                              height={400}
+                              />
+                              <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removeImage}
+                              >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove image</span>
+                              </Button>
+                            </div>
+                            ) : (
+                            <div
+                              onClick={triggerImageFileInput}
+                              className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                            >
+                              <Plus className="text-grey-400 h-10 w-10" />
+                            </div>
+                            )}
+                            <p className="text-sm text-gray-500">
+                            Only PNG, JPEG, and WEBP formats are allowed. Maximum size: 1 MB.
+                            </p>
+                          </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>

@@ -18,8 +18,8 @@ const app = express();
 app.use("/uploads", express.static("uploads"));
 const corsOptions = {
   // origin: process.env.FRONTEND_HOST,
-  origin: ["http://localhost:5173", "http://localhost:3000"],
-    credentials: true,
+  origin: "https://eduroutez-kixc.vercel.app/",
+  credentials: true,
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
@@ -68,7 +68,7 @@ const mailgun=()=>mg({
 })
 
 app.post("/send-email", async (req, res) => {
-  const { to, subject, message } = req.body; // `to` is an array
+  const { to, subject, message } = req.body;
   if (!Array.isArray(to) || to.length === 0) {
     return res.status(400).json({ error: "Recipient email list is empty or invalid" });
   }
