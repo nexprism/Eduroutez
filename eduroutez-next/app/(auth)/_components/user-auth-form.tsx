@@ -27,7 +27,7 @@ const formSchema = z.object({
 
 type UserFormValue = z.infer<typeof formSchema>;
 
-export default function UserAuthForm({ setToggle ,toggle}: any) {
+export default function UserAuthForm({ setToggle, toggle }: any) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [user, setuser] = useState();
@@ -102,10 +102,6 @@ export default function UserAuthForm({ setToggle ,toggle}: any) {
     mutation.mutate(data);
   };
 
-  const handleToggle = () => {
-    setToggle(true);
-  };
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
@@ -145,10 +141,9 @@ export default function UserAuthForm({ setToggle ,toggle}: any) {
             </FormItem>
           )}
         />
-        <button className='w-full justify-end text-blue-600 ml-0' onClick={()=>setToggle(!toggle)} type="button">Don't Have Account?Create Account</button>
+        <button className='w-full justify-end text-blue-600 ml-0' onClick={() => setToggle(!toggle)} type="button">Don't Have Account?Create Account</button>
         <Button
           disabled={mutation.isLoading || isPending}
-          className="ml-auto w-full"
           type="submit"
         >
           {mutation.isLoading || isPending ? 'Signing In...' : 'Sign In'}
