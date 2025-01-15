@@ -21,6 +21,7 @@ interface Issue {
 }
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const ImageUrl = process.env.NEXT_PUBLIC_NEW_IMAGES;
 
 const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -37,7 +38,7 @@ const getStatusColor = (status: string) => {
 
 const getImageUrl = (imagePath: string) => {
     if (!imagePath) return '';
-    return `http://localhost:4001/api/uploads/${imagePath}`;
+    return `${ImageUrl}/${imagePath}`;
 };
 
 const HelpSupportPage: React.FC = () => {
