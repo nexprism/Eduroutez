@@ -141,7 +141,7 @@ export default function UserAuthForm({ setToggle, toggle }: any) {
             </FormItem>
           )}
         />
-        <button className='w-full justify-end text-blue-600 ml-0' onClick={() => setToggle(!toggle)} type="button">Don't Have Account?Create Account</button>
+        <button className='w-full justify-end text-blue-600 ml-0' onClick={() => setToggle(!toggle)} type="button">Don&apos;t Have Account?Create Account</button>
         <Button
           disabled={mutation.isLoading || isPending}
           type="submit"

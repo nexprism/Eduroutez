@@ -11,14 +11,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { CalendarDateRangePicker } from '@/components/date-range-picker';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Users, Building2, Crown, Activity, DollarSign, Star } from 'lucide-react';
+import { Users, Building2, Crown, Activity, DollarSign, Star } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
 
-const Dashboard = ({ counselorData }) => {
+interface Subscription {
+  status: string;
+}
+
+interface CounselorData {
+  level?: string;
+  points?: number;
+}
+
+const Dashboard: React.FC<{ counselorData: CounselorData }> = ({ counselorData }) => {
   const [role, setRole] = useState(localStorage.getItem('role'));
   const [newCounselors, setNewCounselors] = useState(0);
   const [newInstitutes, setNewInstitutes] = useState(0);
-  const [subscriptions, setSubscriptions] = useState([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,7 +45,7 @@ const Dashboard = ({ counselorData }) => {
         setNewInstitutes(institutesResponse.data.data.result.length);
         setSubscriptions(subscriptionsResponse.data.data.result);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error(error);
       } finally {
         setIsLoading(false);
       }
@@ -47,7 +56,13 @@ const Dashboard = ({ counselorData }) => {
 
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
 
-  const StatCard = ({ title, value, icon: Icon, color, isLoading }) => (
+  const StatCard: React.FC<{
+    title: string;
+    value: string | number;
+    icon: React.ComponentType<{ className?: string }>;
+    color: string;
+    isLoading: boolean;
+  }> = ({ title, value, icon: Icon, color, isLoading }) => (
     <Card className="relative overflow-hidden">
       <div className={`absolute right-0 top-0 h-full w-2 ${color}`} />
       <CardHeader>
