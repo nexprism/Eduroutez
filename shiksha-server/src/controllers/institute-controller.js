@@ -222,6 +222,18 @@ console.log(sheetName);
       const data = xlsx.utils.sheet_to_json(sheet);
       console.log(data);
 
+      //add in user table
+      const users = data.map((row) => ({
+        _id: new mongoose.Types.ObjectId(),
+        name: row.instituteName,
+        email: row.email,
+        password: row.password,
+        role: "institute",
+        is_verified: true,
+      }));
+
+      await UserRepository.insertMany(users);
+
       const institutes = data.map((row) => ({
         _id: new mongoose.Types.ObjectId(),
         instituteName: row.instituteName,

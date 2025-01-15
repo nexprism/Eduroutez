@@ -149,7 +149,7 @@ export async function purchasePlan(req, res) {
 
   const response = await subscriptionService.purchasePlan(payload);
     SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully " + req.body.type +" plan";
+    SuccessResponse.message = "Successfully " + payload.type + " plan";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     console.log('error',error.message);
