@@ -3,6 +3,7 @@ import { ReviewRepository } from "../repository/index.js";
 class ReviewService {
   constructor() {
     this.reviewRepository = new ReviewRepository();
+    
   }
 
   async create(data) {
@@ -110,7 +111,17 @@ class ReviewService {
       throw error;
     }
   }
+  async getReviewsByUser(email) {
+    try {
+      const reviews = await this.reviewRepository.getAllByUser(email);
+      return reviews;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
+
+
 
 export default ReviewService;
 
