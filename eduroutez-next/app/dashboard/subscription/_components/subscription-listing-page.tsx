@@ -29,7 +29,6 @@ const PricingPage = () => {
     }
   });
 
-
   const handlePayment = async (plan: any) => {
     console.log('Selected plan:', plan);
     const isScriptLoaded = await loadRazorpayScript();
@@ -60,11 +59,11 @@ const PricingPage = () => {
           toast.success('Payment successful 🎉');
 
           try {
-            const purchaseResponse = await axiosInstance.post(`${apiUrl}/purchase-plan', {
+            const purchaseResponse = await axiosInstance.post(`${apiUrl}/purchase-plan`, {
               plan: plan._id,
               paymentId: response.razorpay_payment_id,
             });
-            console.log('Purchasefghbjn response:', purchaseResponse);
+            console.log('Purchase response:', purchaseResponse);
           } catch (error) {
             console.error('Failed to record purchase', error);
           }
@@ -78,7 +77,6 @@ const PricingPage = () => {
     const rzp = new (window as any).Razorpay(options);
     rzp.open();
   };
-
 
   if (isLoading) {
     return (
@@ -175,14 +173,13 @@ const PricingPage = () => {
                 </ul>
                 
                 <Button
-  className={`mt-6 w-full ${
-    plan.subscriptionType === 'POPULAR' ? 'bg-primary' : ''
-  }`}
-  onClick={() => handlePayment(plan)}
->
-  Choose {plan.name}
-</Button>
-
+                  className={`mt-6 w-full ${
+                    plan.subscriptionType === 'POPULAR' ? 'bg-primary' : ''
+                  }`}
+                  onClick={() => handlePayment(plan)}
+                >
+                  Choose {plan.name}
+                </Button>
               </CardContent>
             </Card>
           ))}

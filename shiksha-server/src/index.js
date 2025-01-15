@@ -18,8 +18,8 @@ const app = express();
 app.use("/uploads", express.static("uploads"));
 const corsOptions = {
   // origin: process.env.FRONTEND_HOST,
-  origin: "https://eduroutez-kixc.vercel.app/",
-  credentials: true,
+  origin: "*",
+    credentials: true,
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));

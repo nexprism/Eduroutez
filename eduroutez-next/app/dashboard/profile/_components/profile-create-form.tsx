@@ -460,7 +460,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     },
   // Only fetch when in edit mode
   });
-  const IMAGE_URL = 'http://localhost:4001/api/';
+  const IMAGE_URL = process.env.NEXT_PUBLIC_NEW_IMAGES;
 
 
   React.useEffect(() => {
