@@ -124,17 +124,27 @@ export async function purchasePlan(req, res) {
     const plan = req.body.plan;
     // console.log('user',req.user);
 
+
+    //check plan is already purchased or not
+    // console.log('user',user.plan);
     const payload = {
       plan: plan,
       user: user._id,
       paymentId: req.body.paymentId,
-      type: req.body.type
+      type: 'new'
     };
+
+    if(user.plan && user.plan._id == plan){
+      
+      payload.type = 'renew';
+
+    }
+
 
    
   
 
-  // console.log('payload',payload);
+  console.log('payload',payload);
 
 
   const response = await subscriptionService.purchasePlan(payload);

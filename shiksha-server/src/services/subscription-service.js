@@ -96,10 +96,10 @@ class SubscriptionService {
     //fetch subscription by data.plan
     const subscription = await this.subscriptionRepository.get(data.plan);
     if(!subscription){
-      throw new AppError("Subscription not found", StatusCodes.NOT_FOUND);
+      throw error;
     }
 
-    console.log('subscription', subscription);
+    // console.log('subscription', subscription);
 
 
     //expiry date count base on plan suration type and suration
@@ -113,7 +113,7 @@ class SubscriptionService {
     //set plan to user
     const user = await this.userRepository.get(data.user);
     if(!user){
-      throw new AppError("User not found", StatusCodes.NOT_FOUND);
+      throw error;
     }
     user.plan = subscription._id;
     user.planName = subscription.name;
@@ -124,7 +124,7 @@ class SubscriptionService {
     if(user.role == "institute"){
       const institute = await this.instituteRepository.get({ _id:user._id});
       if(!institute){
-        throw new AppError("Institute not found", StatusCodes.NOT_FOUND);
+        throw error;
       }
 
       institute.plan = subscription;
