@@ -21,7 +21,7 @@ import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, 
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
-import { createReview, deleteReview, getReview, getReviews, updateReview } from "../../controllers/review-controller.js";
+import { createReview, deleteReview, getReview, getReviews, updateReview ,getReviewsByUser} from "../../controllers/review-controller.js";
 import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCategory, updateBlogCategory } from "../../controllers/blog-category-controller.js";
 import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog,getBlogsByInstitute } from "../../controllers/blog-controller.js";
 import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, updateNews } from "../../controllers/news-controller.js";
@@ -222,6 +222,7 @@ router.get("/review", getReviews);
 router.get("/review/:id",  getReview);
 router.patch("/review/:id", updateReview);
 router.delete("/review/:id", deleteReview);
+router.get("/reviews-by-user/:email", getReviewsByUser);
 
 /**
  * blog-category routes

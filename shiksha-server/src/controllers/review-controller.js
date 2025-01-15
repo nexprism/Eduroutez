@@ -164,3 +164,17 @@ export async function deleteReview(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+
+
+export async function getReviewsByUser(req, res) {  
+  try {
+    const response = await reviewService.getReviewsByUser(req.params.email);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched reviews";
+    return res.status(200).json(SuccessResponse);
+  } catch (error) {
+    console.log('err',error.message)
+    ErrorResponse.error = error;
+    return res.status(500).json(ErrorResponse);
+  } 
+}
