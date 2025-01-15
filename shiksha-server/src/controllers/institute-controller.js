@@ -441,7 +441,7 @@ export const submitIssue = async (req, res) => {
 };
 
 
-/**export async function getHelpList(req, res) {
+export async function getHelpList(req, res) {
   try {
     const response = await instituteService.getHelpList();
     SuccessResponse.data = response;
@@ -451,7 +451,7 @@ export const submitIssue = async (req, res) => {
     ErrorResponse.error = error;
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
-}**/
+}
 
 // export async function submitIssue(req, res) {
 //   try {

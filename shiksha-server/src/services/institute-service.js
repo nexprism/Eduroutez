@@ -237,6 +237,16 @@ console.log('updatesInstitute',updatesInstitute);
     }
   }
 
+    
+    async getHelpList() {
+      try {
+        const helpList = await this.instituteIssuesRepository.getHelpList();
+        return helpList;
+      } catch (error) {
+        console.log(error.message);
+        throw new AppError("Cannot fetch help list", StatusCodes.INTERNAL_SERVER_ERROR);
+      }
+    }
   
 }
 
