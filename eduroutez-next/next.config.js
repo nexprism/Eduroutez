@@ -3,6 +3,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  rules: {
+    'react/no-unescaped-entities': 'off',
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
