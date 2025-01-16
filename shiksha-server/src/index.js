@@ -17,9 +17,8 @@ const app = express();
 
 app.use("/uploads", express.static("uploads"));
 const corsOptions = {
-  // origin: process.env.FRONTEND_HOST,
-  origin: "*",
-    credentials: true,
+  origin: "http://localhost:5173",
+  credentials: true,
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
@@ -62,7 +61,7 @@ app.get("/", (req, res) => {
 });
 app.use("/api", apiRoutes);
 
-const mailgun=()=>mg({
+const mailgun = () => mg({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: process.env.MAILGUN_DOMAIN
 })
@@ -96,7 +95,7 @@ app.post("/send-email", async (req, res) => {
 
 
 app.listen(ServerConfig.PORT, async () => {
-  console.log(`Server started on port ${ServerConfig.PORT}`);
+  // console.log('Server started on port ${ ServerConfig.PORT });
   await DATABASE.connect(ServerConfig.DATABASE_URL);
   console.log("Mongo db connected");
   console.log("setup init");

@@ -115,9 +115,10 @@ export async function updateUser(req, res) {
         payload.access = req.body.access; 
       }
 
+      const user = await studentService.get(userId);
       if (req.file) {
-        const user = await studentService.get(userId);
 
+        
         // Record the old image path if it exists
         if (user.image) {
           oldImagePath = path.join("uploads", user.image);
@@ -128,7 +129,15 @@ export async function updateUser(req, res) {
       }
 
       // Update the user with new data
+
+      
+      const student = await studentService.get(userId);
+      
+      
+
       const response = await studentService.update(userId, payload);
+      
+      
 
       // Delete the old image only if the update is successful and old image exists
       if (oldImagePath) {
@@ -139,6 +148,7 @@ export async function updateUser(req, res) {
         }
       }
 
+      console.log("Update user response:", response);
       // Return success response
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully updated the user";

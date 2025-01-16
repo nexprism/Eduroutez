@@ -7,11 +7,13 @@ class StudentRepository extends CrudRepository {
   }
 
   async makeStudent(data) {
-    const { email } = data;
-    let counselor = await this.model.findOne({ email });
-
+    const { user } = data;
+    let counselor = await this.model.findOne({ _id: user });
+    console.log("counselor", counselor);
     if (counselor) {
-      counselor = await this.model.findOneAndUpdate({ email }, data, { new: true });
+      counselor = await this.model.findOneAndUpdate({ _id: user }, data, {
+        new: true,
+      });
     } else {
       counselor = new this.model(data);
       await counselor.save();

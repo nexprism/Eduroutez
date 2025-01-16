@@ -1,12 +1,24 @@
 import { StudentRepository } from "../repository/index.js";
+import { UserRepository } from "../repository/index.js";
 
 class StudentService {
   constructor() {
     this.studentRepository = new StudentRepository();
+    this.userRepository = new UserRepository();
   }
 
   async create(data) {
     try {
+      console.log('data',data)
+
+      const userpayload = {
+        name: data.name,
+        email: data.email,
+        contact_number: data.contactno,
+      };
+
+      const userResponse = await this.userRepository.update(data.user, userpayload);
+
       const student = await this.studentRepository.makeStudent(data);
       return student;
     } catch (error) {
@@ -89,8 +101,23 @@ class StudentService {
   }
   async update(id, data) {
     try {
+
+      const userpayload = {
+        name: data.name,
+        email: data.email,
+        contact_number: data.contactno,
+      };
+
+    
+      const userResponse = await this.userRepository.update(id, userpayload);
+
+
+
       const student = await this.studentRepository.update(id, data);
       return student;
+
+
+
     } catch (error) {
       throw error;
     }
