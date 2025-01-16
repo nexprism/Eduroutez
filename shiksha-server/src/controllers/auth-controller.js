@@ -125,6 +125,7 @@ if(req.body.referal_Code){
 //save in student table
 
   const studentPayload = {
+    _id: userId,
     name: req.body.name,
     email: req.body.email,
     phone: req.body.contact_number,

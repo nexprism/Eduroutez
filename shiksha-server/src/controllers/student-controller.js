@@ -49,7 +49,9 @@ export const createStudent = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong. Please try again later." });
       }
 
+      const student = req.user
       const payload = { ...req.body };
+      console.log("payload", payload);
       if (req.files && req.files["profilePicture"]) {
         payload.profilePicture = req.files["profilePicture"][0].filename;
       }
@@ -78,6 +80,12 @@ export const createStudent = async (req, res) => {
             return education;
           });
         }
+      }
+
+        payload.user = student._id;
+        payload.email = student.email;
+      if (req.body.dob) {
+         payload.dateOfBirth = new Date(payload.dob);
       }
 
       try {
