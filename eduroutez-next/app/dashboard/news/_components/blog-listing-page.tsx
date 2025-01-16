@@ -19,6 +19,7 @@ type News = {
   institute: string;
   date: string;
   viewCount: number;
+  status: string;
   createdAt: string;
   updatedAt: string;
   __v: number;

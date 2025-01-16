@@ -21,17 +21,9 @@ export const columns: ColumnDef<ManagePages>[] = [
     accessorKey: 'answer', // Added accessorKey for consistency
     cell: ({ row }) => (
       <div
-        dangerouslySetInnerHTML={{ __html: row.original.description }} // Fixed syntax
+        dangerouslySetInnerHTML={{ __html: row.original.description || '' }} // Fixed syntax
       />
     ),
-  },
-  {
-    header: 'CREATED AT',
-    cell: ({ row }) => {
-      const date = new Date(row.original.createdAt);
-      const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-      return <div>{formattedDate}</div>;
-    }
   },
   {
     accessorKey: 'status',

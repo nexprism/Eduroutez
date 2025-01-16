@@ -11,17 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useBlogTableFilters } from './blog-tables/use-blog-table-filters';
 import axiosInstance from '@/lib/axios';
 
-type Blog = {
-  _id: string;
-  title: string;
-  instituteId: string;
-  image: string;
-  description: string;
-  category: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-};
+import { Blog } from '@/types';
 
 type BlogResponse = {
   success: boolean;

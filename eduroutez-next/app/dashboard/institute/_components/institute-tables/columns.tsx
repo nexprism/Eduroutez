@@ -46,7 +46,7 @@ export const columns: ColumnDef<Institute>[] = [
     header: 'COURSE',
     cell: ({ row }) => {
       console.log('Row:', row);
-      return <div>{`${row.original.courses.length}`}</div>;
+      return <div>{`${row.original.courses ? row.original.courses.length : 0}`}</div>;
     }
   },
   {
@@ -64,15 +64,6 @@ export const columns: ColumnDef<Institute>[] = [
           </Badge>
         </div>
       );
-    }
-  },
-  {
-    header: 'CREATED AT',
-    cell: ({ row }) => {
-      console.log('Row:', row);
-      const date = new Date(row.original.updatedAt);
-      const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-      return <div>{formattedDate}</div>;
     }
   },
   {

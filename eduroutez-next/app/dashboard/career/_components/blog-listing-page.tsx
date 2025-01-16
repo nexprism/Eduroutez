@@ -16,13 +16,14 @@ interface Career {
   title: string;
   image: string;
   description: string;
-  category: string;
+  category: { _id: string; name: string };
   eligibility: string;
   jobRoles: string;
   topColleges: string;
   instituteId: string;
   createdAt: string;
   updatedAt: string;
+  status: string; // Added status property
 }
 
 interface CareerResponse {
@@ -77,7 +78,11 @@ export default function CareerListingPage({}: TCareerListingPage) {
             </div>
             <Separator />
             <BlogTable
-              data={data.data}
+              data={data.data.map(career => ({
+                ...career,
+                category: { _id: career.category._id, name: career.category.name }, // Assuming IBlogCategory has '_id' and 'name' properties
+                status: career.status === 'true' // Convert status to boolean
+              }))}
               totalData={data.data.length}
             />
           </div>
