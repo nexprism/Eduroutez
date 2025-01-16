@@ -17,7 +17,7 @@ const app = express();
 
 app.use("/uploads", express.static("uploads"));
 const corsOptions = {
-  origin: "*",
+  origin: ["*", "https://eduroutez-frontend.vercel.app", "https://eduroutez-kixc.vercel.app"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
