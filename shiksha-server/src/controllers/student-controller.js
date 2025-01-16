@@ -84,7 +84,9 @@ export const createStudent = async (req, res) => {
 
         payload.user = student._id;
         payload.email = student.email;
-        payload.dateOfBirth = new Date(payload.dob);
+      if (req.body.dob) {
+         payload.dateOfBirth = new Date(payload.dob);
+      }
 
       try {
         const response = await studentService.create(payload);
