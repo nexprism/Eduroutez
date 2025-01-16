@@ -7,6 +7,7 @@ import Dropzone, {
   type DropzoneProps,
   type FileRejection
 } from 'react-dropzone';
+
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,6 @@ interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: File[];
 
   /**
-   * Function to be called when the value changes.
    * @type React.Dispatch<React.SetStateAction<File[]>>
    * @default undefined
    * @example onValueChange={(files) => setFiles(files)}
