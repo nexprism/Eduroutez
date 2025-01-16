@@ -145,10 +145,10 @@ const GeneralInfo = () => {
         brochure: instituteData.brochure
       });
       
-    setPreviewThumbnailUrl(`${baseURL}${instituteData.thumbnailImage}`);
-    setPreviewCoverUrl(`${baseURL}${instituteData.coverImage}`);
-    setPreviewLogoUrl(`${baseURL}${instituteData.instituteLogo}`);
-    setPreviewbrochure(`${baseURL}${instituteData.brochure}`);
+    setPreviewThumbnailUrl(`${baseURL}/${instituteData.thumbnailImage}`);
+    setPreviewCoverUrl(`${baseURL}/${instituteData.coverImage}`);
+    setPreviewLogoUrl(`${baseURL}/${instituteData.instituteLogo}`);
+    setPreviewbrochure(`${baseURL}/${instituteData.brochure}`);
     }})
 
 

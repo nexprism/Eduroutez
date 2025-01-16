@@ -140,11 +140,11 @@ const GeneralInfo = () => {
         brochure: instituteData.brochure
       });
       console.log('Institute fetch nb:', instituteData.thumbnailImage);
-
-      setPreviewThumbnailUrl(`${baseURL}${instituteData.thumbnailImage}`);
-      setPreviewCoverUrl(`${baseURL}${instituteData.coverImage}`);
-      setPreviewLogoUrl(`${baseURL}${instituteData.instituteLogo}`);
-      setPreviewbrochure(`${baseURL}${instituteData.brochure}`);
+              // Get images URLs 
+              setPreviewThumbnailUrl(`${baseURL}/${instituteData.thumbnailImage}`);
+              setPreviewCoverUrl(`${baseURL}/${instituteData.coverImage}`);
+              setPreviewLogoUrl(`${baseURL}/${instituteData.instituteLogo}`);
+              setPreviewbrochure(`${baseURL}/${instituteData.brochure}`);
       console.log('Institute fetch successfully:', instituteData);
     } catch (error: any) {
       console.log('Error fetching institute:', error.message);
@@ -638,7 +638,7 @@ const GeneralInfo = () => {
                         />
 
                         {previewLogoUrl ? (
-                          <div className="relative inline-block">
+                          <div className="relative ">
                             <Image
                               src={previewLogoUrl}
                               alt="Preview"
@@ -688,7 +688,7 @@ const GeneralInfo = () => {
                         />
       
                         {previewThumbnailUrl ? (
-                          <div className="relative inline-block">
+                          <div className="relative">
                             <Image
                               src={previewThumbnailUrl}
                               alt="Preview"
@@ -738,7 +738,7 @@ const GeneralInfo = () => {
                         />
 
                         {previewCoverUrl ? (
-                          <div className="relative inline-block">
+                            <div className="relative">
                             <Image
                               src={previewCoverUrl}
                               alt="Preview"
@@ -750,13 +750,13 @@ const GeneralInfo = () => {
                               type="button"
                               variant="destructive"
                               size="icon"
-                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              className="absolute right-0 top-0 transform translate-x-1/2 -translate-y-1/2"
                               onClick={removeCoverImage}
                             >
                               <X className="h-4 w-4" />
                               <span className="sr-only">Remove image</span>
                             </Button>
-                          </div>
+                            </div>
                         ) : (
                           <div
                             onClick={triggerCoverFileInput}

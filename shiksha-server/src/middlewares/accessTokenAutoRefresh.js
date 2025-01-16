@@ -2,6 +2,8 @@ import { Token } from "../utils/index.js";
 
 const accessTokenAutoRefresh = async (req, res, next) => {
   try {
+    console.log("accessTokenAutoRefresh middleware");
+    console.log(req.headers);
     // Read access token from cookies or custom header `X-Access-Token`
     const accessToken = req.cookies.accessToken || JSON.parse(req.headers["x-access-token"]);
 

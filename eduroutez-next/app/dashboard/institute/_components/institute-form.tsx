@@ -214,9 +214,9 @@ export default function CreateInstitute() {
         
       });
       console.log("Form values:", );
-      setPreviewThumbnailUrl(`${baseURL}${instituteData.thumbnailImage}`);
-      setPreviewCoverUrl(`${baseURL}${instituteData.coverImage}`);
-      setPreviewLogoUrl(`${baseURL}${instituteData.instituteLogo}`);
+      setPreviewThumbnailUrl(`${baseURL}/${instituteData.thumbnailImage}`);
+      setPreviewCoverUrl(`${baseURL}/${instituteData.coverImage}`);
+      setPreviewLogoUrl(`${baseURL}/${instituteData.instituteLogo}`);
   
       setGalleryImages(galleryUrls); // Set the full URLs for rendering
     } catch (error) {
