@@ -628,7 +628,7 @@ const GeneralInfo = () => {
                         />
 
                         {previewLogoUrl ? (
-                          <div className="relative inline-block">
+                          <div className="relative">
                             <Image
                               src={previewLogoUrl}
                               alt="Preview"
@@ -678,7 +678,7 @@ const GeneralInfo = () => {
                         />
 
                         {previewThumbnailUrl ? (
-                          <div className="relative inline-block">
+                          <div className="relative ">
                             <Image
                               src={previewThumbnailUrl}
                               alt="Preview"
@@ -728,7 +728,7 @@ const GeneralInfo = () => {
                         />
 
                         {previewCoverUrl ? (
-                          <div className="relative inline-block">
+                          <div className="relative">
                             <Image
                               src={previewCoverUrl}
                               alt="Preview"
@@ -780,7 +780,7 @@ const GeneralInfo = () => {
                       />
 
                       {previewbrochure ? (
-                        <div className="relative inline-block">
+                        <div className="relative">
                           <Image
                             src={previewbrochure}
                             alt="Preview"

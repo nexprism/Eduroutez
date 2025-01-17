@@ -790,7 +790,7 @@ const GeneralInfo = () => {
                                  />
            
                                  {previewbrochure ? (
-                                   <div className="relative inline-block">
+                                   <div className="relative">
                                      <Image
                                        src={previewbrochure}
                                        alt="Preview"
