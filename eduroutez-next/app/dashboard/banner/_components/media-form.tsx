@@ -235,7 +235,7 @@ export default function CourseCategoryForm() {
                           />
 
                           {previewImageUrl ? (
-                            <div className="relative inline-block">
+                            <div className="relative">
                               <Image
                                 src={previewImageUrl}
                                 alt="Preview"
