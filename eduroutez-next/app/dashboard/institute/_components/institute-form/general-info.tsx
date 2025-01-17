@@ -139,7 +139,7 @@ const GeneralInfo = () => {
         logo: instituteData.instituteLogo,
         brochure: instituteData.brochure
       });
-      console.log('Institute fetch nb:', instituteData.thumbnailImage);
+      console.log('Institute fetch nb:', `${baseURL}/${instituteData.thumbnailImage}`);
               // Get images URLs 
               setPreviewThumbnailUrl(`${baseURL}/${instituteData.thumbnailImage}`);
               setPreviewCoverUrl(`${baseURL}/${instituteData.coverImage}`);
