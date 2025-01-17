@@ -17,7 +17,7 @@ const app = express();
 
 app.use("/uploads", express.static("uploads"));
 const corsOptions = {
-  origin: ["https://eduroutez-lpax.vercel.app", "https://eduroutez-kixc.vercel.app"],
+  origin: ["https://eduroutez-lpax.vercel.app", "https://eduroutez-kixc.vercel.app","http://localhost:3000"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
