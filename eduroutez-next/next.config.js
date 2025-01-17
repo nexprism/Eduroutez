@@ -22,20 +22,15 @@ const nextConfig = {
         port: ''
       },
       {
-        protocol: 'https',
-        hostname: 'api.slingacademy.com',
-        port: ''
-      },
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
-        port: ''
-      },
-      {
         hostname: 'localhost'
       },
       {
         hostname: 'coupon.nexprism.in'
+      },
+      {
+        protocol: 'https',
+        hostname: 'eduroutez-3.onrender.com',
+        port: ''
       }
     ]
   },
