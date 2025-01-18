@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -24,7 +25,8 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
+  FormDescription
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CustomEditor from '@/components/custom-editor';
@@ -152,7 +154,9 @@ const formSchema = z.object({
   }),
   applicationEndDate: z.date({
     required_error: 'Application end date is required.'
-  })
+  }),
+  isCoursePopular: z.boolean().optional(),
+  isCourseTreanding: z.boolean().optional(),
 });
 console.log(FormData);
 
@@ -187,7 +191,9 @@ export default function CreateCourse() {
       shortDescription: '',
       longDescription: '',
       isCourseFree: 'free',
-      isCourseDiscounted: 'no'
+      isCourseDiscounted: 'no',
+      isCoursePopular: false,  // Add this
+      isCourseTreanding: false, 
     }
   });
 
@@ -319,6 +325,8 @@ export default function CreateCourse() {
       formData.append('instituteCategory', values.instituteCategory);
       formData.append('visibility', values.visibility);
       formData.append('language', values.language);
+      formData.append('isCoursePopular', values.isCoursePopular?.toString() || 'false');
+      formData.append('isCourseTrending', values.isCourseTreanding?.toString() || 'false');
       if (values.examAccepted !== undefined) {
         formData.append('examAccepted', values.examAccepted);
       }
@@ -495,7 +503,9 @@ export default function CreateCourse() {
           metaTitle: course.data.metaTitle,
           metaDescription: course.data.metaDescription,
           metaKeywords: course.data.metaKeywords,
-          metaImage: course.data.metaImage
+          metaImage: course.data.metaImage,
+      isCoursePopular: course.data.isCoursePopular || false,
+      isCourseTreanding: course.data.isCourseTrending || false,
         });
       }
     }, [course, form]);
@@ -809,6 +819,51 @@ export default function CreateCourse() {
                         </FormItem>
                       )}
                     />
+                    <FormField
+  control={form.control}
+  name="isCoursePopular"
+  render={({ field }) => (
+    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+      <FormControl>
+        <Checkbox
+          checked={field.value}
+          onCheckedChange={field.onChange}
+        />
+      </FormControl>
+      <div className="space-y-1 leading-none">
+        <FormLabel>
+          Popular Course
+        </FormLabel>
+        <FormDescription>
+          Mark this course as popular
+        </FormDescription>
+      </div>
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={form.control}
+  name="isCourseTreanding"
+  render={({ field }) => (
+    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+      <FormControl>
+        <Checkbox
+          checked={field.value}
+          onCheckedChange={field.onChange}
+        />
+      </FormControl>
+      <div className="space-y-1 leading-none">
+        <FormLabel>
+          Trending Course
+        </FormLabel>
+        <FormDescription>
+          Mark this course as trending
+        </FormDescription>
+      </div>
+    </FormItem>
+  )}
+/>
 
                     <FormField
                       control={form.control}

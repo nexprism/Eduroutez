@@ -20,7 +20,7 @@ export default function CounselorListingPage({}: TCounselorListingPage) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['counselors', searchQuery],
+    queryKey: ['counselors', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/counselors`, {
         params: {

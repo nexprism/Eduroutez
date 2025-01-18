@@ -119,7 +119,6 @@ export default function AppSidebar({
     return null; // Render nothing or a skeleton until mounted
   }
 
-  console.log('filteredNavItems',filteredNavItems)
 
   return (
     <SidebarProvider>

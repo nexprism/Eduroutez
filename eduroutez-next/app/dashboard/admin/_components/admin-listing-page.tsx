@@ -20,7 +20,7 @@ export default function AdminListingPage({}: TAdminListingPage) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['admins', searchQuery],
+    queryKey: ['admins', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/admins`, {
         params: {

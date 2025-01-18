@@ -1,9 +1,10 @@
-import BlogViewPage from '../_components/blog-catogery-view-page';
-
+import BlogcategoryPage from '../_components/blog-catogery-view-page';
+import BlogCatogeryForm from '../_components/blog-catogery-form';
 export const metadata = {
-  title: 'Dashboard : Blog'
+  title: 'Dashboard : Career'
 };
 
 export default function Page({ params }: { params: { slug: string } }) {
-  return <BlogViewPage />;
+  console.log('params');
+  return <BlogCatogeryForm />;
 }

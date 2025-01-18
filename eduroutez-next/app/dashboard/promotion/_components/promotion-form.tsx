@@ -8,45 +8,122 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
-import { format, set } from 'date-fns';
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage
-} from '@/components/ui/form';
-
-import { Input } from '@/components/ui/input';
-import { X, Plus } from 'lucide-react';
-import { CourseCategory } from '@/types';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
+import { X, ImageIcon } from 'lucide-react';
+
 import { toast } from 'sonner';
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+
+// Define all promotion locations with their requirements
+const PROMOTION_LOCATIONS = {
+  // Blog Page
+  BLOG_PAGE: {
+    id: 'BLOG_PAGE',
+    label: 'Blog Page',
+    width: 300,
+    height: 250,
+    category: 'Blog',
+    description: 'Advertisement space on blog posts'
+  },
+
+  // Institute Pages
+  INSTITUTE_PAGE: {
+    id: 'INSTITUTE_PAGE',
+    label: 'Institute Page Banner',
+    width: 300,
+    height: 250,
+    category: 'Institute',
+    description: 'Main banner on institute profile pages'
+  },
+
+  // Home Page
+  HOME_PAGE: {
+    id: 'HOME_PAGE',
+    label: 'Home Page Banner',
+    width: 728,
+    height: 90,
+    category: 'Home',
+    description: 'Main promotion on home page'
+  },
+
+  // Review Page
+  REVIEW_PAGE: {
+    id: 'REVIEW_PAGE',
+    label: 'Review Page',
+    width: 728,
+    height: 90,
+    category: 'Review',
+    description: 'Banner on review pages'
+  },
+
+  // Career Page
+  CAREER_PAGE: {
+    id: 'CAREER_PAGE',
+    label: 'Career Page',
+    width: 728,
+    height: 90,
+    category: 'Career',
+    description: 'Banner on career pages'
+  },
+
+  // Courses Page
+  COURSES_PAGE: {
+    id: 'COURSES_PAGE',
+    label: 'Courses Page',
+    width: 728,
+    height: 90,
+    category: 'Courses',
+    description: 'Banner on courses listing'
+  },
+
+  // Counseling Page
+  COUNSELING_PAGE_MAIN: {
+    id: 'COUNSELING_PAGE_MAIN',
+    label: 'Counseling Page Main',
+    width: 728,
+    height: 90,
+    category: 'Counseling',
+    description: 'Main banner on counseling page'
+  },
+  COUNSELING_PAGE_SIDEBAR: {
+    id: 'COUNSELING_PAGE_SIDEBAR',
+    label: 'Counseling Page Sidebar',
+    width: 250,
+    height: 250,
+    category: 'Counseling',
+    description: 'Sidebar promotion on counseling page'
+  },
+
+  // Q&A Page
+  QA_PAGE: {
+    id: 'QA_PAGE',
+    label: 'Q&A Page',
+    width: 250,
+    height: 250,
+    category: 'Q&A',
+    description: 'Advertisement space on Q&A section'
+  }
+} as const;
+
+// Group locations by category
+const LOCATION_CATEGORIES = Object.values(PROMOTION_LOCATIONS).reduce((acc, location) => {
+  if (!acc[location.category]) {
+    acc[location.category] = [];
+  }
+  acc[location.category].push(location);
+  return acc;
+}, {} as Record<string, typeof PROMOTION_LOCATIONS[keyof typeof PROMOTION_LOCATIONS][]>);
+
+// Form schema with validation
 const formSchema = z.object({
   title: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
   }),
-  work: z.string(),
+  location: z.enum(Object.keys(PROMOTION_LOCATIONS) as [keyof typeof PROMOTION_LOCATIONS, ...Array<keyof typeof PROMOTION_LOCATIONS>], {
+    required_error: 'Please select a location'
+  }),
   image: z
     .instanceof(File)
     .optional()
@@ -59,26 +136,24 @@ const formSchema = z.object({
       {
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
-    )
-  ,
-    startDate: z.date({
-      required_error: 'Start date is required.'
-    }),
-    endDate: z.date({
-      required_error: 'End date is required.'
-    })
+    ),
+  startDate: z.date({
+    required_error: 'Start date is required.'
+  }),
+  endDate: z.date({
+    required_error: 'End date is required.'
+  })
 });
 
-export default function CourseCategoryForm() {
-  const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
-  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(
-    null
-  );
+type FormValues = z.infer<typeof formSchema>;
+
+export default function PromotionForm() {
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
-
-  console.log(segments);
+  const router = useRouter();
 
   React.useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
@@ -86,54 +161,34 @@ export default function CourseCategoryForm() {
     }
   }, [segments]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      work: 'Promotion',
+      location: undefined,
       startDate: undefined,
       endDate: undefined,
       image: undefined
     }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const formData = new FormData();
-    formData.append('title', values.title);
-    formData.append('startDate', values.startDate.toISOString());
-    formData.append('endDate', values.endDate.toISOString());
-    if (values.image) {
-      formData.append('images', values.image);
-    }
-
-    mutate(formData);
-  }
-
-  const router = useRouter();
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
         ? `${apiUrl}/promotion/${segments[4]}`
         : `${apiUrl}/promotion`;
       const response = await axiosInstance({
-        url: `${endpoint}`,
+        url: endpoint,
         method: isEdit ? 'patch' : 'post',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      console.log(response.data);
       return response.data;
     },
-
     onSuccess: () => {
-      const message = isEdit
-        ? 'Media updated successfully'
-        : 'Media created successfully';
-      toast.success(message);
-      form.reset();
-      setPreviewImageUrl(null);
+      toast.success(isEdit ? 'Promotion updated successfully' : 'Promotion created successfully');
       router.push('/dashboard/promotion');
     },
     onError: () => {
@@ -141,249 +196,241 @@ export default function CourseCategoryForm() {
     }
   });
 
+  const { data: existingPromotion } = useQuery({
+    queryKey: ['promotion', segments[4]],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/promotion/${segments[4]}`);
+      return response.data;
+    },
+    enabled: isEdit
+  });
+
+  React.useEffect(() => {
+    if (existingPromotion?.data) {
+      form.reset({
+        title: existingPromotion.data.title,
+        location: existingPromotion.data.location,
+        startDate: new Date(existingPromotion.data.startDate),
+        endDate: new Date(existingPromotion.data.endDate)
+      });
+      if (existingPromotion.data.image) {
+        setPreviewUrl(`${IMAGE_URL}/${existingPromotion.data.image}`);
+      }
+    }
+  }, [existingPromotion, form]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImageUrl(reader.result as string);
+      const img = new window.Image();
+      img.onload = () => {
+        const location = form.getValues('location');
+        if (location) {
+          const requirements = PROMOTION_LOCATIONS[location];
+          if (img.width !== requirements.width || img.height !== requirements.height) {
+            toast.error(`Image must be exactly ${requirements.width}x${requirements.height} pixels for this location`);
+            removeImage();
+            return;
+          }
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setPreviewUrl(reader.result as string);
+          };
+          reader.readAsDataURL(file);
+          form.setValue('image', file);
+        }
       };
-      reader.readAsDataURL(file);
-      form.setValue('image', file);
-    } else {
-      setPreviewImageUrl(null);
-      form.setValue('image', undefined);
+      img.src = URL.createObjectURL(file);
     }
-  };
-
-  const triggerImageFileInput = () => {
-    fileInputImageRef.current?.click();
   };
 
   const removeImage = () => {
-    setPreviewImageUrl(null);
+    setPreviewUrl(null);
     form.setValue('image', undefined);
-    if (fileInputImageRef.current) {
-      fileInputImageRef.current.value = ''; // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
-  const fetchCategories = async () => {
-    const response = await axiosInstance.get(`${apiUrl}/promotions`);
-    return response.data;
+  const onSubmit = (values: FormValues) => {
+    const formData = new FormData();
+    formData.append('title', values.title);
+    formData.append('location', values.location);
+    formData.append('startDate', values.startDate.toISOString());
+    formData.append('endDate', values.endDate.toISOString());
+    if (values.image) {
+      formData.append('image', values.image);
+    }
+    mutate(formData);
   };
 
-  const {
-    data: courseCategories = [],
-    isLoading,
-    error
-  } = useQuery({ queryKey: ['promotion'], queryFn: fetchCategories });
-
-  const { data: category } = useQuery({
-    queryKey: ['promotion', segments[4]],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/promotion/${segments[4]}`
-      );
-      return response.data;
-    },
-    enabled: isEdit // Only fetch when in edit mode
-  });
-
-  console.log(category);
-
-  React.useEffect(() => {
-    if (category?.data && courseCategories?.data?.result) {
-      // Find the matching parent category
-      const parentCategory = courseCategories.data.result.find(
-        (cat: CourseCategory) => cat._id === category.data.parentCategory
-      );
-
-      form.reset({
-        title: category.data.title
-      });
-
-      if (category.data.icon) {
-        setPreviewImageUrl(`${IMAGE_URL}/${category.data.icon}`);
-      }
-    }
-  }, [category, courseCategories, form]);
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading categories</div>;
   return (
-    <div className="container mx-auto space-y-6 py-6">
-      <Card className="mx-auto w-full">
-        <CardHeader>
-          <CardTitle className="text-left text-2xl font-bold">
-            Promotion Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter Title" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <div className="container mx-auto py-8 px-4">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="p-8">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isEdit ? 'Edit Promotion' : 'Create New Promotion'}
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Configure your promotion details including placement, timing, and creative assets
+            </p>
+          </div>
 
-              <div className="grid grid-cols-1">
-                <FormField
-                  control={form.control}
-                  name="image"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Image</FormLabel>
-                      <FormControl>
-                        <div className="space-y-4">
-                          <Input
-                            type="file"
-                            accept="image/png, image/jpeg, image/webp"
-                            onChange={handleImageChange}
-                            ref={fileInputImageRef} // Reference to reset input
-                            className="hidden "
-                          />
-
-                          {previewImageUrl ? (
-                            <div className="relative inline-block">
-                              <Image
-                                src={previewImageUrl}
-                                alt="Preview"
-                                className="max-h-[400px] max-w-full rounded-md object-cover"
-                                width={1200}
-                                height={400}
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute right-0 top-0 -mr-2 -mt-2"
-                                onClick={removeImage}
-                              >
-                                <X className="h-4 w-4" />
-                                <span className="sr-only">Remove image</span>
-                              </Button>
-                            </div>
-                          ) : (
-                            <div
-                              onClick={triggerImageFileInput}
-                              className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
-                            >
-                              <Plus className="text-grey-400 h-10 w-10" />
-                            </div>
-                          )}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="space-y-6">
+              {/* Title Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Promotion Title
+                </label>
+                <input
+                  {...form.register('title')}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Enter a descriptive title"
                 />
+                {form.formState.errors.title && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.title.message}
+                  </p>
+                )}
               </div>
 
-              <div className="mt-4 flex flex-col gap-4 grid-rows-2 lg:mt-0">
-                <div className="flex flex-col gap-4">
-                  <Label>Promotion Start Date</Label>
-                  <FormField
-                    control={form.control}
-                    name="startDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={'outline'}
-                                className={cn(
-                                  'w-[240px] pl-3 text-left font-normal',
-                                  !field.value && 'text-muted-foreground'
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, 'PPP')
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => date < new Date('1900-01-01')}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {/* Location Select */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Placement Location
+                </label>
+                <select
+                  {...form.register('location')}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Select placement location</option>
+                  {Object.entries(LOCATION_CATEGORIES).map(([category, locations]) => (
+                    <optgroup key={category} label={category}>
+                      {locations.map((location) => (
+                        <option key={location.id} value={location.id}>
+                          {location.label} ({location.width}x{location.height}px)
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+                {form.getValues('location') && (
+                  <div className="mt-2 p-4 bg-blue-50 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      Required dimensions: {PROMOTION_LOCATIONS[form.getValues('location')].width}x
+                      {PROMOTION_LOCATIONS[form.getValues('location')].height}px
+                      <br />
+                      {PROMOTION_LOCATIONS[form.getValues('location')].description}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Image Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Promotion Image
+                </label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  className="hidden"
+                  accept="image/png, image/jpeg, image/webp"
+                />
+
+                {previewUrl ? (
+                  <div className="relative inline-block bg-gray-100 p-4 rounded-lg">
+                    <Image
+                      src={previewUrl}
+                      alt="Preview"
+                      className="rounded-lg"
+                      width={form.getValues('location') ? 
+                        PROMOTION_LOCATIONS[form.getValues('location')].width : 
+                        300}
+                      height={form.getValues('location') ? 
+                        PROMOTION_LOCATIONS[form.getValues('location')].height : 
+                        250}
+                    />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute -right-2 -top-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors"
+                    style={{
+                      width: form.getValues('location') ? 
+                        `${PROMOTION_LOCATIONS[form.getValues('location')].width}px` : 
+                        '100%',
+                      height: form.getValues('location') ? 
+                        `${PROMOTION_LOCATIONS[form.getValues('location')].height}px` : 
+                        '200px',
+                    }}
+                  >
+                    <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <p className="mt-2 text-sm text-gray-600">
+                      Click to upload promotion image
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Date Selection */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      {...form.register('startDate')}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
                 </div>
-                <div className="mt-4 flex flex-col gap-4 lg:mt-0">
-                  <Label>Promotion End Date</Label>
 
-                  <FormField
-                    control={form.control}
-                    name="endDate"
-                    render={({ field }) => (
-                      <FormItem>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={'outline'}
-                                className={cn(
-                                  'w-[240px] pl-3 text-left font-normal',
-                                  !field.value && 'text-muted-foreground'
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, 'PPP')
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) => date < new Date('1900-01-01')}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    End Date
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      {...form.register('endDate')}
+                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isPending}>
-                  {isEdit ? 'Update' : 'Create'}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isPending ? (
+                <span className="flex items-center justify-center space-x-2">
+                  <span className="animate-spin">⌛</span>
+                  <span>{isEdit ? 'Updating...' : 'Creating...'}</span>
+                </span>
+              ) : (
+                <span>{isEdit ? 'Update Promotion' : 'Create Promotion'}</span>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

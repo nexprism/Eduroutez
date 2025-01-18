@@ -79,8 +79,8 @@ export default function CounselorForm() {
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: async (formData: z.infer<typeof formSchema>) => {
       const endpoint = isEdit
-        ? `${apiUrl}/question-answer/${segments[4]}`
-        : `${apiUrl}/question-answer`;
+        ? `${apiUrl}/query/${segments[4]}`
+        : `${apiUrl}/query`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: isEdit ? 'patch' : 'post',
@@ -94,11 +94,11 @@ export default function CounselorForm() {
 
     onSuccess: () => {
       const message = isEdit
-        ? 'FAQs updated successfully'
-        : 'FAQs created successfully';
+        ? 'Query updated successfully'
+        : 'Query created successfully';
       toast.success(message);
       form.reset();
-      router.push('/dashboard/question-answer');
+      router.push('/dashboard/query');
     },
     onError: (error) => {
       toast.error('Something went wrong');
@@ -112,7 +112,7 @@ export default function CounselorForm() {
     queryKey: ['answer', segments[4]],
     queryFn: async () => {
       const response = await axiosInstance.get(
-        `${apiUrl}/question-answer/${segments[4]}`
+        `${apiUrl}/query/${segments[4]}`
       );
       return response.data;
     },

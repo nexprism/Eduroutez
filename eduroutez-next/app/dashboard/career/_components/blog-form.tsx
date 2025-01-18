@@ -62,7 +62,7 @@ const formSchema = z.object({
     ),
   eligibility: z.string(),
   jobRoles: z.string(),
-  oppertunity: z.string(),
+  opportunity: z.string(),
   topColleges: z.string(),
   description: z.string()
 });
@@ -91,7 +91,7 @@ export default function CounselorForm() {
       description: '',
       eligibility: '',
       jobRoles: '',
-      oppertunity: '',
+      opportunity: '',
       topColleges: '',
       counselorType: ''
     }
@@ -118,7 +118,7 @@ export default function CounselorForm() {
     formData.append('description', values.description);
     formData.append('eligibility', values.eligibility);
     formData.append('jobRoles', values.jobRoles);
-    formData.append('oppertunity', values.oppertunity);
+    formData.append('opportunity', values.opportunity);
     formData.append('topColleges', values.topColleges);
     if (values.image) {
       formData.append('images', values.image);
@@ -196,13 +196,13 @@ export default function CounselorForm() {
   React.useEffect(() => {
     if (counselor?.data) {
       form.reset({
-        title: counselor.data.name,
-        category: counselor.data.category[0],
+        title: counselor.data.title,
+        category: counselor.data.category,
         description: counselor.data.description,
         image: undefined,
         eligibility: counselor.data.eligibility,
         jobRoles: counselor.data.jobRoles,
-        oppertunity: counselor.data.oppertunity,
+        opportunity: counselor.data.opportunity,
         topColleges: counselor.data.topColleges,
         counselorType: counselor?.data?.counselorType
       });
@@ -383,13 +383,13 @@ export default function CounselorForm() {
               
               <FormField
                 control={form.control}
-                name="oppertunity"
+                name="opportunity"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Opportunity</FormLabel>
                     <FormControl>
                       <Controller
-                        name="oppertunity"
+                        name="opportunity"
                         control={form.control}
                         render={({ field }) => (
                           <CustomEditor

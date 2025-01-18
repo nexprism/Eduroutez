@@ -78,11 +78,6 @@ export default function NewsListingPage({}: TNewsListingPage) {
                     <Plus className="mr-1 h-4 w-4" /> Add New News
                   </Link>
                 </Button>
-                <Button asChild className="w-fit whitespace-nowrap px-2">
-                  <Link href="/dashboard/news/news-category">
-                    <Plus className="mr-1 h-4 w-4" /> Add New News Category
-                  </Link>
-                </Button>
               </div>
             </div>
             <Separator />

@@ -28,7 +28,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const deleteQuestionAnswerMutation = useMutation({
     mutationFn: async (questionAnswerId: string) => {
       const response = await axiosInstance({
-        url: `${apiUrl}/question-answer/${questionAnswerId}`,
+        url: `${apiUrl}/query/${questionAnswerId}`,
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -39,7 +39,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['question-answers'] });
-      router.push('/dashboard/question-answer');
+      router.push('/dashboard/query');
     },
     onSettled: () => {
       setOpen(false);
@@ -72,7 +72,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
           <DropdownMenuItem
             onClick={() =>
-              router.push(`/dashboard/question-answer/update/${data._id}/`)
+              router.push(`/dashboard/query/update/${data._id}/`)
             }
           >
             <Edit className="mr-2 h-4 w-4" /> Update

@@ -20,7 +20,7 @@ export default function InstituteListingPage({}: TInstituteListingPage) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['institutes', searchQuery],
+    queryKey: ['institutes', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/institutes`, {
         params: {

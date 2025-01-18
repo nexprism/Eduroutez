@@ -76,8 +76,8 @@ export default function BlogCatogeryForm() {
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
-        ? `${apiUrl}blog-category/${segments[4]}`
-        : `${apiUrl}/blog-category`;
+        ? `${apiUrl}career-category/${segments[4]}`
+        : `${apiUrl}/career-category`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: isEdit ? 'patch' : 'post',
@@ -95,7 +95,7 @@ export default function BlogCatogeryForm() {
         : 'Counselor created successfully';
       toast.success(message);
       form.reset();
-      router.push('/dashboard/blog');
+      router.push('/dashboard/career');
     },
     onError: (error) => {
       toast.error('Something went wrong');
@@ -120,7 +120,7 @@ export default function BlogCatogeryForm() {
     queryKey: ['counselor', segments[4]],
     queryFn: async () => {
       const response = await axiosInstance.get(
-        `${apiUrl}/blog-category/${segments[4]}`
+        `${apiUrl}/career-category/${segments[4]}`
       );
       return response.data;
     },
@@ -132,7 +132,7 @@ export default function BlogCatogeryForm() {
     <Card className="mx-auto w-full">
       <CardHeader>
         <CardTitle className="text-left text-2xl font-bold">
-          Create Blog Category
+          Create Career Category
         </CardTitle>
       </CardHeader>
       <CardContent>

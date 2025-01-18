@@ -70,7 +70,7 @@ export default function CareerListingPage({}: TCareerListingPage) {
                   </Link>
                 </Button>
                 <Button asChild className="w-fit whitespace-nowrap px-2">
-                  <Link href="/dashboard/career/blog-category">
+                  <Link href="/dashboard/career/category">
                     <Plus className="mr-1 h-4 w-4" /> Add New Career Category
                   </Link>
                 </Button>

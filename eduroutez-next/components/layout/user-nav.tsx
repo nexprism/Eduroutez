@@ -20,6 +20,7 @@ export function UserNav() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   // const [startTransition] = useTransition();
   const router = useRouter();
+  const email = localStorage.getItem('email');
   const mutation: any = useMutation({
     mutationFn: async () => {
       try {
@@ -71,8 +72,7 @@ export function UserNav() {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{'Rahil A.'}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {'rahil@gmail.com'}
-            </p>
+{email}            </p>
           </div>
         </DropdownMenuLabel>
         {/* <DropdownMenuSeparator /> */}

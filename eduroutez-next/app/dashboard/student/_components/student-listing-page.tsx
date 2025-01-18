@@ -45,11 +45,6 @@ export default function StudentListingPage({}: TStudentListingPage) {
                 title={`Student (${data.data.totalDocuments})`}
                 description="All students online and offline are listed here."
               />
-              <Button asChild className="w-fit whitespace-nowrap px-2">
-                <Link href="/dashboard/student/new">
-                  <Plus className="mr-1 h-4 w-4" /> Add New
-                </Link>
-              </Button>
             </div>
             <Separator />
             <StudentTable

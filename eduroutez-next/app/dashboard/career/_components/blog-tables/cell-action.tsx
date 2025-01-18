@@ -9,14 +9,14 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import axiosInstance from '@/lib/axios';
-import { Blog } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Career } from '@/types';
 import { useState } from 'react';
 
 interface CellActionProps {
-  data: Blog;
+  data: Career;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
@@ -28,7 +28,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const deleteBlogMutation = useMutation({
     mutationFn: async (blogId: string) => {
       const response = await axiosInstance({
-        url: `${apiUrl}/blog/${blogId}`,
+        url: `${apiUrl}/career/${blogId}`,
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -39,8 +39,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] });
-      router.push('/dashboard/blog');
-    },
+window.location.reload();    },
     onSettled: () => {
       setOpen(false);
       setLoading(false);
@@ -72,7 +71,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
           <DropdownMenuItem
             onClick={() =>
-              router.push(`/dashboard/blog/update/${data._id}/`)
+              router.push(`/dashboard/career/update/${data._id}/`)
             }
           >
             <Edit className="mr-2 h-4 w-4" /> Update

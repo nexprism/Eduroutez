@@ -15,35 +15,12 @@ export const columns: ColumnDef<Student>[] = [
     cell: ({ row }) => <div>{`${row.original.name}`}</div>
   },
   {
-    header: 'COURSE',
-    cell: ({ row }) => <div>{`${2}`}</div>
+    header: 'Email',
+    cell: ({ row }) => <div>{`${row.original.email}`}</div>
   },
   {
-    header: 'SALES',
-    cell: ({ row }) => <div>{`${1}`}</div>
-  },
-  {
-    header: 'INCOME',
-    cell: ({ row }) => <div>{`${4}`}</div>
-  },
-  {
-    header: 'BALANCE',
-    cell: ({ row }) => <div>{`${4}`}</div>
-  },
-
-  {
-    accessorKey: 'status',
-    header: 'STATUS',
-    cell: ({ row }) => (
-      <div className="flex w-32 space-x-1">
-        <Badge
-          variant={!row.original.status ? 'secondary' : 'default'}
-          className="text-xs "
-        >
-          {row.original.status ? 'Active' : 'Inactive'}
-        </Badge>
-      </div>
-    )
+    header: 'Phone',
+    cell: ({ row }) => <div>{`${row.original.phone}`}</div>
   },
   {
     header: 'CREATED AT',
