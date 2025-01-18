@@ -7,12 +7,10 @@ import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { X, ImageIcon } from 'lucide-react';
-
 import { toast } from 'sonner';
-
+import { QueryKey, UseQuery } from '@tanstack/query-core';
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 
@@ -143,6 +141,9 @@ const formSchema = z.object({
   endDate: z.date({
     required_error: 'End date is required.'
   })
+}).refine((data) => data.startDate <= data.endDate, {
+  message: "End date must be after start date",
+  path: ["endDate"]
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -152,30 +153,56 @@ export default function PromotionForm() {
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const pathname = usePathname();
   const segments = pathname.split('/');
-  const [isEdit, setIsEdit] = React.useState(false);
+  const promotionId = segments[4];
+  const isEdit = segments.length === 5 && segments[3] === 'update';
   const router = useRouter();
-
-  React.useEffect(() => {
-    if (segments.length === 5 && segments[3] === 'update') {
-      setIsEdit(true);
-    }
-  }, [segments]);
+  const [selectedLocation, setSelectedLocation] = React.useState<keyof typeof PROMOTION_LOCATIONS | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       location: undefined,
-      startDate: undefined,
-      endDate: undefined,
+      startDate: new Date(),
+      endDate: new Date(),
       image: undefined
     }
   });
 
+
+  const { data: existingPromotion, isLoading } = useQuery({
+    queryKey: ['promotion', promotionId],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/promotion/${promotionId}`);
+      return response.data;
+    },
+    enabled: isEdit,
+  });
+  
+  React.useEffect(() => {
+    if (existingPromotion?.data) {
+      // Set the location first
+      setSelectedLocation(existingPromotion.data.location);
+      
+      // Then reset the form with all values
+      form.reset({
+        title: existingPromotion.data.title,
+        location: existingPromotion.data.location,
+        startDate: new Date(existingPromotion.data.startDate),
+        endDate: new Date(existingPromotion.data.endDate)
+      });
+  
+      // Set preview URL if image exists
+      if (existingPromotion.data.image) {
+        setPreviewUrl(`${IMAGE_URL}/uploads/${existingPromotion.data.image}`);
+      }
+    }
+  }, [existingPromotion, form]);
+
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
-        ? `${apiUrl}/promotion/${segments[4]}`
+        ? `${apiUrl}/promotion/${promotionId}`
         : `${apiUrl}/promotion`;
       const response = await axiosInstance({
         url: endpoint,
@@ -196,28 +223,15 @@ export default function PromotionForm() {
     }
   });
 
-  const { data: existingPromotion } = useQuery({
-    queryKey: ['promotion', segments[4]],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/promotion/${segments[4]}`);
-      return response.data;
-    },
-    enabled: isEdit
-  });
-
+  // Watch for location changes
   React.useEffect(() => {
-    if (existingPromotion?.data) {
-      form.reset({
-        title: existingPromotion.data.title,
-        location: existingPromotion.data.location,
-        startDate: new Date(existingPromotion.data.startDate),
-        endDate: new Date(existingPromotion.data.endDate)
-      });
-      if (existingPromotion.data.image) {
-        setPreviewUrl(`${IMAGE_URL}/${existingPromotion.data.image}`);
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'location') {
+        setSelectedLocation(value.location as keyof typeof PROMOTION_LOCATIONS);
       }
-    }
-  }, [existingPromotion, form]);
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -225,7 +239,7 @@ export default function PromotionForm() {
       const img = new window.Image();
       img.onload = () => {
         const location = form.getValues('location');
-        if (location) {
+        if (location && PROMOTION_LOCATIONS[location]) {
           const requirements = PROMOTION_LOCATIONS[location];
           if (img.width !== requirements.width || img.height !== requirements.height) {
             toast.error(`Image must be exactly ${requirements.width}x${requirements.height} pixels for this location`);
@@ -262,6 +276,24 @@ export default function PromotionForm() {
       formData.append('image', values.image);
     }
     mutate(formData);
+  };
+
+  const getImageDimensions = () => {
+    if (!selectedLocation || !PROMOTION_LOCATIONS[selectedLocation]) {
+      return { width: 300, height: 250 }; // Default dimensions
+    }
+    return {
+      width: PROMOTION_LOCATIONS[selectedLocation].width,
+      height: PROMOTION_LOCATIONS[selectedLocation].height
+    };
+  };
+
+  if (isLoading) {
+    return <div className="p-8 text-center">Loading...</div>;
+  }
+
+  const formatDate = (date: Date) => {
+    return date.toISOString().split('T')[0];
   };
 
   return (
@@ -316,15 +348,20 @@ export default function PromotionForm() {
                     </optgroup>
                   ))}
                 </select>
-                {form.getValues('location') && (
+                {selectedLocation && PROMOTION_LOCATIONS[selectedLocation] && (
                   <div className="mt-2 p-4 bg-blue-50 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      Required dimensions: {PROMOTION_LOCATIONS[form.getValues('location')].width}x
-                      {PROMOTION_LOCATIONS[form.getValues('location')].height}px
+                      Required dimensions: {PROMOTION_LOCATIONS[selectedLocation].width}x
+                      {PROMOTION_LOCATIONS[selectedLocation].height}px
                       <br />
-                      {PROMOTION_LOCATIONS[form.getValues('location')].description}
+                      {PROMOTION_LOCATIONS[selectedLocation].description}
                     </p>
                   </div>
+                )}
+                {form.formState.errors.location && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.location.message}
+                  </p>
                 )}
               </div>
 
@@ -347,12 +384,8 @@ export default function PromotionForm() {
                       src={previewUrl}
                       alt="Preview"
                       className="rounded-lg"
-                      width={form.getValues('location') ? 
-                        PROMOTION_LOCATIONS[form.getValues('location')].width : 
-                        300}
-                      height={form.getValues('location') ? 
-                        PROMOTION_LOCATIONS[form.getValues('location')].height : 
-                        250}
+                      width={getImageDimensions().width}
+                      height={getImageDimensions().height}
                     />
                     <button
                       type="button"
@@ -367,11 +400,11 @@ export default function PromotionForm() {
                     onClick={() => fileInputRef.current?.click()}
                     className="cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors"
                     style={{
-                      width: form.getValues('location') ? 
-                        `${PROMOTION_LOCATIONS[form.getValues('location')].width}px` : 
+                      width: selectedLocation && PROMOTION_LOCATIONS[selectedLocation] ? 
+                        `${PROMOTION_LOCATIONS[selectedLocation].width}px` : 
                         '100%',
-                      height: form.getValues('location') ? 
-                        `${PROMOTION_LOCATIONS[form.getValues('location')].height}px` : 
+                      height: selectedLocation && PROMOTION_LOCATIONS[selectedLocation] ? 
+                        `${PROMOTION_LOCATIONS[selectedLocation].height}px` : 
                         '200px',
                     }}
                   >
@@ -411,7 +444,6 @@ export default function PromotionForm() {
                   </div>
                 </div>
               </div>
-            </div>
 
             {/* Submit Button */}
             <button
@@ -428,9 +460,10 @@ export default function PromotionForm() {
                 <span>{isEdit ? 'Update Promotion' : 'Create Promotion'}</span>
               )}
             </button>
+            </div>
           </form>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
   );
 }

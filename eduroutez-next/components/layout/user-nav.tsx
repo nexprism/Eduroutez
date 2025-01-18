@@ -63,14 +63,13 @@ export function UserNav() {
               src={'session.user?.image'}
               alt={'session.user?.name'}
             />
-            <AvatarFallback>{'R'}</AvatarFallback>
+            <AvatarFallback>{email ? email.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{'Rahil A.'}</p>
             <p className="text-xs leading-none text-muted-foreground">
 {email}            </p>
           </div>
