@@ -193,30 +193,19 @@ async getMyRefferal(id) {
 
   async getAllRefferal() {
     try {
-      // Fetch all users where 'refer_by' is not null
-      const all_refferal = await this.userRepository.getAll({ refer_by: { $ne: null } });
+      // Fetch all users where 'refer_by' is not null and populate the 'refer_by' field
+      const all_refferal = await this.userRepository.getAll({
+        refer_by: { $ne: null }
+      }); // Populating the 'refer_by' field with user details
 
-      // Check if all_refferal is an array
-      if (!Array.isArray(all_refferal)) {
-        throw new Error('Expected an array from getAll, but received:', all_refferal);
-      }
+      // Log the count of referrals fetched
+      console.log('all_refferal count:', all_refferal);
 
-      console.log('all_refferal count:', all_refferal.length);
-
-      // Process each user and fetch the 'refer_by' user object
-      for (let i = 0; i < all_refferal.length; i++) {
-        const user = all_refferal[i];
-        if (user.refer_by) {
-          const referalUser = await this.userRepository.get(user.refer_by);
-          all_refferal[i].refer_by = referalUser;
-        }
-      }
-
-      // console.log('Updated all_refferal:', all_refferal);
+      // Return the populated list of referrals
       return all_refferal;
     } catch (error) {
       console.error('Error fetching referral data:', error.message);
-      throw new AppError("Cannot fetch data of all the users", StatusCodes.INTERNAL_SERVER_ERROR);
+      throw error;
     }
   }
 

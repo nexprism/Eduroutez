@@ -19,6 +19,16 @@ class UserRepository extends CrudRepository {
       throw error;
     }
   }
+
+  // getAll tieht .populate('refer_by')
+  async getAll(query) {
+    try {
+      const response = await User.find(query).populate("refer_by");
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export { UserRepository };
