@@ -18,6 +18,16 @@ class WebinarService {
     return webinar;
   }
 
+  //getwebinarById
+  async getwebinarById(id) {
+    try {
+      const webinar = await this.webinarRepository.getwebinarById(id);
+      return webinar;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getAllWebinar() {
     try {
       const blogs = await this.webinarRepository.getAll();

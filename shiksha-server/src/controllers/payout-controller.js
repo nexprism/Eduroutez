@@ -11,6 +11,24 @@ export const createPayout = async (req, res) => {
   try {
     const payload = { ...req.body };
 
+    const user = req.user;
+
+    payload.user = user._id;
+
+    if (user.role === "student") {
+      payload.userType = "STUDENT";
+    }
+
+    console.log("user", user);
+
+    if (user.role === "counsellor") {
+      payload.userType = "COUNSELOR";
+    }
+
+    if (user.balance < payload.requestedAmount) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ error: "Insufficient balance" });
+    }
+
     const response = await payoutService.create(payload);
 
     SuccessResponse.data = response;
@@ -18,6 +36,7 @@ export const createPayout = async (req, res) => {
 
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
+    console.error("Error creating payout:", error.message);
     ErrorResponse.error = error;
 
     return res.status(error.statusCode).json(ErrorResponse);
@@ -32,6 +51,20 @@ export const createPayout = async (req, res) => {
 export async function getPayouts(req, res) {
   try {
     const response = await payoutService.getAll(req.query);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched payouts";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Error creating payout:", error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+//getPayoutsByUser
+export async function getPayoutsByUser(req, res) {
+  try {
+    const response = await payoutService.getAllByUser(req.user._id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched payouts";
     return res.status(StatusCodes.OK).json(SuccessResponse);
@@ -70,8 +103,16 @@ export async function updatePayout(req, res) {
     const payload = {};
 
     // Check if a new title is provided
-    if (req.body.title) {
-      payload.title = req.body.title;
+    if (req.body.paymentStatus) {
+      payload.paymentStatus = req.body.paymentStatus;
+    }
+
+    if (req.body.status){
+      payload.status = req.body.status;
+    }
+
+    if (req.body.transactionId){
+      payload.transactionId = req.body.transactionId;
     }
 
     // Update the payout with new data
@@ -100,6 +141,7 @@ export async function deletePayout(req, res) {
     SuccessResponse.message = "Successfully deleted the payout";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.error("Error deleting payout:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }

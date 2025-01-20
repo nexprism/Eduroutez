@@ -237,6 +237,17 @@ console.log('updatesInstitute',updatesInstitute);
     }
   }
 
+  //updateIssue
+  async updateIssue(id,data){
+    try {
+      const updatesIssue = await this.instituteIssuesRepository.update(id, data);
+      return updatesIssue;
+    } catch (error) {
+      throw new AppError("Cannot update the issue ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
     
     async getHelpList() {
       try {

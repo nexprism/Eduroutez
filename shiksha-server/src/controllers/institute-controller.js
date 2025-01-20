@@ -297,11 +297,14 @@ console.log(sheetName);
 
 export async function getInstitute(req, res) {
   try {
+    console.log('hello',req.params.id);
     const response = await instituteService.get(req.params.id);
+    console.log('response in getInstitute',response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the institute";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.error("Get institute error:", error.message); 
     ErrorResponse.error = error;
     return res.status(error.statusCode||500).json(ErrorResponse);
   }
@@ -451,6 +454,30 @@ export const submitIssue = async (req, res) => {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 };
+
+//updateIssue status
+export async function updateIssue(req, res) {
+  try {
+    const issueId = req.params.id;
+    const payload = req.body;
+
+    if (payload.status) {
+      payload.status = payload.status
+    }
+
+    console.log('payload',payload);
+
+    const response = await instituteService.updateIssue(issueId, payload);
+
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully updated issue status";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.log('error in updateIssue',error.message);
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+}
 
 
 export async function getHelpList(req, res) {

@@ -15,7 +15,7 @@ import { createStream, deleteStream, getStream, getStreams, updateStream } from 
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, addFacility, submitIssue, bestRatedInstitute ,bulkAddInstitutes ,getHelpList} from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, addFacility, submitIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer ,getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute } from "../../controllers/counselor-controller.js";
@@ -27,7 +27,7 @@ import { createCareerCategory, deleteCareerCategory, getCareerCategories, getCar
 
 import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog,getBlogsByInstitute } from "../../controllers/blog-controller.js";
 import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, updateNews } from "../../controllers/news-controller.js";
-import { createPayout, deletePayout, getPayout, getPayouts, updatePayout } from "../../controllers/payout-controller.js";
+import { createPayout, deletePayout, getPayout, getPayouts, updatePayout, getPayoutsByUser } from "../../controllers/payout-controller.js";
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
 import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer } from "../../controllers/question-answer-controller.js";
 import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishlist } from "../../controllers/wishlist-controller.js";
@@ -140,6 +140,8 @@ router.post("/addGallery/:id", accessTokenAutoRefresh, passport.authenticate("jw
 //submitIssue
 router.post("/submitIssue", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitIssue);
 router.get("/issues-list", getHelpList);
+//update issue status
+router.patch("/updateIssue/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateIssue);
 
 
 /**
@@ -278,6 +280,7 @@ router.delete("/news/:id", accessTokenAutoRefresh, passport.authenticate("jwt", 
 router.post("/payout", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createPayout);
 router.get("/payouts", getPayouts);
 router.get("/payout/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPayout);
+router.get("/payouts-by-user", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPayoutsByUser);
 router.patch("/payout/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updatePayout);
 router.delete("/payout/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deletePayout);
 

@@ -59,6 +59,45 @@ class PayoutService {
       throw new AppError("Cannot fetch data of all the categories", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
+
+  //getAllByUser
+  async getAllByUser(userId) {
+    try {
+      const filterConditions = { user: userId };
+      // const populateFields = ["user"];
+      const payouts = await this.payoutRepository.getAll(filterConditions, {}, 1, 1000);
+      return payouts;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async get(id) {
+    try {
+      const payout = await this.payoutRepository.get(id);
+      return payout;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async update(id, data) {
+    try {
+      const payout = await this.payoutRepository.update(id, data);
+      return payout;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async delete(id) {
+    try {
+      const payout = await this.payoutRepository.destroy(id);
+      return payout;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default PayoutService;

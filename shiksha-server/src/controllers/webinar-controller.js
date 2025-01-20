@@ -61,7 +61,7 @@ export async function getWebinarsByInstitute(req, res) {
     const { instituteId } = req.params;
 
     const user = await usersevice.getUserById(instituteId);
-
+    console.log("user", user.role);
     if (user.role !== "institute") {
       const response = await webinarService.getAllWebinar();
       SuccessResponse.data = response;
@@ -89,12 +89,15 @@ export async function getWebinarsByInstitute(req, res) {
 
 export async function getWebinar(req, res) {
   try {
-    const response = await webinarService.get(req.params.id);
+    console.log("req.params.id", req.params.id);
+    const response = await webinarService.getwebinarById(req.params.id);
+    console.log("response", response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the webinar";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
+    console.log("error in getWebinar", error.message);
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
@@ -123,9 +126,30 @@ export async function updateWebinar(req, res) {
         payload.description = req.body.description;
       }
 
+      //webinarLink
+      if (req.body.webinarLink) {
+        payload.webinarLink = req.body.webinarLink;
+      }
+
+      //date
+      if (req.body.date) {
+        payload.date = req.body.date;
+      }
+
+      //time
+      if (req.body.time) {
+        payload.time = req.body.time;
+      }
+
+      //duration
+      if (req.body.duration) {
+        payload.duration = req.body.duration;
+      }
+
+
       // Check if a new image is uploaded
       if (req.file) {
-        const webinar = await webinarService.get(webinarId);
+        const webinar = await webinarService.getwebinarById(webinarId);
 
         // Record the old image path if it exists
         if (webinar.image) {
