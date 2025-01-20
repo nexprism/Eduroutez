@@ -17,6 +17,14 @@ const promotionSchema = new mongoose.Schema(
       type: String,
       default: "active",
     },
+    location: {
+      type: String,
+    },
+    institute: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Institute",
+      required: true
+    },
     startDate: {
       type: Date,
       required: true,

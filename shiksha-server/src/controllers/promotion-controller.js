@@ -18,13 +18,17 @@ export const createPromotion = async (req, res) => {
         return res.status(500).json({ error: err });
       }
 
+      user = req.user;
+
+      console.log("User", user);
+
       console.log(req.body);
       const payload = { ...req.body };
       payload.image = req.file.filename;
 
-      const response = await promotionService.create(payload);
+      // const response = await promotionService.create(payload);
 
-      SuccessResponse.data = response;
+      // SuccessResponse.data = response;
       SuccessResponse.message = "Successfully created a promotion";
 
       return res.status(StatusCodes.CREATED).json(SuccessResponse);
