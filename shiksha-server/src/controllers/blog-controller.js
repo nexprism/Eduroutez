@@ -134,6 +134,11 @@ export async function updateBlog(req, res) {
         payload.description = req.body.description;
       }
 
+      if(req.body.category){
+        payload.category = req.body.category;
+
+      }
+
       // Check if a new image is uploaded
       console.log("req.file", req.file);
       if (req.files && req.files["images"]) {
@@ -148,6 +153,9 @@ console.log("oldImagePath", oldImagePath);
         // Set the new image filename in payload
         payload.image = req.files["images"][0].filename;
       }
+
+        console.log('category payload', payload);
+
 
       // Update the blog with new data
       const response = await blogService.update(blogId, payload);
