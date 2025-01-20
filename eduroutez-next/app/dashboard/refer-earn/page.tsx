@@ -1,38 +1,54 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Download, ArrowUpDown, Users } from 'lucide-react';
+import axiosInstance from '@/lib/axios';
 
-// Sample data - in real app would come from API
-const referrals = [
-  { 
-    id: 1, 
-    referrer: 'John Smith',
-    referrerEmail: 'john@example.com',
-    referred: 'Alice Cooper',
-    referredEmail: 'alice@example.com',
-    date: '2024-01-15',
-    rewardPaid: '$25',
-    signupDate: '2024-01-16',
-    purchaseDate: '2024-01-20',
-  },
-  {
-    id: 2,
-    referrer: 'Sarah Johnson',
-    referrerEmail: 'sarah@example.com',
-    referred: 'Mike Wilson',
-    referredEmail: 'mike@example.com',
-    date: '2024-01-18',
-    rewardPaid: '-',
-    signupDate: '2024-01-19',
-    purchaseDate: '-',
-  },
-  // Add more sample data as needed
-];
+interface Referral {
+  id: string;
+  referrer: string;
+  referrerEmail: string;
+  referred: string;
+  referredEmail: string;
+  date: string;
+  rewardPaid: string;
+}
 
 const AdminReferralsPage = () => {
+  const [referrals, setReferrals] = useState<Referral[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
+  const [totalReferrals, setTotalReferrals] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+
+  useEffect(() => {
+    const fetchReferrals = async () => {
+      try {
+        const response = await axiosInstance.get(`${apiUrl}/all-refferal`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = response.data.data.map((item: any) => ({
+          id: item._id,
+          referrer: item.refer_by.name,
+          referrerEmail: item.refer_by.email,
+          referred: item.name,
+          referredEmail: item.email,
+          date: new Date(item.createdAt).toLocaleDateString(),
+          rewardPaid: item.points.toString(),
+        }));
+        setReferrals(data);
+        setTotalReferrals(response.data.totalCount); // Assuming the API returns totalCount
+      } catch (error) {
+        console.error('Error fetching referrals:', error);
+      }
+    };
+
+    fetchReferrals();
+  }, []);
 
   // Filter referrals based on search term
   const filteredReferrals = referrals.filter(referral => {
@@ -46,8 +62,8 @@ const AdminReferralsPage = () => {
 
   // Sort referrals
   const sortedReferrals = [...filteredReferrals].sort((a, b) => {
-    const aValue = a[sortField];
-    const bValue = b[sortField];
+    const aValue = a[sortField as keyof Referral];
+    const bValue = b[sortField as keyof Referral];
 
     if (sortOrder === 'asc') {
       return aValue > bValue ? 1 : -1;
@@ -56,13 +72,21 @@ const AdminReferralsPage = () => {
     }
   });
 
-  const handleSort = (field) => {
+  const handleSort = (field: keyof Referral) => {
     if (field === sortField) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortOrder('asc');
     }
+  };
+
+  const handleSeeMore = () => {
+    setVisibleCount(prevCount => prevCount + 10);
+  };
+
+  const handleSeeLess = () => {
+    setVisibleCount(3);
   };
 
   return (
@@ -77,33 +101,6 @@ const AdminReferralsPage = () => {
           <Download className="w-4 h-4" />
           Export CSV
         </button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid md:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Users className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-gray-600 text-sm">Total Referrals</p>
-              <p className="text-2xl font-bold text-gray-900">1,234</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-xl shadow-sm border">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <Users className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-gray-600 text-sm">Total Rewards</p>
-              <p className="text-2xl font-bold text-gray-900">$12,450</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Filters */}
@@ -148,11 +145,10 @@ const AdminReferralsPage = () => {
                   </div>
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Reward</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {sortedReferrals.map(referral => (
+              {sortedReferrals.slice(0, visibleCount).map(referral => (
                 <tr key={referral.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-900">{referral.referrer}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{referral.referrerEmail}</td>
@@ -160,16 +156,31 @@ const AdminReferralsPage = () => {
                   <td className="px-6 py-4 text-sm text-gray-600">{referral.referredEmail}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{referral.date}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{referral.rewardPaid}</td>
-                  <td className="px-6 py-4">
-                    <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                      View Details
-                    </button>
-                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Pagination Buttons */}
+      <div className="flex justify-center space-x-4 mt-4">
+        {visibleCount < sortedReferrals.length && (
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={handleSeeMore}
+          >
+            See More
+          </button>
+        )}
+        {visibleCount > 10 && (
+          <button
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            onClick={handleSeeLess}
+          >
+            See Less
+          </button>
+        )}
       </div>
     </div>
   );

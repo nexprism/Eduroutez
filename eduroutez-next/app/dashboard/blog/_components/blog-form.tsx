@@ -180,12 +180,23 @@ export default function BlogForm() {
     enabled: isEdit
   });
 
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+         `${apiUrl}/blog-category`
+      );
+      return response.data.data.result;
+    }
+  });
+
   React.useEffect(() => {
     if (blog?.data) {
       form.reset({
         title: blog.data.title,
         category: blog.data.category,
         description: blog.data.description,
+        
       });
 
       if (blog.data.image) {
@@ -231,12 +242,13 @@ export default function BlogForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="MBA">MBA</SelectItem>
-                      <SelectItem value="ENGINEERING">ENGINEERING</SelectItem>
-                      <SelectItem value="MEDICAL">MEDICAL</SelectItem>
+                      {categories?.map((category: any) => (
+                        <SelectItem key={category.name} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
                 </FormItem>
               )}
             />
