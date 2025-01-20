@@ -190,6 +190,38 @@ async getMyRefferal(id) {
   }
 }
 
+
+  async getAllRefferal() {
+    try {
+      // Fetch all users where 'refer_by' is not null
+      const all_refferal = await this.userRepository.getAll({ refer_by: { $ne: null } });
+
+      // Check if all_refferal is an array
+      if (!Array.isArray(all_refferal)) {
+        throw new Error('Expected an array from getAll, but received:', all_refferal);
+      }
+
+      console.log('all_refferal count:', all_refferal.length);
+
+      // Process each user and fetch the 'refer_by' user object
+      for (let i = 0; i < all_refferal.length; i++) {
+        const user = all_refferal[i];
+        if (user.refer_by) {
+          const referalUser = await this.userRepository.get(user.refer_by);
+          all_refferal[i].refer_by = referalUser;
+        }
+      }
+
+      // console.log('Updated all_refferal:', all_refferal);
+      return all_refferal;
+    } catch (error) {
+      console.error('Error fetching referral data:', error.message);
+      throw new AppError("Cannot fetch data of all the users", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
+
 }
 
 export default UserService;

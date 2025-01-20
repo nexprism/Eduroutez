@@ -204,6 +204,22 @@ export async function getMyRefferal(req, res) {
 }
 
 
+export async function getAllRefferal(req, res) {
+  try {
+    const userId = req.user._id;
+    const response = await userService.getAllRefferal(userId);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the user";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.error('Error in all Refferal:', error.message);
+
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+
 //redeemPoints
 export async function redeemPoints(req, res) {
   try {
