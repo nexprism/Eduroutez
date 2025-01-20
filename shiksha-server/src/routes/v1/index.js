@@ -228,7 +228,7 @@ router.get("/reviews-by-user/:email", getReviewsByUser);
  * blog-category routes
  */
 router.post("/blog-category", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBlogCategory);
-router.get("/blog-categories", getBlogCategories);
+router.get("/blog-category", getBlogCategories);
 router.get("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlogCategory);
 router.patch("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBlogCategory);
 router.delete("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBlogCategory);

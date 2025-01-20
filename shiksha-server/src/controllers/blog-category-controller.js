@@ -10,7 +10,7 @@ const blogCategoryService = new BlogCategoryService();
 export const createBlogCategory = async (req, res) => {
   try {
     const payload = { ...req.body };
-    payload.image = req.file.filename;
+    // payload.image = req.file.filename;
 
     const response = await blogCategoryService.create(payload);
 
@@ -19,6 +19,7 @@ export const createBlogCategory = async (req, res) => {
 
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
+    console.log('Error creating blog category:', error);
     ErrorResponse.error = error;
 
     return res.status(error.statusCode).json(ErrorResponse);
@@ -69,8 +70,9 @@ export async function updateBlogCategory(req, res) {
     const blogCategoryId = req.params.id;
     const payload = {};
 
-    if (req.body.title) {
-      payload.title = req.body.title;
+    console.log('req.body', req.body);
+    if (req.body.name) {
+      payload.name = req.body.name;
     }
 
     const response = await blogCategoryService.update(blogCategoryId, payload);
