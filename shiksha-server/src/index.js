@@ -15,9 +15,9 @@ import { setupINIT } from "./utils/helpers/init.js";
 import mg from "mailgun-js";
 const app = express();
 
-app.use("/uploads", express.static("uploads"));
+
 const corsOptions = {
-  origin: ["https://eduroutez-lpax.vercel.app", "https://eduroutez-kixc.vercel.app","http://localhost:3000"],
+  origin: ["https://eduroutez-lpax.vercel.app", "https://eduroutez-kixc.vercel.app","http://localhost:3000","http://localhost:5173"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -60,6 +60,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 app.use("/api", apiRoutes);
+
 
 const mailgun = () => mg({
   apiKey: process.env.MAILGUN_API_KEY,
