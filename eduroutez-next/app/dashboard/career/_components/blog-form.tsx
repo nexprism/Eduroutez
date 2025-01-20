@@ -193,6 +193,16 @@ export default function CounselorForm() {
     enabled: isEdit
   });
 
+  const { data: categories } = useQuery({
+    queryKey: ['career-categories'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        `${apiUrl}/career-category`
+      );
+      return response.data;
+    }
+  });
+
   React.useEffect(() => {
     if (counselor?.data) {
       form.reset({
@@ -250,9 +260,11 @@ export default function CounselorForm() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={'MBA'}>MBA</SelectItem>
-                        <SelectItem value={'ENGINEERING'}>ENGINEERING</SelectItem>
-                        <SelectItem value={'MEDICAL'}>MEDICAL</SelectItem>
+                        {categories?.data.result.map((category: any) => (
+                          <SelectItem key={category.id} value={category.name}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
