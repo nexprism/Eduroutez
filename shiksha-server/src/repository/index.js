@@ -19,6 +19,7 @@ export { StudentRepository } from "./student-repository.js";
 export { PaymentMethodRepository } from "./payment-method-repository.js";
 export { ReviewRepository } from "./review-repository.js";
 export { BlogCategoryRepository } from "./blog-category-repository.js";
+export { CareerCategoryRepository } from "./career-category-repository.js";
 export { BlogRepository } from "./blog-repository.js";
 export { NewsRepository } from "./news-repository.js";
 export { PayoutRepository } from "./payout-repository.js";

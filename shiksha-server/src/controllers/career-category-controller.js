@@ -1,25 +1,25 @@
 import { StatusCodes } from "http-status-codes";
-import BlogCategoryService from "../services/blog-category-service.js";
+import CareerCategoryService from "../services/career-category-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
-const blogCategoryService = new BlogCategoryService();
+const careerCategoryService = new CareerCategoryService();
 
 /**
- * POST : /blogCategory
+ * POST : /careerCategory
  * req.body {}
  */
-export const createBlogCategory = async (req, res) => {
+export const createCareerCategory = async (req, res) => {
   try {
     const payload = { ...req.body };
     // payload.image = req.file.filename;
 
-    const response = await blogCategoryService.create(payload);
+    const response = await careerCategoryService.create(payload);
 
     SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully created a blog category";
+    SuccessResponse.message = "Successfully created a career category";
 
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
-    console.log('Error creating blog category:', error);
+    console.log('Error creating career category:', error);
     ErrorResponse.error = error;
 
     return res.status(error.statusCode).json(ErrorResponse);
@@ -27,15 +27,15 @@ export const createBlogCategory = async (req, res) => {
 };
 
 /**
- * GET : /blogCategory
+ * GET : /careerCategory
  * req.body {}
  */
 
-export async function getBlogCategories(req, res) {
+export async function getCareerCategories(req, res) {
   try {
-    const response = await blogCategoryService.getAll(req.query);
+    const response = await careerCategoryService.getAll(req.query);
     SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully fetched blog categories";
+    SuccessResponse.message = "Successfully fetched career categories";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
@@ -44,15 +44,15 @@ export async function getBlogCategories(req, res) {
 }
 
 /**
- * GET : /blogCategory/:id
+ * GET : /careerCategory/:id
  * req.body {}
  */
 
-export async function getBlogCategory(req, res) {
+export async function getCareerCategory(req, res) {
   try {
-    const response = await blogCategoryService.get(req.params.id);
+    const response = await careerCategoryService.get(req.params.id);
     SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully fetched the blog category";
+    SuccessResponse.message = "Successfully fetched the career category";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
@@ -61,13 +61,13 @@ export async function getBlogCategory(req, res) {
 }
 
 /**
- * PATCH : /blogCategory/:id
+ * PATCH : /careerCategory/:id
  * req.body {capacity:200}
  */
 
-export async function updateBlogCategory(req, res) {
+export async function updateCareerCategory(req, res) {
   try {
-    const blogCategoryId = req.params.id;
+    const careerCategoryId = req.params.id;
     const payload = {};
 
     console.log('req.body', req.body);
@@ -75,29 +75,29 @@ export async function updateBlogCategory(req, res) {
       payload.name = req.body.name;
     }
 
-    const response = await blogCategoryService.update(blogCategoryId, payload);
+    const response = await careerCategoryService.update(careerCategoryId, payload);
 
     // Return success response
     SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully updated the blog category";
+    SuccessResponse.message = "Successfully updated the career category";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
-    console.error("Update blogCategory error:", error);
+    console.error("Update careerCategory error:", error);
     ErrorResponse.error = error;
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
 }
 
 /**
- * DELETE : /blogCategory/:id
+ * DELETE : /careerCategory/:id
  * req.body {}
  */
 
-export async function deleteBlogCategory(req, res) {
+export async function deleteCareerCategory(req, res) {
   try {
-    const response = await blogCategoryService.delete(req.params.id);
+    const response = await careerCategoryService.delete(req.params.id);
     SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully deleted the blog category";
+    SuccessResponse.message = "Successfully deleted the career category";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;

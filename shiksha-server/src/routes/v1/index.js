@@ -23,6 +23,8 @@ import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } 
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
 import { createReview, deleteReview, getReview, getReviews, updateReview ,getReviewsByUser} from "../../controllers/review-controller.js";
 import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCategory, updateBlogCategory } from "../../controllers/blog-category-controller.js";
+import { createCareerCategory, deleteCareerCategory, getCareerCategories, getCareerCategory, updateCareerCategory } from "../../controllers/career-category-controller.js";
+
 import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog,getBlogsByInstitute } from "../../controllers/blog-controller.js";
 import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, updateNews } from "../../controllers/news-controller.js";
 import { createPayout, deletePayout, getPayout, getPayouts, updatePayout } from "../../controllers/payout-controller.js";
@@ -228,10 +230,20 @@ router.get("/reviews-by-user/:email", getReviewsByUser);
  * blog-category routes
  */
 router.post("/blog-category", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBlogCategory);
-router.get("/blog-categories", getBlogCategories);
+router.get("/blog-category", getBlogCategories);
 router.get("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlogCategory);
 router.patch("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBlogCategory);
 router.delete("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBlogCategory);
+
+//career-category
+router.post("/career-category", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCareerCategory);
+router.get("/career-category", getCareerCategories);
+router.get("/career-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCareerCategory);
+router.patch("/career-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCareerCategory);
+router.delete("/career-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCareerCategory);
+
+
+
 
 /**
  * blog routes
