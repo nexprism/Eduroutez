@@ -256,7 +256,7 @@ export const navItems: NavItem[] = [
 
   {
     title: 'Online counselling',
-    url: '/dashboard/online-counselling-list',
+    url: '/dashboard/scheduled-counselling-list',
     icon: 'scroll-text',
     isActive: false,
     items: [
