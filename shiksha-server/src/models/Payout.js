@@ -25,6 +25,9 @@ const payoutSchema = new mongoose.Schema(
       type: String,
       default: "PENDING",
     },
+    transactionId: {
+      type: String,
+    },
     status: {
       type: String,
       enum: ["REQUESTED", "UNPAID", "REJECTED", "PAID"],

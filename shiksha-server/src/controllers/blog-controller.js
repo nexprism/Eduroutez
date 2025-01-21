@@ -149,7 +149,7 @@ export async function updateBlog(req, res) {
           oldImagePath = path.join("uploads", blog.image);
         }
 
-console.log("oldImagePath", oldImagePath);
+      console.log("oldImagePath", oldImagePath);
         // Set the new image filename in payload
         payload.image = req.files["images"][0].filename;
       }
