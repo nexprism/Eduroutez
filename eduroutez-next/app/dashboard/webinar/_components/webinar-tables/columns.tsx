@@ -28,7 +28,7 @@ export const columns: ColumnDef<Webinar>[] = [
   // },
   {
     header: 'ID',
-    cell: ({ row }) => <div>{`${row.index+1}`}</div>
+    cell: ({ row }) => <div>{`${row.index + 1}`}</div>
   },
   {
     header: 'NAME',
@@ -45,12 +45,32 @@ export const columns: ColumnDef<Webinar>[] = [
       <div className="flex w-32 space-x-1">
         <Badge
           variant={!row.original.status ? 'secondary' : 'default'}
-          className="text-xs "
+          className="text-xs"
         >
           {row.original.status ? 'Active' : 'Inactive'}
         </Badge>
       </div>
     )
+  },
+  {
+    header: 'Time',
+    cell: ({ row }) => <div>{`${row.original.time}`}</div>
+  },
+  {
+    header: 'Duration',
+    cell: ({ row }) => <div>{`${row.original.duration}`}</div>
+  },
+  {
+    header: 'Date',
+    cell: ({ row }) => {
+      const date = new Date(row.original.date);
+      const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+      return <div>{formattedDate}</div>;
+    }
+  },
+  {
+    header: 'Link',
+    cell: ({ row }) => <div>{`${row.original.webinarLink}`}</div>
   },
   {
     header: 'CREATED AT',
@@ -60,7 +80,6 @@ export const columns: ColumnDef<Webinar>[] = [
       return <div>{formattedDate}</div>;
     }
   },
-
   {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />

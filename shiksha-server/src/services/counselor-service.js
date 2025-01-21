@@ -27,7 +27,7 @@ class CounselorService {
 
   async getAll(query) {
     try {
-      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 1000000, filters = "{}", searchFields = "{}", sort = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 

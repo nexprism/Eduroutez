@@ -55,7 +55,7 @@ export default function AppSidebar({
     const role = localStorage.getItem('role');
     const excludedTitles =
       role === 'institute'
-        ? ['Institutes', 'Admins','Refer and Earn','Subscriptions','Bulk Institute Upload','Help And Support','Earnings','Payouts','Promotions', 'Streams','Redeem','Students', 'Sales','Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
+        ? ['Institutes', 'Admins','Refer and Earn','Manage Pages','Subscriptions','Bulk Institute Upload','Help And Support','Earnings','Payouts','Promotions', 'Streams','Redeem','Students', 'Sales','Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
         : role === 'counsellor'
         ? [
             'Institutes',
@@ -69,8 +69,7 @@ export default function AppSidebar({
             'Subscription',
             'Courses',
             'Streams',
-            'Manage Pages',
-            'Counselors',
+'Manage Pages',            'Counselors',
             'Admins',
             'Students',
             'Email Templates',
@@ -139,7 +138,7 @@ export default function AppSidebar({
             <SidebarGroupLabel>Overview </SidebarGroupLabel>
             <SidebarMenu>
               {filteredNavItems?.map((item) => {
-                const Icon = item.icon ? Icons[item.icon] : Icons.logo;
+                const Icon = item.icon ? Icons[item.icon as keyof typeof Icons] : Icons.logo;
                 return item?.items && item?.items?.length > 0 ? (
                   <Collapsible
                     key={item.title}
@@ -160,7 +159,7 @@ export default function AppSidebar({
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub>
-                          {item.items?.map((subItem) => (
+                          {item.items?.map((subItem:any) => (
                             <SidebarMenuSubItem key={subItem.title}>
                               <SidebarMenuSubButton
                                 asChild

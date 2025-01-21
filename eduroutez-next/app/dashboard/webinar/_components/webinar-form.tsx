@@ -52,6 +52,7 @@ const formSchema = z.object({
     message: 'Invalid URL format.'
   }),
   description: z.string(),
+  webinarCreatedBy: z.string().optional(),
   image: z
     .instanceof(File)
     .optional()
@@ -203,21 +204,21 @@ export default function CourseCategoryForm() {
   console.log(category);
 
   React.useEffect(() => {
-    if (category?.data && courseCategories?.data?.result) {
-      // Find the matching parent category
-      const parentCategory = courseCategories.data.result.find(
-        (cat: CourseCategory) => cat._id === category.data.parentCategory
-      );
-
+    if (category?.data) {
       form.reset({
-        title: category.data.title
+        title: category.data.title,
+        time: category.data.time,
+        date: category.data.date,
+        duration: category.data.duration,
+        webinarLink: category.data.webinarLink,
+        description: category.data.description,
       });
 
       if (category.data.icon) {
         setPreviewImageUrl(`${IMAGE_URL}/${category.data.icon}`);
       }
     }
-  }, [category, courseCategories, form]);
+  }, [category, form]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading categories</div>;

@@ -27,8 +27,6 @@ const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
         case 'open':
             return 'bg-green-100 text-green-800';
-        case 'pending':
-            return 'bg-yellow-100 text-yellow-800';
         case 'closed':
             return 'bg-gray-100 text-gray-800';
         default:
@@ -64,6 +62,21 @@ const HelpSupportPage: React.FC = () => {
 
     const handleSeeMore = () => {
         setDisplayCount(displayCount + 6);
+    };
+
+    const handleStatusUpdate = async (issueId: string, newStatus: string) => {
+        try {
+            const response = await axiosInstance.patch(`${apiUrl}/updateIssue/${issueId}`, { status: newStatus });
+            if (response.status === 200) {
+                setIssues((prevIssues) =>
+                    prevIssues.map((issue) =>
+                        issue._id === issueId ? { ...issue, status: newStatus } : issue
+                    )
+                );
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+        }
     };
 
     const displayedIssues = issues.slice(0, displayCount);
@@ -164,6 +177,14 @@ const HelpSupportPage: React.FC = () => {
                                                             <span>Created: {new Date(issue.createdAt).toLocaleDateString()}</span>
                                                             <span>Updated: {new Date(issue.updatedAt).toLocaleDateString()}</span>
                                                         </div>
+                                                    </div>
+                                                    <div className="mt-4">
+                                                        <button 
+                                                            onClick={() => handleStatusUpdate(issue._id, issue.status === 'open' ? 'closed' : 'open')}
+                                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                                                        >
+                                                            {issue.status === 'open' ? 'Close Issue' : 'Reopen Issue'}
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>

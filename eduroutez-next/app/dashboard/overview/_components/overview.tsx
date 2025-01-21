@@ -23,11 +23,12 @@ interface CounselorData {
   points?: number;
 }
 
-const Dashboard: React.FC<{ counselorData: CounselorData }> = ({ counselorData }) => {
+const Dashboard: React.FC = () => {
   const [role, setRole] = useState(localStorage.getItem('role'));
   const [newCounselors, setNewCounselors] = useState(0);
   const [newInstitutes, setNewInstitutes] = useState(0);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [counselorData, setCounselorData] = useState<CounselorData>({});
   const [isLoading, setIsLoading] = useState(true);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -53,6 +54,24 @@ const Dashboard: React.FC<{ counselorData: CounselorData }> = ({ counselorData }
 
     fetchData();
   }, [apiUrl]);
+
+  useEffect(() => {
+    async function fetchCounselorData() {
+      const email = localStorage.getItem('email');
+      if (email) {
+        try {
+          const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`);
+          setCounselorData(response.data);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }
+
+    if (role === 'counsellor') {
+      fetchCounselorData();
+    }
+  }, [apiUrl, role]);
 
   const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
 

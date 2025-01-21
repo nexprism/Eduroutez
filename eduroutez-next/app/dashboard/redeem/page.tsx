@@ -8,15 +8,15 @@ import axiosInstance from "@/lib/axios";
 
 interface RedeemHistoryItem {
   id: number;
-  date: string;
-  coins: number;
-  reward: string;
+  Date: string;
+  points: number;
+  remarks: string;
 }
 
 const RedeemPage = () => {
   const [coins, setCoins] = useState("");
   const [redeemHistory, setRedeemHistory] = useState<RedeemHistoryItem[]>([]);
-  const [availableCoins, setAvailableCoins] = useState(1000);
+  const [availableCoins, setAvailableCoins] = useState(500);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,8 +33,8 @@ const RedeemPage = () => {
       const response = await axiosInstance.get(`${apiUrl}/redeem-history`);
       
       // Validate that response.data is an array
-      if (Array.isArray(response.data)) {
-        setRedeemHistory(response.data);
+      if (response) {
+        setRedeemHistory(response.data.data.result);
       } else {
         setRedeemHistory([]);
         setError("Invalid history data received");
@@ -95,13 +95,13 @@ const RedeemPage = () => {
               `}
             >
               <td className="px-4 py-3 text-sm text-purple-900">
-                {new Date(item.date).toLocaleDateString()}
+                {isNaN(Date.parse(item.Date)) ? 'Invalid Date' : new Date(item.Date).toISOString().split('T')[0]}
               </td>
               <td className="px-4 py-3 text-sm font-medium text-purple-900">
-                {item.coins}
+                {item.points}
               </td>
               <td className="px-4 py-3 text-sm text-purple-900">
-                {item.reward}
+                {item.remarks}
               </td>
             </tr>
           ))}
