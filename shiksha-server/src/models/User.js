@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema(
     plan:{
           type: mongoose.Schema.Types.ObjectId,
           ref: "Subscription",
-          default:"676d7f071e0e1af8cb5344d7"
+          default:"6790930506cb01e88d502091"
         },
     planName: {
       type: String,
