@@ -49,6 +49,9 @@ class WebinarService {
         
       const webinars = await this.webinarRepository.getwebinarByCreatedBy(userId);
       console.log("webinars", webinars);
+      if (webinars.length === 0) {
+        return null;
+      }
       return webinars;
     } catch (error) {
       throw new Error("Cannot fetch webinars for the user");

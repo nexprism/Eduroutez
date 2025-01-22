@@ -181,7 +181,7 @@ export default function CreateInstitute() {
       console.log("Fetching institute data...");
       const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
-      console.log("Institute data:", instituteData);
+      console.log("Institute data here:", instituteData);
   
       // Convert filenames to URLs for rendering in the frontend
       const galleryUrls = instituteData.gallery.map(
@@ -318,6 +318,16 @@ console.log('Error updating institute:', error.message); }
   const handleMultipleImageChange = async (event: any) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
+
+    const instituteData = await axiosInstance.get(`${apiUrl}/institute/${id}`);
+    const plan = instituteData.data.data.plan;
+    const mediaLimit = plan.features.find((feature: any) => feature.key === 'Media').value;
+  
+    // Check if the number of selected images exceeds the allowed limit
+    if (instituteData.data.data.gallery.length + files.length > mediaLimit) {
+      toast.error(`You can only upload up to ${mediaLimit} images at this plan. Upgrade your plan to add more images.`);
+      return;
+    }
   
     // Show temporary previews of selected images
     const previewArray = Array.from(files).map((file: any) => URL.createObjectURL(file));
