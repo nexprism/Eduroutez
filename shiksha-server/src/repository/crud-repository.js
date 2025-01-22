@@ -28,8 +28,15 @@ class CrudRepository {
   async get(id) {
     try {
       // console.log('hello',id);
-      const result = await this.model.findById(id);
-      // console.log('hii',result);
+      
+      var result = await this.model.findById(id);
+      // console.log('result',result);
+      if (result.plan) {
+        var result = await this.model.findById(result._id).populate("plan");
+
+      }
+
+      
       return result;
     } catch (error) {
       throw error;

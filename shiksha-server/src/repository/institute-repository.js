@@ -151,7 +151,7 @@ class InstituteRepository extends CrudRepository {
   async getByEmail(email) {
     try {
       console.log('hello2')
-      const result = await this.model.findOne({ email }); // Query by email
+      const result = await this.model.findOne({ email }).populate("plan");
       return result;
     } catch (error) {
       throw error;

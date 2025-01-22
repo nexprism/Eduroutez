@@ -110,7 +110,9 @@ class SubscriptionService {
       }
 
     //set plan to user
-    const user = await this.userRepository.get(data.user);
+    const user = await this.userRepository.get(data.user._id);
+
+    console.log('user_for_plan',user);
     if(!user){
       throw error;
     }
@@ -125,6 +127,8 @@ class SubscriptionService {
       if(!institute){
         throw error;
       }
+
+      
 
       institute.plan = subscription;
       institute.planName = subscription.name;
