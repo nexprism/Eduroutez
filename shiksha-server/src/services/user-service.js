@@ -21,7 +21,6 @@ class UserService {
   async getUserByEmail(email) {
     try {
       const user = await this.userRepository.findBy({ email });
-      console.log('user',user);
       return user;
     } catch (error) {
       throw error;

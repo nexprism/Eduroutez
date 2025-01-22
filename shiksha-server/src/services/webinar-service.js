@@ -42,7 +42,12 @@ class WebinarService {
   async getAllByUser(userId) {
     try {
       console.log("userId", userId);
-      const webinars = await this.webinarRepository.get({ webinarCreatedBy: userId });
+
+      const filterConditions = {};
+
+      filterConditions.webinarCreatedBy = userId;
+        
+      const webinars = await this.webinarRepository.getwebinarByCreatedBy(userId);
       console.log("webinars", webinars);
       if (webinars.length === 0) {
         return null;
