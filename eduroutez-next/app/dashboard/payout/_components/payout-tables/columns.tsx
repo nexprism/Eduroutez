@@ -53,10 +53,10 @@ export const columns: ColumnDef<Payout>[] = [
     cell: ({ row }) => (
       <div className="flex w-32 space-x-1">
         <Badge
-          variant={!row.original.status ? 'secondary' : 'default'}
+          variant={!row.original.paymentStatus ? 'secondary' : 'default'}
           className="text-xs "
         >
-          {row.original.status ? 'Active' : 'Inactive'}
+          {row.original.status}
         </Badge>
       </div>
     )
@@ -70,7 +70,7 @@ export const columns: ColumnDef<Payout>[] = [
           variant={row.original.paymentStatus=='PENDING' ? 'secondary' : 'outline'}
           className="text-xs "
         >
-          {row.original.paymentStatus=='PENDING' ? 'Complete' : 'Pending'}
+          {row.original.paymentStatus}
         </Badge>
       </div>
     )

@@ -71,6 +71,7 @@ class CounselorService {
     }
   }
   async get(email) {
+    console.log('email',email);
     const counselor = await this.counselorRepository.get(email);
     if(!counselor) {
       //find in user by email

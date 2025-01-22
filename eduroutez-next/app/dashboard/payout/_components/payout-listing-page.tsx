@@ -14,15 +14,16 @@ import axiosInstance from '@/lib/axios';
 type TPayoutListingPage = {};
 
 export default function PayoutListingPage({}: TPayoutListingPage) {
-  // const queryClient = useQueryClient()
   const { searchQuery, page, limit } = usePayoutTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+  const apiEndpoint = role === 'SUPER_ADMIN' ? `${apiUrl}/payouts` : `${apiUrl}/payouts-by-user`;
 
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['payouts', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/payouts`, {
+      const response = await axiosInstance.get(apiEndpoint, {
         params: {
           searchFields: JSON.stringify({}),
           sort: JSON.stringify({ createdAt: 'desc' }),
@@ -33,7 +34,10 @@ export default function PayoutListingPage({}: TPayoutListingPage) {
       return response.data;
     }
   });
-  console.log(data?.data);
+
+  const payouts = data?.data?.result || [];
+  const totalDocuments = data?.data?.totalDocuments || 0;
+
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -43,19 +47,21 @@ export default function PayoutListingPage({}: TPayoutListingPage) {
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Payout (${data.data.totalDocuments})`}
+                title={`Payout (${totalDocuments})`}
                 description="All payouts online and offline are listed here."
               />
-              <Button asChild className="w-fit whitespace-nowrap px-2">
-                <Link href="/dashboard/payout/new">
+                {role !== 'SUPER_ADMIN' && (
+                <Button asChild className="w-fit whitespace-nowrap px-2">
+                  <Link href="/dashboard/payout/new">
                   <Plus className="mr-1 h-4 w-4" /> Add New
-                </Link>
-              </Button>
+                  </Link>
+                </Button>
+                )}
             </div>
             <Separator />
             <PayoutTable
-              data={data.data.result}
-              totalData={data.data.totalDocuments}
+              data={payouts}
+              totalData={totalDocuments}
             />
           </div>
         )
