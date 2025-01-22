@@ -45,7 +45,7 @@ class WebinarService {
       const webinars = await this.webinarRepository.get({ webinarCreatedBy: userId });
       console.log("webinars", webinars);
       if (webinars.length === 0) {
-        throw new Error("No webinars found for this user");
+        return null;
       }
       return webinars;
     } catch (error) {
