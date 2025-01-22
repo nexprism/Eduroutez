@@ -13,7 +13,11 @@ const PayoutUpdateForm = () => {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const payoutId = '6784e6f8f34b91e48ca15459';
+    const payoutId = new URL(window.location.href).pathname.split('/').pop();
+    if (!payoutId) {
+        toast.error('Payout ID is missing in the URL.');
+        return null;
+    }
 
     useEffect(() => {
         const fetchPayoutDetails = async () => {
@@ -54,8 +58,8 @@ const PayoutUpdateForm = () => {
             setSuccess('Payout status updated successfully!');
         } catch (error: any) {
             console.error('There was an error!', error);
-            toast.error(error.response.data.error || 'Failed to update payout status. Please try again.');
-            setError(error.response.data.error || 'Failed to update payout status. Please try again.');
+            toast.error(error.response.error || 'Failed to update payout status. Please try again.');
+            setError(error.response.error || 'Failed to update payout status. Please try again.');
         } finally {
             setLoading(false);
         }

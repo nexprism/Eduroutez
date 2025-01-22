@@ -15,9 +15,9 @@ import { useEffect, useState } from 'react';
 type TCourseListingPage = {};
 
 export default function CourseListingPage({}: TCourseListingPage) {
-  // const queryClient = useQueryClient()
   const { searchQuery, page, limit } = useCourseTableFilters();
-  const [content, setcontent] = useState([]);
+  const [content, setContent] = useState([]);
+  const [popularCourseFeature, setPopularCourseFeature] = useState<number>(0);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -31,6 +31,30 @@ export default function CourseListingPage({}: TCourseListingPage) {
       setEmail(emailFromStorage); // Save email if the condition is met
       setEnabled(true); // Enable the query
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchInstituteData = async () => {
+      const id = localStorage.getItem('instituteId');
+      try {
+        console.log("Fetching institute data...");
+        const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
+        const instituteData = response.data.data;
+        console.log("Institute data here:", instituteData);
+        
+        const plan = instituteData.data.data.plan;
+        const feature = plan.features.find(
+          (feature: any) => feature.key === 'Courses Listing'
+        );
+        if (feature) {
+          setPopularCourseFeature(feature.value);
+        }
+      } catch (error) {
+        console.log("Error fetching institute data:", error);
+      }
+    };
+
+    fetchInstituteData();
   }, []);
 
   const { data, isLoading, isSuccess } = useQuery({
@@ -47,16 +71,14 @@ export default function CourseListingPage({}: TCourseListingPage) {
       return response.data;
     }
   });
-  console.log('hi',data);
+  console.log('hi', data);
 
   useEffect(() => {
     if (isSuccess && data?.data?.result) {
-      setcontent(data.data.result); // Update content when data is available
+      setContent(data.data.result); // Update content when data is available
       console.log('Data successfully set in content');
     }
   }, [isSuccess, data]);
-
-  // Log `content` only when it updates
 
   const data1 = useQuery({
     queryKey: ['institute', searchQuery],
@@ -76,9 +98,10 @@ export default function CourseListingPage({}: TCourseListingPage) {
 
   console.log(localStorage.getItem('role'));
   console.log(data1?.data?.data);
+
   useEffect(() => {
-    if(data1?.data?.data.courses){
-      setcontent(data1?.data?.data.courses);
+    if (data1?.data?.data?.courses) {
+      setContent(data1.data.data.courses);
     }
   }, [data1]);
 
@@ -101,7 +124,7 @@ export default function CourseListingPage({}: TCourseListingPage) {
               </Button>
             </div>
             <Separator />
-            <CourseTable data={content} totalData={data.data.totalDocuments} />
+            <CourseTable data={content.slice(0, popularCourseFeature)} totalData={data?.data?.totalDocuments || 0} />
           </div>
         )
       )}

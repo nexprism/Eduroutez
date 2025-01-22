@@ -28,6 +28,7 @@ import {
   FormMessage,
   FormDescription
 } from '@/components/ui/form';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CustomEditor from '@/components/custom-editor';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -170,6 +171,8 @@ export default function CreateCourse() {
   const [previewMetaImageUrl, setPreviewMetaImageUrl] = React.useState<
     string | null
   >(null);
+
+  const [isPopularEnabled, setIsPopularEnabled] = useState(false);
   const [activeTab, setActiveTab] = React.useState('general');
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputMetaImageRef = React.useRef<HTMLInputElement | null>(null);
@@ -453,6 +456,32 @@ export default function CreateCourse() {
       toast.error('Something went wrong');
     }
   });
+
+
+  useEffect(() => {
+    const fetchInstituteData = async () => {
+      const id = localStorage.getItem('instituteId');
+      try {
+        console.log("Fetching institute data...");
+        const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
+        const instituteData = response.data.data;
+        console.log("Institute data here:", instituteData);
+        
+        const plan = instituteData.data.data.plan;
+        const popularCourseFeature = plan.features.find(
+          (feature:any) => feature.key === 'Popular Courses'
+        );
+        
+        // Enable checkbox only if feature value is "Yes"
+        setIsPopularEnabled(popularCourseFeature?.value === "Yes");
+      } catch (error) {
+        console.log("Error fetching institute data:", error);
+        setIsPopularEnabled(false);
+      }
+    };
+
+    fetchInstituteData();
+  }, []);
 
   const { data: course } = useQuery({
     queryKey: ['category', segments[4]],
@@ -819,28 +848,34 @@ export default function CreateCourse() {
                         </FormItem>
                       )}
                     />
-                    <FormField
-  control={form.control}
-  name="isCoursePopular"
-  render={({ field }) => (
-    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-      <FormControl>
-        <Checkbox
-          checked={field.value}
-          onCheckedChange={field.onChange}
-        />
-      </FormControl>
-      <div className="space-y-1 leading-none">
-        <FormLabel>
-          Popular Course
-        </FormLabel>
-        <FormDescription>
-          Mark this course as popular
-        </FormDescription>
-      </div>
-    </FormItem>
-  )}
-/>
+                 
+
+                 <FormField
+      control={form.control}
+      name="isCoursePopular"
+      render={({ field }) => (
+        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+          <FormControl>
+            <Checkbox
+              checked={field.value}
+              onCheckedChange={field.onChange}
+              disabled={!isPopularEnabled}
+            />
+          </FormControl>
+          <div className="space-y-1 leading-none">
+            <FormLabel>
+              Popular Course
+            </FormLabel>
+            <FormDescription>
+              {isPopularEnabled 
+                ? "Mark this course as popular"
+                : "Popular course feature is not available in your current plan"}
+            </FormDescription>
+          </div>
+        </FormItem>
+      )}
+    />
+
 
 <FormField
   control={form.control}
@@ -851,6 +886,8 @@ export default function CreateCourse() {
         <Checkbox
           checked={field.value}
           onCheckedChange={field.onChange}
+          disabled={!isPopularEnabled}
+
         />
       </FormControl>
       <div className="space-y-1 leading-none">
@@ -858,8 +895,9 @@ export default function CreateCourse() {
           Trending Course
         </FormLabel>
         <FormDescription>
-          Mark this course as trending
-        </FormDescription>
+        {isPopularEnabled 
+                ? "Mark this course as popular"
+                : "Trending course feature is not available in your current plan"}        </FormDescription>
       </div>
     </FormItem>
   )}
