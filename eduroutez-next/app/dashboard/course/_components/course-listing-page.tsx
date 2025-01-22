@@ -91,7 +91,7 @@ export default function CourseListingPage({}: TCourseListingPage) {
           <div className="space-y-4">
             <div className="flex flex-col justify-between md:flex-row ">
               <Heading
-                title={`Course (${data.data.totalDocuments})`}
+                title={`Course`}
                 description="All courses online and offline are listed here."
               />
               <Button asChild className="w-fit whitespace-nowrap px-2">

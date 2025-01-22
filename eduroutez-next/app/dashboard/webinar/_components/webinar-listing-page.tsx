@@ -30,7 +30,7 @@ type Webinar = {
 type WebinarResponse = {
   success: boolean;
   message: string;
-  data: Webinar[];
+  data: Webinar[] | null;
   error: Record<string, unknown>;
 };
 
@@ -54,7 +54,7 @@ export default function WebinarListingPage({}: TWebinarListingPage) {
       {isLoading ? (
         <div>Loading...</div>
       ) : (
-        isSuccess && data && (
+        isSuccess && data && data.data ? (
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
@@ -73,6 +73,8 @@ export default function WebinarListingPage({}: TWebinarListingPage) {
               totalData={data.data.length}
             />
           </div>
+        ) : (
+          <div>No webinars found.</div>
         )
       )}
     </PageContainer>
