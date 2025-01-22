@@ -7,13 +7,13 @@ class UserRepository extends CrudRepository {
   }
 
   async get(id) {
-    const student = await User.findById(id);
+    const student = await User.findById(id).populate("plan", "refer_by");
     return student;
   }
 
   async findBy(data) {
     try {
-      const response = await User.findOne(data);
+      const response = await User.findOne(data).populate("plan", "refer_by");
       return response;
     } catch (error) {
       throw error;
@@ -23,7 +23,7 @@ class UserRepository extends CrudRepository {
   // getAll tieht .populate('refer_by')
   async getAll(query) {
     try {
-      const response = await User.find(query).populate("refer_by");
+      const response = await User.find(query).populate("refer_by, plan");
       return response;
     } catch (error) {
       throw error;
