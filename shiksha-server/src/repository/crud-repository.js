@@ -28,7 +28,7 @@ class CrudRepository {
   async get(id) {
     try {
       // console.log('hello',id);
-      const result = await this.model.findById(id);
+      const result = await this.model.findById(id).populate("plan");
       // console.log('hii',result);
       return result;
     } catch (error) {
@@ -38,7 +38,7 @@ class CrudRepository {
 
   async getALL() {
     try {
-      const result = await this.model.find();
+      const result = await this.model.find().populate("plan");
       return result;
     } catch (error) {
       throw error;
