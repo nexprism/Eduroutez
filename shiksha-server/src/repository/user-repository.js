@@ -7,13 +7,14 @@ class UserRepository extends CrudRepository {
   }
 
   async get(id) {
-    const student = await User.findById(id).populate("plan", "refer_by");
+    const student = await User.findById(id).populate("plan");
     return student;
   }
 
   async findBy(data) {
     try {
-      const response = await User.findOne(data).populate("plan", "refer_by");
+      //get user with popuplate plan
+      const response = await User.findOne(data).populate("plan");
       return response;
     } catch (error) {
       throw error;
