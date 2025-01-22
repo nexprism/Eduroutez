@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle2, DollarSign } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';
 
 const PayoutUpdateForm = () => {
-    const [status, setStatus] = useState('Open');
+    const [status, setStatus] = useState('PAID');
+    const [paymentStatus, setPaymentStatus] = useState('Completed');
+    const [transactionId, setTransactionId] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -17,8 +19,10 @@ const PayoutUpdateForm = () => {
         const fetchPayoutDetails = async () => {
             try {
                 const response = await axiosInstance.get(`${apiUrl}/payout/${payoutId}`);
-                const { status } = response.data;
+                const { status, paymentStatus, transactionId } = response.data;
                 setStatus(status);
+                setPaymentStatus(paymentStatus);
+                setTransactionId(transactionId);
             } catch (error: any) {
                 console.error('There was an error fetching payout details!', error);
                 toast.error('Failed to fetch payout details. Please try again.');
@@ -35,12 +39,12 @@ const PayoutUpdateForm = () => {
         setSuccess(null);
 
         try {
-            const response = await axiosInstance(`${apiUrl}/updateIssue/${payoutId}`, {
-                method: 'Patch',
+            const response = await axiosInstance(`${apiUrl}/payout/${payoutId}`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                data: { status },
+                data: { status, paymentStatus, transactionId },
             });
 
             if (!response) {
@@ -78,9 +82,36 @@ const PayoutUpdateForm = () => {
                                 onChange={(e) => setStatus(e.target.value)}
                                 className="block w-full pl-3 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             >
-                                <option value="Open">Open</option>
-                                <option value="Closed">Closed</option>
+                                <option value="PAID">PAID</option>
+                                <option value="REJECTED">REJECTED</option>
+                                <option value="UNPAID">UNPAID</option>
                             </select>
+                        </div>
+
+                        {/* Payment Status */}
+                        <div className="space-y-4">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Payment Status
+                            </label>
+                            <input
+                                type="text"
+                                value={paymentStatus}
+                                onChange={(e) => setPaymentStatus(e.target.value)}
+                                className="block w-full pl-3 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        {/* Transaction ID */}
+                        <div className="space-y-4">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Transaction ID
+                            </label>
+                            <input
+                                type="text"
+                                value={transactionId}
+                                onChange={(e) => setTransactionId(e.target.value)}
+                                className="block w-full pl-3 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            />
                         </div>
 
                         {/* Error and Success Messages */}
