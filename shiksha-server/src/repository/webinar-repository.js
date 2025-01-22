@@ -27,6 +27,17 @@ class WebinarRepository extends CrudRepository {
     }
   }
 
+  getwebinarByCreatedBy(id) {
+    try {
+      // console.log("webinar", webinar);
+      const webinar = Webinar.find({ webinarCreatedBy: id });
+      return webinar;
+    } catch (error) {
+      console.error('Error in WebinarRepository.getwebinarById:', error.message);
+      throw error;
+    }
+  }
+
   async get(userId) {
     try {
       // Log the received userId
