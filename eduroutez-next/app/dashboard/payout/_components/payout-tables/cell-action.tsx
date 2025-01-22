@@ -36,9 +36,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       });
 
       return response;
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payouts'] });
+      window.location.reload();
       router.push('/dashboard/payout');
     },
     onSettled: () => {
@@ -46,6 +48,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       setLoading(false);
     }
   });
+
+  const role=localStorage.getItem('role');
 
   const onConfirm = async () => {
     setLoading(true);
@@ -70,13 +74,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-          <DropdownMenuItem
-            onClick={() =>
+            {role === 'SUPER_ADMIN' && (
+            <DropdownMenuItem
+              onClick={() =>
               router.push(`/dashboard/payout/update/${data._id}/`)
-            }
-          >
-            <Edit className="mr-2 h-4 w-4" /> Update
-          </DropdownMenuItem>
+              }
+            >
+              <Edit className="mr-2 h-4 w-4" /> Update
+            </DropdownMenuItem>
+            )}
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="mr-2 h-4 w-4" /> Delete
           </DropdownMenuItem>

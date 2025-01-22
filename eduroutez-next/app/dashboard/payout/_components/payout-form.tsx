@@ -1,289 +1,151 @@
 'use client';
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import Image from 'next/image';
-import { CalendarIcon, Plus, X } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { Textarea } from '@/components/ui/textarea';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { usePathname, useRouter } from 'next/navigation';
+
+import React, { useState } from 'react';
+import { CreditCard, Wallet, AlertCircle, CheckCircle2, DollarSign } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
+import { toast } from 'sonner';
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.'
-  }),
-  // price: z.string().min(1, {
-  //   message: 'Discount is required.'
-  // }),
-  price: z.string().refine(
-    (value) => {
-      const price = Number(value);
-      return !isNaN(price) && price >= 1 && price <= 100;
-    },
-    {
-      message: 'Discount must be a number between 1 and 100.'
-    }
-  ),
-  startDate: z.date({
-    required_error: 'Please select a start date.'
-  }),
-  endDate: z.date({
-    required_error: 'Please select a end date.'
-  }),
-
-  category: z
-    .string()
-    .min(1, { message: 'Please select a category.' })
-    .refine(
-      (value) => {
-        const category = value;
-        return category !== 'Select a category';
-      },
-      {
-        message: 'Please select a category.'
-      }
-    ),
-  counselorType: z.string().optional(),
-
-  description: z.string().min(20, {
-    message: 'description must be at least 20 characters.'
-  })
-});
-const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
-export default function CounselorForm() {
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const pathname = usePathname();
-  const segments = pathname.split('/');
-  const [isEdit, setIsEdit] = React.useState(false);
-
-  React.useEffect(() => {
-    if (segments.length === 5 && segments[3] === 'update') {
-      setIsEdit(true);
-    }
-  }, [segments]);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      category: '',
-      description: '',
-      // mode: undefined,
-      counselorType: ''
-    }
-  });
-  const router = useRouter();
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Handle form submission here
-    const formData = new FormData();
-    formData.append('name', values.name);
-    formData.append('price', values.price);
-    formData.append('startDate', values.startDate.toISOString());
-    formData.append('category', values.category);
-    formData.append('description', values.description);
-    formData.append('mode', 'ONLINE');
-    formData.append('counselorType', values.counselorType ?? '');
-    mutate(formData);
-  }
-
-  const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const endpoint = isEdit
-        ? `${apiUrl}/counselor/${segments[4]}`
-        : `${apiUrl}/counselor`;
-      const response = await axiosInstance({
-        url: `${endpoint}`,
-        method: isEdit ? 'patch' : 'post',
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      return response.data;
-    },
-
-    onSuccess: () => {
-      const message = isEdit
-        ? 'Counselor updated successfully'
-        : 'Counselor created successfully';
-      toast.success(message);
-      form.reset();
-      setPreviewUrl(null);
-      router.push('/dashboard/counselor');
-    },
-    onError: (error) => {
-      toast.error('Something went wrong');
-    }
-  });
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setPreviewUrl(null);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
+const PayoutForm = () => {
+  const [paymentMethod, setPaymentMethod] = useState('Bank Transfer');
+  const [requestedAmount, setRequestedAmount] = useState(1000);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  // write code to get categories from serve by tanstack query
-  const {
-    data: categories,
-    isLoading,
-    isSuccess
-  } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/categories`);
-      return response.data;
-    }
-  });
 
-  const { data: counselor } = useQuery({
-    queryKey: ['counselor', segments[4]],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/counselor/${segments[4]}`
-      );
-      return response.data;
-    },
-    enabled: isEdit // Only fetch when in edit mode
-  });
 
-  React.useEffect(() => {
-    if (counselor?.data) {
-      form.reset({
-        name: counselor.data.name,
-        price: counselor.data.price.toString(),
-        startDate: new Date(counselor.data.startDate),
-        endDate: new Date(counselor.data.endDate),
-        category: counselor.data.category[0],
-        description: counselor.data.description,
-        //  image: undefined // Handle image separately
-        counselorType: counselor?.data?.counselorType
+  const paymentMethods = [
+    { id: 'bank', name: 'Bank Transfer', icon: Wallet },
+    { id: 'card', name: 'Credit Card', icon: CreditCard },
+    { id: 'wallet', name: 'E-Wallet', icon: Wallet },
+  ];
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+
+
+    try {
+      const response = await axiosInstance(`${apiUrl}/payout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        data: { paymentMethod, requestedAmount },
       });
 
-      // Set preview URL for existing image
-      if (counselor.data.image) {
-        setPreviewUrl(`${IMAGE_URL}/${counselor.data.image}`);
+      if (!response) {
+        throw new Error('Network response was not ok');
       }
+toast.success('Payout request submitted successfully!');
+      setSuccess('Payout request submitted successfully!');
+    } catch (error:any) {
+      console.error('There was an error!', error);
+      toast.error(error.response.data.error || 'Failed to process payout request. Please try again.');
+      setError(error.response.data.error || 'Failed to process payout request. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  }, [counselor, form]);
+  };
 
   return (
-    <Card className="mx-auto w-full">
-      <CardHeader>
-        <CardTitle className="text-left text-2xl font-bold">
-          Counselor Information
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Counselor Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your counselor name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your counselor price"
-                        {...field}
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className=" mx-auto">
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="text-center pb-8">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Request Payout
+            </h2>
+          </div>
 
-              <FormField
-                control={form.control}
-                name="counselorType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Counselor Type (optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a counselor type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={'DEFAULT'}>Default</SelectItem>
-                        <SelectItem value={'POPULAR'}>Popular</SelectItem>
-                        <SelectItem value={'TRENDING'}>Trending</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Payment Method Selection */}
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Select Payment Method
+              </label>
+              <div className="grid grid-cols-3 gap-4">
+                {paymentMethods.map((method) => (
+                  <button
+                    key={method.id}
+                    type="button"
+                    onClick={() => setPaymentMethod(method.name)}
+                    className={`p-4 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${
+                      paymentMethod === method.name
+                        ? 'border-purple-500 bg-purple-50 text-purple-600'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <method.icon className="w-6 h-6" />
+                    <span className="text-sm">{method.name}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <Button type="submit" disabled={isSubmitting}>
-              Submit
-            </Button>
+            {/* Amount Input */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Amount
+              </label>
+              <div className="relative mt-1 rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <DollarSign className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="number"
+                  value={requestedAmount}
+                  onChange={(e) => setRequestedAmount(Number(e.target.value))}
+                  className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Enter amount"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            {/* Error and Success Messages */}
+            {error && (
+              <div className="flex items-center gap-2 text-purple-600 bg-purple-50 p-3 rounded-lg">
+                <AlertCircle className="w-5 h-5" />
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+
+            {success && (
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
+                <CheckCircle2 className="w-5 h-5" />
+                <p className="text-sm">{success}</p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3 px-4 rounded-lg text-white font-medium transition-colors ${
+                loading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-purple-600 hover:bg-purple-700'
+              }`}
+            >
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Processing...</span>
+                </div>
+              ) : (
+                'Submit Payout Request'
+              )}
+            </button>
           </form>
-        </Form>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default PayoutForm;
