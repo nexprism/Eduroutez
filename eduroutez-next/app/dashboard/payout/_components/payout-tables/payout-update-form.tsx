@@ -14,28 +14,11 @@ const PayoutUpdateForm = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const payoutId = new URL(window.location.href).pathname.split('/').pop();
+    console.log(payoutId)
     if (!payoutId) {
         toast.error('Payout ID is missing in the URL.');
         return null;
     }
-
-    useEffect(() => {
-        const fetchPayoutDetails = async () => {
-            try {
-                const response = await axiosInstance.get(`${apiUrl}/payout/${payoutId}`);
-                const { status, paymentStatus, transactionId } = response.data;
-                setStatus(status);
-                setPaymentStatus(paymentStatus);
-                setTransactionId(transactionId);
-            } catch (error: any) {
-                console.error('There was an error fetching payout details!', error);
-                toast.error('Failed to fetch payout details. Please try again.');
-            }
-        };
-
-        fetchPayoutDetails();
-    }, [apiUrl, payoutId]);
-
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         setLoading(true);
