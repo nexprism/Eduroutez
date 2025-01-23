@@ -110,6 +110,16 @@ class WebinarService {
     }
   }
 
+  //getMonthlyWebinarCount
+  async getMonthlyWebinarCount(user) {
+    try {
+      const webinars = await this.webinarRepository.getMonthlyWebinarCount(user._id);
+      return webinars;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async delete(id) {
     try {
       const webinar = await this.webinarRepository.destroy(id);

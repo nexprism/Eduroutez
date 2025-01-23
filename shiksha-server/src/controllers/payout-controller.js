@@ -82,11 +82,13 @@ export async function getPayoutsByUser(req, res) {
 
 export async function getPayout(req, res) {
   try {
+    
     const response = await payoutService.get(req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the payout";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.error("Error fetching payout:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }
@@ -100,7 +102,7 @@ export async function getPayout(req, res) {
 export async function updatePayout(req, res) {
   try {
     const couponId = req.params.id;
-    const payload = {};
+    const payload = { ...req.body };
 
     // Check if a new title is provided
     if (req.body.paymentStatus) {
@@ -115,6 +117,8 @@ export async function updatePayout(req, res) {
       payload.transactionId = req.body.transactionId;
     }
 
+    console.log("couponId", couponId);
+    console.log("payload", payload);
     // Update the payout with new data
     const response = await payoutService.update(couponId, payload);
 

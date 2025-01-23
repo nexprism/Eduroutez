@@ -38,6 +38,55 @@ class WebinarRepository extends CrudRepository {
     }
   }
 
+  //getMonthlyWebinarCount monthly webinar count by webinarCreatedBy user._id
+
+  async getMonthlyWebinarCount(userId) {
+    try {
+      // Log the received userId
+      console.log("Received userId:", userId);
+
+      // Handle case where userId is an object
+      
+
+      // Query get current  month webinar count by webinarCreatedBy user._id
+      const webinars = await Webinar.aggregate([
+        {
+          $match: {
+            webinarCreatedBy: userId,
+            $expr: {
+              $eq: [{ $month: "$createdAt" }, new Date().getMonth() + 1],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+
+
+      
+
+      
+      if (!webinars || webinars.length === 0) {
+        const error = new Error("No webinars found for this user");
+        error.statusCode = 404;
+        throw error;
+      }
+      
+      return webinars;
+    } catch (error) {
+      // Preserve the status code if it exists, otherwise use 500
+      error.statusCode = error.statusCode || 500;
+      console.error('Error in WebinarRepository.get:', error);
+      throw error; // Throw the error with status code
+    }
+  }
+  
+  
   async get(userId) {
     try {
       // Log the received userId

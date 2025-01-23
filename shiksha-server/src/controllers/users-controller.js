@@ -167,7 +167,7 @@ export async function allowUser(req, res) {
     if (!id) {
       return res.status(400).json({ message: 'User ID is required' });
     }
-    const payload = await userService.get(id);
+    const payload = await userService.getUserById(id);
 
     if (!payload) {
       return res.status(404).json({ message: 'User not found' });
@@ -182,7 +182,34 @@ export async function allowUser(req, res) {
 
     return res.status(200).json({ message: 'User verified successfully', data: response });
   } catch (error) {
-    console.error('Error in allowUser:', error);
+    console.error('Error in allowUser:', error.message);
+    return res.status(500).json({ message: 'Internal Server Error', error: error.message });
+  }
+}
+
+
+export async function denyUser(req, res) {
+  try {
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+    const payload = await userService.getUserById(id);
+
+    if (!payload) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    payload.is_verified = false;
+    const response = await userService.update(id, payload);
+
+    const instituteresponse = await instituteService.update(id, payload);
+
+
+
+
+    return res.status(200).json({ message: 'User block successfully', data: response });
+  } catch (error) {
+    console.error('Error in allowUser:', error.message);
     return res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 }

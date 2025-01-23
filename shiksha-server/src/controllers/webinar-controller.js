@@ -200,3 +200,17 @@ export async function deleteWebinar(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+
+//getMonthlyWebinarCount
+export async function getMonthlyWebinarCount(req, res) {
+  try {
+    const user = await usersevice.getUserById(req.params.id);
+    const response = await webinarService.getMonthlyWebinarCount(user);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the webinar count";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}

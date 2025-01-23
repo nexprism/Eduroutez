@@ -104,9 +104,9 @@ class SubscriptionService {
     //expiry date count base on plan suration type and suration
     let expiryDate = new Date();
       if (subscription.durationType == "month"){
-        expiryDate.setMonth(expiryDate.getMonth() + subscription.duration);
+        expiryDate.setMonth(expiryDate.getMonth() + parseInt(subscription.duration));
       }else if(subscription.durationType == "year"){
-        expiryDate.setFullYear(expiryDate.getFullYear() + subscription.duration);
+        expiryDate.setFullYear(expiryDate.getFullYear() + parseInt(subscription.duration));
       }
 
     //set plan to user
