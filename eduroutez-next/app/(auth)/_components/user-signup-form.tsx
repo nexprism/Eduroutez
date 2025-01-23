@@ -53,6 +53,7 @@ const formSchema = z.object({
 });
 
 const roleTypes = [
+  { value: 'admin', label: 'Admin' },
   { value: 'institute', label: 'University/College Institute' },
   { value: 'counsellor', label: 'Counsellor' }
 ];
@@ -94,12 +95,15 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
     },
     onSuccess: (data) => {
       toast.success('Signed Up Successfully!');
-      if (role === 'institute') {
-        setShowAlert(true);
-      }
+      
       localStorage.setItem('accessToken', JSON.stringify(data.data.accessToken));
       localStorage.setItem('refreshToken', JSON.stringify(data.data.refreshToken));
-      router.push('/');
+
+      if (role === 'institute') {
+        setShowAlert(true);
+      } else {
+        startTransition(() => router.push('/'));
+      }
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || 'Failed to sign up';
@@ -281,7 +285,8 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
           {isPending ? 'Signing Up...' : 'Sign Up'}
         </Button>
       </form>
-      <SignupAlert isOpen={showAlert} onClose={() => setShowAlert(false)} />
-    </Form>
+ {role === 'institute' && (
+        <SignupAlert isOpen={showAlert} onClose={() => setShowAlert(false)} />
+      )}    </Form>
   );
 }
