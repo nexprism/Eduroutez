@@ -54,28 +54,36 @@ export default function WebinarListingPage({}: TWebinarListingPage) {
       {isLoading ? (
         <div>Loading...</div>
       ) : (
-        isSuccess && data && data.data ? (
-          <div className="space-y-4">
-            <div className="flex items-start justify-between">
-              <Heading
-                title={`Webinar (${data.data.length})`}
-                description="All webinars online and offline are listed here."
-              />
-              <Button asChild className="w-fit whitespace-nowrap px-2">
-                <Link href="/dashboard/webinar/new">
-                  <Plus className="mr-1 h-4 w-4" /> Add New
-                </Link>
-              </Button>
-            </div>
-            <Separator />
-            <WebinarTable
-              data={data.data}
-              totalData={data.data.length}
+        <div className="space-y-4">
+          <div className="flex items-start justify-between">
+            <Heading
+              title={`Webinar (${data?.data?.length || 0})`}
+              description="All webinars online and offline are listed here."
             />
+            <Button asChild className="w-fit whitespace-nowrap px-2">
+              <Link href="/dashboard/webinar/new">
+                <Plus className="mr-1 h-4 w-4" /> Add New
+              </Link>
+            </Button>
           </div>
-        ) : (
-          <div>No webinars found.</div>
-        )
+          <Separator />
+          {isSuccess && data ? (
+            <WebinarTable
+              data={data.data || []}
+              totalData={data.data?.length || 0}
+            />
+          ) : (
+<div className="flex flex-col items-center justify-center p-6 bg-gray-100 rounded-md shadow-md">
+  <div className="text-gray-500 text-lg font-semibold mb-2">No Webinars Found</div>
+  <div className="text-gray-400 text-sm mb-4">It seems there are no webinars available at the moment. Please create a webinar.</div>
+  <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+  <Link href="/dashboard/webinar/new">
+    Add Webinar
+  </Link>
+  </button>
+</div>
+          )}
+        </div>
       )}
     </PageContainer>
   );

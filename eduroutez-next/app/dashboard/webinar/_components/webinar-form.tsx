@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
@@ -18,23 +18,25 @@ import {
 } from '@/components/ui/form';
 
 import { Input } from '@/components/ui/input';
-import { X, Plus } from 'lucide-react';
-import { CourseCategory } from '@/types';
+import { X, Plus, Rocket, Lock } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { toast } from 'sonner';
 import CustomEditor from '@/components/custom-editor';
-import { description } from '../../earning/_components/bar-graph';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle 
+} from '@/components/ui/alert-dialog';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+
 const formSchema = z.object({
   title: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
@@ -68,16 +70,14 @@ const formSchema = z.object({
     )
 });
 
-export default function CourseCategoryForm() {
+export default function WebinarForm() {
   const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
-  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(
-    null
-  );
+  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
-
-  console.log(segments);
+  const [isWebinarEnabled, setIsWebinarEnabled] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   React.useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
@@ -99,27 +99,6 @@ export default function CourseCategoryForm() {
     }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const formData = new FormData();
-    formData.append('time', values.time);
-    formData.append('date', values.date);
-    formData.append('duration', values.duration);
-    formData.append('webinarLink', values.webinarLink);
-    formData.append('description', values.description);
-
-    formData.append('title', values.title);
-    if (values.image) {
-      formData.append('image', values.image);
-    }
-
-    const webinarCreatedBy = localStorage.getItem('instituteId');
-  if (webinarCreatedBy) {
-    formData.append('webinarCreatedBy', webinarCreatedBy);
-  }
-
-    mutate(formData);
-  }
-
   const router = useRouter();
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -134,7 +113,6 @@ export default function CourseCategoryForm() {
           'Content-Type': 'multipart/form-data'
         }
       });
-      console.log(response.data);
       return response.data;
     },
 
@@ -151,6 +129,27 @@ export default function CourseCategoryForm() {
       toast.error('Something went wrong');
     }
   });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    const formData = new FormData();
+    formData.append('time', values.time);
+    formData.append('date', values.date);
+    formData.append('duration', values.duration);
+    formData.append('webinarLink', values.webinarLink);
+    formData.append('description', values.description);
+    formData.append('title', values.title);
+
+    if (values.image) {
+      formData.append('image', values.image);
+    }
+
+    const webinarCreatedBy = localStorage.getItem('instituteId');
+    if (webinarCreatedBy) {
+      formData.append('webinarCreatedBy', webinarCreatedBy);
+    }
+
+    mutate(formData);
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -179,18 +178,10 @@ export default function CourseCategoryForm() {
     }
   };
 
-  const fetchCategories = async () => {
-    const response = await axiosInstance.get(`${apiUrl}/webinars`);
-    return response.data;
-  };
-
-  const {
-    data: courseCategories = [],
-    isLoading,
-    error
-  } = useQuery({ queryKey: ['webinar'], queryFn: fetchCategories });
-
-  const { data: category } = useQuery({
+  const { 
+    data: category, 
+    isLoading: isCategoryLoading 
+  } = useQuery({
     queryKey: ['webinar', segments[4]],
     queryFn: async () => {
       const response = await axiosInstance.get(
@@ -200,8 +191,6 @@ export default function CourseCategoryForm() {
     },
     enabled: isEdit // Only fetch when in edit mode
   });
-
-  console.log(category);
 
   React.useEffect(() => {
     if (category?.data) {
@@ -220,18 +209,76 @@ export default function CourseCategoryForm() {
     }
   }, [category, form]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading categories</div>;
+  useEffect(() => {
+    const fetchInstituteData = async () => {
+      const id = localStorage.getItem('instituteId');
+      try {
+        const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
+        const instituteData = response.data.data;
+  
+        const plan = instituteData.plan;
+        const webinarFeature = plan.features.find(
+          (feature: any) => feature.key === 'Webinar'
+        );
+  
+        // Enable form only if webinar feature value is "Yes"
+        setIsWebinarEnabled(webinarFeature?.value !== "0");
+      } catch (error) {
+        console.log("Error fetching institute data:", error);
+        setIsWebinarEnabled(false);
+      }
+    };
+  
+    fetchInstituteData();
+  }, []);
+
+
+
+  // If webinar is not enabled, show upgrade prompt
+  if (!isWebinarEnabled) {
+    return (
+      <div className="container mx-auto py-12">
+        <Card className="max-w-md mx-auto text-center">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-gray-800">
+              Webinar Feature Locked
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex justify-center">
+              <Lock className="text-yellow-500 w-16 h-16" />
+            </div>
+            <p className="text-gray-600">
+              Webinar creation is not available in your current plan.
+            </p>
+            <div className="flex items-center">
+              <Rocket className="mr-2 text-purple-500" size={20} />
+              Unlock advanced features with a plan upgrade
+            </div>
+            <Button 
+              onClick={() => window.location.href = '/dashboard/subscription'}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              Upgrade Plan
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isCategoryLoading) return <div>Loading...</div>;
+
   return (
     <div className="container mx-auto space-y-6 py-6">
       <Card className="mx-auto w-full">
         <CardHeader>
           <CardTitle className="text-left text-2xl font-bold">
-            Banner Information
+            Webinar Information
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
+        <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
