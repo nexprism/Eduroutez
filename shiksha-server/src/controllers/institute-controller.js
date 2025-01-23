@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import { ServerConfig } from "../config/index.js";
 import path from "path";
 import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
@@ -9,8 +10,11 @@ import { UserRepository } from "../repository/user-repository.js";
 import xlsx from "xlsx";
 import mongoose from "mongoose";
 import Institute from "../models/Institute.js";
+import User from "../models/User.js";
 import { cp } from "fs";
 import multer from "multer";
+import bcrypt from "bcrypt";
+
 
 const singleUploader = FileUpload.upload.single("image");
 const fileUploader = FileUpload.upload.single("file");
@@ -208,73 +212,85 @@ export const bulkAddInstitutes = async (req, res) => {
 
     try {
       const file = req.file;
-      console.log(file,'fghjk');
       if (!file) {
         return res.status(StatusCodes.BAD_REQUEST).json({ error: "No file uploaded" });
       }
 
       const workbook = xlsx.readFile(file.path);
-      console.log(workbook.SheetNames[0]);
       const sheetName = workbook.SheetNames[0];
-console.log(sheetName);
       const sheet = workbook.Sheets[sheetName];
-      await fs.writeFile('sheet.xlsx', xlsx.write(workbook, { bookType: 'xlsx', type: 'buffer' }));
       const data = xlsx.utils.sheet_to_json(sheet);
-      console.log(data);
 
-      //add in user table
-      const users = data.map((row) => ({
-        _id: new mongoose.Types.ObjectId(),
-        name: row.instituteName,
-        email: row.email,
-        password: row.password,
-        role: "institute",
-        is_verified: true,
-      }));
+      const users = [];
+      const institutes = [];
 
-      await UserRepository.insertMany(users);
+      for (const row of data) {
+        const existingUser = await User.findOne({ email: row.email });
+        if (existingUser) {
+          console.log(`Skipping row with email ${row.email} as it already exists`);
+          continue;
+        }
 
-      const institutes = data.map((row) => ({
-        _id: new mongoose.Types.ObjectId(),
-        instituteName: row.instituteName,
-        email: row.email,
-        institutePhone: row.institutePhone,
-        address: row.address,
-        state: row.state,
-        city: row.city,
-        establishedYear: row.establishedYear,
-        website: row.website,
-        about: row.about,
-        instituteLogo: row.instituteLogo,
-        coverImage: row.coverImage,
-        thumbnailImage: row.thumbnailImage,
-        organisationType: row.organisationType,
-        brochure: row.brochure,
-        subscriptionType: row.subscriptionType,
-        courses: row.courses,
-        collegeInfo: row.collegeInfo,
-        isTrending: row.isTrending,
-        courseInfo: row.courseInfo,
-        admissionInfo: row.admissionInfo,
-        placementInfo: row.placementInfo,
-        fee: row.fee,
-        ranking: row.ranking,
-        cutoff: row.cutoff,
-        campusInfo: row.campusInfo,
-        scholarshipInfo: row.scholarshipInfo,
-        minFees: row.minFees,
-        maxFees: row.maxFees,
-        affiliation: row.affiliation,
-        highestPackage: row.highestPackage,
-        reviews: row.reviews,
-        streams: row.streams,
-        specialization: row.specialization,
-        gallery: row.gallery,
-        facilities: row.facilities,
-        password: row.password,
-        status: row.status,
-      }));
+        const userId = new mongoose.Types.ObjectId();
+        var password = row.password;
+         const salt = bcrypt.genSaltSync(+ServerConfig.SALT);
+            const hashedPassword = bcrypt.hashSync(password, salt);
+             
 
+        users.push({
+          _id: userId,
+          name: row.instituteName,
+          email: row.email,
+          password: hashedPassword,
+          role: "institute",
+          is_verified: true,
+        });
+
+        institutes.push({
+          _id: userId,
+          instituteName: row.instituteName,
+          email: row.email,
+          institutePhone: row.institutePhone,
+          address: row.address,
+          state: row.state,
+          city: row.city,
+          establishedYear: row.establishedYear,
+          website: row.website,
+          about: row.about,
+          instituteLogo: row.instituteLogo,
+          coverImage: row.coverImage,
+          thumbnailImage: row.thumbnailImage,
+          organisationType: row.organisationType,
+          brochure: row.brochure,
+          // subscriptionType: row.subscriptionType,
+          // courses: row.courses,
+          collegeInfo: row.collegeInfo,
+          isTrending: row.isTrending,
+          courseInfo: row.courseInfo,
+          admissionInfo: row.admissionInfo,
+          placementInfo: row.placementInfo,
+          fee: row.fee,
+          ranking: row.ranking,
+          cutoff: row.cutoff,
+          campusInfo: row.campusInfo,
+          scholarshipInfo: row.scholarshipInfo,
+          minFees: row.minFees,
+          maxFees: row.maxFees,
+          affiliation: row.affiliation,
+          highestPackage: row.highestPackage,
+          // reviews: row.reviews,
+          streams: row.streams,
+          specialization: row.specialization,
+          // gallery: row.gallery,
+          facilities: row.facilities,
+          password: row.password,
+          // status: row.status,
+        });
+      }
+
+      console.log("Users:", users);
+
+      await User.insertMany(users);
       await Institute.insertMany(institutes);
 
       SuccessResponse.data = institutes;
