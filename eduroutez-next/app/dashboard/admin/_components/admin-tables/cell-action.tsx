@@ -26,6 +26,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   const deleteAdminMutation = useMutation({
     mutationFn: async (adminId: string) => {
       const response = await axiosInstance({
@@ -47,8 +48,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       setLoading(false);
     }
   });
-  console.log(data);
-  const { mutate, isPending } = useMutation({
+
+  const { mutate: allowMutate } = useMutation({
     mutationFn: async (jsonData: { id: string }) => {
       const endpoint = `${apiUrl}/allow`;
       const response = await axiosInstance({
@@ -62,21 +63,47 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       return response.data;
     },
     onSuccess: () => {
-      const message = 'User Allowed Sucessfully';
+      const message = 'User Allowed Successfully';
       toast.success(message);
+      window.location.reload();
       router.push('/dashboard/institute');
     },
     onError: (error) => {
       toast.error('Something went wrong');
     },
   });
-  
+
   const handlePermission = async () => {
-    mutate({ id: data?._id }); // Pass the `id` as an object
+    allowMutate({ id: data?._id });
   };
-  
 
+  const { mutate: denyMutate } = useMutation({
+    mutationFn: async (jsonData: { id: string }) => {
+      const endpoint = `${apiUrl}/deny/${jsonData.id}`;
+      const response = await axiosInstance({
+        url: endpoint,
+        method: 'POST',
+        data: jsonData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      const message = 'User Denied Successfully';
+      toast.success(message);
+      window.location.reload();
+      router.push('/dashboard/institute');
+    },
+    onError: (error) => {
+      toast.error('Something went wrong');
+    },
+  });
 
+  const handleDeny = async () => {
+    denyMutate({ id: data?._id });
+  };
 
   const onConfirm = async () => {
     setLoading(true);
@@ -100,15 +127,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-          <DropdownMenuItem
-            onClick={
-              handlePermission
-            }
-          >
+          <DropdownMenuItem onClick={handlePermission}>
             <Edit className="mr-2 h-4 w-4" /> Allow
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setOpen(true)}>
+          <DropdownMenuItem onClick={handleDeny}>
             <Trash className="mr-2 h-4 w-4" /> Deny
           </DropdownMenuItem>
         </DropdownMenuContent>
