@@ -79,7 +79,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const { mutate: denyMutate } = useMutation({
     mutationFn: async (jsonData: { id: string }) => {
-      const endpoint = `${apiUrl}/deny/${jsonData.id}`;
+      const endpoint = `${apiUrl}/deny`;
       const response = await axiosInstance({
         url: endpoint,
         method: 'POST',

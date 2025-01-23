@@ -321,7 +321,7 @@ console.log('Error updating institute:', error.message); }
 
     const instituteData = await axiosInstance.get(`${apiUrl}/institute/${id}`);
     const plan = instituteData.data.data.plan;
-    const mediaLimit = plan.features.find((feature: any) => feature.key === 'Media').value;
+    const mediaLimit = plan.features.find((feature: any) => feature.key === 'Media'||feature.key === 'Images').value;
   
     // Check if the number of selected images exceeds the allowed limit
     if (instituteData.data.data.gallery.length + files.length > mediaLimit) {

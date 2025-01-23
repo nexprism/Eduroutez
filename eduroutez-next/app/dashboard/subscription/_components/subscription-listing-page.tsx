@@ -21,8 +21,8 @@ declare global {
 
 const PricingPage = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const role = 'institute';
-  const email = 'institute@gmail.com';
+  const role = localStorage.getItem('role');
+  const email = localStorage.getItem('email');
 
   const { data: instituteData, isLoading: isInstituteLoading } = useQuery({
     queryKey: ['institute', email],
