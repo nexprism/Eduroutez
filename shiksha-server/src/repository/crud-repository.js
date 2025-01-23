@@ -36,6 +36,10 @@ class CrudRepository {
 
       }
 
+      if (result.reviews) {
+        var result = await this.model.findById(result._id).populate("reviews");
+      }
+
       
       return result;
     } catch (error) {

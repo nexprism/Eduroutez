@@ -27,14 +27,17 @@ const userSchema = new mongoose.Schema(
     plan:{
           type: mongoose.Schema.Types.ObjectId,
           ref: "Subscription",
-          default:"6790930506cb01e88d502091"
+          default:"67921a8896ff8884c3a795a7"
         },
     planName: {
       type: String,
-      default: "Standard"
+      default: "Free Plan"
     },
     expiryDate: {
       type: Date,
+      //set defualt 1 motnth from now
+      default: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      
     },
     role: {
       type: String,
@@ -90,7 +93,16 @@ const userSchema = new mongoose.Schema(
     },
     level: {
       type: String,
-      default: "Well Wisher",
+      default: function () {
+        if (this.role === "student") {
+          return "Well Wisher";
+        } else if (this.role === "counsellor") {
+          return "Career Advisor";
+        } else {
+          return null;
+        }
+      }
+      
     },
     balance: {
       type: Number,

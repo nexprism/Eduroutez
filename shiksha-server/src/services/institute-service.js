@@ -105,6 +105,9 @@ console.log('updatesInstitute',updatesInstitute);
 
   async get(id) {
     const institute = await this.instituteRepository.get(id);
+
+    
+
     return institute;
   }
 

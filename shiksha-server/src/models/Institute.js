@@ -148,14 +148,15 @@ const instituteSchema = new mongoose.Schema(
     plan:{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subscription",
-      default:"676d7f071e0e1af8cb5344d7"
+      default:"67921a8896ff8884c3a795a7"
     },
     planName:{
       type:String,
-      default:"Standard"
+      default:"Free Plan"
     },
     expiryDate:{
       type:Date,
+      default: new Date(new Date().setMonth(new Date().getMonth() + 1)),
     },
     issues: [
       {
