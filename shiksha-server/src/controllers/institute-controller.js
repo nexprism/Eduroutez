@@ -273,8 +273,6 @@ console.log(sheetName);
         facilities: row.facilities,
         password: row.password,
         status: row.status,
-        plan: row.plan,
-        planName: row.planName,
       }));
 
       await Institute.insertMany(institutes);

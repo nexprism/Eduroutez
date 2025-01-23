@@ -93,7 +93,16 @@ const userSchema = new mongoose.Schema(
     },
     level: {
       type: String,
-      default: "Well Wisher",
+      default: function () {
+        if (this.role === "student") {
+          return "Well Wisher";
+        } else if (this.role === "counsellor") {
+          return "Career Advisor";
+        } else {
+          return null;
+        }
+      }
+      
     },
     balance: {
       type: Number,
