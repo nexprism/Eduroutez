@@ -209,6 +209,28 @@ async getMyRefferal(id) {
     }
   }
 
+  async getUserById(id) {
+    try {
+      console.log('id', id);
+      const user = await this.userRepository.get(id);
+
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  async update(id, data) {
+    try {
+      const institute = await this.userRepository.update(id, data);
+
+      return institute;
+    } catch (error) {
+      throw new AppError("Cannot update the user ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }   
+
 
 
 }

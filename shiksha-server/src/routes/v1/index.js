@@ -9,7 +9,7 @@ import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from 
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
-import { getUsers, updateUser, allowUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal } from "../../controllers/users-controller.js";
+import { getUsers, updateUser, allowUser, denyUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory,getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
@@ -31,7 +31,7 @@ import { createPayout, deletePayout, getPayout, getPayouts, updatePayout, getPay
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
 import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer } from "../../controllers/question-answer-controller.js";
 import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishlist } from "../../controllers/wishlist-controller.js";
-import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar,getWebinarsByInstitute } from "../../controllers/webinar-controller.js";
+import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount } from "../../controllers/webinar-controller.js";
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
@@ -52,7 +52,8 @@ router.post("/admin", createAdmin);
 router.get("/admins", getAdmins);
 router.post("/verify-email", verifyEmail);
 router.post("/login", login);
-router.post("/allow",allowUser);
+router.post("/allow", allowUser);
+router.post("/deny", denyUser);
 router.post("/logout", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), logout);
 router.post("/change-password", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), changeUserPassword);
 router.post("/reset-password-link", sendUserPasswordResetEmail);
@@ -107,6 +108,8 @@ router.get("/course/:id", getCourse);
 router.patch("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCourse);
 router.delete("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCourse);
 router.get("/course-by-institute/:id", getCourseByInstitute);
+//monthly webinar count
+router.get("/monthly-webinar-count/:id", getMonthlyWebinarCount);
 
 /**
  * query routes

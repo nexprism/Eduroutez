@@ -93,7 +93,7 @@ console.log('updatesInstitute',updatesInstitute);
       }
 
       // Execute query with dynamic filters, sorting, and pagination
-      const populateFields = ["reviews"];
+      const populateFields = ["reviews","plan"];
       const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
 
       return institutes;
