@@ -102,7 +102,7 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
       if (role === 'institute') {
         setShowAlert(true);
       } else {
-        startTransition(() => router.push('/'));
+        startTransition(() => router.push('/dashboard'));
       }
     },
     onError: (error: any) => {
