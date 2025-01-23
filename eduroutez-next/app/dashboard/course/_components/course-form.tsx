@@ -467,7 +467,7 @@ export default function CreateCourse() {
         const instituteData = response.data.data;
         console.log("Institute data here:", instituteData);
         
-        const plan = instituteData.data.data.plan;
+        const plan = instituteData.plan;
         const popularCourseFeature = plan.features.find(
           (feature:any) => feature.key === 'Popular Courses'
         );
