@@ -505,6 +505,8 @@ export async function downloadBruchure(req, res) {
     
     const filePath = path.join('uploads', brochure);
 
+    console.log('test filePath',filePath);
+
 
     res.download(filePath, brochure, (err) => {
 
