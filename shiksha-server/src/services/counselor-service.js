@@ -73,6 +73,9 @@ class CounselorService {
   async get(email) {
     console.log('email',email);
     const counselor = await this.counselorRepository.get(email);
+
+    console.log('counselor',counselor);
+
     if(!counselor) {
       //find in user by email
       const user = await this.userRepository.get(email);
@@ -80,9 +83,9 @@ class CounselorService {
         
         //create counselor
         const counselor = await this.create({userId:user._id,email:user.email,firstname:user.name,lastname:user.lastname});
-        return counselor;
       }
     }
+    return counselor;
 
 
 

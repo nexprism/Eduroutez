@@ -24,8 +24,9 @@ class CounselorRepository extends CrudRepository {
   
   async get(email) {
     try {
-      const result = await this.model.findOne({ email:email });
-      console.log('result',result)
+      console.log('counsellor email',email);
+      const result = await this.model.find({ email: email });
+      console.log('counsellor result',result)
       return result;
     } catch (error) {
       throw error;
