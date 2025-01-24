@@ -52,10 +52,11 @@ class PayoutService {
 
       const populateFields = ["user"];
       // const categories = await this.payoutRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
-      const categories = await this.payoutRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
+      const categories = await this.payoutRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
 
       return categories;
     } catch (error) {
+      console.log(error.message);
       throw new AppError("Cannot fetch data of all the categories", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }

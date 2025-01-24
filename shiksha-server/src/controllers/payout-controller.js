@@ -55,7 +55,7 @@ export async function getPayouts(req, res) {
     SuccessResponse.message = "Successfully fetched payouts";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
-    console.error("Error creating payout:", error);
+    console.error("Error creating payout:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }

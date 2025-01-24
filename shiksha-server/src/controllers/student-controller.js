@@ -55,6 +55,7 @@ export const createStudent = async (req, res) => {
       if (req.files && req.files["profilePicture"]) {
         payload.profilePicture = req.files["profilePicture"][0].filename;
       }
+      
       if (req.files && req.files["adharCardImage"]) {
         payload.adharCardImage = req.files["adharCardImage"][0].filename;
       }
@@ -84,8 +85,9 @@ export const createStudent = async (req, res) => {
 
         payload.user = student._id;
         payload.email = student.email;
-      if (req.body.dob) {
-         payload.dateOfBirth = new Date(payload.dob);
+
+      if (req.body.dob && !isNaN(Date.parse(req.body.dob))) {
+         payload.dateOfBirth = new Date(req.body.dob);
       }
 
       try {
@@ -96,7 +98,7 @@ export const createStudent = async (req, res) => {
 
         return res.status(StatusCodes.CREATED).json(SuccessResponse);
       } catch (error) {
-        console.error("Error creating student:", error);
+        console.error("Error creating student:", error.message);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong. Please try again later." });
       }
     });
@@ -157,8 +159,8 @@ export async function updateStudent(req, res) {
       let oldImagePath;
 
       // Check if a new title is provided
-      if (req.body.title) {
-        payload.title = req.body.title;
+      if (req.body.name) {
+        payload.name = req.body.name;
       }
 
       // Check if a new image is uploaded

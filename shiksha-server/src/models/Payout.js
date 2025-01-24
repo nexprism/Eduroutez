@@ -5,7 +5,7 @@ const payoutSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: "userType", // Dynamic reference based on userType field
+      ref: "User",
     },
     userType: {
       type: String,
