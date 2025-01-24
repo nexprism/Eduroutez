@@ -69,9 +69,14 @@ export async function updateStream(req, res) {
     const streamId = req.params.id;
     const payload = {};
 
-    if (req.body.title) {
-      payload.title = req.body.title;
+    if (req.body.name) {
+      payload.name = req.body.name;
     }
+
+    if(req.body.status){
+      payload.status = req.body.status;
+    }
+
 
     const response = await streamService.update(streamId, payload);
 
