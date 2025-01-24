@@ -14,7 +14,8 @@ class StudentService {
       const userpayload = {
         name: data.name,
         email: data.email,
-        contact_number: data.contactno,
+        contact_number: data.phone,
+        about: data.about,
       };
 
       const userResponse = await this.userRepository.update(data.user, userpayload);
