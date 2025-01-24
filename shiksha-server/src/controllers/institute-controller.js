@@ -528,7 +528,7 @@ export async function downloadBruchure(req, res) {
 
     
   } catch (error) {
-    console.error("Download brochure error:", error.message);
+    console.error("Download test brochure error:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
