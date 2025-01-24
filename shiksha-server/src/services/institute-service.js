@@ -111,6 +111,29 @@ console.log('updatesInstitute',updatesInstitute);
     return institute;
   }
 
+
+  //downloadBruchure
+  async downloadBruchure(id){
+    try {
+
+      //get institute 
+
+      const institute = await this.instituteRepository.get(id);
+      if (!institute) {
+        throw new AppError("Institute not found", StatusCodes.NOT_FOUND);
+      }
+
+    const bruchure = institute.brochure;
+    
+    return bruchure;
+      
+    } catch (error) {
+      throw new AppError("Cannot fetch institute bruchure", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
+
   //bestRatedInstitute
   async bestRatedInstitute() {
     try {

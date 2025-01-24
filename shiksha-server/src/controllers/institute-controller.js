@@ -493,6 +493,47 @@ export async function updateIssue(req, res) {
   }
 }
 
+//downloadBruchure
+export async function downloadBruchure(req, res) {
+  try {
+    const instituteId = req.params.id;
+    const brochure = await instituteService.downloadBruchure(instituteId);
+
+    // console.log('brochure',brochure);
+
+    // console.log('filePath',ServerConfig.UPLOAD_DIR);
+    
+    const filePath = path.join('uploads', brochure);
+
+
+    res.download(filePath, brochure, (err) => {
+
+      if (err) {
+        console.error("Error downloading brochure:", err.message);
+        ErrorResponse.error
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+      }
+
+      
+    });
+
+    StatusCodes.message = "Successfully downloaded brochure";
+    res.status(StatusCodes.OK);
+
+    return res;
+
+
+
+    
+  } catch (error) {
+    console.error("Download brochure error:", error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+}
+
+
+
 
 export async function getHelpList(req, res) {
   try {
