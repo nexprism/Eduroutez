@@ -28,14 +28,6 @@ import axiosInstance from '@/lib/axios';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  price: z.string().refine(
-    (value) => {
-      const price = Number(value);
-      return !isNaN(price) && price >= 1 && price <= 100;
-    },
-    { message: 'Price must be a number between 1 and 100.' }
-  ),
-  streamType: z.string().optional(),
   status: z.boolean(),
 });
 
@@ -52,8 +44,6 @@ export default function StreamForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      price: '',
-      streamType: '',
       status: true,
     },
   });
@@ -107,8 +97,6 @@ headers: {
     if (stream?.data) {
       form.reset({
         name: stream.data.name,
-        price: stream.data.price ? stream.data.price.toString() : '',
-        streamType: stream.data.streamType,
         status: stream.data.status,
       });
    
@@ -118,8 +106,6 @@ headers: {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const formData = new FormData();
     formData.append('name', values.name);
-    formData.append('price', values.price);
-    formData.append('streamType', values.streamType ?? '');
     formData.append('status', values.status ? 'true' : 'false');
     
 
@@ -151,46 +137,7 @@ headers: {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter stream price"
-                        {...field}
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-          
-              <FormField
-                control={form.control}
-                name="streamType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Stream Type (optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a stream type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="DEFAULT">Default</SelectItem>
-                        <SelectItem value="POPULAR">Popular</SelectItem>
-                        <SelectItem value="TRENDING">Trending</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
               <FormField
                 control={form.control}
                 name="status"
