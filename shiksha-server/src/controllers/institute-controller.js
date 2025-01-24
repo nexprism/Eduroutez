@@ -511,7 +511,7 @@ export async function downloadBruchure(req, res) {
     res.download(filePath, brochure, (err) => {
 
       if (err) {
-        console.error("Error downloading brochure:", err.message);
+        console.error("Error test watch downloading brochure:", err.message);
         ErrorResponse.error
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
       }
@@ -528,7 +528,7 @@ export async function downloadBruchure(req, res) {
 
     
   } catch (error) {
-    console.error("Download test brochure error:", error.message);
+    console.error("Download test watch brochure error:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
