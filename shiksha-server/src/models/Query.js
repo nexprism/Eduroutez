@@ -26,6 +26,11 @@ const querySchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        status: {
+            type: String,
+            enum: ["Pending", "Open", "Closed"],
+            default: "Pending",
+        },
     },
     { timestamps: true }
 );
