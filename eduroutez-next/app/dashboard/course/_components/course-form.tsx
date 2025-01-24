@@ -1465,7 +1465,7 @@ export default function CreateCourse() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Video url </FormLabel>
-                        <Input placeholder="Enter Exam accepted" {...field} />
+                        <Input placeholder="Add a vedio url" {...field} />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -1610,7 +1610,7 @@ export default function CreateCourse() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Meta Title</FormLabel>
-                        <Input placeholder="Enter Exam accepted" {...field} />
+                        <Input placeholder="Enter meta Title" {...field} />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -1622,7 +1622,7 @@ export default function CreateCourse() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Meta Keyword </FormLabel>
-                        <Input placeholder="Enter Exam accepted" {...field} />
+                        <Input placeholder="Enter meta Keywords" {...field} />
                         <FormMessage />
                       </FormItem>
                     )}
@@ -1633,7 +1633,7 @@ export default function CreateCourse() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Meta Description </FormLabel>
-                        <Input placeholder="Enter Exam accepted" {...field} />
+                        <Input placeholder="Enter Meta Description" {...field} />
                         <FormMessage />
                       </FormItem>
                     )}

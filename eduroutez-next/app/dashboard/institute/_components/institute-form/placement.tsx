@@ -79,7 +79,7 @@ const formSchema = z.object({
   about: z.string({
     required_error: 'Please enter about.'
   }),
-  organizationType: z.string({
+  organisationType: z.string({
     required_error: 'Please select an organization type.'
   }),
   brochure: z.any().optional(),
@@ -97,7 +97,7 @@ const Placement = () => {
       isCourseDiscounted: 'yes'
       // city: '',
       // state: '',
-      // organizationType: ''
+      // organisationType: ''
     }
   });
 

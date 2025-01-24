@@ -54,12 +54,7 @@ export default function CounselingListingPage({}: TCounselingListingPage) {
                 title={'Online Counselling Slots'}
                 description="Manage and view available slots for each counselor."
               />
-              <Button asChild className="px-6 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center shadow-lg hover:shadow-xl transition-all">
-                <Link href="/dashboard/online-counselling/new">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Update Slot
-                </Link>
-              </Button>
+            
             </div>
             <Separator className="my-6" />
             

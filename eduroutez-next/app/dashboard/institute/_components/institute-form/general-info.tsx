@@ -67,7 +67,7 @@ const formSchema = z.object({
   email: z.string({
     required_error: 'Please enter an email.'
   }),
-  establishedYear: z.string({
+  establishedYear: z.any({
     required_error: 'Please enter an established year.'
   }),
   website: z.string({
@@ -79,7 +79,7 @@ const formSchema = z.object({
   about: z.string({
     required_error: 'Please enter about.'
   }),
-  organizationType: z.string({
+  organisationType: z.string({
     required_error: 'Please select an organization type.'
   }),
   brochure: z.any().optional()
@@ -122,7 +122,7 @@ const GeneralInfo = () => {
         institutePhone: instituteData.institutePhone,
         email: instituteData.email,
         establishedYear: instituteData.establishedYear,
-        organizationType: instituteData.organizationType,
+        organisationType: instituteData.organisationType,
         website: instituteData.website,
         city: instituteData.city,
         state: instituteData.state,
@@ -165,7 +165,7 @@ const GeneralInfo = () => {
       institutePhone:'',
       email:'',
       establishedYear:'',
-      organizationType:'',
+      organisationType:'private',
       website:'',
       city:'',
       state:'',
@@ -187,7 +187,7 @@ const GeneralInfo = () => {
     formData.append('institutePhone', values.institutePhone);
     formData.append('email', values.email);
     formData.append('establishedYear', values.establishedYear);
-    formData.append('organizationType', values.organizationType);
+    formData.append('organisationType', values.organisationType);
     formData.append('website', values.website);
     formData.append('city', values.city);
     formData.append('state', values.state);
@@ -433,7 +433,7 @@ const GeneralInfo = () => {
 
               <FormField
                 control={form.control}
-                name="organizationType"
+                name="organisationType"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Organization Type</FormLabel>
