@@ -146,7 +146,7 @@ export async function getStudent(req, res) {
  */
 
 export async function updateStudent(req, res) {
-  singleUploader(req, res, async (err) => {
+  multiUploader(req, res, async (err) => {
     if (err) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }

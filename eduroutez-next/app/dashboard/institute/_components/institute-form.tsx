@@ -118,7 +118,7 @@ const formSchema = z.object({
   about: z.string({
     required_error: 'Please enter about.'
   }),
-  organizationType: z.string({
+  organisationType: z.string({
     required_error: 'Please select an organization type.'
   }),
   brochure: z.any().optional(),
@@ -194,7 +194,7 @@ export default function CreateInstitute() {
         institutePhone: instituteData.institutePhone,
         email: instituteData.email,
         establishedYear: instituteData.establishedYear,
-        organizationType: instituteData.organizationType,
+        organisationType: instituteData.organisationType,
         website: instituteData.website,
         city: instituteData.city,
         state: instituteData.state,

@@ -28,18 +28,19 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const deleteCourseMutation = useMutation({
     mutationFn: async (courseId: string) => {
       const response = await axiosInstance({
-        url: `${apiUrl}/course/${courseId}`,
+        url: `${apiUrl}/course-category/${courseId}`,
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
         }
       });
+      window.location.reload();
 
       return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
-      router.push('/dashboard/course');
+      router.push('/dashboard/course-category');
     },
     onSettled: () => {
       setOpen(false);
