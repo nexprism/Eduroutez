@@ -34,7 +34,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           'Content-Type': 'application/json'
         }
       });
-
+console.log("Response from deleteCourseMutation:", response);
       return response;
     },
     onSuccess: () => {

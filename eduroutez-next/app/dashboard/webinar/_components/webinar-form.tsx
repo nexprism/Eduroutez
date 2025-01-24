@@ -78,6 +78,8 @@ export default function WebinarForm() {
   const [isEdit, setIsEdit] = React.useState(false);
   const [isWebinarEnabled, setIsWebinarEnabled] = useState(false);
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+
 
   React.useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
@@ -208,8 +210,15 @@ export default function WebinarForm() {
       }
     }
   }, [category, form]);
-
   useEffect(() => {
+    const storedRole = localStorage.getItem('role');
+    setRole(storedRole);
+  }, []);
+
+  // Fetch institute data and check webinar feature only for institute role
+  useEffect(() => {
+    if (role !== 'institute') return;
+
     const fetchInstituteData = async () => {
       const id = localStorage.getItem('instituteId');
       try {
@@ -230,12 +239,9 @@ export default function WebinarForm() {
     };
   
     fetchInstituteData();
-  }, []);
+  }, [role]);
 
-
-
-  // If webinar is not enabled, show upgrade prompt
-  if (!isWebinarEnabled) {
+  if (role === 'institute' && !isWebinarEnabled) {
     return (
       <div className="container mx-auto py-12">
         <Card className="max-w-md mx-auto text-center">

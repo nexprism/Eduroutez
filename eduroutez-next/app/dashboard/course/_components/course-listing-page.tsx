@@ -18,24 +18,29 @@ type TCourseListingPage = {};
 export default function CourseListingPage({}: TCourseListingPage) {
   const { searchQuery, page, limit } = useCourseTableFilters();
   const [content, setContent] = useState([]);
-  const [popularCourseFeature, setPopularCourseFeature] = useState<number>(0);
+  const [popularCourseFeature, setPopularCourseFeature] = useState<number | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const [enabled, setEnabled] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const role = localStorage.getItem('role');
+    const storedRole = localStorage.getItem('role');
     const emailFromStorage = localStorage.getItem('email');
-    if (role === 'institute' && emailFromStorage) {
+    
+    if (storedRole && emailFromStorage) {
+      setRole(storedRole);
       setEmail(emailFromStorage);
-      setEnabled(true);
+      setEnabled(storedRole === 'institute');
     }
   }, []);
 
   useEffect(() => {
     const fetchInstituteData = async () => {
+      if (role !== 'institute' || !email) return;
+
       const id = localStorage.getItem('instituteId');
       try {
         const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
@@ -54,7 +59,7 @@ export default function CourseListingPage({}: TCourseListingPage) {
     };
 
     fetchInstituteData();
-  }, []);
+  }, [role, email]);
 
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['courses', searchQuery],
@@ -102,7 +107,9 @@ export default function CourseListingPage({}: TCourseListingPage) {
 
   // Calculate total courses and courses shown
   const totalCourses = content?.length || 0;
-  const coursesShown = Math.min(content?.length || 0, popularCourseFeature);
+  const coursesShown = role === 'institute' && popularCourseFeature !== null 
+    ? Math.min(totalCourses, popularCourseFeature)
+    : totalCourses;
 
   return (
     <PageContainer scrollable>
@@ -124,7 +131,7 @@ export default function CourseListingPage({}: TCourseListingPage) {
             </div>
             <Separator />
             
-            {totalCourses > popularCourseFeature && (
+            {role === 'institute' && totalCourses > popularCourseFeature && (
               <Alert variant="default" className="mb-4">
                 <Lock className="h-4 w-4" />
                 <AlertDescription>
@@ -135,7 +142,9 @@ export default function CourseListingPage({}: TCourseListingPage) {
             )}
             
             <CourseTable 
-              data={content.slice(0, popularCourseFeature)} 
+              data={role === 'institute' && popularCourseFeature !== null 
+                ? content.slice(0, popularCourseFeature) 
+                : content} 
               totalData={data?.data?.totalDocuments || 0} 
             />
           </div>
