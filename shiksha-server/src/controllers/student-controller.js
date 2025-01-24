@@ -43,53 +43,69 @@ const studentService = new StudentService();
 export const createStudent = async (req, res) => {
   try {
     multiUploader(req, res, async function (err) {
-      console.log("req.files", req.files);
       if (err) {
         console.error("Error uploading files:", err);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong. Please try again later." });
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json({ message: "Something went wrong during file upload. Please try again later." });
       }
 
-      const student = req.user
+      const student = req.user; // Current logged-in user
       const payload = { ...req.body };
-      console.log("payload", payload);
-      if (req.files && req.files["profilePicture"]) {
-        payload.profilePicture = req.files["profilePicture"][0].filename;
-      }
-      
-      if (req.files && req.files["adharCardImage"]) {
-        payload.adharCardImage = req.files["adharCardImage"][0].filename;
-      }
-      if (req.files && req.files["panCardImage"]) {
-        payload.panCardImage = req.files["panCardImage"][0].filename;
-      }
-      if (req.files && req.files["tenthMarksheetImage"]) {
-        payload.tenthMarksheetImage = req.files["tenthMarksheetImage"][0].filename;
-      }
-      if (req.files && req.files["twelthMarksheetImage"]) {
-        payload.twelthMarksheetImage = req.files["twelthMarksheetImage"][0].filename;
-      }
 
-      // Handle certificateImage files inside the educations array
+      // Log the received files and body for debugging
+      console.log("req.files", req.files);
+      console.log("education payload", payload);
+
+      // Handle single file uploads
+      const singleFileFields = [
+        "profilePicture",
+        "adharCardImage",
+        "panCardImage",
+        "tenthMarksheetImage",
+        "twelthMarksheetImage",
+      ];
+
+      singleFileFields.forEach((field) => {
+        if (req.files && req.files[field]) {
+          payload[field] = req.files[field][0].filename;
+        }
+      });
+
+      // Handle certificateImage files for educations array
       if (req.files && req.files["certificateImage"]) {
         const certificateImages = req.files["certificateImage"].map((file) => file.filename);
-        if (Array.isArray(payload.educations)) {
-          payload.educations = JSON.parse(payload.educations);
-          payload.educations = payload.educations.map((education, index) => {
-            if (certificateImages[index]) {
-              education.certificateImage = certificateImages[index];
+
+        // Ensure educations field is parsed and is an array
+        if (payload.educations) {
+          try {
+            payload.educations = JSON.parse(payload.educations);
+
+            if (Array.isArray(payload.educations)) {
+              payload.educations = payload.educations.map((education, index) => {
+                if (certificateImages[index]) {
+                  education.certificateImage = certificateImages[index];
+                }
+                return education;
+              });
             }
-            return education;
-          });
+          } catch (parseError) {
+            console.error("Error parsing educations:", parseError);
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid educations format." });
+          }
         }
       }
 
-        payload.user = student._id;
-        payload.email = student.email;
+      // Add user and email to payload
+      payload.user = student._id;
+      payload.email = student.email;
 
+      // Validate and convert the date of birth (dob)
       if (req.body.dob && !isNaN(Date.parse(req.body.dob))) {
-         payload.dateOfBirth = new Date(req.body.dob);
+        payload.dateOfBirth = new Date(req.body.dob);
       }
 
+      // Try to create a student in the database
       try {
         const response = await studentService.create(payload);
 
@@ -97,16 +113,21 @@ export const createStudent = async (req, res) => {
         SuccessResponse.message = "Successfully created a student";
 
         return res.status(StatusCodes.CREATED).json(SuccessResponse);
-      } catch (error) {
-        console.error("Error creating student:", error.message);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong. Please try again later." });
+      } catch (creationError) {
+        console.error("Error creating student:", creationError.message);
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json({ message: "Failed to create student. Please try again later." });
       }
     });
   } catch (error) {
     console.error("Error in createStudent:", error);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong. Please try again later." });
+    return res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "An unexpected error occurred. Please try again later." });
   }
 };
+
 
 /**
  * GET : /student
