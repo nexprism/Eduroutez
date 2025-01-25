@@ -21,10 +21,10 @@ import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, 
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
-import { createReview, deleteReview, getReview, getReviews, updateReview ,getReviewsByUser} from "../../controllers/review-controller.js";
+import { createReview, deleteReview, getReview, getReviews, updateReview ,getReviewsByUser,getReviewByInstitute} from "../../controllers/review-controller.js";
 import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCategory, updateBlogCategory } from "../../controllers/blog-category-controller.js";
 import { createCareerCategory, deleteCareerCategory, getCareerCategories, getCareerCategory, updateCareerCategory } from "../../controllers/career-category-controller.js";
-
+import { createRecruiter, deleteRecruiter, getRecruiters, getRecruitersByInstitute, getRecruiter, updateRecruiter } from "../../controllers/recruiters-controller.js";
 import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog,getBlogsByInstitute } from "../../controllers/blog-controller.js";
 import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, updateNews } from "../../controllers/news-controller.js";
 import { createPayout, deletePayout, getPayout, getPayouts, updatePayout, getPayoutsByUser } from "../../controllers/payout-controller.js";
@@ -233,6 +233,9 @@ router.get("/review/:id",  getReview);
 router.patch("/review/:id", updateReview);
 router.delete("/review/:id", deleteReview);
 router.get("/reviews-by-user/:email", getReviewsByUser);
+//getReviewByInstitute
+router.get("/review-by-institute/:id", getReviewByInstitute);
+
 
 /**
  * blog-category routes
@@ -242,6 +245,15 @@ router.get("/blog-category", getBlogCategories);
 router.get("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlogCategory);
 router.patch("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBlogCategory);
 router.delete("/blog-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBlogCategory);
+
+//Recruiters
+router.post("/recruiter", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createRecruiter);
+router.get("/recruiters", getRecruiters);
+router.get("/recruiters-by-institute/:id", getRecruitersByInstitute);
+router.get("/recruiter/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getRecruiter);
+router.patch("/recruiter/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateRecruiter);
+router.delete("/recruiter/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteRecruiter);
+
 
 //career-category
 router.post("/career-category", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCareerCategory);

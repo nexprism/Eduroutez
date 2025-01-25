@@ -111,6 +111,18 @@ class ReviewService {
       throw error;
     }
   }
+
+  //getReviewsByInstitute
+  async getReviewsByInstitute(instituteId) {
+    try {
+      const reviews = await this.reviewRepository.getAllByInstitute(instituteId);
+      return reviews;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
   async getReviewsByUser(email) {
     try {
       const reviews = await this.reviewRepository.getAllByUser(email);

@@ -7,11 +7,11 @@ import ReviewService from "../services/review-service.js";
 import InstituteService from "../services/institute-service.js";
 const multiUploader = FileUpload.upload.fields([
   {
-    name: "studentDocument",
+    name: "studentIdImage",
     maxCount: 1,
   },
   {
-    name: "studentSelfie",
+    name: "selfieImage",
     maxCount: 1,
   },
 ]);
@@ -32,12 +32,14 @@ export const createReview = async (req, res) => {
 
       const payload = { ...req.body };
       const {institute,...rest}=payload;
-      // if (req?.files["studentIdImage"]) {
-      //   payload.studentDocument = req.files["studentIdImage"][0].filename;
-      // }
-      // if (req?.files["selfieImage"]) {
-      //   payload.studentSelfie = req.files["selfieImage"][0].filename;
-      // }
+      if (req?.files["studentIdImage"]) {
+        payload.studentIdImage = req.files["studentIdImage"][0].filename;
+      }
+      if (req?.files["selfieImage"]) {
+        payload.selfieImage = req.files["selfieImage"][0].filename;
+      }
+
+      console.log('payload',payload);
       const response = await reviewService.create(payload);
       console.log(response);
       const resp=await instituteService.addReviews(institute,response);
@@ -48,6 +50,7 @@ export const createReview = async (req, res) => {
       return res.status(StatusCodes.CREATED).json(SuccessResponse);
     });
   } catch (error) {
+    console.log('error in create review',error.message);
     ErrorResponse.error = error;
 
     return res.status(error.statusCode).json(ErrorResponse);
@@ -95,58 +98,35 @@ export async function getReview(req, res) {
  * req.body {capacity:200}
  */
 
-export async function updateReview(req, res) {
-  singleUploader(req, res, async (err) => {
-    if (err) {
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
-    }
-
-    try {
-      const reviewId = req.params.id;
-      const payload = {};
-      let oldImagePath;
-
-      // Check if a new title is provided
-      if (req.body.title) {
-        payload.title = req.body.title;
+//updateReview with images
+export const updateReview = async (req, res) => {
+  try {
+    multiUploader(req, res, async function (err, data) {
+      if (err) {
+        return res.status(500).json({ error: err });
       }
 
-      // Check if a new image is uploaded
-      if (req.file) {
-        const review = await reviewService.get(reviewId);
-
-        // Record the old image path if it exists
-        if (review.image) {
-          oldImagePath = path.join("uploads", review.image);
-        }
-
-        // Set the new image filename in payload
-        payload.image = req.file.filename;
+      const payload = { ...req.body };
+      if (req?.files["studentIdImage"]) {
+        payload.studentIdImage = req.files["studentIdImage"][0].filename;
+      }
+      if (req?.files["selfieImage"]) {
+        payload.selfieImage = req.files["selfieImage"][0].filename;
       }
 
-      // Update the review with new data
-      const response = await reviewService.update(reviewId, payload);
-
-      // Delete the old image only if the update is successful and old image exists
-      if (oldImagePath) {
-        try {
-          fs.unlink(oldImagePath);
-        } catch (unlinkError) {
-          console.error("Error deleting old image:", unlinkError);
-        }
-      }
-
-      // Return success response
+      const response = await reviewService.update(req.params.id, payload);
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully updated the review";
       return res.status(StatusCodes.OK).json(SuccessResponse);
-    } catch (error) {
-      console.error("Update review error:", error);
-      ErrorResponse.error = error;
-      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
-    }
-  });
-}
+    });
+  } catch (error) {
+    console.log('error in update review',error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+};
+
+
 
 /**
  * DELETE : /review/:id
@@ -164,6 +144,22 @@ export async function deleteReview(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+
+//getReviewByInstitute
+export async function getReviewByInstitute(req, res) {
+  try {
+    const response = await reviewService.getReviewsByInstitute(req.params.id);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched reviews";
+    return res.status(200).json(SuccessResponse);
+  } catch (error) {
+    console.log('err',error.message)
+    ErrorResponse.error = error;
+    return res.status(500).json(ErrorResponse);
+  } 
+}
+
+
 
 
 export async function getReviewsByUser(req, res) {  

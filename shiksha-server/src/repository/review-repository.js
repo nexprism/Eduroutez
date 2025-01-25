@@ -6,6 +6,18 @@ class ReviewRepository extends CrudRepository {
     super(Review);
   }
 
+  //getAllByInstitute
+  async getAllByInstitute(instituteId) {
+    try {
+      const reviews = await Review.find({ institute: instituteId });
+      return reviews;
+    }
+    catch (error) {
+      throw error;
+    }
+  }
+
+
   async getAllByUser(email) {
     try {
       const reviews = await Review.find({ email: email });

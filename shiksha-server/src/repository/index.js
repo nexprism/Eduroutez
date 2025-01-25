@@ -9,7 +9,7 @@ export { SubscriptionRepository } from "./subscription-repository.js";
 export { StreamRepository } from "./stream-repository.js";
 export { CourseCategoryRepository } from "./course-category-repository.js";
 export { CourseRepository } from "./course-repository.js";
-
+export { RecruiterRepository } from "./recruiter-repository.js";
 export { InstituteRepository } from "./institute-repository.js";
 export { InstituteIssuesRepository } from "./institute-issues-repository.js";
 export { CareerRepository } from "./career-repository.js";
