@@ -8,6 +8,7 @@ export type News = {
 };
 
 
+
 export type Career = {
   title: string;
   description: string;
