@@ -29,7 +29,7 @@ import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog,getBlogsByInstitu
 import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, updateNews } from "../../controllers/news-controller.js";
 import { createPayout, deletePayout, getPayout, getPayouts, updatePayout, getPayoutsByUser } from "../../controllers/payout-controller.js";
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
-import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer } from "../../controllers/question-answer-controller.js";
+import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer ,getQuestionAnswerByEmail} from "../../controllers/question-answer-controller.js";
 import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishlist } from "../../controllers/wishlist-controller.js";
 import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount } from "../../controllers/webinar-controller.js";
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
@@ -304,6 +304,7 @@ router.delete("/feedback/:id", accessTokenAutoRefresh, passport.authenticate("jw
  */
 router.post("/question-answer",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createQuestionAnswer);
 router.get("/question-answers", getQuestionAnswers);
+router.get("/question-answer/:email",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswerByEmail);
 router.get("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswer);
 router.patch("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  updateQuestionAnswer);
 router.delete("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  deleteQuestionAnswer);

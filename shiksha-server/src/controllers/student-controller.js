@@ -158,6 +158,7 @@ export async function getStudent(req, res) {
     SuccessResponse.message = "Successfully fetched the student";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.error("Get student error:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }

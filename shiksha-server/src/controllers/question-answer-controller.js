@@ -60,6 +60,22 @@ export async function getQuestionAnswer(req, res) {
   }
 }
 
+export async function getQuestionAnswerByEmail(req, res) {
+  try {
+    console.log(req.params);
+    const response = await questionAnswerService.getbyEmail(req.params.email);
+    console.log('hi',response);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the question and answer";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.log(error.message);
+
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 /**
  * PATCH : /question-answer/:id
  * req.body {capacity:200}

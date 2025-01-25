@@ -60,6 +60,18 @@ class questionAnswerService {
     return questionAnswer;
   }
 
+  async getbyEmail(email) {
+    try{
+    const questionAnswer = await this.questionAnswerRepository.getbyInstituteEmail(email);
+    return questionAnswer;
+    }
+    catch (error) {
+      console.log(error.message);
+
+      throw error;
+    }
+  }
+
   async update(id, data) {
     try {
       const questionAnswer = await this.questionAnswerRepository.update(id, data);
