@@ -18,7 +18,7 @@ import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPop
 import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, addFacility, submitIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer ,getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
-import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute } from "../../controllers/counselor-controller.js";
+import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
 import { createReview, deleteReview, getReview, getReviews, updateReview ,getReviewsByUser} from "../../controllers/review-controller.js";
@@ -371,6 +371,9 @@ router.get("/redeem-history", accessTokenAutoRefresh, passport.authenticate("jwt
 
 //razorpay create order
 router.post("/purchase-plan", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), purchasePlan);
+
+//submit-counsellor-feedback
+router.post("/submit-counsellor-review", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitcounsellorReview);
 
 
 

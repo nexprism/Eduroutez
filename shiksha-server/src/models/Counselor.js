@@ -89,6 +89,30 @@ const counselorSchema = new mongoose.Schema(
     bankName: { type: String },
     accountDetails: { type: String },
     ifscCode: { type: String },
+    reviews: [
+      {
+        studentEmail: {
+          type: String,
+          // required: true,
+        },
+        rating: {
+          type: Number,
+          // required: true,
+        },
+        comment: {
+          type: String,
+          // required: true,
+        },
+        slot: {
+          type: String,
+          // required: true,
+        },
+        date: {
+          type: String,
+          // required: true,
+        },
+      },
+    ],
     educations: [
       {
         institute: {

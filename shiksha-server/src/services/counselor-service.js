@@ -137,6 +137,37 @@ class CounselorService {
     }
   }
 
+  //submitReview
+  async submitReview(email, data) {
+    try {
+
+      //get counselor by email
+      const counselor = await this.counselorRepository.getByEmail(email);
+      console.log('counselor',counselor);
+
+      //submit review
+      const reviews = {
+        studentEmail: data.studentEmail,
+        comment: data.comment,
+        rating: data.rating,
+        slot: data.slot,
+        date: data.date,
+      }
+      
+
+      counselor.reviews.push(reviews);
+
+      const review = await counselor.save();
+
+
+      return counselor
+      
+      
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async delete(id) {
     try {
       const counselor = await this.counselorRepository.destroy(id);

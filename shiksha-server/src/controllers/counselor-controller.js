@@ -196,6 +196,21 @@ export const updateCounselor = async (req, res) => {
   }
 }
 
+//submitcounsellorslotReview
+export const submitcounsellorReview = async (req, res) => {
+  try {
+    const {email, date, slot, studentEmail, review, comment } = req.body;
+    const payload = { date, slot, studentEmail, review, comment };
+    const response = await counselorService.submitReview(email, payload);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully submitted the review";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+};
+
 
 /**
  * DELETE : /counselor/:id
