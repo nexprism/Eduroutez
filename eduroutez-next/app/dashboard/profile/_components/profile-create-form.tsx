@@ -476,8 +476,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         instituteEmail: counselor.data?.instituteEmail,
         city: counselor.data?.city,
         gender: counselor.data?.gender,
-        dateOfBirth: counselor.data?.dateOfBirth.split('T')[0], // Format date
-        experiences: counselor.data?.experiences,
+        dateOfBirth: counselor.data?.dateOfBirth?.split('T')[0] || '', // Format date
+        experiences: counselor.data?.experiences || [],
         bankName: counselor.data?.bankName,
         accountDetails: counselor.data?.accountDetails,
         ifscCode: counselor.data?.ifscCode,
