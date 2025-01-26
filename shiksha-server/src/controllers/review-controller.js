@@ -23,7 +23,6 @@ const instituteService = new InstituteService();
  * req.body {}
  */
 export const createReview = async (req, res) => {
-  // console.log(req?.files);
   try {
     multiUploader(req, res, async function (err, data) {
       if (err) {
@@ -31,7 +30,7 @@ export const createReview = async (req, res) => {
       }
 
       const payload = { ...req.body };
-      const {institute,...rest}=payload;
+      const { institute, ...rest } = payload;
       if (req?.files["studentIdImage"]) {
         payload.studentIdImage = req.files["studentIdImage"][0].filename;
       }
@@ -39,10 +38,16 @@ export const createReview = async (req, res) => {
         payload.selfieImage = req.files["selfieImage"][0].filename;
       }
 
-      console.log('payload',payload);
-      const response = await reviewService.create(payload);
+      // console.log("payload", payload);
+      const response = await reviewService.create({
+        ...payload,
+        placementStars: payload?.ratings?.placementStars,
+        facultyStars: payload?.ratings?.facultyStars,
+        campusLifeStars: payload?.ratings?.campusLifeStars,
+        suggestionsStars: payload?.ratings?.suggestionsStars,
+      });
       console.log(response);
-      const resp=await instituteService.addReviews(institute,response);
+      const resp = await instituteService.addReviews(institute, response);
 
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully created a review";
@@ -50,7 +55,7 @@ export const createReview = async (req, res) => {
       return res.status(StatusCodes.CREATED).json(SuccessResponse);
     });
   } catch (error) {
-    console.log('error in create review',error.message);
+    console.log("error in create review", error.message);
     ErrorResponse.error = error;
 
     return res.status(error.statusCode).json(ErrorResponse);
@@ -120,13 +125,11 @@ export const updateReview = async (req, res) => {
       return res.status(StatusCodes.OK).json(SuccessResponse);
     });
   } catch (error) {
-    console.log('error in update review',error.message);
+    console.log("error in update review", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }
 };
-
-
 
 /**
  * DELETE : /review/:id
@@ -153,24 +156,21 @@ export async function getReviewByInstitute(req, res) {
     SuccessResponse.message = "Successfully fetched reviews";
     return res.status(200).json(SuccessResponse);
   } catch (error) {
-    console.log('err',error.message)
+    console.log("err", error.message);
     ErrorResponse.error = error;
     return res.status(500).json(ErrorResponse);
-  } 
+  }
 }
 
-
-
-
-export async function getReviewsByUser(req, res) {  
+export async function getReviewsByUser(req, res) {
   try {
     const response = await reviewService.getReviewsByUser(req.params.email);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched reviews";
     return res.status(200).json(SuccessResponse);
   } catch (error) {
-    console.log('err',error.message)
+    console.log("err", error.message);
     ErrorResponse.error = error;
     return res.status(500).json(ErrorResponse);
-  } 
+  }
 }
