@@ -36,7 +36,7 @@ import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../.
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
-import { createCounselorSlots, getCounselorSlot, updateCounselorSlot } from "../../controllers/counselorSlot-controller.js";
+import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot } from "../../controllers/counselorSlot-controller.js";
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
 import { createQuery, deleteQuery, getQueries, getQuery, updateQuery } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ ,getFAQsByInstitute} from "../../controllers/faq-controller.js";
@@ -198,6 +198,8 @@ router.post("/markslot", markSlot);
 router.get("/counselorslots", getCounselors);
 router.get("/counselorslots/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorSlot);
 router.patch("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselorSlot);
+//delete counselor slot
+router.delete("/counselorslot/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselorSlot);
 
 /**
  * student routes
