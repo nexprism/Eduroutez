@@ -21,6 +21,17 @@ class QuestionAnswerRepository extends CrudRepository {
       throw error;
     }
   }
+  
+  async getQuestion(id) {
+    try {
+      console.log('hello',id);
+      let result = await this.model.findById(id).populate("askedBy");
+      return result;
+    } catch (error) {
+      throw error;
+    }
 }
+}
+
 
 export { QuestionAnswerRepository };

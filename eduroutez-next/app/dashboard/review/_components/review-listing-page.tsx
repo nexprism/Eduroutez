@@ -44,7 +44,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Review (${data?.data?.totalDocuments || 0})`}
+                title={`Review (${data?.data?.length || 0})`}
                 description="All reviews online and offline are listed here."
               />
               {/* <Button asChild className="w-fit whitespace-nowrap px-2">

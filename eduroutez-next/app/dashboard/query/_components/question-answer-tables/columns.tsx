@@ -9,21 +9,51 @@ import { Query, QuestionAnswer } from '@/types';
 export const columns: ColumnDef<Query>[] = [
   {
     header: 'ID',
-    cell: ({ row }) => <div>{row.index + 1}</div>, // Corrected formatting
+    cell: ({ row }) => <div>{row.index + 1}</div>,
   },
   {
-    header: 'Query',
-    accessorKey: 'question', // Simplified with accessorKey
-    cell: ({ row }) => <div>{row.original.queryRelatedTo}</div>,
-  },
-  {
-    header: 'AskedBy',
-    accessorKey: 'question', // Simplified with accessorKey
+    header: 'Name',
+    accessorKey: 'name',
     cell: ({ row }) => <div>{row.original.name}</div>,
   },
   {
+    header: 'Email',
+    accessorKey: 'email',
+    cell: ({ row }) => <div>{row.original.email}</div>,
+  },
+  {
+    header: 'Phone No',
+    accessorKey: 'phoneNo',
+    cell: ({ row }) => <div>{row.original.phoneNo}</div>,
+  },
+  {
+    header: 'City',
+    accessorKey: 'city',
+    cell: ({ row }) => <div>{row.original.city}</div>,
+  },
+  {
+    header: 'Query Related To',
+    accessorKey: 'queryRelatedTo',
+    cell: ({ row }) => <div>{row.original.queryRelatedTo}</div>,
+  },
+  {
+    header: 'Query',
+    accessorKey: 'query',
+    cell: ({ row }) => <div>{row.original.query}</div>,
+  },
+  {
+    header: 'Created At',
+    accessorKey: 'createdAt',
+    cell: ({ row }) => <div>{new Date(row.original.createdAt).toLocaleString()}</div>,
+  },
+  {
+    header: 'Updated At',
+    accessorKey: 'updatedAt',
+    cell: ({ row }) => <div>{new Date(row.original.updatedAt).toLocaleString()}</div>,
+  },
+  {
     id: 'actions',
-    header: 'Actions', // Added header for clarity
+    header: 'Actions',
     cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];

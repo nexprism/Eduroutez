@@ -29,17 +29,8 @@ class CrudRepository {
     try {
       // console.log('hello',id);
       
-      var result = await this.model.findById(id);
+      let result = await this.model.findById(id).populate("plan").populate("reviews");
       // console.log('result',result);
-      if (result.plan) {
-        var result = await this.model.findById(result._id).populate("plan");
-
-      }
-
-      if (result.reviews) {
-        var result = await this.model.findById(result._id).populate("reviews");
-      }
-
       
       return result;
     } catch (error) {

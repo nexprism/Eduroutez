@@ -109,7 +109,7 @@ export default function CounselorForm() {
   const { data: faq } = useQuery({
     queryKey: ['answer', segments[4]],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/question-answer/${segments[4]}`);
+      const response = await axiosInstance.get(`${apiUrl}/question-answer-detail/${segments[4]}`);
       return response.data;
     },
     enabled: isEdit // Only fetch when in edit mode

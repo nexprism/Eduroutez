@@ -111,7 +111,7 @@ export default function CounselorForm() {
       router.push('/dashboard/counselor');
     },
     onError: (error) => {
-      toast.error('Something went wrong');
+      toast.error((error as any)?.response?.data?.error || 'An error occurred'); 
     }
   });
 

@@ -5,36 +5,23 @@ import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
 import { Review } from '@/types';
 
-
 export const columns: ColumnDef<Review>[] = [
-  // {
-  //   id: 'select',
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={table.getIsAllPageRowsSelected()}
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false
-  // },
   {
     header: 'ID',
-    cell: ({ row }) => <div>{`${row.index+1}`}</div>
+    cell: ({ row }) => <div>{`${row.index + 1}`}</div>
   },
   {
     header: 'NAME',
     cell: ({ row }) => <div>{`${row.original.fullName}`}</div>
   },
-
+  {
+    header: 'EMAIL',
+    cell: ({ row }) => <div>{`${row.original.email}`}</div>
+  },
+  {
+    header: 'REVIEW TITLE',
+    cell: ({ row }) => <div>{`${row.original.reviewTitle}`}</div>
+  },
   {
     accessorKey: 'status',
     header: 'STATUS',
@@ -49,7 +36,12 @@ export const columns: ColumnDef<Review>[] = [
       </div>
     )
   },
-
+  {
+    header: 'RECOMMENDATION',
+    cell: ({ row }) => (
+      <div>{row.original.recommendation ? 'Yes' : 'No'}</div>
+    )
+  },
   {
     header: 'CREATED AT',
     cell: ({ row }) => {
@@ -58,8 +50,6 @@ export const columns: ColumnDef<Review>[] = [
       return <div>{formattedDate}</div>;
     }
   },
-
-
   {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />

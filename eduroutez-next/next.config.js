@@ -43,6 +43,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'eduroutez.com',
         port: ''
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.eduroutez.com',
+        port: ''
       }
     ]
   },

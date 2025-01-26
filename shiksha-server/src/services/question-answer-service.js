@@ -13,6 +13,9 @@ class questionAnswerService {
       throw error;
     }
   }
+
+
+  
   async getAll(query) {
     try {
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
@@ -56,7 +59,7 @@ class questionAnswerService {
   }
 
   async get(id) {
-    const questionAnswer = await this.questionAnswerRepository.get(id);
+    const questionAnswer = await this.questionAnswerRepository.getQuestion(id);
     return questionAnswer;
   }
 

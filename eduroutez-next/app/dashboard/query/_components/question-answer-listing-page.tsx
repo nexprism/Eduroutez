@@ -45,8 +45,8 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   )?.value;
 
   const displayedQueries = allowedQueries
-    ? data?.data?.result.slice(0, Math.ceil((allowedQueries / 100) * data?.data?.totalDocuments))
-    : data?.data?.result;
+    ? data?.data?.result?.slice(0, Math.ceil((allowedQueries / 100) * (data?.data?.totalDocuments ?? 0)))
+    : data?.data?.result ?? [];
 
   return (
     <PageContainer scrollable>
@@ -57,14 +57,14 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Queries (${displayedQueries?.length || 0}/${data?.data?.totalDocuments})`}
+                title={`Queries (${displayedQueries?.length ?? 0}/${data?.data?.totalDocuments ?? 0})`}
                 description="All question and answers are listed here."
               />
             </div>
             <Separator />
             <QuestionAnswerTable
               data={displayedQueries}
-              totalData={data?.data?.totalDocuments}
+              totalData={data?.data?.totalDocuments ?? 0}
             />
           </div>
         )
