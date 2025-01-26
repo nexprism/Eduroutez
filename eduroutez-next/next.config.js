@@ -10,7 +10,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ['eduroutez-3.onrender.com', 'utfs.io', 'eduroutez.nexprism.in', 'localhost', 'coupon.nexprism.in'],
+    domains: ['eduroutez-3.onrender.com', 'utfs.io', 'eduroutez.nexprism.in', 'localhost', 'coupon.nexprism.in', 'admin.eduroutez.com'],
 
     remotePatterns: [
       {
@@ -32,6 +32,16 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'eduroutez-3.onrender.com',
+        port: ''
+      },
+      {
+        protocol: 'https',
+        hostname: 'admin.eduroutez.com',
+        port: ''
+      },
+      {
+        protocol: 'https',
+        hostname: 'eduroutez.com',
         port: ''
       }
     ]

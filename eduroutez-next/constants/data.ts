@@ -119,6 +119,13 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Recruiter',
+    url: '/dashboard/recruiter',
+    icon: 'message-circle',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
     title: 'Reviews',
     url: '/dashboard/review',
     icon: 'message-circle',

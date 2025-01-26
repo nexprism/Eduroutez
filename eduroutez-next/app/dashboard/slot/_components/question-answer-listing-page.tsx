@@ -18,7 +18,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const { searchQuery, page, limit } = useQuestionAnswerTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const email=localStorage.getItem('email');
+  const email = localStorage.getItem('email');
 
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['question-answers', searchQuery],
@@ -34,7 +34,10 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
       return response.data;
     }
   });
-  console.log(data?.data?.students);
+
+  const students = data?.data?.flatMap((item: any) => item.students) ?? [];
+  const totalDocuments = data?.totalDocuments ?? 0;
+
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -55,8 +58,8 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             </div>
             <Separator />
             <QuestionAnswerTable
-              data={data?.data?.students}
-              totalData={data?.data?.totalDocuments}
+              data={students}
+              totalData={totalDocuments}
             />
           </div>
         )
