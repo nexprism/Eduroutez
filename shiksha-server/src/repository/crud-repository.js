@@ -27,12 +27,14 @@ class CrudRepository {
 
   async get(id) {
     try {
+      // console.log('hello',id);
       
       let result = await this.model.findById(id);
-
-      if(result.plan && result.plan){
+      
+      if (result.plan && result.reviews){
         result = await this.model.findById(id).populate("plan").populate("reviews");
       }
+      
       return result;
     } catch (error) {
       throw error;

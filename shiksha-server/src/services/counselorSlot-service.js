@@ -74,13 +74,13 @@ class questionAnswerService {
 
   async delete(id) {
     try {
-      const questionAnswer = await this.questionAnswerRepository.destroy(id);
+      const questionAnswer = await this.counselorSlotRepository.destroy(id);
       return questionAnswer;
     } catch (error) {
       if (error.statusCode === StatusCodes.NOT_FOUND) {
-        throw new AppError("The questionAnswer you requested to delete is not present", error.statusCode);
+        throw new AppError("Slot not found", StatusCodes.NOT_FOUND);
       }
-      throw new AppError("Cannot delete the questionAnswer ", StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new AppError("Cannot delete the Slot ", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 }
