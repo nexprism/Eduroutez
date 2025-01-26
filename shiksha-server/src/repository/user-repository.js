@@ -24,7 +24,14 @@ class UserRepository extends CrudRepository {
   // getAll tieht .populate('refer_by')
   async getAll(query) {
     try {
-      const response = await User.find(query).populate("refer_by, plan");
+      const response = await User.find(query);
+
+      if(query.refer_by && query.plan) {
+        response = await User.find(query).populate('refer_by').populate('plan');
+      }
+      
+
+      
       return response;
     } catch (error) {
       throw error;
