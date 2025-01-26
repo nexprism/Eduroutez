@@ -182,7 +182,7 @@ export const updateCounselor = async (req, res) => {
       }
     }
 
-    // console.log("Payload:", payload);
+    console.log("update counselor Payload:", payload);
 
     const response = await counselorService.update(id, payload);
     console.log("Response:", response);

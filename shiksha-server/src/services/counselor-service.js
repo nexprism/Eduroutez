@@ -127,9 +127,10 @@ class CounselorService {
 
       //fetch counselor by id
       console.log('id', id);
+      console.log('data', data);
      
 
-      const counselor = await this.counselorRepository.update(id, data);
+      const counselor = await this.counselorRepository.updateCounsellor(id, data);
       return counselor;
     } catch (error) {
       console.log('error', error.message);

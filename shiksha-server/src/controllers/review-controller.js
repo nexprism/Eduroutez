@@ -106,24 +106,24 @@ export async function getReview(req, res) {
 //updateReview with images
 export const updateReview = async (req, res) => {
   try {
-    multiUploader(req, res, async function (err, data) {
-      if (err) {
-        return res.status(500).json({ error: err });
-      }
+    // multiUploader(req, res, async function (err, data) {
+      // if (err) {
+      //   return res.status(500).json({ error: err });
+      // }
 
       const payload = { ...req.body };
-      if (req?.files["studentIdImage"]) {
-        payload.studentIdImage = req.files["studentIdImage"][0].filename;
-      }
-      if (req?.files["selfieImage"]) {
-        payload.selfieImage = req.files["selfieImage"][0].filename;
-      }
+      // if (req?.files["studentIdImage"]) {
+      //   payload.studentIdImage = req.files["studentIdImage"][0].filename;
+      // }
+      // if (req?.files["selfieImage"]) {
+      //   payload.selfieImage = req.files["selfieImage"][0].filename;
+      // }
 
       const response = await reviewService.update(req.params.id, payload);
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully updated the review";
       return res.status(StatusCodes.OK).json(SuccessResponse);
-    });
+    // });
   } catch (error) {
     console.log("error in update review", error.message);
     ErrorResponse.error = error;
