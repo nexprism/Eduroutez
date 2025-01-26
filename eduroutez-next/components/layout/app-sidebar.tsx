@@ -69,6 +69,7 @@ export default function AppSidebar({
             'Subscription',
             'Courses',
             'Streams',
+            'Recruiter',
 'Manage Pages',            'Counselors',
             'Admins',
             'Students',

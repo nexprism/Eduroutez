@@ -31,7 +31,7 @@ export default function CounselingListingPage({}: TCounselingListingPage) {
     enabled: !!email,
   });
 
-  const counselors = data?.data?.result || [];
+  const counselors = data?.data || [];
   const totalItems = counselors.length;
 
   const handleToggleView = () => {

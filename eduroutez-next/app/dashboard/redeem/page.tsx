@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Coins, Gift, History } from "lucide-react";
 import axiosInstance from "@/lib/axios";
+import { useQuery } from "@tanstack/react-query";
 
 interface RedeemHistoryItem {
   id: number;
@@ -16,15 +17,27 @@ interface RedeemHistoryItem {
 const RedeemPage = () => {
   const [coins, setCoins] = useState("");
   const [redeemHistory, setRedeemHistory] = useState<RedeemHistoryItem[]>([]);
-  const [availableCoins, setAvailableCoins] = useState(500);
+  const [availableCoins, setAvailableCoins] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  const { data: counselor } = useQuery({
+    queryKey: ['answer'],
+    queryFn: async () => {
+      const email = localStorage.getItem('email');
+      const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`);
+      return response.data;
+    },
+  });
+
   useEffect(() => {
+    if (counselor) {
+      setAvailableCoins(counselor?.data[0]?.balance || 0);
+    }
     fetchRedeemHistory();
-  }, []);
+  }, [counselor]);
 
   const fetchRedeemHistory = async () => {
     setIsLoading(true);

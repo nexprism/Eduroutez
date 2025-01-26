@@ -198,7 +198,6 @@ router.post("/markslot", markSlot);
 router.get("/counselorslots", getCounselors);
 router.get("/counselorslots/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorSlot);
 router.patch("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselorSlot);
-// router.delete("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselorSlots);
 
 /**
  * student routes

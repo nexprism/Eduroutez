@@ -50,11 +50,11 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
                 title={`Booked Slots`}
                 description="All question and answers are listed here."
               />
-              {/* <Button asChild className="w-fit whitespace-nowrap px-2">
-                <Link href="/dashboard/question-answer/new">
+               <Button asChild className="w-fit whitespace-nowrap px-2">
+                <Link href="/dashboard/slot/new">
                   <Plus className="mr-1 h-4 w-4" /> Add New
                 </Link>
-              </Button> */}
+              </Button>
             </div>
             <Separator />
             <QuestionAnswerTable

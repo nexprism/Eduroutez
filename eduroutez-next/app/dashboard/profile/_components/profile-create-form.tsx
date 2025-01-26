@@ -349,8 +349,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
 
     onSuccess: () => {
       const message = isEdit
-        ? 'User updated successfully'
-        : 'User created successfully';
+        ? 'Profile updated successfully'
+        : 'Profile created successfully';
       toast.success(message);
       form.reset();
 
@@ -466,32 +466,32 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   React.useEffect(() => {
     if (counselor?.data) {
       form.reset({
-        firstname: counselor.data?.firstname,
-        lastname: counselor.data?.lastname,
-        email: counselor.data?.email,
-        contactno: counselor.data?.contactno,
-        country: counselor.data?.country,
-        address: counselor.data?.address,
-        category: counselor.data?.category,
-        instituteEmail: counselor.data?.instituteEmail,
-        city: counselor.data?.city,
-        gender: counselor.data?.gender,
-        dateOfBirth: counselor.data?.dateOfBirth?.split('T')[0] || '', // Format date
-        experiences: counselor.data?.experiences || [],
-        bankName: counselor.data?.bankName,
-        accountDetails: counselor.data?.accountDetails,
-        ifscCode: counselor.data?.ifscCode,
-        language: counselor.data?.language,
-        ExperienceYear: counselor.data?.ExperienceYear
+        firstname: counselor.data[0]?.firstname,
+        lastname: counselor.data[0]?.lastname,
+        email: counselor.data[0]?.email,
+        contactno: counselor.data[0]?.contactno,
+        country: counselor.data[0]?.country,
+        address: counselor.data[0]?.address,
+        category: counselor.data[0]?.category,
+        instituteEmail: counselor.data[0]?.instituteEmail,
+        city: counselor.data[0]?.city,
+        gender: counselor.data[0]?.gender,
+        dateOfBirth: counselor.data[0]?.dateOfBirth?.split('T')[0] || '', // Format date
+        experiences: counselor.data[0]?.experiences || [],
+        bankName: counselor.data[0]?.bankName,
+        accountDetails: counselor.data[0]?.accountDetails,
+        ifscCode: counselor.data[0]?.ifscCode,
+        language: counselor.data[0]?.language,
+        ExperienceYear: counselor.data[0]?.ExperienceYear
       });
-      if (counselor.data.panCard) {
-        setPreviewPanCardUrl(`${IMAGE_URL}/${counselor.data?.panCard}`);
+      if (counselor.data[0].panCard) {
+        setPreviewPanCardUrl(`${IMAGE_URL}/${counselor.data[0]?.panCard}`);
       }
-      if (counselor.data.adharCard) {
-        setPreviewAdharCardUrl(`${IMAGE_URL}/${counselor.data?.adharCard}`);
+      if (counselor.data[0].adharCard) {
+        setPreviewAdharCardUrl(`${IMAGE_URL}/${counselor.data[0]?.adharCard}`);
       }
-      if (counselor.data.profilePhoto) {
-        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.data?.profilePhoto}`);
+      if (counselor.data[0].profilePhoto) {
+        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.data[0]?.profilePhoto}`);
       }
       // console.log(datOfBirth);
     }
@@ -1212,8 +1212,13 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
           )}
           {currentStep === 4 && (
             <div>
-              <h1>Completed</h1>
-              <pre className="whitespace-pre-wrap">{JSON.stringify(data)}</pre>
+                <div className="text-center">
+                <h1 className="text-2xl font-bold">Profile Completed</h1>
+                <p className="mt-4 text-lg">Here is the summary of your profile:</p>
+                <pre className="mt-4 whitespace-pre-wrap bg-gray-100 p-4 rounded-md text-left">
+                  {JSON.stringify(data, null, 2)}
+                </pre>
+                </div>
             </div>
           )}
           {currentStep === 4 && (
