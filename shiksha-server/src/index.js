@@ -17,7 +17,7 @@ const app = express();
 
 
 const corsOptions = {
-  origin:["http://localhost:3000","http://localhost:5173"],
+  origin: ["http://localhost:3000", "http://localhost:5173","https://admin.eduroutez.com","https://eduroutez.com"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
