@@ -33,7 +33,7 @@ import { m } from 'framer-motion';
 import { AlertTriangleIcon, Trash, Trash2Icon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 // import { useParams, useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -145,8 +145,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   initialData,
   categories
 }) => {
-  // const params = useParams();
-  // const router = useRouter();
+  const [streamCategories, setStreamCategories] = useState<any[]>([]);
   const [, setOpen] = useState(false);
   const [loading] = useState(false);
   // const [imgLoading, setImgLoading] = useState(false);
@@ -360,6 +359,23 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       toast.error('Something went wrong');
     }
   });
+
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get(`${apiUrl}/streams`);
+        setStreamCategories(response.data.data.result|| []);
+      } catch (error) {
+        console.error('Failed to fetch stream categories', error);
+        // Optionally show a toast error
+        toast.error('Unable to load categories');
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
 
   const handlePanCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -759,40 +775,42 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={loading}
-                          placeholder="Write your Catogery"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={loading}
-                          placeholder="Write your address"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+               
+                 <FormField
+    control={form.control}
+    name="category"
+    render={({ field }) => (
+      <FormItem>
+        <FormLabel>Category</FormLabel>
+        <Select
+          disabled={loading}
+          onValueChange={field.onChange}
+          value={field.value}
+          defaultValue={field.value}
+        >
+          <FormControl>
+            <SelectTrigger>
+              <SelectValue
+                defaultValue={field.value}
+                placeholder="Select Category"
+              />
+            </SelectTrigger>
+          </FormControl>
+          <SelectContent>
+            {streamCategories?.map((category) => (
+              <SelectItem 
+                key={category?._id ?? ''} 
+                value={category?.name ?? ''}
+              >
+                {category?.name ?? 'Unknown'}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <FormMessage />
+      </FormItem>
+    )}
+  />
                 <FormField
                   control={form.control}
                   name="instituteEmail"
