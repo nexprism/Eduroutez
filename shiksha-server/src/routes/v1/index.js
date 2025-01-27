@@ -18,7 +18,7 @@ import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPop
 import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, addFacility, submitIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer ,getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
-import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview } from "../../controllers/counselor-controller.js";
+import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview, getCounselorById, getCounselorsByCategory } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
 import { createReview, deleteReview, getReview, getReviews, updateReview ,getReviewsByUser,getReviewByInstitute} from "../../controllers/review-controller.js";
@@ -186,6 +186,9 @@ router.post(
 router.get("/counselors-by-institute/:institute", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorsByInstitute);
 router.get("/counselors", getCounselors);
 router.get("/counselor/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselor);
+router.get("/counselor-by-id/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorById);
+//counselloers-by-category
+router.post("/counselors-by-category",  getCounselorsByCategory);
 router.patch("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselor);
 router.delete("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselor);
 

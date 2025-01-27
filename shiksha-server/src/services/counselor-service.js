@@ -71,7 +71,7 @@ class CounselorService {
     }
   }
   async get(email) {
-    console.log('email',email);
+    
     const counselor = await this.counselorRepository.get(email);
 
     console.log('counselor',counselor);
@@ -83,6 +83,37 @@ class CounselorService {
         
         //create counselor
         const counselor = await this.create({userId:user._id,email:user.email,firstname:user.name,lastname:user.lastname});
+      }
+    }
+    return counselor;
+
+
+
+  }
+
+  //getByCategory
+  async getByCategory(category) {
+    try {
+      const counselors = await this.counselorRepository.getByCategory(category);
+      return counselors;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getById(id) {
+    
+    const counselor = await this.counselorRepository.getByid(id);
+
+    console.log('counselor', counselor);
+
+    if (!counselor) {
+      //find in user by email
+      const user = await this.userRepository.getById(id);
+      if (user) {
+
+        //create counselor
+        const counselor = await this.create({ userId: user._id, email: user.email, firstname: user.name, lastname: user.lastname });
       }
     }
     return counselor;
