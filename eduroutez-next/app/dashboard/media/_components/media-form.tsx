@@ -181,8 +181,8 @@ export default function CourseCategoryForm() {
         title: category.data.title,
       });
 
-      if (category.data.icon) {
-        setPreviewImageUrl(`${IMAGE_URL}/${category.data.icon}`);
+      if (category.data.images && category.data.images.length > 0) {
+        setPreviewImageUrl(`${IMAGE_URL}/${category.data.images[0]}`);
       }
     }
   }, [category, courseCategories, form]);

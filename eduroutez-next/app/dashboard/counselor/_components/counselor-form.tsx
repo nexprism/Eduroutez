@@ -13,13 +13,6 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -50,6 +43,7 @@ export default function CounselorForm() {
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
+  const counselorId = segments[4];
 
   React.useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
@@ -69,6 +63,33 @@ export default function CounselorForm() {
   });
   const router = useRouter();
 
+  // Add query to fetch counselor data
+  const { data: counselorData, isLoading } = useQuery({
+    queryKey: ['counselor', counselorId],
+    queryFn: async () => {
+      if (isEdit && counselorId) {
+        const response = await axiosInstance.get(`${apiUrl}/counselor/${counselorId}`);
+        return response.data;
+      }
+      return null;
+    },
+    enabled: isEdit && !!counselorId
+  });
+
+  // Set initial form values when counselor data is fetched
+  React.useEffect(() => {
+    if (counselorData) {
+      form.reset({
+        firstname: counselorData.firstname,
+        lastname: counselorData.lastname,
+        contactno: counselorData.contactno,
+        email: counselorData.email,
+        instituteId: counselorData.instituteId
+      });
+    }
+  }, [counselorData, form]);
+
+  // Set instituteId from localStorage
   React.useEffect(() => {
     const instituteId = localStorage.getItem('instituteId');
     if (instituteId) {
@@ -89,7 +110,7 @@ export default function CounselorForm() {
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
-        ? `${apiUrl}/counselor/${segments[4]}`
+        ? `${apiUrl}/counselor/${counselorId}`
         : `${apiUrl}/counselor`;
       const response = await axiosInstance({
         url: `${endpoint}`,
@@ -101,7 +122,6 @@ export default function CounselorForm() {
       });
       return response.data;
     },
-
     onSuccess: () => {
       const message = isEdit
         ? 'Counselor updated successfully'
@@ -111,15 +131,19 @@ export default function CounselorForm() {
       router.push('/dashboard/counselor');
     },
     onError: (error) => {
-      toast.error((error as any)?.response?.data?.error || 'An error occurred'); 
+      toast.error((error as any)?.response?.data?.error || 'An error occurred');
     }
   });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Card className="mx-auto w-full">
       <CardHeader>
         <CardTitle className="text-left text-2xl font-bold">
-          Counselor Information
+          {isEdit ? 'Update Counselor' : 'Add New Counselor'}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -190,11 +214,10 @@ export default function CounselorForm() {
                   </FormItem>
                 )}
               />
-            
             </div>
 
             <Button type="submit" disabled={isSubmitting}>
-              Submit
+              {isEdit ? 'Update' : 'Submit'}
             </Button>
           </form>
         </Form>

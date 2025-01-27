@@ -162,10 +162,6 @@ export const navItems: NavItem[] = [
       {
         title: 'Banner',
         url: '/dashboard/banner'
-      },
-      {
-        title: 'Gallery',
-        url: '/dashboard/media'
       }
     ]
   },

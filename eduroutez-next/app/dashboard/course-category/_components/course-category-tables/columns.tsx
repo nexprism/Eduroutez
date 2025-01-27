@@ -39,10 +39,6 @@ export const columns: ColumnDef<CourseCategory>[] = [
     header: 'Icon',
     cell: ({ row }) => <img className='w-[2.5rem] h-[2rem] rounded-full' src={`${IMAGE_URL}/${row.original.icon}`} alt="Icon" />
   },
-  {
-    header: 'Course',
-    // cell: ({ row }) => <div>{`${row.original.parentCategory}`}</div>
-  },
  
 
   {

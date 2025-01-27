@@ -123,8 +123,8 @@ const formSchema = z.object({
   cutOff: z.string().optional(),
   ranking: z.string().optional(),
   examAccepted: z.string().optional(),
-  courseDurationYears: z.string().optional(),
-  courseDurationMonths: z.string().optional(),
+  courseDurationYears: z.any().optional(),
+  courseDurationMonths: z.any().optional(),
 
   courseOverview: z.string().optional(),
 
@@ -133,7 +133,7 @@ const formSchema = z.object({
   courseFee: z.string().optional(),
   courseOpportunities: z.string().optional(),
 
-  coursePrice: z.string().optional(),
+  coursePrice: z.any().optional(),
   courseDiscount: z.string().optional(),
   courseDiscountType: z.string().optional(),
   coursePreviewType: z.string().optional(),
@@ -177,6 +177,8 @@ export default function CreateCourse() {
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputMetaImageRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
+  const [isInstituteRole, setIsInstituteRole] = useState(false);
+
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
@@ -199,6 +201,17 @@ export default function CreateCourse() {
       isCourseTreanding: false, 
     }
   });
+
+  useEffect(() => {
+    const userRole = localStorage.getItem('role');
+    const instituteId = localStorage.getItem('instituteId');
+    
+    if (userRole === 'institute' && instituteId) {
+      setIsInstituteRole(true);
+      // Set the institute ID in the form
+      form.setValue('instituteCategory', instituteId);
+    }
+  }, []);
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -752,40 +765,48 @@ export default function CreateCourse() {
                     />
                     {/* a */}
                     <FormField
-                      control={form.control}
-                      name="instituteCategory"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Institute Category</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Institute " />
-                              </SelectTrigger>
-                            </FormControl>
-
-                            <SelectContent>
-                              {instituteCategories?.data?.result?.length > 0
-                                ? instituteCategories.data.result.map(
-                                    (category: Institute) => (
-                                      <SelectItem
-                                        key={category._id}
-                                        value={category._id}
-                                      >
-                                        {category.instituteName}
-                                      </SelectItem>
-                                    )
-                                  )
-                                : <SelectItem value="">No Institutes Available</SelectItem>}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+  control={form.control}
+  name="instituteCategory"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Institute Category</FormLabel>
+      {isInstituteRole ? (
+        <div className="flex items-center space-x-2">
+          <Input
+            value={instituteCategories?.data?.result?.find((category: Institute) => category._id === field.value)?.instituteName || ''}
+            readOnly
+          />
+        </div>
+      ) : (
+        <Select
+          onValueChange={field.onChange}
+          value={field.value}
+        >
+          <FormControl>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Institute" />
+            </SelectTrigger>
+          </FormControl>
+          <SelectContent>
+            {instituteCategories?.data?.result?.length > 0
+              ? instituteCategories.data.result.map(
+                  (category: Institute) => (
+                    <SelectItem
+                      key={category._id}
+                      value={category._id}
+                    >
+                      {category.instituteName}
+                    </SelectItem>
+                  )
+                )
+              : <SelectItem value="">No Institutes Available</SelectItem>}
+          </SelectContent>
+        </Select>
+      )}
+      <FormMessage />
+    </FormItem>
+  )}
+/>
 
                     <FormField
                       control={form.control}
