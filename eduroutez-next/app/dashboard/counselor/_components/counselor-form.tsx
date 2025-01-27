@@ -77,7 +77,7 @@ export default function CounselorForm() {
     }
   }, [segments]);
 
-  const form = useForm<any>({
+  const form = useForm<z.infer<ReturnType<typeof getFormSchema>>>({
     resolver: zodResolver(getFormSchema(isEdit)),
     defaultValues: {
       firstname: '',
@@ -298,7 +298,7 @@ export default function CounselorForm() {
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
-                        const selectedCategory = categories?.find(cat => cat?._id === value);
+                        const selectedCategory = categories?.find((cat: { name: string }) => cat?.name === value);
                         if (selectedCategory?.name) {
                           setSelectedCategoryName(selectedCategory.name);
                         }
@@ -315,8 +315,8 @@ export default function CounselorForm() {
                       <SelectContent>
                         {Array.isArray(categories) && categories.map((category: any) => (
                           <SelectItem 
-                            key={category?._id || 'default'} 
-                            value={category?._id || ''}
+                            key={category?.name || 'default'} 
+                            value={category?.name || ''}
                           >
                             {category?.name || 'Unnamed Category'}
                           </SelectItem>
