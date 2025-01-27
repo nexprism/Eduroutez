@@ -133,7 +133,7 @@ async updateReferalUser(referalUser, userId) {
 async redeemPoints(userId, points) {
   try {
 
-    const user = await this.userRepository.get(userId);
+    const user = await this.userRepository.getById(userId);
 
     const updatedPoints = user.points - points;
     const updatedBalance = user.balance + points / 2;

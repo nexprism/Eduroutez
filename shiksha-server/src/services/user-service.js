@@ -31,7 +31,7 @@ class UserService {
   async getUserById(id) {
     try {
       console.log('id',id);
-      const user = await this.userRepository.get(id);
+      const user = await this.userRepository.getById(id);
       
       return user;
     } catch (error) {
@@ -205,7 +205,7 @@ console.log('user',user)
   async userPasswordReset(id, token, password) {
     try {
       // Find user by ID
-      const user = this.userRepository.get(id);
+      const user = this.userRepository.getById(id);
       if (!user) {
         return res.status(404).json({ status: "failed", message: "User not found" });
       }
