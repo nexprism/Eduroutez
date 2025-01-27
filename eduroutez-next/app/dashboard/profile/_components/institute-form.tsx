@@ -576,10 +576,10 @@ console.log('Error updating institute:', error.message); }
                 <div className="space-y-8">
                   <FormField
                     control={form.control}
-                    name="about"
+                    name="scholarshipInfo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>About</FormLabel>
+                        <FormLabel>scholarship Info</FormLabel>
                         <FormControl>
                           <CustomEditor
                             value={field.value}
