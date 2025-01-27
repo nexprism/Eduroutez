@@ -110,7 +110,7 @@ class SubscriptionService {
       }
 
     //set plan to user
-    const user = await this.userRepository.get(data.user._id);
+      const user = await this.userRepository.getById(data.user._id);
 
     console.log('user_for_plan',user);
     if(!user){
