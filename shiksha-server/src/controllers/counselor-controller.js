@@ -196,6 +196,36 @@ export const updateCounselor = async (req, res) => {
   }
 }
 
+//getCounselorById
+export const getCounselorById = async (req, res) => {
+    try {
+      console.log("Request:", req.params.id);
+      const response = await counselorService.getById(req.params.id);
+      console.log("Response:", response);
+      SuccessResponse.data = response;
+      SuccessResponse.message = "Successfully fetched the counselor";
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+      conosoel.error("Error in getCounselor:", error.message);
+      ErrorResponse.error = error;
+      return res.status(error.statusCode).json(ErrorResponse);
+    }
+};
+
+//getCounselorsByCategory
+export const getCounselorsByCategory = async (req, res) => {
+  try {
+    const category = req.body.category;
+    const response = await counselorService.getByCategory(category);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched counselors";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+};
+
 //submitcounsellorslotReview
 export const submitcounsellorReview = async (req, res) => {
   try {

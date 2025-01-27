@@ -43,6 +43,16 @@ class CounselorRepository extends CrudRepository {
     }
   }
 
+  //getByCategory
+  async getByCategory(category) {
+    try {
+      const counselors = await this.model.find({ category: category });
+      return counselors;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   //getByEmail
   async getByEmail(email) {
     try {
