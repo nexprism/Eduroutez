@@ -147,9 +147,7 @@ const formSchema = z.object({
   isCourseFree: z.enum(['free', 'notfree'], {
     required_error: 'You need to select one option.'
   }),
-  isCourseDiscounted: z.enum(['yes', 'no'], {
-    required_error: 'You need to select one option.'
-  }),
+  isCourseDiscounted: z.enum(['yes', 'no']).optional(),
   applicationStartDate: z.date({
     required_error: 'Application start date is required.'
   }),
