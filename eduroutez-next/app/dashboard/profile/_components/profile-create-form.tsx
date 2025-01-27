@@ -49,9 +49,6 @@ export const profileSchema = z.object({
     .min(3, { message: ' lastName must be at least 3 characters' }),
   category: z
     .string(),
-  address: z
-    .string()
-    .min(3, { message: ' Name must be at least 3 characters' }),
   bankName: z.string().min(3, { message: 'Account Name characters' }),
   accountDetails: z
     .string()
@@ -295,7 +292,6 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       formData.append('city', values.city);
       formData.append('gender', values.gender);
       formData.append('dateOfBirth', values.dateOfBirth);
-      formData.append('address', values.address);
       formData.append('category', values.category);
       formData.append('instituteEmail', values.instituteEmail);
       formData.append('language', values.language);
@@ -487,7 +483,6 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         email: counselor.data[0]?.email,
         contactno: counselor.data[0]?.contactno,
         country: counselor.data[0]?.country,
-        address: counselor.data[0]?.address,
         category: counselor.data[0]?.category,
         instituteEmail: counselor.data[0]?.instituteEmail,
         city: counselor.data[0]?.city,
@@ -501,13 +496,16 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         ExperienceYear: counselor.data[0]?.ExperienceYear
       });
       if (counselor.data[0].panCard) {
-        setPreviewPanCardUrl(`${IMAGE_URL}/${counselor.data[0]?.panCard}`);
+        const panCardFileName = counselor.data[0].panCard.split('\\').pop()?.split('/').pop();
+        setPreviewPanCardUrl(`${IMAGE_URL}/${panCardFileName}`);
       }
       if (counselor.data[0].adharCard) {
-        setPreviewAdharCardUrl(`${IMAGE_URL}/${counselor.data[0]?.adharCard}`);
+        const adharCardFileName = counselor.data[0]?.adharCard.split('\\').pop()?.split('/').pop();
+        setPreviewAdharCardUrl(`${IMAGE_URL}/${adharCardFileName}`);
       }
       if (counselor.data[0].profilePhoto) {
-        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.data[0]?.profilePhoto}`);
+        const profilePhoto = counselor.data[0]?.profilePhoto.split('\\').pop()?.split('/').pop();
+        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${profilePhoto}`);
       }
       // console.log(datOfBirth);
     }
@@ -1035,11 +1033,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           className="hidden"
                         />
                         {previewPanCardUrl ? (
-                          <div className="relative inline-block">
+                          <div className="relative">
                             <Image
                               src={previewPanCardUrl}
                               alt="Preview"
-                              className="max-h-[400px] max-w-full rounded-md object-cover"
+                              className="w-full h-full rounded-md object-cover"
                               width={1200}
                               height={400}
                             />
@@ -1085,7 +1083,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           className="hidden"
                         />
                         {previewAdharCardUrl ? (
-                          <div className="relative inline-block">
+                          <div className="relative">
                             <Image
                               src={previewAdharCardUrl}
                               alt="Preview"
@@ -1135,11 +1133,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           className="hidden"
                         />
                         {previewProfilePhotoUrl ? (
-                          <div className="relative inline-block">
+                          <div className="relative">
                             <Image
                               src={previewProfilePhotoUrl}
                               alt="Preview"
-                              className="max-h-[400px] max-w-full rounded-md object-cover"
+                              className="w-full h-full rounded-md object-cover"
                               width={1200}
                               height={400}
                             />
