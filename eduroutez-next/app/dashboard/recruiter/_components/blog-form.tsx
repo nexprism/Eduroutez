@@ -41,7 +41,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
-const apiUrl = 'http://localhost:4001/api/v1/recruiter';
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function RecruiterImageForm() {
   const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
@@ -86,8 +86,8 @@ export default function RecruiterImageForm() {
   const { mutate, isPending: isSubmitting } = useMutation({
     mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
-        ? `${apiUrl}/${segments[4]}`
-        : `${apiUrl}`;
+        ? `${apiUrl}/recruiter/${segments[4]}`
+        : `${apiUrl}/recruiter`;
       const response = await axiosInstance({
         url: endpoint,
         method: isEdit ? 'patch' : 'post',
