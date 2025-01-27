@@ -68,8 +68,8 @@ export default function CounselorForm() {
     queryKey: ['counselor', counselorId],
     queryFn: async () => {
       if (isEdit && counselorId) {
-        const response = await axiosInstance.get(`${apiUrl}/counselor/${counselorId}`);
-        return response.data;
+        const response = await axiosInstance.get(`${apiUrl}/counselor-by-id/${counselorId}`);
+        return response.data.data;
       }
       return null;
     },
