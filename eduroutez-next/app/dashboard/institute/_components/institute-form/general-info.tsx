@@ -676,7 +676,7 @@ const GeneralInfo = () => {
                 name="thumbnail"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Thumbnail Image</FormLabel>
+                    <FormLabel>Thumbnail Image (Recommended size: 446px x 290px)</FormLabel>
                     <FormControl>
                       <div className="space-y-4">
                         <Input
@@ -726,7 +726,7 @@ const GeneralInfo = () => {
                 name="cover"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cover Image</FormLabel>
+                    <FormLabel>Cover Image  (Recommended size: 1414px x 400px) </FormLabel>
                     <FormControl>
                       <div className="space-y-4">
                         <Input
@@ -778,7 +778,7 @@ const GeneralInfo = () => {
                          name="brochure"
                          render={({ field }) => (
                            <FormItem>
-                             <FormLabel>Brochure</FormLabel>
+                             <FormLabel>Brochure (Recommended size: 1414px x 400px)</FormLabel>
                              <FormControl>
                                <div className="space-y-4">
                                  <Input
