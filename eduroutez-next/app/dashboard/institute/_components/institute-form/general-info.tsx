@@ -141,10 +141,10 @@ const GeneralInfo = () => {
       });
       console.log('Institute fetch nb:', `${baseURL}/${instituteData.thumbnailImage}`);
               // Get images URLs 
-              setPreviewThumbnailUrl(`${baseURL}/${instituteData.thumbnailImage}`);
-              setPreviewCoverUrl(`${baseURL}/${instituteData.coverImage}`);
-              setPreviewLogoUrl(`${baseURL}/${instituteData.instituteLogo}`);
-              setPreviewbrochure(`${baseURL}/${instituteData.brochure}`);
+                setPreviewThumbnailUrl(instituteData.thumbnailImage ? `${baseURL}/${instituteData.thumbnailImage}` : null);
+                setPreviewCoverUrl(instituteData.coverImage ? `${baseURL}/${instituteData.coverImage}` : null);
+                setPreviewLogoUrl(instituteData.instituteLogo ? `${baseURL}/${instituteData.instituteLogo}` : null);
+                setPreviewbrochure(instituteData.brochure ? `${baseURL}/${instituteData.brochure}` : null);
       console.log('Institute fetch successfully:', instituteData);
     } catch (error: any) {
       console.log('Error fetching institute:', error.message);
