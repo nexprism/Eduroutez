@@ -13,6 +13,13 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -21,29 +28,48 @@ import axiosInstance from '@/lib/axios';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-const formSchema = z.object({
-  firstname: z.string().min(2, {
-    message: 'First name must be at least 2 characters.'
-  }),
-  lastname: z.string().min(2, {
-    message: 'Last name must be at least 2 characters.'
-  }),
-  contactno: z.string().min(10, {
-    message: 'Contact number must be at least 10 characters.'
-  }),
-  email: z.string().email({
-    message: 'Invalid email address.'
-  }),
-  instituteId: z.string().min(1, {
-    message: 'Institute ID is required.'
-  })
-});
+// Dynamic schema based on edit mode
+const getFormSchema = (isEdit: boolean) => {
+  const baseSchema = {
+    firstname: z.string().min(2, {
+      message: 'First name must be at least 2 characters.'
+    }),
+    lastname: z.string().min(2, {
+      message: 'Last name must be at least 2 characters.'
+    }),
+    contactno: z.string().min(10, {
+      message: 'Contact number must be at least 10 characters.'
+    }),
+    email: z.string().email({
+      message: 'Invalid email address.'
+    }),
+    category: z.string().min(1, {
+      message: 'Category is required.'
+    }),
+    instituteId: z.string().min(1, {
+      message: 'Institute ID is required.'
+    })
+  };
+
+  // Add password field only for create mode
+  if (!isEdit) {
+    return z.object({
+      ...baseSchema,
+      password: z.string().min(8, {
+        message: 'Password must be at least 8 characters.'
+      })
+    });
+  }
+
+  return z.object(baseSchema);
+};
 
 export default function CounselorForm() {
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
   const counselorId = segments[4];
+  const [selectedCategoryName, setSelectedCategoryName] = React.useState<string>('');
 
   React.useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
@@ -51,17 +77,33 @@ export default function CounselorForm() {
     }
   }, [segments]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<any>({
+    resolver: zodResolver(getFormSchema(isEdit)),
     defaultValues: {
       firstname: '',
       lastname: '',
       contactno: '',
       email: '',
+      ...(isEdit ? {} : { password: '' }),
+      category: '',
       instituteId: ''
     }
   });
   const router = useRouter();
+
+  // Fetch categories/streams
+  const { data: categories } = useQuery({
+    queryKey: ['streams'],
+    queryFn: async () => {
+      try {
+        const response = await axiosInstance.get(`${apiUrl}/streams`);
+        return response.data?.data?.result || [];
+      } catch (error) {
+        console.error('Error fetching streams:', error);
+        return [];
+      }
+    }
+  });
 
   // Add query to fetch counselor data
   const { data: counselorData, isLoading } = useQuery({
@@ -76,18 +118,28 @@ export default function CounselorForm() {
     enabled: isEdit && !!counselorId
   });
 
-  // Set initial form values when counselor data is fetched
+  // Set initial form values and find category name when counselor data is fetched
   React.useEffect(() => {
     if (counselorData) {
-      form.reset({
-        firstname: counselorData.firstname,
-        lastname: counselorData.lastname,
-        contactno: counselorData.contactno,
-        email: counselorData.email,
-        instituteId: counselorData.instituteId
-      });
+      const formData = {
+        firstname: counselorData.firstname || '',
+        lastname: counselorData.lastname || '',
+        contactno: counselorData.contactno || '',
+        email: counselorData.email || '',
+        category: counselorData.category || '',
+        instituteId: counselorData.instituteId || ''
+      };
+      form.reset(formData);
+
+      // Find and set the category name
+      if (Array.isArray(categories)) {
+        const selectedCategory = categories.find(cat => cat?._id === counselorData.category);
+        if (selectedCategory?.name) {
+          setSelectedCategoryName(selectedCategory.name);
+        }
+      }
     }
-  }, [counselorData, form]);
+  }, [counselorData, categories, form]);
 
   // Set instituteId from localStorage
   React.useEffect(() => {
@@ -97,12 +149,16 @@ export default function CounselorForm() {
     }
   }, [form]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<ReturnType<typeof getFormSchema>>) {
     const formData = new FormData();
     formData.append('firstname', values.firstname);
     formData.append('lastname', values.lastname);
     formData.append('contactno', values.contactno);
     formData.append('email', values.email);
+    if (!isEdit) {
+      formData.append('password', values.password);
+    }
+    formData.append('category', values.category);
     formData.append('instituteId', values.instituteId);
     mutate(formData);
   }
@@ -210,6 +266,63 @@ export default function CounselorForm() {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {!isEdit && (
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Enter your password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        const selectedCategory = categories?.find(cat => cat?._id === value);
+                        if (selectedCategory?.name) {
+                          setSelectedCategoryName(selectedCategory.name);
+                        }
+                      }} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category">
+                            {field.value ? selectedCategoryName : 'Select a category'}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Array.isArray(categories) && categories.map((category: any) => (
+                          <SelectItem 
+                            key={category?._id || 'default'} 
+                            value={category?._id || ''}
+                          >
+                            {category?.name || 'Unnamed Category'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
