@@ -22,6 +22,17 @@ const AdminReferralsPage = () => {
   const [visibleCount, setVisibleCount] = useState(3);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  // Safe string conversion utility that handles null/undefined
+  const safeString = (value: any): string => {
+    if (value === null || value === undefined || typeof value === 'undefined') return '';
+    return String(value);
+  };
+
+  // Safe toLowerCase utility that handles null/undefined
+  const safeLowerCase = (value: any): string => {
+    const str = safeString(value);
+    return str ? str.toLowerCase() : '';
+  };
 
   useEffect(() => {
     const fetchReferrals = async () => {
@@ -31,39 +42,54 @@ const AdminReferralsPage = () => {
             'Content-Type': 'application/json',
           },
         });
+
+        if (!response?.data?.data) {
+          setReferrals([]);
+          return;
+        }
+
         const data = response.data.data.map((item: any) => ({
-          id: item._id,
-          referrer: item.refer_by.name,
-          referrerEmail: item.refer_by.email,
-          referred: item.name,
-          referredEmail: item.email,
-          date: new Date(item.createdAt).toLocaleDateString(),
-          rewardPaid: item.points.toString(),
+          id: safeString(item?._id),
+          referrer: safeString(item?.refer_by?.name),
+          referrerEmail: safeString(item?.refer_by?.email),
+          referred: safeString(item?.name),
+          referredEmail: safeString(item?.email),
+          date: item?.createdAt ? new Date(item.createdAt).toLocaleDateString() : '',
+          rewardPaid: safeString(item?.points),
         }));
         setReferrals(data);
-        setTotalReferrals(response.data.totalCount); // Assuming the API returns totalCount
+        setTotalReferrals(response.data.totalCount || 0);
       } catch (error) {
         console.error('Error fetching referrals:', error);
+        setReferrals([]);
+        setTotalReferrals(0);
       }
     };
 
     fetchReferrals();
   }, []);
 
-  // Filter referrals based on search term
+  // Filter referrals based on search term with null checks
   const filteredReferrals = referrals.filter(referral => {
+    if (!searchTerm) return true;
+    
+    const search = safeLowerCase(searchTerm);
+    if (!search) return true;
+
     return (
-      referral.referrer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      referral.referred.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      referral.referrerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      referral.referredEmail.toLowerCase().includes(searchTerm.toLowerCase())
+      safeLowerCase(referral?.referrer).includes(search) ||
+      safeLowerCase(referral?.referred).includes(search) ||
+      safeLowerCase(referral?.referrerEmail).includes(search) ||
+      safeLowerCase(referral?.referredEmail).includes(search)
     );
   });
 
-  // Sort referrals
+  // Sort referrals with null checks
   const sortedReferrals = [...filteredReferrals].sort((a, b) => {
-    const aValue = a[sortField as keyof Referral];
-    const bValue = b[sortField as keyof Referral];
+    if (!a || !b) return 0;
+    
+    const aValue = safeString(a[sortField as keyof Referral]);
+    const bValue = safeString(b[sortField as keyof Referral]);
 
     if (sortOrder === 'asc') {
       return aValue > bValue ? 1 : -1;
@@ -148,14 +174,14 @@ const AdminReferralsPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {sortedReferrals.slice(0, visibleCount).map(referral => (
-                <tr key={referral.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">{referral.referrer}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{referral.referrerEmail}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{referral.referred}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{referral.referredEmail}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{referral.date}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{referral.rewardPaid}</td>
+              {sortedReferrals.slice(0, visibleCount).map((referral, index) => (
+                <tr key={referral.id || index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-sm text-gray-900">{referral.referrer || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{referral.referrerEmail || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{referral.referred || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{referral.referredEmail || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{referral.date || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{referral.rewardPaid || '0'}</td>
                 </tr>
               ))}
             </tbody>
