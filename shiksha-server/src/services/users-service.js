@@ -212,7 +212,7 @@ async getMyRefferal(id) {
   async getUserById(id) {
     try {
       console.log('id', id);
-      const user = await this.userRepository.get(id);
+      const user = await this.userRepository.getById(id);
 
       return user;
     } catch (error) {
