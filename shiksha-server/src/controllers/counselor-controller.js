@@ -47,6 +47,7 @@ export const createCounselor = async (req, res) => {
       const userPayload = {
         name: `${req.body.firstname} ${req.body.lastname}`,
         email: req.body.email,
+        contact_number: req.body.contactno,
         password: req.body.password,
         role: "counsellor",
         is_verified: true,

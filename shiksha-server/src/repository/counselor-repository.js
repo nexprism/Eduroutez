@@ -101,8 +101,14 @@ class CounselorRepository extends CrudRepository {
 
       // First check if counselor exists in User table
       const user = await User.findOne({ _id: id });
-      if (!user) {
-        throw new Error('User with the given id not found');
+      if (user) {
+        // If user exists, update the existing entry
+        user.name = data.firstname + ' ' + data.lastname;
+        user.email = data.email;
+        contact_number: data.contactno;
+
+        await user.save();
+        
       }
   
       // Check if counselor already exists in Counselor table
