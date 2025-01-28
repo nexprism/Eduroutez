@@ -458,7 +458,9 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   // const cities = [{ id: '2', name: 'kerala' }];
   const gender = [
     { id: 'male', name: 'Male' },
-    { id: 'female', name: 'Female' }
+    { id: 'female', name: 'Female' },
+    { id: 'other', name: 'Other' }
+
   ];
 
   const { data: counselor } = useQuery({

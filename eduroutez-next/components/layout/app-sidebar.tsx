@@ -58,7 +58,6 @@ export default function AppSidebar({
         ? ['Institutes', 'Admins','Refer and Earn','Reviews','Manage Pages','Subscriptions','Bulk Institute Upload','Help And Support','Earnings','Payouts','Promotions', 'Streams','Redeem','Students', 'Sales','Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
         : role === 'counsellor'
         ? [
-          'Slots',
             'Institutes',
             'Admins',
             'Promotions',
