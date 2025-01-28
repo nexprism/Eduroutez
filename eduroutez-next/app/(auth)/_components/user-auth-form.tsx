@@ -47,7 +47,7 @@ export default function UserAuthForm({ setToggle, toggle }: any) {
       try {
         const response = await axiosInstance.post(
           `${apiUrl}/login`,
-          credentials,
+          { ...credentials, isStudent: false },
           {
             headers: {
               'Content-Type': 'application/json'
