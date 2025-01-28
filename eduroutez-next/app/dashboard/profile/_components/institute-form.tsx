@@ -155,6 +155,8 @@ export default function CreateInstitute() {
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
   const multipleFileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [pastFacilities, setPastFacilities] = useState<string[]>([]); 
+
   
   const pathname = usePathname();
   const segments = pathname.split('/');
@@ -188,6 +190,8 @@ export default function CreateInstitute() {
         (filename: string) => `${ImageUrl}/${filename}`
       );
   
+      setPastFacilities(instituteData.facilities || []);
+
       console.log("Gallery URLs for rendering:", galleryUrls);
   
       // Update the form and gallery images state
@@ -362,8 +366,7 @@ console.log('Error updating institute:', error.message); }
           })
         );
         
-      window.location.reload();
-  
+        fetchInstituteData();  
         // Update the state with the new image URLs
         setPreviewUrls((prev) => [...prev, ...imageUrls]);
   
@@ -728,11 +731,29 @@ console.log('Error updating institute:', error.message); }
               >
                 Add Facility
               </Button>
+
+
+                <div className="mt-6">
+                <h3 className="text-lg font-semibold">Past Facilities</h3>
+                <ul className="list-disc pl-5">
+                  {pastFacilities && pastFacilities.length > 0 ? (
+                  pastFacilities.map((facility, index) => (
+                    <li key={index}>{facility}</li>
+                  ))
+                  ) : (
+                  <li>No facilities available</li>
+                  )}
+                </ul>
+                </div>
 </div>
+
+
+
 </Form>
 </CardContent>
 </Card>
 </TabsContent>
+
 
 
 
