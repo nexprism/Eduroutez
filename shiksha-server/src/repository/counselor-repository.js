@@ -2,6 +2,7 @@ import { console } from "inspector";
 import Counselor from "../models/Counselor.js";
 import CrudRepository from "./crud-repository.js";
 import User from "../models/User.js";
+import WalletTransaction from "../models/WalletTransaction.js";
 
 class CounselorRepository extends CrudRepository {
   constructor() {
@@ -78,6 +79,11 @@ class CounselorRepository extends CrudRepository {
   async book(email, studentData) {
     try {
       console.log(email, studentData);
+
+      //get counselor by email
+
+      const counselor = await this.model.findOne({ email });
+
       const result = await this.model.findOneAndUpdate(
         { email: email }, // Match the schema field
         { $push: { students: studentData } }, // Push student data into the students array
@@ -86,6 +92,35 @@ class CounselorRepository extends CrudRepository {
       if (!result) {
         throw new Error('Counselor with the given email not found');
       }
+
+      //set in wallet transaction
+      var totalamount = 500;
+
+      //30% of 500
+      var commission = totalamount * 0.3;
+      
+
+      //add amount in balance of user 
+
+      const user = await User.findOne({ _id: counselor._id });
+      if (user) {
+        // If user exists, update the existing entry
+        user.balance = user.balance + commission;
+
+        await user.save();
+
+      }
+
+
+
+      const walletTransaction = await WalletTransaction.create({
+        user: counselor._id,
+        type: "CREDIT",
+        amount: commission,
+        remarks: "Counselling fee of slot " + studentData.slot + " booked by " + studentData.studentEmail + " On " + studentData.date,
+        status: "COMPLETED",
+        paymentId: studentData.paymentId, 
+      });
   
       return result; // Return the updated document
     } catch (error) {

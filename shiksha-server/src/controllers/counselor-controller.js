@@ -263,8 +263,8 @@ export async function deleteCounselor(req, res) {
 
 export const bookSlots = async (req, res) => {
   try {
-    const { email, slot, studentEmail,date } = req.body;
-    const payload = { slot, studentEmail,date };
+    const { email, slot, studentEmail, date, paymentId } = req.body;
+    const payload = { slot, studentEmail, date, paymentId };
     // console.log('cont',payload);
     const response = await counselorService.book(email, payload);
     SuccessResponse.data = response;

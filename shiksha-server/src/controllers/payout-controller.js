@@ -25,9 +25,13 @@ export const createPayout = async (req, res) => {
       payload.userType = "COUNSELOR";
     }
 
+    console.log("payload", payload);
+
     if (user.balance < payload.requestedAmount) {
       return res.status(StatusCodes.BAD_REQUEST).json({ error: "Insufficient balance" });
     }
+
+    
 
     const response = await payoutService.create(payload);
 
