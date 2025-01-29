@@ -81,7 +81,6 @@ export default function AppSidebar({
             'Career',
            'Subscriptions',
            'Bulk Institute Upload',
-            'Questions and Answers',
             'Online counselling list',
             'Webinars',
             'Help And Support'
