@@ -86,6 +86,15 @@ export async function updateQuestionAnswer(req, res) {
     const questionAnswerId = req.params.id;
     const payload = {};
 
+    if (req.body.answer) {
+      payload.answer = req.body.answer;
+    }
+
+    if (req.body.answeredBy) {
+      payload.answeredBy = req.body.answeredBy;
+
+    }
+
     const response = await questionAnswerService.update(questionAnswerId, payload);
 
     // Return success response
