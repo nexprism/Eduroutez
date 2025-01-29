@@ -10,59 +10,59 @@ const CounselorSlotSchema = new Schema({
     },
     mondayStart: {
         type: String,
-        required: true
+        
     },
     mondayEnd: {
         type: String,
-        required: true
+        
     },
     tuesdayStart: {
         type: String,
-        required: true
+        
     },
     tuesdayEnd: {
         type: String,
-        required: true
+        
     },
     wednesdayStart: {
         type: String,
-        required: true
+        
     },
     wednesdayEnd: {
         type: String,
-        required: true
+        
     },
     thursdayStart: {
         type: String,
-        required: true
+        
     },
     thursdayEnd: {
         type: String,
-        required: true
+        
     },
     fridayStart: {
         type: String,
-        required: true
+        
     },
     fridayEnd: {
         type: String,
-        required: true
+        
     },
     saturdayStart: {
         type: String,
-        required: true
+        
     },
     saturdayEnd: {
         type: String,
-        required: true
+        
     },
     sundayStart: {
         type: String,
-        required: true
+        
     },
     sundayEnd: {
         type: String,
-        required: true
+        
     }
 });
 

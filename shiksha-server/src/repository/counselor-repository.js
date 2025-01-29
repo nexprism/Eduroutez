@@ -111,6 +111,9 @@ class CounselorRepository extends CrudRepository {
 
       }
 
+      counselor.balance = counselor.balance + commission;
+      await counselor.save();
+
 
 
       const walletTransaction = await WalletTransaction.create({
