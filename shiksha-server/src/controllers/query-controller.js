@@ -58,6 +58,19 @@ export async function getQuery(req, res) {
   }
 }
 
+//getQueryByInstitute
+export async function getQueryByInstitute(req, res) {
+  try {
+    const response = await questionAnswerService.getByInstitute(req.params.id);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the question and answer";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 /**
  * PATCH : /question-answer/:id
  * req.body {capacity:200}

@@ -38,7 +38,7 @@ import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../.
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
 import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot } from "../../controllers/counselorSlot-controller.js";
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
-import { createQuery, deleteQuery, getQueries, getQuery, updateQuery } from "../../controllers/query-controller.js";
+import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, updateQuery } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ ,getFAQsByInstitute} from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage } from "../../controllers/customPage-controller.js";
 import { upload } from "../../middlewares/upload-middleware.js";
@@ -117,6 +117,7 @@ router.get("/monthly-webinar-count/:id", getMonthlyWebinarCount);
 router.post("/query", createQuery);
 router.get("/queries", getQueries);
 router.get("/query/:id", getQuery);
+router.get("/query-by-institute/:id", getQueryByInstitute);
 router.patch("/query/:id",  updateQuery);
 router.delete("/query/:id", deleteQuery);
 

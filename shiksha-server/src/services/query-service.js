@@ -47,7 +47,8 @@ class questionAnswerService {
       }
 
       // Execute query with dynamic filters, sorting, and pagination
-      const questionAnswers = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
+      const populateFields = ["instituteId"];
+      const questionAnswers = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
 
       return questionAnswers;
     } catch (error) {
@@ -56,8 +57,14 @@ class questionAnswerService {
   }
 
   async get(id) {
-    const questionAnswer = await this.queryRepository.get(id);
+    const questionAnswer = await this.queryRepository.get(id).populate("instituteId");
     return questionAnswer;
+  }
+
+  //getByInstitute
+  async getByInstitute(id) {
+    const questionAnswer = await this.queryRepository.findOne({ instituteId: id }).populate("instituteId");
+    return questionAnswer
   }
 
   async update(id, data) {
