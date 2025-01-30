@@ -11,6 +11,46 @@ const instituteService = new InstituteService();
 const counselorService = new CounselorService();
 const studentService = new StudentService();
 
+//getStates
+export const getStates = async (req, res) => {
+  try {
+    const states = await userService.getStates();
+    return res.status(200).json({
+      success: true,
+      message: "Successfully fetched states",
+      data: states,
+      err: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong",
+      data: {},
+      success: false,
+      err: error,
+    });
+  }
+};
+
+//getCitiesByState
+export const getCitiesByState = async (req, res) => {
+  try {
+    const cities = await userService.getCitiesByState(req.params.id);
+    return res.status(200).json({
+      success: true,
+      message: "Successfully fetched cities",
+      data: cities,
+      err: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong",
+      data: {},
+      success: false,
+      err: error.message,
+    });
+  }
+};
+
 export const signup = async (req, res) => {
   console.log(req.body);
   //req parms refercode

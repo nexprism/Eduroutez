@@ -27,6 +27,30 @@ class UserService {
     }
   }
 
+  //getStates
+  async getStates() {
+    try {
+      const states = await this.userRepository.getStates();
+      return states;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  //getCitiesByState
+  async getCitiesByState(stateId) {
+    try {
+      const cities = await this.userRepository.getCityByState(stateId);
+      return cities;
+    } catch (error) {
+      throw error;
+    }
+
+  }
+
+
+
   //getbyid
   async getUserById(id) {
     try {

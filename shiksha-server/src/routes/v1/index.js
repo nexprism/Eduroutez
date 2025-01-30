@@ -2,7 +2,7 @@ import express from "express";
 import { EventEmitter } from "events";
 EventEmitter.defaultMaxListeners = 20;``
 
-import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset } from "../../controllers/auth-controller.js";
+import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset, getStates, getCitiesByState } from "../../controllers/auth-controller.js";
 import accessTokenAutoRefresh from "../../middlewares/accessTokenAutoRefresh.js";
 import passport from "passport";
 import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from "../../controllers/coupon-controller.js";
@@ -120,6 +120,11 @@ router.get("/query/:id", getQuery);
 router.get("/query-by-institute/:id", getQueryByInstitute);
 router.patch("/query/:id",  updateQuery);
 router.delete("/query/:id", deleteQuery);
+
+
+//states
+router.get("/states", getStates);
+router.get("/cities-by-state/:id", getCitiesByState);
 
 /**
  * institute routes

@@ -63,7 +63,8 @@ class questionAnswerService {
 
   //getByInstitute
   async getByInstitute(id) {
-    const questionAnswer = await this.queryRepository.findOne({ instituteId: id }).populate("instituteId");
+    console.log("id", id);
+    const questionAnswer = await this.queryRepository.getQueryByInstitute(id);
     return questionAnswer
   }
 
