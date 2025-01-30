@@ -114,41 +114,43 @@ const GeneralInfo = () => {
   const [isEdit, setIsEdit] = React.useState(false);
 
 
-    const { data: institute } = useQuery({
-      queryKey: ['institute'],
-      queryFn: async () => {
+    useEffect(() => {
+      const fetchData = async () => {
         const id = localStorage.getItem('instituteId');
-        // console.log('hiiiiii',email);
         const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
-      const instituteData = response.data.data;
+        const instituteData = response.data.data;
 
-      form.reset({
-        instituteName: instituteData.instituteName,
-        institutePhone: instituteData.institutePhone,
-        email: instituteData.email,
-        establishedYear: instituteData.establishedYear,
-        organizationType: instituteData.organizationType,
-        website: instituteData.website,
-        city: instituteData.city,
-        state: instituteData.state,
-        address: instituteData.address,
-        about: instituteData.about,
-        minFees: instituteData.minFees,
-        maxFees: instituteData.maxFees,
-        affiliation: instituteData.affiliation,
-        highestPackage: instituteData.highestPackage,
-        streams: instituteData.streams,
-        specialization: instituteData.specialization,
-        thumbnail: instituteData.thumbnailImage,
-        cover: instituteData.coverImage,
-        logo: instituteData.instituteLogo,
-        brochure: instituteData.brochure
-      });
-      setPreviewThumbnailUrl(instituteData.thumbnailImage ? `${baseURL}/${instituteData.thumbnailImage}` : null);
-      setPreviewCoverUrl(instituteData.coverImage ? `${baseURL}/${instituteData.coverImage}` : null);
-      setPreviewLogoUrl(instituteData.instituteLogo ? `${baseURL}/${instituteData.instituteLogo}` : null);
-      setPreviewbrochure(instituteData.brochure ? `${baseURL}/${instituteData.brochure}` : null);
-    }})
+        form.reset({
+          instituteName: instituteData.instituteName,
+          institutePhone: instituteData.institutePhone,
+          email: instituteData.email,
+          establishedYear: instituteData.establishedYear,
+          organizationType: instituteData.organizationType,
+          website: instituteData.website,
+          city: instituteData.city,
+          state: instituteData.state,
+          address: instituteData.address,
+          about: instituteData.about,
+          minFees: instituteData.minFees,
+          maxFees: instituteData.maxFees,
+          affiliation: instituteData.affiliation,
+          highestPackage: instituteData.highestPackage,
+          streams: instituteData.streams,
+          specialization: instituteData.specialization,
+          thumbnail: instituteData.thumbnailImage,
+          cover: instituteData.coverImage,
+          logo: instituteData.instituteLogo,
+          brochure: instituteData.brochure
+        });
+
+        setPreviewThumbnailUrl(instituteData.thumbnailImage ? `${baseURL}/${instituteData.thumbnailImage}` : null);
+        setPreviewCoverUrl(instituteData.coverImage ? `${baseURL}/${instituteData.coverImage}` : null);
+        setPreviewLogoUrl(instituteData.instituteLogo ? `${baseURL}/${instituteData.instituteLogo}` : null);
+        setPreviewbrochure(instituteData.brochure ? `${baseURL}/${instituteData.brochure}` : null);
+      };
+
+      fetchData();
+    }, [pathname]);
 
 
   const form = useForm<z.infer<typeof formSchema>>({

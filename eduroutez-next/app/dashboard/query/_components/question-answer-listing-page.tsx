@@ -13,11 +13,12 @@ type TQuestionAnswerListingPage = {};
 export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage) {
   const { searchQuery, page, limit } = useQuestionAnswerTableFilters();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const id = localStorage.getItem('instituteId');
 
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['question-answers', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/queries`, {
+      const response = await axiosInstance.get(`${apiUrl}/query-by-institute/${id}`, {
         params: {
           searchFields: JSON.stringify({}),
           sort: JSON.stringify({ createdAt: 'desc' }),
@@ -63,7 +64,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             </div>
             <Separator />
             <QuestionAnswerTable
-              data={displayedQueries}
+              data={displayedQueries ?? []}
               totalData={data?.data?.totalDocuments ?? 0}
             />
           </div>
