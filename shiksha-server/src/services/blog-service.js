@@ -50,6 +50,8 @@ class BlogService {
         sortConditions[field] = direction === "asc" ? 1 : -1;
       }
 
+      console.log("filterConditions", filterConditions);
+
       // Execute query with dynamic filters, sorting, and pagination
       // const populateFields = ["createdBy"];
       const blogs = await this.blogRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);

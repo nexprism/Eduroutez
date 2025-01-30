@@ -8,6 +8,9 @@ const questionAnswerSchema = new mongoose.Schema(
     answer: {
       type: String,
     },
+    answers: {
+      type: Array,
+    },
     grade:{
       type:String
     },

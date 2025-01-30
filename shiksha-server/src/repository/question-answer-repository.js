@@ -21,6 +21,31 @@ class QuestionAnswerRepository extends CrudRepository {
       throw error;
     }
   }
+
+  //submitAnswer
+  async submitAnswer(id, data) {
+    try {
+
+      const answers = {
+        answer: data.answer,
+        answeredBy: data.answeredBy,
+        answeredAt: new Date()
+      };
+
+      const result = await this.model
+        .findByIdAndUpdate(id, { $push: { answers: answers } }, { new: true });
+
+      return result;
+
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+
+
+      
   
   async getQuestion(id) {
     try {

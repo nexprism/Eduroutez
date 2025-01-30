@@ -77,7 +77,7 @@ class questionAnswerService {
 
   async update(id, data) {
     try {
-      const questionAnswer = await this.questionAnswerRepository.update(id, data);
+      const questionAnswer = await this.questionAnswerRepository.submitAnswer(id, data);
 
       return questionAnswer;
     } catch (error) {

@@ -7,14 +7,29 @@ class BlogRepository extends CrudRepository {
   }
 
   //getall()
-  async getAll() {
-    try {
-      const blogs = await Blog.find();
-      return blogs;
-    } catch (error) {
-      console.error('Error in BlogRepository.getAll:', error.message);
-      throw error;
+  async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = []) {
+    let query = this.model
+      .find(filterCon)
+      .sort(sortCon)
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum);
+
+    // Populate fields if any
+    if (populateFields?.length > 0) {
+      populateFields?.forEach((field) => {
+        query = query.populate(field);
+      });
     }
+    const result = await query;
+    // Get the total count of documents matching the filter
+    const totalDocuments = await this.model.countDocuments(filterCon);
+
+    return {
+      result,
+      currentPage: pageNum,
+      totalPages: Math.ceil(totalDocuments / limitNum),
+      totalDocuments,
+    };
   }
 
 
