@@ -438,6 +438,46 @@ export async function addFacility(req, res) {
   }
 }
 
+//deleteFacility
+export async function deleteFacility(req, res) {
+  try {
+    const instituteId = req.params.id;
+    const facilityId = req.body.facility;
+    const response = await instituteService.deleteFacility(instituteId, facilityId);
+
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully deleted facility from the institute";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+}
+
+//deleteGallery
+export async function deleteGallery(req, res) {
+  try {
+    const instituteId = req.params.id;
+    const galleryimg = req.body.image;
+    const response = await instituteService.deleteGallery(instituteId, galleryimg);
+
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully deleted gallery image from the institute";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+
+}
+
+
+
+  
+
+
+
+
 export const submitIssue = async (req, res) => {
   try {
     const instituteId = req.user;

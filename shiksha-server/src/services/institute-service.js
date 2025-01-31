@@ -41,6 +41,28 @@ console.log('updatesInstitute',updatesInstitute);
     }
   }
 
+  //deleteFacility
+  async deleteFacility(id,facilityId){
+    try {
+      const updatesInstitute = await this.instituteRepository.removeFacility(id,facilityId);
+
+      return updatesInstitute;
+    } catch (error) {
+      throw new AppError("Cannot update the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  //deleteGallery
+  async deleteGallery(id,galleryimg){
+    try {
+      const updatesInstitute = await this.instituteRepository.removeGallery(id,galleryimg);
+
+      return updatesInstitute;
+    } catch (error) {
+      throw new AppError("Cannot update the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
 
   async Upgrade(email,data){
     try {
