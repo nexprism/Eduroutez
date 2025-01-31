@@ -178,7 +178,7 @@ export async function allowUser(req, res) {
 
     const institute = await instituteService.get(id);
     if (institute) {
-      institute.status = false;
+      institute.status = true;
       const instituteresponse = await instituteService.update(id, institute);
     }
 
