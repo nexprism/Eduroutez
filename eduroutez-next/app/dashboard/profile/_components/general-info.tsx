@@ -431,7 +431,7 @@ const GeneralInfo = () => {
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}                     >
-                    >
+                    
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Organization Type" />
