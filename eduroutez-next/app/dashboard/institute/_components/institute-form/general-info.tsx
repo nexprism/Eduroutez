@@ -165,8 +165,8 @@ const GeneralInfo = () => {
       institutePhone:'',
       email:'',
       establishedYear:'',
-      organisationType:'private',
       website:'',
+        organisationType: '',
       city:'',
       state:'',
       address:'',
@@ -439,8 +439,7 @@ const GeneralInfo = () => {
                     <FormLabel>Organization Type</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                      value={field.value}                     >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Organization Type" />

@@ -20,21 +20,21 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
     queryFn: async () => {
       if (!id || !role) return null;
 
-      const params = {
+      const params = role !== 'SUPER_ADMIN' ? {
         searchFields: JSON.stringify({}),
         sort: JSON.stringify({ createdAt: 'desc' }),
         page,
         limit
-      };
+      } : {};
 
       const response = await axiosInstance.get(
-        role === 'SUPER_ADMIN' 
-          ? `${apiUrl}/query`
-          : `${apiUrl}/query-by-institute/${id}`, 
+        role === 'SUPER_ADMIN'
+          ? `${apiUrl}/queries`
+          : `${apiUrl}/query-by-institute/${id}`,
         { params }
       );
 
-      return response.data;
+      return role === 'SUPER_ADMIN' ? response.data?.data?.result : response.data?.data;
     },
     enabled: !!id && !!role
   });
@@ -48,14 +48,14 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading 
-                title={`Queries (${data?.data?.length ?? 0})`} 
+                title={`Queries (${data?.length ?? 0})`} 
                 description="All question and answers are listed here." 
               />
             </div>
             <Separator />
             <QuestionAnswerTable 
-              data={data?.data ?? []} 
-              totalData={data?.data?.length ?? 0} 
+              data={data ?? []} 
+              totalData={data?.length ?? 0} 
             />
           </div>
         )

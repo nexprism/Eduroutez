@@ -60,6 +60,7 @@ export default function AppSidebar({
         ? [
             'Institutes',
             'Admins',
+            'Queries',
             'Promotions',
             'Refer and Earn',
             'FAQs',

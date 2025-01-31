@@ -51,6 +51,7 @@ const orgTypes = [
   { value: 'private', label: 'Private' }
 ];
 
+
 const formSchema = z.object({
   title: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
@@ -219,6 +220,7 @@ export default function CreateInstitute() {
         
       });
       console.log("Form values:", );
+      console.log('organisationType',instituteData.organisationType)
       setPreviewThumbnailUrl(`${baseURL}/${instituteData.thumbnailImage}`);
       setPreviewCoverUrl(`${baseURL}/${instituteData.coverImage}`);
       setPreviewLogoUrl(`${baseURL}/${instituteData.instituteLogo}`);
