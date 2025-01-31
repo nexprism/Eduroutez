@@ -106,7 +106,7 @@ const formSchema = z.object({
   email: z.string({
     required_error: 'Please enter an email.'
   }),
-  establishedYear: z.string({
+  establishedYear: z.any({
     required_error: 'Please enter an established year.'
   }),
   website: z.string({
