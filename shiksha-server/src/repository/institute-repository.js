@@ -114,6 +114,51 @@ class InstituteRepository extends CrudRepository {
     }
   }
 
+  //removeFacility
+  async removeFacility(id, facility) {
+    try {
+
+      //get institute and remove facility from array
+      const result = await this.model.findByIdAndUpdate(
+        id,
+        { $pull: { facilities: facility } },
+        { new: true }
+      );
+
+
+
+
+
+      
+      return result;
+    }
+    catch (error) {
+      throw error;
+    }
+  }
+
+  //removeGallery
+  async removeGallery(id, gallery) {
+    try {
+
+      //get institute and remove facility from array
+      const result = await this.model.findByIdAndUpdate
+        (id,
+          { $pull: { gallery: gallery } },
+          { new: true }
+        );
+
+      return result;
+    }
+    catch (error) {
+      throw error;
+    }
+
+  }
+  
+
+
+
   //bestRatedInstitute
   async bestRatedInstitute() {
     try {

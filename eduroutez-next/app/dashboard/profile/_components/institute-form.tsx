@@ -310,6 +310,7 @@ console.log('Error updating institute:', error.message); }
         `${apiUrl}/addfacility/${id}`,
         { title: values.facility }
       );
+      fetchInstituteData();
       console.log('Facility added successfully:', response.data);
       console.log('Facility added successfully:', response.data);
       toast.success('Facility added successfully!');
