@@ -229,6 +229,28 @@ export default function CreateInstitute() {
     }
   };
 
+
+
+  const deleteFacility = async (facility: string) => {
+    try {
+      const id = segments[4];
+      console.log('Deleting facility:', facility);
+      const response = await axiosInstance.post(`${apiUrl}/delete-facility/${id}`, {
+        data: { facility }
+      });
+      
+      // Update the facilities list after successful deletion
+      setPastFacilities(prevFacilities => 
+        prevFacilities.filter(f => f !== facility)
+      );
+      
+      console.log('Facility deleted successfully:', response.data);
+      toast.success('Facility deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting facility:', error);
+      toast.error('Failed to delete facility');
+    }
+  };
   
   useEffect(() => {
    
@@ -688,58 +710,70 @@ console.log('Error updating institute:', error.message); }
   </Card>
 </TabsContent>
 
+
 <TabsContent value="facility">
-  <Card>
-    <CardHeader>
-      <CardTitle>Facility</CardTitle>
-      <p className="text-sm text-gray-600">
-        Add facilities provided by your institute.
-      </p>
-          
-    </CardHeader>
-    <CardContent>
-      <Form {...form}>
+    <Card>
+      <CardHeader>
+        <CardTitle>Facility</CardTitle>
+        <p className="text-sm text-gray-600">
+          Add facilities provided by your institute.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
           <div className="space-y-6">
-              <FormField
-                control={form.control}
-                name="facility"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Facility</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter facility"
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="button"
-                onClick={addFacility}
-              >
-                Add Facility
-              </Button>
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold">Past Facilities</h3>
-                <ul className="list-disc pl-5">
-                  {pastFacilities && pastFacilities.length > 0 ? (
+            <FormField
+              control={form.control}
+              name="facility"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Facility</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter facility"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="button"
+              onClick={addFacility}
+            >
+              Add Facility
+            </Button>
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold">Past Facilities</h3>
+              <ul className="space-y-2">
+                {pastFacilities && pastFacilities.length > 0 ? (
                   pastFacilities.map((facility, index) => (
-                    <li key={index}>{facility}</li>
+                    <li key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                      <span>{facility}</span>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteFacility(facility)}
+                      >
+                        <X size={16} className="mr-1" />
+                        Delete
+                      </Button>
+                    </li>
                   ))
-                  ) : (
+                ) : (
                   <li>No facilities available</li>
-                  )}
-                </ul>
-                </div>
-</div>
-</Form>
-</CardContent>
-</Card>
-</TabsContent>
+                )}
+              </ul>
+            </div>
+          </div>
+        </Form>
+      </CardContent>
+    </Card>
+  </TabsContent>
+
 
   <TabsContent value="fee">
     <Card>

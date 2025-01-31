@@ -55,9 +55,11 @@ const coursePreviewType = [
   { value: 'yutube', label: 'Youtube' }
 ];
 const courseTypes = [
-  { value: 'live', label: 'Live' },
-  { value: 'text', label: 'Text' },
-  { value: 'recorded', label: 'Recorded' }
+  { value: 'All', label: 'All' },
+  { value: 'Part-Time', label: 'Part-Time' },
+  { value: 'Full-Time', label: 'Full-Time' },
+  { value: 'Online', label: 'Online' }
+
 ];
 
 

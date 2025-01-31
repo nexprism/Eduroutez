@@ -26,28 +26,10 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           limit: limit
         }
       });
-      return response.data;
+      console.log('sxdcfvgbhn',response.data);
+      return response?.data?.data;
     }
   });
-
-  const { data: subscription } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/subscription/${localStorage.getItem('plan')}`
-      );
-      return response.data;
-    }
-  });
-
-  // Determine the number of queries allowed based on the plan
-  const allowedQueries = subscription?.data?.features?.find(
-    (feature: { key: string; value: string }) => feature.key === 'Lead Allocation'
-  )?.value;
-
-  const displayedQueries = allowedQueries
-    ? data?.data?.result?.slice(0, Math.ceil((allowedQueries / 100) * (data?.data?.totalDocuments ?? 0)))
-    : data?.data?.result ?? [];
 
   return (
     <PageContainer scrollable>
@@ -58,13 +40,13 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Queries (${displayedQueries?.length ?? 0}/${data?.data?.totalDocuments ?? 0})`}
+                title={`Queries (${data?.data?.length ?? 0}/${data?.data?.totalDocuments ?? 0})`}
                 description="All question and answers are listed here."
               />
             </div>
             <Separator />
             <QuestionAnswerTable
-              data={displayedQueries ?? []}
+              data={data?.data ?? []}
               totalData={data?.data?.totalDocuments ?? 0}
             />
           </div>
