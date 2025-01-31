@@ -135,12 +135,8 @@ const formSchema = z.object({
     required_error: 'You need to select one option.'
   }),
   isCourseDiscounted: z.enum(['yes', 'no']).optional(),
-  applicationStartDate: z.date({
-    required_error: 'Application start date is required.'
-  }),
-  applicationEndDate: z.date({
-    required_error: 'Application end date is required.'
-  }),
+  applicationStartDate: z.date().optional(),
+  applicationEndDate: z.date().optional(),
   isCoursePopular: z.boolean().optional(),
   isCourseTreanding: z.boolean().optional(),
 });
@@ -986,7 +982,7 @@ export default function CreateCourse() {
                                   selected={field.value}
                                   onSelect={field.onChange}
                                   disabled={(date) =>
-                                    date < new Date('1900-01-01')
+                                    date <= new Date()
                                   }
                                   initialFocus
                                 />
