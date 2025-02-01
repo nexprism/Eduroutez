@@ -359,7 +359,7 @@ router.delete("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jw
  */
 router.post("/webinar", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createWebinar);
 router.get("/webinars", getWebinars);
-router.get("/webinars-by-institute/:instituteId", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinarsByInstitute);
+router.get("/webinars-by-institute/:instituteId",  getWebinarsByInstitute);
 router.get("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinar);
 router.patch("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateWebinar);
 router.delete("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteWebinar);
