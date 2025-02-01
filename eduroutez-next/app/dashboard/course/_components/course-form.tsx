@@ -62,8 +62,16 @@ const courseTypes = [
 
 ];
 
+const instructors = [
+  { value: 'instructor1', label: 'John Doe' },
+  { value: 'instructor2', label: 'Jane Smith' }
+];
 
-
+const levels = [
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'advanced', label: 'Advanced' }
+];
 
 const statuses = [
   { value: 'active', label: 'Active' },
@@ -88,8 +96,12 @@ const formSchema = z.object({
   courseType: z.string({
     required_error: 'Please select a course type.'
   }),
-
-  
+  instructor: z.string({
+    required_error: 'Please select an instructor.'
+  }),
+  courseLevel: z.string({
+    required_error: 'Please select a level.'
+  }),
   shortDescription: z.any().optional(),
   longDescription: z.any().optional(),
 
@@ -112,6 +124,7 @@ const formSchema = z.object({
   eligibility: z.string().optional(),
   cutOff: z.string().optional(),
   ranking: z.string().optional(),
+  examAccepted: z.string().optional(),
   courseDurationYears: z.any().optional(),
   courseDurationMonths: z.any().optional(),
 
@@ -317,6 +330,8 @@ export default function CreateCourse() {
       formData.append('shortDescription', values.shortDescription);
       formData.append('longDescription', values.longDescription);
       formData.append('courseType', values.courseType);
+      formData.append('instructor', values.instructor);
+      formData.append('courseLevel', values.courseLevel);
       formData.append('category', values.category);
       formData.append('status', values.status);
       formData.append('instituteCategory', values.instituteCategory);
@@ -324,6 +339,9 @@ export default function CreateCourse() {
       formData.append('language', values.language);
       formData.append('isCoursePopular', values.isCoursePopular?.toString() || 'false');
       formData.append('isCourseTrending', values.isCourseTreanding?.toString() || 'false');
+      if (values.examAccepted !== undefined) {
+        formData.append('examAccepted', values.examAccepted);
+      }
       if (values.eligibility !== undefined) {
         formData.append('eligibility', values.eligibility);
       }
@@ -493,11 +511,14 @@ export default function CreateCourse() {
           isCourseFree: course.data.isCourseFree,
           isCourseDiscounted: course.data.isCourseDiscounted,
           courseType: course.data.courseType,
+          instructor: course.data.instructor,
+          courseLevel: course.data.courseLevel,
           category: course.data.category,
           status: course.data.status,
           instituteCategory: course.data.instituteCategory,
           visibility: course.data.visibility,
           language: course.data.language,
+          examAccepted: course.data.examAccepted,
           eligibility: course.data.eligibility,
           cutOff: course.data.cutOff,
           ranking: course.data.ranking,
@@ -640,7 +661,67 @@ export default function CreateCourse() {
                       )}
                     />
 
+                    <FormField
+                      control={form.control}
+                      name="instructor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Instructor</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select Instructor" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {instructors.map((instructor) => (
+                                <SelectItem
+                                  key={instructor.value}
+                                  value={instructor.value}
+                                >
+                                  {instructor.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
+                    <FormField
+                      control={form.control}
+                      name="courseLevel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Level</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select Level" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {levels.map((level) => (
+                                <SelectItem
+                                  key={level.value}
+                                  value={level.value}
+                                >
+                                  {level.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}
@@ -870,6 +951,17 @@ export default function CreateCourse() {
                       )}
                     />
 
+                    <FormField
+                      control={form.control}
+                      name="examAccepted"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Exam Accepted</FormLabel>
+                          <Input placeholder="Enter Exam Accepted" {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}
@@ -1402,9 +1494,6 @@ export default function CreateCourse() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Thumbnail Image</FormLabel>
-                       <span className="text-xs text-gray-500 ml-2">
-          (Image size must be less than 1 MB - Recommended size: 446px x 290px)
-        </span>
                           <FormControl>
                             <div className="space-y-4">
                               <Input
@@ -1457,9 +1546,6 @@ export default function CreateCourse() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Cover Image</FormLabel>
-                          <span className="text-xs text-gray-500 ml-2">
-          (Image size must be less than 1 MB - Recommended size: 446px x 290px)
-        </span>
                           <FormControl>
                             <div className="space-y-4">
                               <Input
@@ -1577,9 +1663,6 @@ export default function CreateCourse() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Meta Image</FormLabel>
-                          <span className="text-xs text-gray-500 ml-2">
-          (Image size must be less than 1 MB - Recommended size less then 1024px x 1024)
-        </span>
                           <FormControl>
                             <div className="space-y-4">
                               <Input
