@@ -209,7 +209,7 @@ router.post("/counselorslots", accessTokenAutoRefresh, passport.authenticate("jw
 router.post("/bookslot", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), bookSlots);
 router.post("/markslot", markSlot);
 router.get("/counselorslots", getCounselors);
-router.get("/counselorslots/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorSlot);
+router.get("/counselorslots/:email", getCounselorSlot);
 router.patch("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselorSlot);
 //delete counselor slot
 router.delete("/counselorslot/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselorSlot);
