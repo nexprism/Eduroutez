@@ -773,40 +773,40 @@ const GeneralInfo = () => {
                   <FormControl>
                     <div className="space-y-4">
                       <Input
-                        type="file"
-                        accept="image/png, image/jpeg, image/webp"
-                        onChange={handleBrochureChange}
-                        ref={fileInputBrochureRef} // Reference to reset input
-                        className="hidden "
+                      type="file"
+                      accept="image/png, image/jpeg, image/webp, application/pdf"
+                      onChange={handleBrochureChange}
+                      ref={fileInputBrochureRef} // Reference to reset input
+                      className="hidden "
                       />
 
                       {previewbrochure ? (
-                        <div className="relative">
-                          <Image
-                            src={previewbrochure}
-                            alt="Preview"
-                            className="max-h-[200px] max-w-full rounded-md object-cover"
-                            width={1200}
-                            height={1200}
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute right-0 top-0 -mr-2 -mt-2"
-                            onClick={removeBrochure}
-                          >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove image</span>
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={triggerBrochureFileInput}
-                          className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                      <div className="relative">
+                        <Image
+                        src={previewbrochure}
+                        alt="Preview"
+                        className="max-h-[200px] max-w-full rounded-md object-cover"
+                        width={1200}
+                        height={1200}
+                        />
+                        <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute right-0 top-0 -mr-2 -mt-2"
+                        onClick={removeBrochure}
                         >
-                          <Plus className="text-grey-400 h-10 w-10" />
-                        </div>
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Remove image</span>
+                        </Button>
+                      </div>
+                      ) : (
+                      <div
+                        onClick={triggerBrochureFileInput}
+                        className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                      >
+                        <Plus className="text-grey-400 h-10 w-10" />
+                      </div>
                       )}
                     </div>
                   </FormControl>
