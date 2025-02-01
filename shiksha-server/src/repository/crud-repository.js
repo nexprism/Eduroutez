@@ -34,6 +34,10 @@ class CrudRepository {
       if (result.plan && result.reviews){
         result = await this.model.findById(id).populate("plan").populate("reviews");
       }
+
+      if(result.category){
+        result = await this.model.findById(id).populate("category");
+      }
       
       return result;
     } catch (error) {
