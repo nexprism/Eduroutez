@@ -1,4 +1,5 @@
 import { BlogRepository } from "../repository/index.js";
+import AppError from "../utils/errors/app-error.js";
 
 class BlogService {
   constructor() {

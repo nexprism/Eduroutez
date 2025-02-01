@@ -13,7 +13,19 @@ import axiosInstance from '@/lib/axios';
 
 import { Blog } from '@/types';
 
-type BlogResponse = {
+type SuperAdminBlogResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    result: Blog[];
+    currentPage: number;
+    totalPages: number;
+    totalDocuments: number;
+  };
+  error: Record<string, unknown>;
+};
+
+type InstituteAdminBlogResponse = {
   success: boolean;
   message: string;
   data: Blog[];
@@ -25,26 +37,62 @@ type TBlogListingPage = {};
 export default function BlogListingPage({}: TBlogListingPage) {
   const { searchQuery, page, limit } = useBlogTableFilters();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  
+  const userRole = localStorage.getItem('role');
+  const instituteId = localStorage.getItem('instituteId');
 
-  const { data, isLoading, isSuccess, error } = useQuery<BlogResponse>({
-    queryKey: ['blogs', searchQuery],
+  const { data, isLoading, isSuccess, error } = useQuery<SuperAdminBlogResponse | InstituteAdminBlogResponse>({
+    queryKey: ['blogs', searchQuery, userRole],
     queryFn: async () => {
       try {
-        const instituteId = localStorage.getItem('instituteId');
-        console.log('InstituteId from localStorage:', instituteId);
-        
-        if (!instituteId) {
-          throw new Error('Institute ID not found in localStorage');
+        let response;
+
+        if (userRole === 'SUPER_ADMIN') {
+          response = await axiosInstance.get(`${apiUrl}/blogs`);
+        } else {
+          if (!instituteId) {
+            throw new Error('Institute ID not found in localStorage');
+          }
+          response = await axiosInstance.get(`${apiUrl}/blogs-by-institute/${instituteId}`);
         }
 
-        const response = await axiosInstance.get(`${apiUrl}/blogs-by-institute/${instituteId}`);
         return response.data;
       } catch (error) {
         console.error('Error in queryFn:', error);
         throw error;
       }
-    }
+    },
+    enabled: !!userRole && (userRole === 'SUPER_ADMIN' || !!instituteId)
   });
+
+  // Get the correct data array based on user role
+  const getBlogData = () => {
+    if (!data) return [];
+    
+    if (userRole === 'SUPER_ADMIN') {
+      const superAdminData = data as SuperAdminBlogResponse;
+      return superAdminData.data.result;
+    } else {
+      const instituteData = data as InstituteAdminBlogResponse;
+      return instituteData.data;
+    }
+  };
+
+  // Get total count based on user role
+  const getTotalCount = () => {
+    if (!data) return 0;
+    
+    if (userRole === 'SUPER_ADMIN') {
+      const superAdminData = data as SuperAdminBlogResponse;
+      return superAdminData.data.totalDocuments;
+    } else {
+      const instituteData = data as InstituteAdminBlogResponse;
+      return instituteData.data.length;
+    }
+  };
+
+  const blogData = getBlogData();
+  const totalCount = getTotalCount();
 
   return (
     <PageContainer scrollable>
@@ -57,7 +105,7 @@ export default function BlogListingPage({}: TBlogListingPage) {
           <div className="space-y-4">
             <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
               <Heading
-                title={`Blog (${data.data.length})`}
+                title={`Blog (${totalCount})`}
                 description="All blogs online and offline are listed here."
               />
               <div className="flex gap-4">
@@ -75,8 +123,8 @@ export default function BlogListingPage({}: TBlogListingPage) {
             </div>
             <Separator />
             <BlogTable
-              data={data.data}
-              totalData={data.data.length}
+              data={blogData}
+              totalData={totalCount}
             />
           </div>
         )
