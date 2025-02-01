@@ -7,6 +7,7 @@ export default function BlogcategoryPage() {
       <div className="flex-1 space-y-4 p-4 lg:p-8">
         <BlogCatogeryForm />
       </div>
+      
     </PageContainer>
   );
 }
