@@ -85,6 +85,12 @@ const courseSchema = new mongoose.Schema(
     coursePrice: {
       type: Number,
     },
+    courseMaxPrice: {
+      type: Number,
+    },
+    courseMinPrice: {
+      type: Number
+    },
     courseDiscount: {
       type: Number,
     },
