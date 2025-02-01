@@ -782,7 +782,7 @@ const GeneralInfo = () => {
                                <div className="space-y-4">
                                  <Input
                                    type="file"
-                                   accept="image/png, image/jpeg, image/webp"
+                                   accept="image/png, image/jpeg, image/webp, application/pdf"
                                    onChange={handleBrochureChange}
                                    ref={fileInputBrochureRef} // Reference to reset input
                                    className="hidden "
