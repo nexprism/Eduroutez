@@ -87,7 +87,8 @@ class CourseService {
   
 
   async get(id) {
-    const course = await this.courseRepository.get(id);
+    const populateFields = ["category"];
+    const course = await this.courseRepository.get(id, populateFields);
     return course;
   }
 

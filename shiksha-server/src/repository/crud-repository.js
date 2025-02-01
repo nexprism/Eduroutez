@@ -25,7 +25,7 @@ class CrudRepository {
     }
   }
 
-  async get(id) {
+  async get(id, populateFields = []) {
     try {
       // console.log('hello',id);
       
@@ -35,8 +35,8 @@ class CrudRepository {
         result = await this.model.findById(id).populate("plan").populate("reviews");
       }
 
-      if(result.category){
-        result = await this.model.findById(id).populate("category");
+      if (populateFields?.length > 0) {
+        result = await this.model.findById(id).populate(populateFields);
       }
       
       return result;
