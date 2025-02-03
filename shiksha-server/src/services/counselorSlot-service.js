@@ -7,8 +7,19 @@ class questionAnswerService {
 
   async create(data) {
     try {
+
+      //check if slot already exists
+      const slot = await this.counselorSlotRepository.get(data.counselorEmail);
+      console.log('slot',slot);
+      if(slot) {
+        //update the slot
+        const updatedSlot = await this.counselorSlotRepository.update(data.counselorEmail, data);
+        console.log('updatedSlot',updatedSlot);
+        return updatedSlot;
+      }else {
       const counselorSlot = await this.counselorSlotRepository.create(data);
       return counselorSlot;
+      }
     } catch (error) {
       throw error;
     }

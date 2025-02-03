@@ -10,6 +10,7 @@ const counselorSlotService = new CounselorSlotService();
 export const createCounselorSlots = async (req, res) => {
   try {
     const payload = req.body;
+    console.log("Incoming data:", payload);
     const response = await counselorSlotService.create(payload);
     console.log(response);
     SuccessResponse.data = response;
