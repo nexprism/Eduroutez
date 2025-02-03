@@ -82,16 +82,14 @@ export const signup = async (req, res) => {
 
 
     var is_verified = true;
+    var status = true;
     //generate random referalCode
     var referalCode = Math.random().toString(36).substring(7);
     
     
-
-
-
-
     if (req.body.role === 'institute'){
       is_verified = false;
+      status = false;
     }
 
     var referdata = {};
