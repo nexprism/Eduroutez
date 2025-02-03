@@ -77,7 +77,7 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'Admins',
+    title: 'Users',
     url: '/dashboard/admin',
     icon: 'usersround',
     isActive: false,
