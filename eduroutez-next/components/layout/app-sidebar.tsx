@@ -67,6 +67,7 @@ export default function AppSidebar({
             'News',
             'Streams',
             'Media',
+            'Online counselling',
             'Subscription',
             'Courses',
             'Streams',
