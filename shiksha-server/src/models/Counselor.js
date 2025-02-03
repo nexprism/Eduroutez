@@ -107,7 +107,7 @@ const counselorSchema = new mongoose.Schema(
           type: String,
           // required: true,
         },
-        counsellorId: {
+        counselorId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Counselor",
         },
