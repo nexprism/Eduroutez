@@ -170,22 +170,25 @@ class CounselorService {
   }
 
   //submitReview
-  async submitReview(email, data) {
+  async submitReview(id, data) {
     try {
 
       //get counselor by email
-      const counselor = await this.counselorRepository.getByEmail(email);
-      console.log('counselor',counselor);
+      const counselor = await this.counselorRepository.getByid(id);
+      console.log('data',data);
 
       //submit review
       const reviews = {
         studentEmail: data.studentEmail,
         comment: data.comment,
         rating: data.rating,
-        counsellorId: data.counsellorId,
+        counselorId: data.counselorId,
         date: Date.now(),
       }
+
+      // console.log('reviews',reviews);
       
+      console.log('counselor', counselor);
 
       counselor.reviews.push(reviews);
 

@@ -230,13 +230,14 @@ export const getCounselorsByCategory = async (req, res) => {
 //submitcounsellorslotReview
 export const submitcounsellorReview = async (req, res) => {
   try {
-    const { email, date, counsellorId, studentEmail, review, comment } = req.body;
-    const payload = { date, counsellorId, studentEmail, review, comment };
-    const response = await counselorService.submitReview(email, payload);
+    const { email, date, counselorId, studentEmail, rating, comment } = req.body;
+    const payload = { date, counselorId, studentEmail, rating, comment };
+    const response = await counselorService.submitReview(counselorId, payload);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully submitted the review";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.error("Error in submitcounsellorReview:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }
