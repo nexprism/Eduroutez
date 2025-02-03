@@ -23,13 +23,16 @@ const ScheduleSlotSchema = new Schema({
     },
     link: {
         type: String,
-        required: true
     },
     status: {
         type: String,
         enum: ['scheduled', 'completed', 'cancelled'],
         default: 'scheduled'
-    }
+    },
+    paymentId: {
+        type: String,
+        required: true
+    },
 });
 
 const ScheduleSlot = mongoose.model("ScheduleSlot", ScheduleSlotSchema);

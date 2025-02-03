@@ -2,6 +2,8 @@ import { console } from "inspector";
 import Counselor from "../models/Counselor.js";
 import CrudRepository from "./crud-repository.js";
 import User from "../models/User.js";
+import ScheduleSlot from "../models/ScheduleSlots.js";
+import Student from "../models/Student.js";
 import WalletTransaction from "../models/WalletTransaction.js";
 
 class CounselorRepository extends CrudRepository {
@@ -76,31 +78,31 @@ class CounselorRepository extends CrudRepository {
   }
 
 
-  async book(email, studentData) {
+  async book(id, studentData) {
     try {
-      console.log(email, studentData);
+      
+      const counselor = await this.model.findOne({ _id: id });
 
-      //get counselor by email
-
-      const counselor = await this.model.findOne({ email });
-
-      const result = await this.model.findOneAndUpdate(
-        { email: email }, // Match the schema field
-        { $push: { students: studentData } }, // Push student data into the students array
-        { new: true } // Return the updated document
-      );
-      if (!result) {
-        throw new Error('Counselor with the given email not found');
+      const slot = await ScheduleSlot.findOne({ date: studentData.date, slot: studentData.slot, status: "scheduled" });
+      if (slot) {
+        throw new Error('This slot is already booked,Plese select another slot');
       }
 
-      //set in wallet transaction
+      // Create a new slot
+      const newSlot = await ScheduleSlot.create({
+        counselorId: id,
+        studentId: studentData.studentId,
+        date: studentData.date,
+        slot: studentData.slot,
+        status: "scheduled",
+        paymentId: studentData.paymentId,
+      });
+
       var totalamount = 500;
 
       //30% of 500
       var commission = totalamount * 0.3;
       
-
-      //add amount in balance of user 
 
       const user = await User.findOne({ _id: counselor._id });
       if (user) {
@@ -114,20 +116,20 @@ class CounselorRepository extends CrudRepository {
       counselor.balance = counselor.balance + commission;
       await counselor.save();
 
-
+      const student = await Student.findOne({ _id: studentData.studentId });
 
       const walletTransaction = await WalletTransaction.create({
         user: counselor._id,
         type: "CREDIT",
         amount: commission,
-        remarks: "Counselling fee of slot " + studentData.slot + " booked by " + studentData.studentEmail + " On " + studentData.date,
+        remarks: "Counselling fee of slot " + studentData.slot + " booked by " + student.name + " On " + studentData.date,
         status: "COMPLETED",
         paymentId: studentData.paymentId, 
       });
   
-      return result; // Return the updated document
+      return newSlot; // Return the updated document
     } catch (error) {
-      console.error("Error in book function:", error);
+      console.error("Error in book function:", error.message);
       throw error;
     }
   }

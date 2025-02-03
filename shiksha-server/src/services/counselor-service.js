@@ -148,10 +148,16 @@ class CounselorService {
     return counselor;
   }
 
-  async book(email,data) {
+  async book(id,data) {
     // console.log('hi',email,data);
-    const questionAnswer = await this.counselorRepository.book(email,data);
+    try{
+    const questionAnswer = await this.counselorRepository.book(id,data);
+    
     return questionAnswer;
+    }catch(error){
+      console.log('error ',error.message);
+      throw error;
+    };
   }
 
   //getCounselorsByInstitute
