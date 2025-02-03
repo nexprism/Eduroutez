@@ -154,6 +154,9 @@ const instituteSchema = new mongoose.Schema(
       type:String,
       default:"Free Plan"
     },
+    examAccepted: {
+      type: String,
+    },
     expiryDate:{
       type:Date,
       default: new Date(new Date().setMonth(new Date().getMonth() + 1)),
