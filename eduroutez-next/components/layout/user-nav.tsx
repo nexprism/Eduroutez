@@ -15,6 +15,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 // import { useTransition } from 'react';
 import { toast } from 'sonner';
+import Image from 'next/image';
 export function UserNav() {
   // const { data: session } = useSession();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -56,7 +57,16 @@ export function UserNav() {
   };
   return (
     <DropdownMenu>
+        <Button variant="ghost" className="relative flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-700 hover:text-white transition-colors" onClick={() => window.location.href = 'https://eduroutez.com/'}>
+          <Image src="/back.png" 
+          width={20}
+          height={20}
+          alt="Visit Website" className="h-8 w-8" />
+          Visit Website
+        </Button>
       <DropdownMenuTrigger asChild>
+    
+
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarImage

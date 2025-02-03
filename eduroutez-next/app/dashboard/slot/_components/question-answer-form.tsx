@@ -45,21 +45,43 @@ export default function CounselorWeeklySlotsPage() {
     queryKey: ['counselorWeeklySlots', email],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/counselorslots/${email}`);
-      return response.data?.data;
-    },
-    onSuccess: (data) => {
-      if (data) {
+      if ( response?.data) {
+        const slotData = response.data;
         setSlots({
-          monday: { start: data.mondayStart, end: data.mondayEnd },
-          tuesday: { start: data.tuesdayStart, end: data.tuesdayEnd },
-          wednesday: { start: data.wednesdayStart, end: data.wednesdayEnd },
-          thursday: { start: data.thursdayStart, end: data.thursdayEnd },
-          friday: { start: data.fridayStart, end: data.fridayEnd },
-          saturday: { start: data.saturdayStart, end: data.saturdayEnd },
-          sunday: { start: data.sundayStart, end: data.sundayEnd },
+          monday: { 
+            start: slotData?.data?.mondayStart || '', 
+            end: slotData?.data?.mondayEnd || '' 
+          },
+          tuesday: { 
+            start: slotData?.data?.tuesdayStart || '', 
+            end: slotData?.data?.tuesdayEnd || '' 
+          },
+          wednesday: { 
+            start: slotData?.data?.wednesdayStart || '', 
+            end: slotData?.data?.wednesdayEnd || '' 
+          },
+          thursday: { 
+            start: slotData?.data?.thursdayStart || '', 
+            end: slotData?.data?.thursdayEnd || '' 
+          },
+          friday: { 
+            start: slotData?.data?.fridayStart || '', 
+            end: slotData?.data?.fridayEnd || '' 
+          },
+          saturday: { 
+            start: slotData?.data?.saturdayStart || '', 
+            end: slotData?.data?.saturdayEnd || '' 
+          },
+          sunday: { 
+            start: slotData?.data?.sundayStart || '', 
+            end: slotData?.data?.sundayEnd || '' 
+          },
         });
       }
+      return response.data;
+
     }
+      
   });
 
   // Create/Update slots mutation
@@ -86,12 +108,16 @@ export default function CounselorWeeklySlotsPage() {
       const response = await axiosInstance.post(`${apiUrl}/counselorslots`, formattedData);
       return response.data;
     },
-    onSuccess: () => {
-      toast.success('Weekly slots saved successfully');
-      queryClient.invalidateQueries({ queryKey: ['counselorWeeklySlots', email] });
+    onSuccess: (response) => {
+      if (response?.success) {
+        toast.success( 'Weekly slots saved successfully');
+        queryClient.invalidateQueries({ queryKey: ['counselorWeeklySlots', email] });
+      } else {
+        toast.error(response?.message || 'Failed to save slots');
+      }
     },
-    onError: () => {
-      toast.error('Failed to save slots');
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to save slots');
     }
   });
 
@@ -147,7 +173,6 @@ export default function CounselorWeeklySlotsPage() {
                       type="time"
                       value={slots[day].start}
                       onChange={(e) => handleTimeChange(day, 'start', e.target.value)}
-                      required
                     />
                   </div>
                   <div className="space-y-2">
@@ -156,7 +181,6 @@ export default function CounselorWeeklySlotsPage() {
                       type="time"
                       value={slots[day].end}
                       onChange={(e) => handleTimeChange(day, 'end', e.target.value)}
-                      required
                     />
                   </div>
                 </div>
