@@ -137,7 +137,7 @@ export async function getCounselor(req, res) {
     SuccessResponse.message = "Successfully fetched the counselor";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
-    conosoel.error("Error in getCounselor:", error.message);
+    console.error("Error in getCounselor:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }

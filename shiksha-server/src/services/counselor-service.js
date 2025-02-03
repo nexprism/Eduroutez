@@ -74,7 +74,7 @@ class CounselorService {
     
     const counselor = await this.counselorRepository.get(email);
 
-    console.log('counselor',counselor);
+    // console.log('counselor',counselor);
 
     if(!counselor) {
       //find in user by email
@@ -85,6 +85,25 @@ class CounselorService {
         const counselor = await this.create({userId:user._id,email:user.email,firstname:user.name,lastname:user.lastname});
       }
     }
+
+    if (counselor[0].reviews.length > 0) {
+
+      //push student object into reviews array
+      counselor[0].reviews.forEach((review) => {
+        // const totalRating = counselor[0].reviews.reduce((acc, review) => acc + review.rating, 0);
+
+        //get student by email
+        const student =  this.userRepository.get(review.studentEmail);
+        console.log('review student',student);
+        review.student = student;
+      });
+
+      
+      console.log('counselor[0].reviews',counselor[0].reviews);
+      
+      // counselor[0].avgrating = totalRating / counselor[0].reviews.length;
+    }
+
     return counselor;
 
 

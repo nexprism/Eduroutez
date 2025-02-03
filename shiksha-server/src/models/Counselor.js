@@ -93,7 +93,7 @@ const counselorSchema = new mongoose.Schema(
       {
         studentEmail: {
           type: String,
-          // required: true,
+          ref: "Student",
         },
         rating: {
           type: Number,
