@@ -107,6 +107,10 @@ const counselorSchema = new mongoose.Schema(
           type: String,
           // required: true,
         },
+        counsellorId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Counselor",
+        },
         date: {
           type: String,
           // required: true,

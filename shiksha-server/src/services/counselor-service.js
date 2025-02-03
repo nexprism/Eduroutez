@@ -182,8 +182,8 @@ class CounselorService {
         studentEmail: data.studentEmail,
         comment: data.comment,
         rating: data.rating,
-        slot: data.slot,
-        date: data.date,
+        counsellorId: data.counsellorId,
+        date: Date.now(),
       }
       
 
