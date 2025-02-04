@@ -1,9 +1,8 @@
 'use client';
 
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { Slot } from '@/types';
-import axiosInstance from '@/lib/axios';
+import { CellAction } from './cell-action';
 
 export const columns: ColumnDef<Slot>[] = [
   {
@@ -11,64 +10,62 @@ export const columns: ColumnDef<Slot>[] = [
     cell: ({ row }) => <div>{row.index + 1}</div>,
   },
   {
-    header: 'Student',
-    accessorKey: 'student',
-    cell: ({ row }) => <div>{row.original.studentEmail}</div>,
+    header: 'Student Name',
+    accessorKey: 'studentName',
+    cell: ({ row }) => <div>{row.original?.studentId?.name || 'N/A'}</div>,
   },
   {
-    header: 'Slot',
+    header: 'Email',
+    accessorKey: 'studentEmail',
+    cell: ({ row }) => <div>{row.original?.studentId?.email || 'N/A'}</div>,
+  },
+  {
+    header: 'Phone',
+    accessorKey: 'studentPhone',
+    cell: ({ row }) => <div>{row.original?.studentId?.phone || 'N/A'}</div>,
+  },
+  {
+    header: 'Slot Time',
     accessorKey: 'slot',
-    cell: ({ row }) => <div>{row.original.slot}</div>,
+    cell: ({ row }) => <div>{row.original?.slot || 'N/A'}</div>,
   },
   {
     header: 'Date',
     accessorKey: 'date',
-    cell: ({ row }) => <div>{row.original.date}</div>,
+    cell: ({ row }) => (
+      <div>{new Date(row.original?.date).toLocaleDateString() || 'N/A'}</div>
+    ),
   },
   {
-    id: 'select',
-    header: 'Completed',
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.original.completed}
-        onCheckedChange={async (value) => {
-          const isSelected = !!value;
-
-          // Update locally for immediate feedback
-          row.original.completed = isSelected;
-
-          try {
-            const response = await axiosInstance({
-              url: '/markslot',
-              method: 'post',
-              data: {
-                email: localStorage.getItem('email'),
-                studentEmail: row.original.studentEmail,
-                completed: isSelected,
-              },
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
-
-            if (!response) {
-              throw new Error('Failed to update status');
-            }
-
-            alert('Status updated successfully');
-            console.log('API Response:', response);
-          } catch (error) {
-            console.error('Error updating slot:', error);
-
-            // Revert the change locally if the API call fails
-            row.original.completed = !isSelected;
-          }
-        }}
-        aria-label="Select row"
-        className="ml-6"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    header: 'Status',
+    accessorKey: 'status',
+    cell: ({ row }) => <div>{row.original?.status || 'N/A'}</div>,
   },
+  {
+    header: 'Payment ID',
+    accessorKey: 'paymentId',
+    cell: ({ row }) => <div>{row.original?.paymentId || 'N/A'}</div>,
+  },
+  {
+    header: 'Meeting Link',
+    accessorKey: 'link',
+    cell: ({ row }) =>
+      row.original?.link ? (
+        <a
+          href={row.original.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 underline"
+        >
+          Join Meeting
+        </a>
+      ) : (
+        'N/A'
+      ),
+  },
+   {
+     id: 'actions',
+     cell: ({ row }) => <CellAction data={row.original} />
+   }
 ];
+

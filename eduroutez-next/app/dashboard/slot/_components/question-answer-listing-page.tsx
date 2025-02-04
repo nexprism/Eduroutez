@@ -18,25 +18,20 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const { searchQuery, page, limit } = useQuestionAnswerTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const id=localStorage.getItem('instituteId');
   const email = localStorage.getItem('email');
 
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['question-answers', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`, {
-        params: {
-          searchFields: JSON.stringify({}),
-          sort: JSON.stringify({ createdAt: 'desc' }),
-          page: page,
-          limit: limit
-        }
-      });
+      const response = await axiosInstance.get(`${apiUrl}/scheduled-slots/${id}`);
+      console.log('dfg',response.data)
       return response.data;
     }
   });
 
-  const students = data?.data?.flatMap((item: any) => item.students) ?? [];
-  const totalDocuments = data?.totalDocuments ?? 0;
+  const students = data?.data ?? [];
+  const totalDocuments = data?.length ?? 0;
 
   return (
     <PageContainer scrollable>

@@ -11,7 +11,7 @@ import {
 import axiosInstance from '@/lib/axios';
 import { Answer } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { Edit, Eye, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -70,15 +70,22 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
+            <DropdownMenuItem
+            onClick={() =>
+              router.push(`https://eduroutez.com/question-&-answers`)
+            }
+            >
+            <Eye className="mr-2 h-4 w-4" /> View Q/A 
+            </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setOpen(true)}>
+            <Trash className="mr-2 h-4 w-4" /> Delete
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
               router.push(`/dashboard/answer/update/${data._id}/`)
             }
           >
             <Edit className="mr-2 h-4 w-4" /> Answer
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className="mr-2 h-4 w-4" /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
