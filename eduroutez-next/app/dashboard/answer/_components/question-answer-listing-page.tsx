@@ -14,13 +14,12 @@ import axiosInstance from '@/lib/axios';
 type TQuestionAnswerListingPage = {};
 
 export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage) {
-  // const queryClient = useQueryClient()
   const { searchQuery, page, limit } = useQuestionAnswerTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['question-answers', searchQuery],
+    queryKey: ['question-answers', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/question-answers`, {
         params: {
@@ -33,7 +32,9 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
       return response.data;
     }
   });
+
   console.log(data?.data);
+
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -56,6 +57,8 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             <QuestionAnswerTable
               data={data?.data?.result ?? []}
               totalData={data?.data?.totalDocuments ?? 0}
+              currentPage={page}
+              pageSize={limit}
             />
           </div>
         )
