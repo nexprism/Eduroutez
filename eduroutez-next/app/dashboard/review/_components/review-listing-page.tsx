@@ -19,24 +19,23 @@ export default function ReviewListingPage({}: TReviewListingPage) {
   // Get user role and email from localStorage
   const role = localStorage.getItem('role');
   const email = localStorage.getItem('email');
+  const id = localStorage.getItem('instituteId');
 
+
+  
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['reviews', searchQuery, role, email],
     queryFn: async () => {
-      if (role === 'counsellor') {
+      if (role === 'institute') {
         // Fetch counselor-specific reviews
-        const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`);
+        const response = await axiosInstance.get(`${apiUrl}/review-by-institute/${id}`);
         
         // Transform counselor data to match review format
-        if (response.data?.success && response.data?.data?.[0]?.reviews) {
+        if (response.data?.success && response.data?.data) {
           return {
             success: true,
-            data: response.data.data[0].reviews.map((review: any) => ({
-              ...review,
-              counselorName: `${response.data.data[0].firstname} ${response.data.data[0].lastname}`,
-              counselorEmail: response.data.data[0].email,
-            })),
-            totalDocuments: response.data.data[0].reviews.length
+            data: response.data.data,
+            totalDocuments: response.data.data?.length
           };
         }
         return { success: true, data: [], totalDocuments: 0 };
