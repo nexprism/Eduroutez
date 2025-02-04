@@ -66,6 +66,23 @@ class questionAnswerService {
     }
   }
 
+  //getScheduleSlots
+  async getScheduleSlots(id) {
+    const questionAnswer = await this.counselorSlotRepository.getScheduleSlots(id);
+    return questionAnswer;
+  }
+
+  //updateScheduleSlot
+  async updateScheduleSlot(scheduleId,data) {
+    try {
+      const questionAnswer = await this.counselorSlotRepository.updateScheduleSlot(scheduleId,data);
+      return questionAnswer;
+    } catch (error) {
+      throw new AppError("Cannot update the questionAnswer ", StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   async get(email) {
     const questionAnswer = await this.counselorSlotRepository.get(email);
     return questionAnswer;

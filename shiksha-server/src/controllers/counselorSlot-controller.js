@@ -57,6 +57,43 @@ export const getCounselorSlot = async (req, res) => {
   }
 };
 
+
+export const getScheduleSlots = async (req, res) => {
+  try {
+    // console.log(req.params.email);
+    const response = await counselorSlotService.getScheduleSlots(req.params.id);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the counselor slot";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Get schedule slots error:", error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+};
+
+
+//updateScheduleSlot
+
+export const updateScheduleSlot = async (req, res) => {
+  try {
+    const payload = req.body;
+    const scheduleId = req.params.id;
+    console.log("Incoming data:", payload);
+    const response = await counselorSlotService.updateScheduleSlot(scheduleId,payload);
+    console.log(response);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully updated the schedule slot";
+
+    return res.status(200).json(SuccessResponse);
+  } catch (error) {
+    console.error("Error updating schedule slot:", error.message);
+    ErrorResponse.error = error;
+
+    return res.status(500).json(ErrorResponse);
+  }
+};
+
 /**
  * PATCH : /counselor-slots/:id
  * req.body {capacity:200}
