@@ -126,7 +126,35 @@ export async function updateCareer(req, res) {
         payload.image = req.file.filename;
       }
 
-      // Update the career with new data
+      if(req.body.description) {
+        payload.description = req.body.description;
+      }
+
+      if(req.body.category) {
+        payload.category = req.body.category;
+      }
+
+      if(req.body.eligibility) {
+        payload.eligibility = req.body.eligibility;
+      }
+
+      if(req.body.jobRoles) {
+        payload.jobRoles = req.body.jobRoles;
+      }
+
+      if(req.body.opportunity) {
+        payload.opportunity = req.body.opportunity;
+      }
+
+
+      if(req.body.topColleges) {
+        payload.topColleges = req.body.topColleges;
+      }
+
+      if(req.body.instituteId) {
+        payload.instituteId = req.body.instituteId;
+      }
+
       const response = await careerService.update(careerId, payload);
 
       // Delete the old image only if the update is successful and old image exists
