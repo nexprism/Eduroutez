@@ -82,7 +82,8 @@ const formSchema = z.object({
   organisationType: z.string({
     required_error: 'Please select an organization type.'
   }),
-  brochure: z.any().optional()
+  brochure: z.any().optional(),
+  examAccepted: z.string().optional()
 });
 
 const GeneralInfo = () => {
@@ -137,7 +138,8 @@ const GeneralInfo = () => {
         thumbnail: instituteData.thumbnailImage,
         cover: instituteData.coverImage,
         logo: instituteData.instituteLogo,
-        brochure: instituteData.brochure
+        brochure: instituteData.brochure,
+        examAccepted: instituteData.examAccepted
       });
       console.log('Institute fetch nb:', `${baseURL}/${instituteData.thumbnailImage}`);
               // Get images URLs 
@@ -177,6 +179,7 @@ const GeneralInfo = () => {
       highestPackage:'',
       streams:'',
       specialization:'',
+      examAccepted: ''
     }
   });
 
@@ -199,6 +202,7 @@ const GeneralInfo = () => {
     formData.append('highestPackage', values.highestPackage);
     formData.append('streams', values.streams);
     formData.append('specialization', values.specialization);
+    formData.append('examAccepted', values.examAccepted);
     if (values.logo) {
       formData.append('instituteLogo', values.logo);
     }
@@ -578,6 +582,19 @@ const GeneralInfo = () => {
                           {...field}
                           onChange={(e) => field.onChange(e.target.value.split(',').map(item => item.trim()))}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="examAccepted"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Exam Accepted</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter exams accepted" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
