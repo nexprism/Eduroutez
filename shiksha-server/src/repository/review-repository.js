@@ -20,7 +20,7 @@ class ReviewRepository extends CrudRepository {
 
   async getAllByUser(email) {
     try {
-      const reviews = await Review.find({ email: email });
+      const reviews = await Review.find({ email: email }).populate('institute');
       return reviews;
     } catch (error) {
       throw error;
