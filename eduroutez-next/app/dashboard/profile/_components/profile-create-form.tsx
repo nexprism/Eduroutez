@@ -50,9 +50,8 @@ export const profileSchema = z.object({
   category: z
     .string(),
   bankName: z.string().min(3, { message: 'Account Name characters' }),
-  accountDetails: z
-    .string()
-    .min(10, { message: 'Account Number must be at least 10 characters' }),
+  accountNumber: z.string().min(10, { message: 'Account Number must be at least 10 characters' }), // Add this line
+  accountHolderName: z.string().min(3, { message: 'Account Holder Name must be at least 3 characters' }), // Add this line
   ifscCode: z
     .string()
     .min(3, { message: 'Product Name must be at least 3 characters' }),
@@ -185,7 +184,9 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         endDate: '',
         description: ''
       }
-    ]
+    ],
+    accountNumber: '', // Add this line
+    accountHolderName: '', // Add this line
   };
 
   const form = useForm<ProfileFormValues>({
@@ -251,7 +252,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     {
       id: 'Step 4',
       name: 'Bank Details',
-      fields: ['bankName', 'accountDetails', 'ifscCode']
+      fields: ['bankName', 'accountNumber', 'accountHolderName', 'ifscCode']
     },
     { id: 'Step 5', name: 'Complete', fields: [] }
   ];
@@ -315,7 +316,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         formData.append('profilePhoto', values.profilePhoto);
       }
       formData.append('bankName', values.bankName);
-      formData.append('accountDetails', values.accountDetails);
+      formData.append('accountNumber', values.accountNumber); // Add this line
+      formData.append('accountHolderName', values.accountHolderName); // Add this line
       formData.append('ifscCode', values.ifscCode);
       // console.log(formData);
       console.log('hi');
@@ -492,7 +494,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         dateOfBirth: counselor.data[0]?.dateOfBirth?.split('T')[0] || '', // Format date
         experiences: counselor.data[0]?.experiences || [],
         bankName: counselor.data[0]?.bankName,
-        accountDetails: counselor.data[0]?.accountDetails,
+        accountNumber: counselor.data[0]?.accountNumber, // Add this line
+        accountHolderName: counselor.data[0]?.accountHolderName, // Add this line
         ifscCode: counselor.data[0]?.ifscCode,
         language: counselor.data[0]?.language,
         ExperienceYear: counselor.data[0]?.ExperienceYear
@@ -1192,15 +1195,33 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
               />
               <FormField
                 control={form.control}
-                name="accountDetails"
+                name="accountNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Account Details</FormLabel>
+                    <FormLabel>Account Number</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
                         disabled={loading}
-                        placeholder="Enter your account details"
+                        placeholder="Enter your account number"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="accountHolderName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Holder Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        disabled={loading}
+                        placeholder="Enter account holder name"
                         {...field}
                       />
                     </FormControl>

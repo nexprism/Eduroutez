@@ -71,7 +71,7 @@ class PayoutService {
           }
 
           if (user.role === "counsellor"){
-            const counsellor = await Counselor.findById(user._id).select("bankName accountDetails ifscCode");
+            const counsellor = await Counselor.findById(user._id).select("bankName accountNumber ifscCode accountHolderName");
             payouts.result[i].user = counsellor;
           }
 

@@ -87,7 +87,8 @@ const counselorSchema = new mongoose.Schema(
 
   
     bankName: { type: String },
-    accountDetails: { type: String },
+    accountNumber: { type: String },
+    accountHolderName: { type: String },
     ifscCode: { type: String },
     reviews: [
       {
