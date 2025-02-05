@@ -276,64 +276,76 @@ export default function PromotionForm() {
   };
 
   const handlePayment = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // Prevent default form submission
-  
-    const formElement = event.currentTarget;
-    if (!(formElement instanceof HTMLFormElement)) {
-      console.error("handlePayment was called with an invalid form element.");
-      return;
-    }
-  
-    const formData = new FormData(formElement); // Extract form data
-  
-  
-    const options = {
-      key: "rzp_test_1DP5mmOlF5G5ag",
-      amount: totalAmount * 100, // Convert to paise for Razorpay
-      currency: "INR",
-      name: "Eduroutez",
-      description: "Payment for Ad Promotion",
-      handler: async (response: any) => {
-        if (response.error) {
-          toast.error(`Payment failed: ${response.error.description}`);
-        } else {
-          toast.success("Payment successful 🎉");
-  
+    event.preventDefault();
+    
+    try {
+      // Get form values directly from React Hook Form
+      const values = form.getValues();
+      
+      // Create FormData with all form values
+      const formData = new FormData();
+      formData.append('title', values.title);
+      formData.append('location', values.location);
+      const startDate = new Date(values.startDate);
+      const endDate = new Date(values.endDate);
+      
+      formData.append('startDate', startDate.toISOString());
+      formData.append('endDate', endDate.toISOString());
+      
+      // Correctly append the image if it exists
+      if (values.image instanceof File) {
+        formData.append('image', values.image);
+      }
+
+      const options = {
+        key: "rzp_test_1DP5mmOlF5G5ag",
+        amount: totalAmount * 100,
+        currency: "INR",
+        name: "Eduroutez",
+        description: "Payment for Ad Promotion",
+        handler: async (response: any) => {
+          if (response.error) {
+            toast.error(`Payment failed: ${response.error.description}`);
+            setPaymentProcessing(false);
+            return;
+          }
+
           try {
-            const promotionData = new FormData();
-  
-            // Append all fields from formData
-            formData.forEach((value, key) => {
-              promotionData.append(key, value);
-            });
-  
-            // Append additional payment-related data
-            promotionData.append("amount", totalAmount.toString());
-            promotionData.append("paymentId", response.razorpay_payment_id);
-  
-            await axiosInstance.post(`${apiUrl}/promotion`, promotionData, {
+            // Add payment details to formData
+            formData.append("amount", totalAmount.toString());
+            formData.append("paymentId", response.razorpay_payment_id);
+
+            // Send the complete formData to your backend
+            const result = await axiosInstance.post(`${apiUrl}/promotion`, formData, {
               headers: { "Content-Type": "multipart/form-data" },
             });
-  
-            toast.success("Promotion successfully recorded!");
+
+            if (result.data) {
+              toast.success("Promotion created successfully! 🎉");
+              router.push('/dashboard/promotion');
+            }
           } catch (error: any) {
-            console.error("Payment processing failed", error.message);
-            toast.error("Failed to record purchase");
+            console.error("Error processing promotion:", error);
+            toast.error("Failed to create promotion");
+            setPaymentProcessing(false);
           }
-        }
-      },
-      prefill: {
-        name: "John Doe",
-        email: "johndoe@example.com",
-        contact: "9876543210",
-      },
-      theme: { color: "#3399cc" },
-    };
-  
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+        },
+        prefill: {
+          name: "John Doe",
+          email: "johndoe@example.com",
+          contact: "9876543210",
+        },
+        theme: { color: "#3399cc" },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Payment initialization failed:", error);
+      toast.error("Failed to initialize payment");
+      setPaymentProcessing(false);
+    }
   };
-  
   
   
   
@@ -379,6 +391,7 @@ export default function PromotionForm() {
     formData.append('location', values.location);
     formData.append('startDate', values.startDate.toISOString());
     formData.append('endDate', values.endDate.toISOString());
+    console.log('values',values)
     if (values.image) {
       formData.append('image', values.image);
     }
