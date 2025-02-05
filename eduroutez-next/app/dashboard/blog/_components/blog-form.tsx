@@ -59,6 +59,19 @@ const formSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
+  thumbnail: z
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= 1024 * 1024, {
+      message: 'Thumbnail size must be less than 1 MB.'
+    })
+    .refine(
+      (file) =>
+        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      {
+        message: 'Invalid thumbnail format. Only PNG, JPEG, and WEBP are allowed.'
+      }
+    ),
   description: z.string().min(1, { message: 'Description is required.' })
 });
 
@@ -69,7 +82,9 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function BlogForm() {
   const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
+  const thumbnailInputRef = React.useRef<HTMLInputElement | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
+  const [thumbnail, setThumbnail] = React.useState<{ file: File; preview: string } | null>(null);
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
@@ -86,7 +101,8 @@ export default function BlogForm() {
     defaultValues: {
       title: '',
       category: '',
-      description: ''
+      description: '',
+      thumbnail: undefined
     }
   });
 
@@ -109,6 +125,12 @@ export default function BlogForm() {
     if (values.image) {
       formData.append('images', values.image);
     }
+
+    // Append thumbnail
+    if (thumbnail) {
+      formData.append('thumbnail', thumbnail.file);
+    }
+
     mutate(formData);
   }
 
@@ -134,6 +156,7 @@ export default function BlogForm() {
       toast.success(message);
       form.reset();
       setPreviewImageUrl(null);
+      setThumbnail(null);
       router.push('/dashboard/blog');
     },
     onError: (error) => {
@@ -157,6 +180,36 @@ export default function BlogForm() {
     }
   };
 
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size <= 1024 * 1024 && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setThumbnail({
+            file,
+            preview: reader.result as string
+          });
+        };
+        reader.readAsDataURL(file);
+        form.setValue('thumbnail', file);
+      } else {
+        toast.error(`${file.name} is too large or has an invalid format`);
+      }
+    } else {
+      setThumbnail(null);
+      form.setValue('thumbnail', undefined);
+    }
+  };
+
+  const removeThumbnail = () => {
+    setThumbnail(null);
+    form.setValue('thumbnail', undefined);
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = '';
+    }
+  };
+
   const removeImage = () => {
     setPreviewImageUrl(null);
     form.setValue('image', undefined);
@@ -169,12 +222,14 @@ export default function BlogForm() {
     fileInputImageRef.current?.click();
   };
 
+  const triggerThumbnailInput = () => {
+    thumbnailInputRef.current?.click();
+  };
+
   const { data: blog } = useQuery({
     queryKey: ['blog', segments[4]],
     queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/blog/${segments[4]}`
-      );
+      const response = await axiosInstance.get(`${apiUrl}/blog/${segments[4]}`);
       return response.data;
     },
     enabled: isEdit
@@ -183,9 +238,7 @@ export default function BlogForm() {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get(
-         `${apiUrl}/blog-category`
-      );
+      const response = await axiosInstance.get(`${apiUrl}/blog-category`);
       return response.data.data.result;
     }
   });
@@ -196,11 +249,18 @@ export default function BlogForm() {
         title: blog.data.title,
         category: blog.data.category,
         description: blog.data.description,
-        
       });
 
       if (blog.data.image) {
         setPreviewImageUrl(`${IMAGE_URL}/${blog.data.image}`);
+      }
+      
+      // Load existing thumbnail if any
+      if (blog.data.thumbnail) {
+        setThumbnail({
+          preview: `${IMAGE_URL}/${blog.data.thumbnail}`,
+          file: new File([], blog.data.thumbnail) // placeholder file object
+        });
       }
     }
   }, [blog, form]);
@@ -258,7 +318,7 @@ export default function BlogForm() {
               name="image"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Image</FormLabel>
+                  <FormLabel>Featured Image</FormLabel>
                   <FormControl>
                     <div className="space-y-4">
                       <Input
@@ -297,9 +357,58 @@ export default function BlogForm() {
                           <Plus className="text-grey-400 h-10 w-10" />
                         </div>
                       )}
-                      <p className="text-sm text-gray-500">
-                        Only PNG, JPEG, and WEBP formats are allowed. Maximum size: 1 MB.
-                      </p>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Thumbnail Section */}
+            <FormField
+              control={form.control}
+              name="thumbnail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Thumbnail</FormLabel>
+                  <FormControl>
+                    <div className="space-y-4">
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        onChange={handleThumbnailChange}
+                        ref={thumbnailInputRef}
+                        className="hidden"
+                      />
+
+                      {thumbnail ? (
+                        <div className="relative inline-block">
+                          <Image
+                            src={thumbnail.preview}
+                            alt="Thumbnail"
+                            className="h-40 w-full rounded-md object-cover"
+                            width={200}
+                            height={160}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-0 top-0 -mr-2 -mt-2"
+                            onClick={removeThumbnail}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove thumbnail</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={triggerThumbnailInput}
+                          className="border-grey-300 flex h-40 w-full cursor-pointer items-center justify-center rounded-md border"
+                        >
+                          <Plus className="text-grey-400 h-10 w-10" />
+                        </div>
+                      )}
                     </div>
                   </FormControl>
                   <FormMessage />

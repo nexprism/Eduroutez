@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { string } from 'prop-types';
 import { CreditCard, Wallet, AlertCircle, CheckCircle2, DollarSign } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';

@@ -60,6 +60,19 @@ const formSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
+    thumbnail: z
+        .instanceof(File)
+        .optional()
+        .refine((file) => !file || file.size <= 1024 * 1024, {
+          message: 'Thumbnail size must be less than 1 MB.'
+        })
+        .refine(
+          (file) =>
+            !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+          {
+            message: 'Invalid thumbnail format. Only PNG, JPEG, and WEBP are allowed.'
+          }
+        ),  
   eligibility: z.string(),
   jobRoles: z.string(),
   opportunity: z.string(),
@@ -73,6 +86,8 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export default function CounselorForm() {
   const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
+    const [thumbnail, setThumbnail] = React.useState<{ file: File; preview: string } | null>(null);
+    const thumbnailInputRef = React.useRef<HTMLInputElement | null>(null);
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
@@ -93,7 +108,9 @@ export default function CounselorForm() {
       jobRoles: '',
       opportunity: '',
       topColleges: '',
-      counselorType: ''
+      counselorType: '',
+      thumbnail: undefined
+
     }
   });
 
@@ -123,6 +140,11 @@ export default function CounselorForm() {
     if (values.image) {
       formData.append('images', values.image);
     }
+    // Append thumbnail
+    if (thumbnail) {
+      formData.append('thumbnail', thumbnail.file);
+    }
+
     mutate(formData);
   }
 
@@ -148,6 +170,8 @@ export default function CounselorForm() {
       toast.success(message);
       form.reset();
       setPreviewImageUrl(null);
+      setThumbnail(null);
+
       router.push('/dashboard/career');
     },
     onError: (error) => {
@@ -180,6 +204,41 @@ export default function CounselorForm() {
     if (fileInputImageRef.current) {
       fileInputImageRef.current.value = '';
     }
+  };
+
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size <= 1024 * 1024 && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setThumbnail({
+            file,
+            preview: reader.result as string
+          });
+        };
+        reader.readAsDataURL(file);
+        form.setValue('thumbnail', file);
+      } else {
+        toast.error(`${file.name} is too large or has an invalid format`);
+      }
+    } else {
+      setThumbnail(null);
+      form.setValue('thumbnail', undefined);
+    }
+  };
+
+  const removeThumbnail = () => {
+    setThumbnail(null);
+    form.setValue('thumbnail', undefined);
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = '';
+    }
+  };
+
+  const triggerThumbnailInput = () => {
+    thumbnailInputRef.current?.click();
   };
 
   const { data: counselor } = useQuery({
@@ -288,6 +347,58 @@ export default function CounselorForm() {
                           ref={fileInputImageRef}
                           className="hidden"
                         />
+
+            <FormField
+              control={form.control}
+              name="thumbnail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Thumbnail</FormLabel>
+                  <FormControl>
+                    <div className="space-y-4">
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        onChange={handleThumbnailChange}
+                        ref={thumbnailInputRef}
+                        className="hidden"
+                      />
+
+                      {thumbnail ? (
+                        <div className="relative inline-block">
+                          <Image
+                            src={thumbnail.preview}
+                            alt="Thumbnail"
+                            className="h-40 w-full rounded-md object-cover"
+                            width={200}
+                            height={160}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-0 top-0 -mr-2 -mt-2"
+                            onClick={removeThumbnail}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove thumbnail</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={triggerThumbnailInput}
+                          className="border-grey-300 flex h-40 w-full cursor-pointer items-center justify-center rounded-md border"
+                        >
+                          <Plus className="text-grey-400 h-10 w-10" />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
 
                         {previewImageUrl ? (
                           <div className="relative inline-block">

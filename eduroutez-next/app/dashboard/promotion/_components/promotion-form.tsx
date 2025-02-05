@@ -1,18 +1,32 @@
 'use client';
 
+import React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
 import Image from 'next/image';
-import { X, ImageIcon } from 'lucide-react';
+import { X, ImageIcon, Calculator } from 'lucide-react';
 import { toast } from 'sonner';
-import { QueryKey, UseQuery } from '@tanstack/query-core';
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+// const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+
+// Pricing configuration
+const LOCATION_PRICING = {
+  BLOG_PAGE: 1000,
+  INSTITUTE_PAGE: 2000,
+  HOME_PAGE: 2000,
+  REVIEW_PAGE: 1500,
+  CAREER_PAGE: 1000,
+  COURSES_PAGE: 1500,
+  COUNSELING_PAGE_MAIN: 2500,
+  COUNSELING_PAGE_SIDEBAR: 2000,
+  QA_PAGE: 1000
+};
 
 // Define all promotion locations with their requirements
 const PROMOTION_LOCATIONS = {
@@ -114,7 +128,6 @@ const LOCATION_CATEGORIES = Object.values(PROMOTION_LOCATIONS).reduce((acc, loca
   return acc;
 }, {} as Record<string, typeof PROMOTION_LOCATIONS[keyof typeof PROMOTION_LOCATIONS][]>);
 
-// Form schema with validation
 const formSchema = z.object({
   title: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
@@ -129,8 +142,7 @@ const formSchema = z.object({
       message: 'Image size must be less than 1 MB.'
     })
     .refine(
-      (file) =>
-        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      (file) => !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
       {
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
@@ -151,12 +163,16 @@ type FormValues = z.infer<typeof formSchema>;
 export default function PromotionForm() {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+  const [totalAmount, setTotalAmount] = React.useState(0);
+  const [numberOfDays, setNumberOfDays] = React.useState(0);
+  const [paymentProcessing, setPaymentProcessing] = React.useState(false);
+  const [selectedLocation, setSelectedLocation] = React.useState<keyof typeof PROMOTION_LOCATIONS | null>(null);
+  
   const pathname = usePathname();
   const segments = pathname.split('/');
   const promotionId = segments[4];
   const isEdit = segments.length === 5 && segments[3] === 'update';
   const router = useRouter();
-  const [selectedLocation, setSelectedLocation] = React.useState<keyof typeof PROMOTION_LOCATIONS | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -169,8 +185,53 @@ export default function PromotionForm() {
     }
   });
 
+  React.useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => console.log("Razorpay script loaded");
+    script.onerror = () => console.error("Failed to load Razorpay script");
+    document.body.appendChild(script);
+  
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+  
 
-  const { data: existingPromotion, isLoading } = useQuery({
+  // Calculate pricing when location or dates change
+  React.useEffect(() => {
+    const calculateAmount = () => {
+      const location = form.getValues('location');
+      const startDate = form.getValues('startDate');
+      const endDate = form.getValues('endDate');
+
+      if (location && startDate && endDate && LOCATION_PRICING[location]) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        const amount = days * LOCATION_PRICING[location];
+        setNumberOfDays(days);
+        setTotalAmount(amount);
+      } else {
+        setTotalAmount(0);
+        setNumberOfDays(0);
+      }
+    };
+
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'location' || name === 'startDate' || name === 'endDate') {
+        calculateAmount();
+      }
+      if (name === 'location') {
+        setSelectedLocation(value.location as keyof typeof PROMOTION_LOCATIONS);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
+
+  const { isLoading } = useQuery({
     queryKey: ['promotion', promotionId],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/promotion/${promotionId}`);
@@ -178,26 +239,6 @@ export default function PromotionForm() {
     },
     enabled: isEdit,
   });
-  
-  React.useEffect(() => {
-    if (existingPromotion?.data) {
-      // Set the location first
-      setSelectedLocation(existingPromotion.data.location);
-      
-      // Then reset the form with all values
-      form.reset({
-        title: existingPromotion.data.title,
-        location: existingPromotion.data.location,
-        startDate: new Date(existingPromotion.data.startDate),
-        endDate: new Date(existingPromotion.data.endDate)
-      });
-  
-      // Set preview URL if image exists
-      if (existingPromotion.data.image) {
-        setPreviewUrl(`${IMAGE_URL}/uploads/${existingPromotion.data.image}`);
-      }
-    }
-  }, [existingPromotion, form]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
@@ -220,18 +261,43 @@ export default function PromotionForm() {
     },
     onError: () => {
       toast.error('Something went wrong');
+      setPaymentProcessing(false);
     }
   });
 
-  // Watch for location changes
-  React.useEffect(() => {
-    const subscription = form.watch((value, { name }) => {
-      if (name === 'location') {
-        setSelectedLocation(value.location as keyof typeof PROMOTION_LOCATIONS);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [form.watch]);
+  const getImageDimensions = () => {
+    if (!selectedLocation || !PROMOTION_LOCATIONS[selectedLocation]) {
+      return { width: 300, height: 250 }; // Default dimensions
+    }
+    return {
+      width: PROMOTION_LOCATIONS[selectedLocation].width,
+      height: PROMOTION_LOCATIONS[selectedLocation].height
+    };
+  };
+
+  const handlePayment = async () => {
+    const options = {
+      key: "rzp_test_1DP5mmOlF5G5ag",
+      amount: 5000, // Amount in paise (50 INR)
+      currency: "INR",
+      name: "Your App",
+      description: "Payment for Order #123",
+      handler: (response:any) => {
+        console.log("Payment successful", response);
+      },
+      prefill: {
+        name: "John Doe",
+        email: "johndoe@example.com",
+        contact: "9876543210",
+      },
+      theme: { color: "#3399cc" },
+    };
+  
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+  
+  
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -266,7 +332,8 @@ export default function PromotionForm() {
     }
   };
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = async (values: FormValues) => {
+    setPaymentProcessing(true);
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('location', values.location);
@@ -275,26 +342,17 @@ export default function PromotionForm() {
     if (values.image) {
       formData.append('image', values.image);
     }
-    mutate(formData);
-  };
-
-  const getImageDimensions = () => {
-    if (!selectedLocation || !PROMOTION_LOCATIONS[selectedLocation]) {
-      return { width: 300, height: 250 }; // Default dimensions
+    
+    if (isEdit) {
+      await mutate(formData);
+    } else {
+      await handlePayment(formData);
     }
-    return {
-      width: PROMOTION_LOCATIONS[selectedLocation].width,
-      height: PROMOTION_LOCATIONS[selectedLocation].height
-    };
   };
 
   if (isLoading) {
     return <div className="p-8 text-center">Loading...</div>;
   }
-
-  const formatDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
-  };
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -305,11 +363,36 @@ export default function PromotionForm() {
               {isEdit ? 'Edit Promotion' : 'Create New Promotion'}
             </h1>
             <p className="mt-2 text-gray-600">
-              Configure your promotion details including placement, timing, and creative assets
+              Configure your promotion details and complete payment to publish
             </p>
           </div>
 
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Pricing Information */}
+            {!isEdit && selectedLocation && (
+              <div className="bg-blue-50 p-6 rounded-lg mb-6">
+                <div className="flex items-center mb-4">
+                  <Calculator className="h-6 w-6 text-blue-600 mr-2" />
+                  <h3 className="text-lg font-semibold text-blue-900">Pricing Details</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-600">Daily Rate:</p>
+                    <p className="font-semibold">₹{LOCATION_PRICING[selectedLocation]} per day</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Duration:</p>
+                    <p className="font-semibold">{numberOfDays} days</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-gray-600">Total Amount:</p>
+                    <p className="text-xl font-bold text-blue-600">₹{totalAmount}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Your existing form fields */}
             <div className="space-y-6">
               {/* Title Input */}
               <div>
@@ -342,22 +425,12 @@ export default function PromotionForm() {
                     <optgroup key={category} label={category}>
                       {locations.map((location) => (
                         <option key={location.id} value={location.id}>
-                          {location.label} ({location.width}x{location.height}px)
+                          {location.label} - ₹{LOCATION_PRICING[location.id]}/day
                         </option>
                       ))}
                     </optgroup>
                   ))}
                 </select>
-                {selectedLocation && PROMOTION_LOCATIONS[selectedLocation] && (
-                  <div className="mt-2 p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      Required dimensions: {PROMOTION_LOCATIONS[selectedLocation].width}x
-                      {PROMOTION_LOCATIONS[selectedLocation].height}px
-                      <br />
-                      {PROMOTION_LOCATIONS[selectedLocation].description}
-                    </p>
-                  </div>
-                )}
                 {form.formState.errors.location && (
                   <p className="mt-1 text-sm text-red-600">
                     {form.formState.errors.location.message}
@@ -365,8 +438,8 @@ export default function PromotionForm() {
                 )}
               </div>
 
-              {/* Image Upload */}
-              <div>
+             {/* Image Upload */}
+             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Promotion Image
                 </label>
@@ -422,48 +495,60 @@ export default function PromotionForm() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Start Date
                   </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      {...form.register('startDate')}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    />
-                  </div>
+                  <input
+                    type="date"
+                    {...form.register('startDate')}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     End Date
                   </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      {...form.register('endDate')}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    />
-                  </div>
+                  <input
+                    type="date"
+                    {...form.register('endDate')}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
                 </div>
               </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isPending}
-              className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isPending ? (
-                <span className="flex items-center justify-center space-x-2">
-                  <span className="animate-spin">⌛</span>
-                  <span>{isEdit ? 'Updating...' : 'Creating...'}</span>
-                </span>
-              ) : (
-                <span>{isEdit ? 'Update Promotion' : 'Create Promotion'}</span>
+              {/* Submit Button (continued) */}
+              <button
+                type="submit"
+                onClick={handlePayment}
+                disabled={isPending || paymentProcessing}
+                className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isPending || paymentProcessing ? (
+                  <span className="flex items-center justify-center space-x-2">
+                    <span className="animate-spin">⌛</span>
+                    <span>{isEdit ? 'Updating...' : 'Processing Payment...'}</span>
+                  </span>
+                ) : (
+                  <span>{isEdit ? 'Update Promotion' : `Proceed to Pay ₹${totalAmount}`}</span>
+                )}
+              </button>
+
+              {/* Payment Terms */}
+              {!isEdit && (
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>By proceeding, you agree to our payment terms and conditions:</p>
+                  <ul className="list-disc ml-5 mt-2">
+                    <li>Payments are processed securely through Razorpay</li>
+                    <li>Promotions will be activated after successful payment</li>
+                    <li>Refunds are subject to our cancellation policy</li>
+                  </ul>
+                </div>
               )}
-            </button>
             </div>
           </form>
-            </div>
-          </div>
         </div>
+      </div>
+    </div>
   );
 }
+
