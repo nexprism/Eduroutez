@@ -9,6 +9,7 @@ import CrudRepository from "./crud-repository.js";
 import ScheduleSlot from "../models/ScheduleSlots.js";
 import ReddemHistry from "../models/ReddemHistry.js";
 import Query from "../models/Query.js";
+import Course from "../models/Course.js";
 
 class UserRepository extends CrudRepository {
   constructor() {
@@ -226,6 +227,32 @@ class UserRepository extends CrudRepository {
       return response;
     }
     catch (error) {
+      throw error;
+    }
+  }
+
+  //instituteDashboard  
+  async instituteDashboard(instituteId) {
+    try {
+      
+      //get course count by institute
+      const courses = await Course.find({ instituteCategory: instituteId });
+
+      //get query count by institute
+      const queries = await Query.find({ instituteId: instituteId });
+
+      const newQueries = await Query.find({ instituteId: instituteId, status: 'Pending' });
+
+
+    const response = {
+      totalCourses: courses.length,
+      totalLeads: queries.length,
+      newLeads: newQueries.length,
+    };
+
+    return response;
+
+    }catch (error) {
       throw error;
     }
   }

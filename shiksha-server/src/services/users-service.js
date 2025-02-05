@@ -188,6 +188,16 @@ async earningReports(userId = '') {
   }
 }
 
+  //instituteDashboard
+  async instituteDashboard(userId = '') {
+  try {
+    const user = await this.userRepository.instituteDashboard(userId);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 //getRedeemHistory
 async getRedeemHistory(userId) {

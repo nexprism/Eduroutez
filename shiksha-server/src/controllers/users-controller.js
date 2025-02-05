@@ -321,6 +321,21 @@ export async function dashboard(req, res) {
   }
 }
 
+//instituteDashboard
+export async function instituteDashboard(req, res) {
+  try {
+    const userId = req.user._id;
+    const response = await userService.instituteDashboard(userId);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the dashboard details";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.error('Error in earningReports:', error.message);
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 //getRedeemHistory
 export async function getRedeemHistory(req, res) {
   try {
