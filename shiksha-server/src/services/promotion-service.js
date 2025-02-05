@@ -10,10 +10,12 @@ class PromotionService {
     try {
       const promotion = await this.promotionRepository.create(data);
 
+      console.log("promotion", promotion);
+
       if (user.role === 'institute') {
       //save PromotionTransaction in PromotionTransaction collection
       const promotionTransaction = new PromotionTransaction({
-        instituteId: promotion.institute,
+        instituteId: data.instituteId,
         location: promotion.location,
         promotionId: promotion._id,
         amount: data.amount,
@@ -21,10 +23,16 @@ class PromotionService {
         status: 'COMPLETED',
         paymentId: data.paymentId
       });
+
+
+      const response = await promotionTransaction.save();
+
+      console.log("response", response);
     }
 
       return promotion;
     } catch (error) {
+      console.log(error.message);
       throw error;
     }
   }

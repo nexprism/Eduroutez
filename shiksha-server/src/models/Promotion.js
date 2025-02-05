@@ -25,7 +25,7 @@ const promotionSchema = new mongoose.Schema(
     location: {
       type: String,
     },
-    institute: {
+    instituteId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institute",
     },
