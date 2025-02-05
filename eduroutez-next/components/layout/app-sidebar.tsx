@@ -56,7 +56,7 @@ export default function AppSidebar({
     const excludedTitles =
       role === 'institute'
         ? ['Institutes', 'Users','Refer and Earn', 'Blogs',
-            'Career','Review','Manage Pages','Subscriptions','Bulk Institute Upload','Help And Support','Earnings','Payouts','Promotions', 'Streams','Redeem','Students', 'Sales','Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
+            'Career','Review','Manage Pages','Subscriptions','Bulk Institute Upload','Help And Support','Earnings','Payouts', 'Streams','Redeem','Students', 'Sales','Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
         : role === 'counsellor'
         ? [
             'Institutes',

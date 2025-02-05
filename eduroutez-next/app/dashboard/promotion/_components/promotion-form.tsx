@@ -277,26 +277,34 @@ export default function PromotionForm() {
 
   const handlePayment = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+  
     try {
       // Get form values directly from React Hook Form
       const values = form.getValues();
-      
+  
       // Create FormData with all form values
       const formData = new FormData();
       formData.append('title', values.title);
       formData.append('location', values.location);
       const startDate = new Date(values.startDate);
       const endDate = new Date(values.endDate);
-      
+  
       formData.append('startDate', startDate.toISOString());
       formData.append('endDate', endDate.toISOString());
-      
+  
       // Correctly append the image if it exists
       if (values.image instanceof File) {
         formData.append('image', values.image);
       }
-
+  
+      // Check if the role is SUPER_ADMIN
+      const role = localStorage.getItem('role');
+      if (role === 'SUPER_ADMIN') {
+        // Directly call the promotion API without opening Razorpay
+        await mutate(formData);
+        return;
+      }
+  
       const options = {
         key: "rzp_test_1DP5mmOlF5G5ag",
         amount: totalAmount * 100,
@@ -309,17 +317,18 @@ export default function PromotionForm() {
             setPaymentProcessing(false);
             return;
           }
-
+  
           try {
             // Add payment details to formData
             formData.append("amount", totalAmount.toString());
             formData.append("paymentId", response.razorpay_payment_id);
-
+            formData.append("instituteId", localStorage.getItem("instituteId") || "");
+  
             // Send the complete formData to your backend
             const result = await axiosInstance.post(`${apiUrl}/promotion`, formData, {
               headers: { "Content-Type": "multipart/form-data" },
             });
-
+  
             if (result.data) {
               toast.success("Promotion created successfully! 🎉");
               router.push('/dashboard/promotion');
@@ -337,7 +346,7 @@ export default function PromotionForm() {
         },
         theme: { color: "#3399cc" },
       };
-
+  
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (error) {
@@ -346,6 +355,7 @@ export default function PromotionForm() {
       setPaymentProcessing(false);
     }
   };
+  
   
   
   
