@@ -73,6 +73,8 @@ async getCareerByinstituteId(instituteId) {
 
   async update(id, data) {
     try {
+
+      console.log("career data", data);
       const career = await this.careerRepository.update(id, data);
 
       return career;

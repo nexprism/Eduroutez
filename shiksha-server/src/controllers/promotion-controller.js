@@ -26,8 +26,10 @@ export const createPromotion = async (req, res) => {
       const payload = { ...req.body };
       payload.image = req.file.filename;
 
-      const response = await promotionService.create(payload);
+      const response = await promotionService.create(user,payload);
 
+
+      
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully created a promotion";
 

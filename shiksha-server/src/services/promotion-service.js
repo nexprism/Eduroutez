@@ -6,10 +6,11 @@ class PromotionService {
     this.promotionRepository = new PromotionRepository();
   }
 
-  async create(data) {
+  async create(user,data) {
     try {
       const promotion = await this.promotionRepository.create(data);
 
+      if (user.role === 'institute') {
       //save PromotionTransaction in PromotionTransaction collection
       const promotionTransaction = new PromotionTransaction({
         instituteId: promotion.institute,
@@ -20,7 +21,8 @@ class PromotionService {
         status: 'COMPLETED',
         paymentId: data.paymentId
       });
-      
+    }
+
       return promotion;
     } catch (error) {
       throw error;

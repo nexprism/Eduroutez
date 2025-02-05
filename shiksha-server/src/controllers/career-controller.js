@@ -6,6 +6,7 @@ import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CareerService from "../services/career-service.js";
 const singleUploader = FileUpload.upload.single("images");
 
+
 const multiUploader = FileUpload.upload.fields([
   {
     name: "images",
@@ -107,12 +108,15 @@ export async function getCareer(req, res) {
  */
 
 export async function updateCareer(req, res) {
-  singleUploader(req, res, async (err) => {
+  console.log("Incoming data:", req.body);
+  multiUploader(req, res, async (err) => {
+    try {
     if (err) {
+      console.error("File upload error:", err.message);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }
 
-    try {
+
       const careerId = req.params.id;
       const payload = {};
       let oldImagePath;
@@ -122,27 +126,30 @@ export async function updateCareer(req, res) {
         payload.title = req.body.title;
       }
 
+      console.log("files:", req.files);
+      console.log("file:", req.file);
       // Check if a new image is uploaded
-      if (req.file) {
+      if (req.files) {
         const career = await careerService.get(careerId);
 
         // Record the old image path if it exists
-        if (career.image) {
-          oldImagePath = path.join("uploads", career.image);
-        }
+        // if (career.image) {
+        //   oldImagePath = path.join("uploads", career.image);
+        // }
 
-        //thumbnail
-        if (career.thumbnail) {
-          oldImagePath = path.join("uploads", career.thumbnail);
-        }
+        // //thumbnail
+        // if (career.thumbnail) {
+        //   oldImagePath = path.join("uploads", career.thumbnail);
+        // }
         
 
         // Set the new image filename in payload
         //image
-        if (req.files && req.files["image"]) {
-          payload.image = req.files["image"][0].filename;
+        if (req.files && req.files["images"]) {
+          payload.image = req.files["images"][0].filename;
         }
 
+        console.log("files thumb:", req.files);
         //thumbnail
         if (req.files && req.files["thumbnail"]) {
           payload.thumbnail = req.files["thumbnail"][0].filename;
@@ -178,6 +185,8 @@ export async function updateCareer(req, res) {
         payload.instituteId = req.body.instituteId;
       }
 
+      console.log("Payload:", payload);
+
       const response = await careerService.update(careerId, payload);
 
       // Delete the old image only if the update is successful and old image exists
@@ -194,7 +203,7 @@ export async function updateCareer(req, res) {
       SuccessResponse.message = "Successfully updated the career";
       return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
-      console.error("Update career error:", error);
+      console.error("Update career error:", error.message);
       ErrorResponse.error = error;
       return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
     }
