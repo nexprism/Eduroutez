@@ -10,6 +10,7 @@ import ScheduleSlot from "../models/ScheduleSlots.js";
 import ReddemHistry from "../models/ReddemHistry.js";
 import Query from "../models/Query.js";
 import Course from "../models/Course.js";
+import Counselor from "../models/Counselor.js";
 
 class UserRepository extends CrudRepository {
   constructor() {
@@ -253,6 +254,45 @@ class UserRepository extends CrudRepository {
     return response;
 
     }catch (error) {
+      throw error;
+    }
+  }
+
+  //counselorDashboard
+  async counselorDashboard(counselorId) {
+    try {
+      //get all schedule slots by counselor
+      const scheduleSlots = await ScheduleSlot.find({ counselor: counselorId });
+
+      const earning = scheduleSlots.length * 500 * 0.30; 
+
+
+
+      //get all completed schedule slots by counselor
+      const completedScheduleSlots = await ScheduleSlot.find({ counselor: counselorId, status: 'completed' });
+
+      //pending schedule slots
+      const pendingScheduleSlots = await ScheduleSlot.find({ counselor: counselorId, status: 'pending' });
+
+      const counselor = await Counselor.findById(counselorId);
+      var averageRating = 0;
+      if (countelor.reviews) {
+
+        const totalRating = counselor.reviews.reduce((acc, review) => acc + review.rating, 0);
+         averageRating = totalRating / counselor.reviews.length;
+
+      }
+    
+      const response = {
+        earning,
+        completedSlots: completedScheduleSlots.length,
+        totalSlots: scheduleSlots.length,
+        pendingSlots: pendingScheduleSlots.length,
+        averageRating
+    };
+
+      return response;
+    } catch (error) {
       throw error;
     }
   }

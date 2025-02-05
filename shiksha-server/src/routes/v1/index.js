@@ -9,7 +9,7 @@ import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from 
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
-import { getUsers, updateUser, allowUser, denyUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard } from "../../controllers/users-controller.js";
+import { getUsers, updateUser, allowUser, denyUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard,counselorDashboard } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory,getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
@@ -406,6 +406,8 @@ router.get("/earning-reports", accessTokenAutoRefresh, passport.authenticate("jw
 router.get("/admin-dashboard", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), dashboard);
 //instiute dashboard
 router.get("/institute-dashboard", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), instituteDashboard);
+//counselor dashboard
+router.get("/counselor-dashboard", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), counselorDashboard);
 router.post("/redeem-points", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), redeemPoints);
 //redeem history
 router.get("/redeem-history", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getRedeemHistory);

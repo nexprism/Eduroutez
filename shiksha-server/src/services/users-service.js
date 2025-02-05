@@ -198,6 +198,16 @@ async earningReports(userId = '') {
   }
 }
 
+  //counselorDashboard
+  async counselorDashboard(userId = '') {
+  try {
+    const user = await this.userRepository.counselorDashboard(userId);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 //getRedeemHistory
 async getRedeemHistory(userId) {
