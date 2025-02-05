@@ -178,6 +178,16 @@ async earningReports(userId = '') {
   }
 }
 
+  //dashboard
+  async dashboard(userId = '') {
+  try {
+    const user = await this.userRepository.dashboardDetails(userId);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 //getRedeemHistory
 async getRedeemHistory(userId) {

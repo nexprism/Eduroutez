@@ -8,6 +8,7 @@ import Transaction from "../models/Transaction.js";
 import CrudRepository from "./crud-repository.js";
 import ScheduleSlot from "../models/ScheduleSlots.js";
 import ReddemHistry from "../models/ReddemHistry.js";
+import Query from "../models/Query.js";
 
 class UserRepository extends CrudRepository {
   constructor() {
@@ -146,6 +147,85 @@ class UserRepository extends CrudRepository {
     }
     catch (error) {
       console.log('error',error.message); 
+      throw error;
+    }
+  }
+
+  //dashboardDetails
+  async dashboardDetails() {
+    try {
+      //get user by id
+      const users = await User.find({ role: 'institute' }).populate("plan");
+      const students = await User.find({ role: 'student' });
+      const counsellor = await User.find({ role: 'counsellor' });
+
+      const activeSubscriptionCount = await User.countDocuments({
+        role: 'institute',
+        expiryDate: { $gt: new Date() },
+        plan: { $exists: true, $ne: null }
+      }).populate({
+        path: 'plan',
+        match: { price: { $gt: 0 } }
+      });
+
+
+      const renewSubscriptionCount = await User.countDocuments({
+        role: 'institute',
+        expiryDate: { $lt: new Date() },
+        plan: { $exists: true, $ne: null }
+      }).populate({
+        path: 'plan',
+        match: { price: { $gt: 0 } }
+      });
+
+
+      //total leads from Query
+      const totalLeads = await Query.countDocuments({});
+
+      //all pending and desc transaction from Transaction
+      const newSubscriptions = await Transaction.find({ status: 'pending' }).sort({ createdAt: -1 });
+
+      var totalEarning = 0;
+     const earning = await this.earningReports().then((response) => {
+        // console.log('earningReports response', response.totalSubscription[0].total);
+          return totalEarning = parseInt(response.totalSubscription[0].total) + parseInt(response.promotionIncome[0].total) + parseInt(response.unlistedpromotionIncome[0].total) ;
+      });
+
+
+      const saparteEarning = await this.earningReports().then((response) => {
+        // console.log('earningReports response', response.totalSubscription[0].total);
+
+        var subscriptionIncome = parseInt(response.totalSubscription[0].total);
+        var promotionIncome = parseInt(response.promotionIncome[0].total);
+
+        return {
+          subscriptionIncome,
+          promotionIncome
+        };
+      });
+
+      // console.log('totalEarning', earning);
+
+      //Pending query count
+      const newLeads = await Query.countDocuments({ status: 'Pending' });
+
+
+      const response = {
+        totalInstitutes: users.length,
+        activeSubscriptionCount,
+        totalLeads,
+        newSubscriptions,
+        totalEarning,
+        totalStudents: students.length,
+        totalCounsellor: counsellor.length,
+        renewSubscriptionCount,
+        saparteEarning,
+        newLeads
+      };
+      
+      return response;
+    }
+    catch (error) {
       throw error;
     }
   }

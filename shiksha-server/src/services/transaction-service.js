@@ -51,7 +51,7 @@ class TransactionService {
 
       // Execute query with dynamic filters, sorting, and pagination
 
-      const populateFields = ["user"];
+      const populateFields = ["user","subscription"];
       const categories = await this.transactionRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
 
       return categories;
