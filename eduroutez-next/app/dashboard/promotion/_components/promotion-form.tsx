@@ -275,15 +275,52 @@ export default function PromotionForm() {
     };
   };
 
-  const handlePayment = async () => {
+  const handlePayment = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault(); // Prevent default form submission
+  
+    const formElement = event.currentTarget;
+    if (!(formElement instanceof HTMLFormElement)) {
+      console.error("handlePayment was called with an invalid form element.");
+      return;
+    }
+  
+    const formData = new FormData(formElement); // Extract form data
+  
+  
     const options = {
       key: "rzp_test_1DP5mmOlF5G5ag",
-      amount: 5000, // Amount in paise (50 INR)
+      amount: totalAmount * 100, // Convert to paise for Razorpay
       currency: "INR",
-      name: "Your App",
-      description: "Payment for Order #123",
-      handler: (response:any) => {
-        console.log("Payment successful", response);
+      name: "Eduroutez",
+      description: "Payment for Ad Promotion",
+      handler: async (response: any) => {
+        if (response.error) {
+          toast.error(`Payment failed: ${response.error.description}`);
+        } else {
+          toast.success("Payment successful 🎉");
+  
+          try {
+            const promotionData = new FormData();
+  
+            // Append all fields from formData
+            formData.forEach((value, key) => {
+              promotionData.append(key, value);
+            });
+  
+            // Append additional payment-related data
+            promotionData.append("amount", totalAmount.toString());
+            promotionData.append("paymentId", response.razorpay_payment_id);
+  
+            await axiosInstance.post(`${apiUrl}/promotion`, promotionData, {
+              headers: { "Content-Type": "multipart/form-data" },
+            });
+  
+            toast.success("Promotion successfully recorded!");
+          } catch (error: any) {
+            console.error("Payment processing failed", error.message);
+            toast.error("Failed to record purchase");
+          }
+        }
       },
       prefill: {
         name: "John Doe",
@@ -296,6 +333,9 @@ export default function PromotionForm() {
     const rzp = new window.Razorpay(options);
     rzp.open();
   };
+  
+  
+  
   
   
 
@@ -367,7 +407,7 @@ export default function PromotionForm() {
             </p>
           </div>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={handlePayment} className="space-y-8">
             {/* Pricing Information */}
             {!isEdit && selectedLocation && (
               <div className="bg-blue-50 p-6 rounded-lg mb-6">
@@ -519,7 +559,6 @@ export default function PromotionForm() {
               {/* Submit Button (continued) */}
               <button
                 type="submit"
-                onClick={handlePayment}
                 disabled={isPending || paymentProcessing}
                 className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
