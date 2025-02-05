@@ -1,3 +1,5 @@
+import Counselor from "../models/Counselor.js";
+import Student from "../models/Student.js";
 import { PayoutRepository } from "../repository/index.js";
 import AppError from "../utils/errors/app-error.js"
 import { StatusCodes } from "http-status-codes";
@@ -52,9 +54,32 @@ class PayoutService {
 
       const populateFields = ["user"];
       // const categories = await this.payoutRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
-      const categories = await this.payoutRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+      const payouts = await this.payoutRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
 
-      return categories;
+      //foreach payouts, get user details
+
+      console.log("payouts", payouts.result);
+      console.log("payouts.length", payouts.result.length);
+
+      if (payouts.result.length > 0){
+        for (let i = 0; i < payouts.result.length; i++) {
+          // console.log("payouts[i].user", payouts[i].user);
+          const user = payouts.result[i].user;
+          if(user.role === "student"){
+            const student = await Student.findById(user._id).select("bankName accountNumber ifscCode accountHolderName"); 
+            payouts.result[i].user = student;
+          }
+
+          if (user.role === "counsellor"){
+            const counsellor = await Counselor.findById(user._id).select("bankName accountDetails ifscCode");
+            payouts.result[i].user = counsellor;
+          }
+
+          console.log("payouts[i].user", payouts.result[i].user);
+        }
+      }
+
+      return payouts;
     } catch (error) {
       console.log(error.message);
       throw new AppError("Cannot fetch data of all the categories", StatusCodes.INTERNAL_SERVER_ERROR);

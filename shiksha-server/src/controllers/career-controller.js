@@ -10,6 +10,10 @@ const multiUploader = FileUpload.upload.fields([
   {
     name: "images",
     maxCount: 1,
+  },
+  {
+    name: "thumbnail",
+    maxCount: 1,
   }
 ]);
 const careerService = new CareerService();
