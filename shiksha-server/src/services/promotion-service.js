@@ -1,4 +1,5 @@
 import { PromotionRepository } from "../repository/index.js";
+import PromotionTransaction from "../models/PromotionTransaction.js";
 
 class PromotionService {
   constructor() {
@@ -8,6 +9,18 @@ class PromotionService {
   async create(data) {
     try {
       const promotion = await this.promotionRepository.create(data);
+
+      //save PromotionTransaction in PromotionTransaction collection
+      const promotionTransaction = new PromotionTransaction({
+        instituteId: promotion.institute,
+        location: promotion.location,
+        promotionId: promotion._id,
+        amount: data.amount,
+        remarks: 'Promotion purchase for ' + promotion.location,
+        status: 'COMPLETED',
+        paymentId: data.paymentId
+      });
+      
       return promotion;
     } catch (error) {
       throw error;
