@@ -8,10 +8,12 @@ import { useBlogTableFilters } from './use-blog-table-filters';
 
 export default function BlogTable({
   data,
-  totalData
+  totalData,
+  onPageChange
 }: {
   data: Blog[];
   totalData: number;
+  onPageChange: (page: number) => void;
 }) {
 const { searchQuery, setPage, setSearchQuery } = useBlogTableFilters();
 console.log(data)

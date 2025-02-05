@@ -10,6 +10,7 @@ import BlogTable from './blog-tables';
 import { useQuery } from '@tanstack/react-query';
 import { useBlogTableFilters } from './blog-tables/use-blog-table-filters';
 import axiosInstance from '@/lib/axios';
+import { useEffect } from 'react';
 
 interface Career {
   _id: string;
@@ -27,6 +28,7 @@ interface Career {
 }
 
 interface CareerResponse {
+  totalDocuments: number;
   success: boolean;
   message: string;
   data: Career[];
@@ -36,20 +38,31 @@ interface CareerResponse {
 type TCareerListingPage = {};
 
 export default function CareerListingPage({}: TCareerListingPage) {
-  const { searchQuery, page, limit } = useBlogTableFilters();
+  const { searchQuery, page, limit, setPage } = useBlogTableFilters();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const { data, isLoading, isSuccess } = useQuery<CareerResponse>({
-    queryKey: ['career', searchQuery],
+  const { data, isLoading, isSuccess, refetch } = useQuery<CareerResponse>({
+    queryKey: ['career', searchQuery, page, limit],
     queryFn: async () => {
       const institute = localStorage.getItem('instituteId');
       if (!institute) {
         throw new Error('Institute ID not found');
       }
-      const response = await axiosInstance.get(`${apiUrl}/career-by-institute/${institute}`);
-      return response.data;
+      const response = await axiosInstance.get(`${apiUrl}/careers`, {
+        params: {
+          search: searchQuery,
+          page,
+          limit
+        }
+      });
+      console.log('fghjk',response.data);
+      return response.data?.data;
     }
   });
+
+  useEffect(() => {
+    refetch();
+  }, [page]);
 
   return (
     <PageContainer scrollable>
@@ -60,7 +73,7 @@ export default function CareerListingPage({}: TCareerListingPage) {
           <div className="space-y-4">
             <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
               <Heading
-                title={`Career (${data.data.length})`}
+                title={`Career (${data?.result?.length})`}
                 description="All careers online and offline are listed here."
               />
               <div className="flex gap-4">
@@ -78,12 +91,13 @@ export default function CareerListingPage({}: TCareerListingPage) {
             </div>
             <Separator />
             <BlogTable
-              data={data.data.map(career => ({
+              data={data?.result?.map(career => ({
                 ...career,
                 category: { _id: career.category._id, name: career.category.name }, // Assuming IBlogCategory has '_id' and 'name' properties
                 status: career.status === 'true' // Convert status to boolean
               }))}
-              totalData={data.data.length}
+              totalData={data?.totalDocuments}
+              onPageChange={setPage} // Assuming BlogTable has an onPageChange prop
             />
           </div>
         )

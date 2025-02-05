@@ -42,18 +42,22 @@ export default function BlogListingPage({}: TBlogListingPage) {
   const instituteId = localStorage.getItem('instituteId');
 
   const { data, isLoading, isSuccess, error } = useQuery<SuperAdminBlogResponse | InstituteAdminBlogResponse>({
-    queryKey: ['blogs', searchQuery, userRole],
+    queryKey: ['blogs', searchQuery, userRole, page, limit],
     queryFn: async () => {
       try {
         let response;
 
         if (userRole === 'SUPER_ADMIN') {
-          response = await axiosInstance.get(`${apiUrl}/blogs`);
+          response = await axiosInstance.get(`${apiUrl}/blogs`, {
+            params: { search: searchQuery, page, limit }
+          });
         } else {
           if (!instituteId) {
             throw new Error('Institute ID not found in localStorage');
           }
-          response = await axiosInstance.get(`${apiUrl}/blogs-by-institute/${instituteId}`);
+          response = await axiosInstance.get(`${apiUrl}/blogs-by-institute/${instituteId}`, {
+            params: { search: searchQuery, page, limit }
+          });
         }
 
         return response.data;
