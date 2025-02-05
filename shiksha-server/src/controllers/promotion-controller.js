@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import PromotionService from "../services/promotion-service.js";
-const singleUploader = FileUpload.upload.single("images");
+const singleUploader = FileUpload.upload.single("image");
 const promotionService = new PromotionService();
 
 /**
@@ -29,8 +29,8 @@ export const createPromotion = async (req, res) => {
 
         if(req.file){ 
           //image
-          if(req.file['images']){
-            payload.image = req.file['images'][0].filename;
+          if(req.file){
+            payload.image = req.file.filename;
           }
 
           
