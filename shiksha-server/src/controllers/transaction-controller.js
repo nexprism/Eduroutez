@@ -43,7 +43,7 @@ export async function getTransactions(req, res) {
     SuccessResponse.message = "Successfully fetched transactions";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
-    console.error("Error creating transaction:", error);
+    console.error("Error creating transaction:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }
