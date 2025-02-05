@@ -1,3 +1,4 @@
+import e from "express";
 import mongoose from "mongoose";
 
 const promotionSchema = new mongoose.Schema(
@@ -15,7 +16,11 @@ const promotionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      default: "active",
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    paymentId: {
+      type: String,
     },
     location: {
       type: String,
@@ -23,7 +28,6 @@ const promotionSchema = new mongoose.Schema(
     institute: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institute",
-      required: true
     },
     startDate: {
       type: Date,
