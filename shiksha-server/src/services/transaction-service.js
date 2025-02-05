@@ -1,5 +1,6 @@
 import { populate } from "dotenv";
 import { TransactionRepository } from "../repository/index.js";
+import AppError  from "../utils/errors/app-error.js";
 
 class TransactionService {
   constructor() {
