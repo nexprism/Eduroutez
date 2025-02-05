@@ -168,6 +168,16 @@ async redeemPoints(userId, points) {
   }
 }
 
+  //earningReports
+async earningReports(userId = '') {
+  try {
+    const user = await this.userRepository.earningReports(userId);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 //getRedeemHistory
 async getRedeemHistory(userId) {

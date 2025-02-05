@@ -290,6 +290,22 @@ export async function redeemPoints(req, res) {
   }
 }
 
+
+//earningReports
+export async function earningReports(req, res) {
+  try {
+    // const userId = req.user._id;
+    const response = await userService.earningReports();
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the user";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.error('Error in earningReports:', error.message);
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 //getRedeemHistory
 export async function getRedeemHistory(req, res) {
   try {
