@@ -34,6 +34,11 @@ export const createCareer = async (req, res) => {
         payload.image = req.files["images"][0].filename;
       }
 
+      //thumbnail
+      if (req.files && req.files["thumbnail"]) {
+        payload.thumbnail = req.files["thumbnail"][0].filename;
+      }
+
       const response = await careerService.create(payload);
 
       SuccessResponse.data = response;
@@ -126,8 +131,22 @@ export async function updateCareer(req, res) {
           oldImagePath = path.join("uploads", career.image);
         }
 
+        //thumbnail
+        if (career.thumbnail) {
+          oldImagePath = path.join("uploads", career.thumbnail);
+        }
+        
+
         // Set the new image filename in payload
-        payload.image = req.file.filename;
+        //image
+        if (req.files && req.files["image"]) {
+          payload.image = req.files["image"][0].filename;
+        }
+
+        //thumbnail
+        if (req.files && req.files["thumbnail"]) {
+          payload.thumbnail = req.files["thumbnail"][0].filename;
+        }
       }
 
       if(req.body.description) {

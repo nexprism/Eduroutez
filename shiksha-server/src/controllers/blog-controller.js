@@ -33,6 +33,12 @@ export const createBlog = async (req, res) => {
       if (req.files && req.files["images"]) {
         payload.image = req.files["images"][0].filename;
       }
+
+      //thumbnail
+      if (req.files && req.files["thumbnail"]) {
+        payload.thumbnail = req.files["thumbnail"][0].filename;
+      }
+
       const response = await blogService.create(payload);
 
       SuccessResponse.data = response;
@@ -157,6 +163,22 @@ export async function updateBlog(req, res) {
         // Set the new image filename in payload
         payload.image = req.files["images"][0].filename;
       }
+
+      //thumbnail
+      if (req.files && req.files["thumbnail"]) {
+        const blog = await blogService.get(blogId);
+        
+        // Record the old image path if it exists
+        if (blog.thumbnail) {
+          oldImagePath = path.join("uploads", blog.thumbnail);
+        }
+
+
+        // Set the new image filename in payload
+        payload.thumbnail = req.files["thumbnail"][0].filename;
+      }
+
+      
 
         console.log('category payload', payload);
 
