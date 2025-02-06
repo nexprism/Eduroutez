@@ -17,6 +17,16 @@ class QueryRepository extends CrudRepository {
 
   }
 
+  //get
+  async get(id) {
+    try {
+      const query = await Query.findById(id).populate("instituteId");
+      return query;
+    } catch (error) {
+      throw error;
+    }
+  }
+
         
 }
 

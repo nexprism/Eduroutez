@@ -53,6 +53,7 @@ export async function getQuery(req, res) {
     SuccessResponse.message = "Successfully fetched the question and answer";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.error("Error in getQuery", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }

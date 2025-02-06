@@ -57,7 +57,7 @@ class questionAnswerService {
   }
 
   async get(id) {
-    const questionAnswer = await this.queryRepository.get(id).populate("instituteId");
+    const questionAnswer = await this.queryRepository.get(id);
     return questionAnswer;
   }
 

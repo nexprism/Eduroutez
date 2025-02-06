@@ -278,9 +278,11 @@ class UserRepository extends CrudRepository {
       const counselor = await Counselor.findById(counselorId);
       var averageRating = 0;
       if (counselor.reviews) {
-
+        console.log('counselor.reviews', counselor.reviews.length);
         const totalRating = counselor.reviews.reduce((acc, review) => acc + review.rating, 0);
+        console.log('totalRating', totalRating);
          averageRating = totalRating / counselor.reviews.length;
+         console.log('averageRating', averageRating);
 
       }
     
