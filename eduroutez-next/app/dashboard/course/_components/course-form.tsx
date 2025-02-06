@@ -118,6 +118,8 @@ const formSchema = z.object({
   courseCurriculum: z.string().optional(),
   courseFee: z.string().optional(),
   courseOpportunities: z.string().optional(),
+  pros: z.string().optional(),
+  cons: z.string().optional(),
 
   coursePrice: z.any().optional(),
   courseDiscount: z.string().optional(),
@@ -321,6 +323,7 @@ export default function CreateCourse() {
       formData.append('language', values.language);
       formData.append('isCoursePopular', values.isCoursePopular?.toString() || 'false');
       formData.append('isCourseTrending', values.isCourseTreanding?.toString() || 'false');
+
       if (values.examAccepted !== undefined) {
         formData.append('examAccepted', values.examAccepted);
       }
@@ -408,6 +411,13 @@ export default function CreateCourse() {
       if (values.metaImage !== undefined) {
         formData.append('metaImage', values.metaImage);
       }
+      if(values.pros !== undefined){
+        formData.append('pros', values.pros);
+      }
+      if(values.cons !== undefined){
+        formData.append('cons', values.cons);
+      }
+
 
       mutate(formData);
     } catch (error) {
@@ -524,6 +534,8 @@ export default function CreateCourse() {
           metaImage: course.data.metaImage,
       isCoursePopular: course.data.isCoursePopular || false,
       isCourseTreanding: course.data.isCourseTrending || false,
+      pros: course.data.pros,
+      cons: course.data.cons,
         });
       }
     }, [course, form]);
@@ -1165,6 +1177,55 @@ export default function CreateCourse() {
                       </FormItem>
                     )}
                   />
+
+
+<FormField
+                    control={form.control}
+                    name="pros"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pros</FormLabel>
+                        <FormControl>
+                          <Controller
+                            name="pros"
+                            control={form.control}
+                            render={({ field }) => (
+                              <CustomEditor
+                                value={field.value}
+                                onChange={field.onChange}
+                              />
+                            )}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+<FormField
+                    control={form.control}
+                    name="cons"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cons</FormLabel>
+                        <FormControl>
+                          <Controller
+                            name="cons"
+                            control={form.control}
+                            render={({ field }) => (
+                              <CustomEditor
+                                value={field.value}
+                                onChange={field.onChange}
+                              />
+                            )}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+
                   <FormField
                     control={form.control}
                     name="courseOpportunities"
@@ -1196,6 +1257,7 @@ export default function CreateCourse() {
             </CardContent>
           </Card>
         </TabsContent>
+        
         <TabsContent value="price" className="space-y-6">
           <Card className="mx-auto w-full">
             <CardHeader>
