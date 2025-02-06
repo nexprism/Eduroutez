@@ -27,6 +27,20 @@ class UserService {
     }
   }
 
+  //getStatesCities
+  async getStatesCities(search) {
+    try {
+      
+      //get state cities with search query
+      const states = await this.userRepository.getStatesCities(search);
+      return states;
+      
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
   //getStates
   async getStates() {
     try {
