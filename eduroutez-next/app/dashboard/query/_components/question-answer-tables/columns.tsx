@@ -42,6 +42,11 @@ export const columns: ColumnDef<Query>[] = [
     cell: ({ row }) => <div>{row.original.query}</div>,
   },
   {
+    header: 'Status',
+    accessorKey: 'query',
+    cell: ({ row }) => <div>{row.original.status}</div>,
+  },
+  {
     header: 'Created At',
     accessorKey: 'createdAt',
     cell: ({ row }) => <div>{new Date(row.original.createdAt).toLocaleString()}</div>,

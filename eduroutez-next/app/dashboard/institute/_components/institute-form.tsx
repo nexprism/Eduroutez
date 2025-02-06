@@ -238,7 +238,7 @@ export default function CreateInstitute() {
       const id = segments[4];
       console.log('Deleting facility:', facility);
       const response = await axiosInstance.post(`${apiUrl}/delete-facility/${id}`, {
-        data: { facility }
+       facility 
       });
       
       // Update the facilities list after successful deletion

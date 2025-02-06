@@ -4,14 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Controller } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
@@ -19,169 +19,135 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '@/components/ui/select';
-// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import Image from 'next/image';
-import { CalendarIcon, Plus, X } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { Textarea } from '@/components/ui/textarea';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
-import CustomEditor from '@/components/custom-editor';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
-const formSchema = z.object({
-  question: z.string().nonempty('Question is required'),
-  answer: z.string().nonempty('Answer is required')
+const statusSchema = z.object({
+  status: z.enum(['Open', 'Closed']).refine((val) => val !== undefined, {
+    message: 'Status is required'
+  })
 });
 
-export default function CounselorForm() {
+export default function QueryStatusForm() {
+  const router = useRouter();
   const pathname = usePathname();
   const segments = pathname.split('/');
-  const [isEdit, setIsEdit] = React.useState(false);
+  const queryId = segments[4];
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  React.useEffect(() => {
-    if (segments.length === 5 && segments[3] === 'update') {
-      setIsEdit(true);
-    }
-  }, [segments]);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof statusSchema>>({
+    resolver: zodResolver(statusSchema),
     defaultValues: {
-      question: '',
-      answer: ''
+      status: 'Open'
     }
   });
-  const router = useRouter();
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Handle form submission here
-    // const formData = new FormData();
-    // formData.append('question', values.question);
-    // formData.append('answer', values.answer);
-    // console.log(`hi${values.question}`);
-    // console.log(`hi${values.answer}`);
-    // console.log(formData);
-    mutate({ question: values.question, answer: values.answer });
-  }
 
   const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: async (formData: z.infer<typeof formSchema>) => {
-      const endpoint = isEdit
-        ? `${apiUrl}/query/${segments[4]}`
-        : `${apiUrl}/query`;
+    mutationFn: async (data: z.infer<typeof statusSchema>) => {
       const response = await axiosInstance({
-        url: `${endpoint}`,
-        method: isEdit ? 'patch' : 'post',
-        data: formData,
+        url: `${apiUrl}/query/${queryId}`,
+        method: 'patch',
+        data: { status: data.status },
         headers: {
           'Content-Type': 'application/json'
         }
       });
       return response.data;
     },
-
     onSuccess: () => {
-      const message = isEdit
-        ? 'Query updated successfully'
-        : 'Query created successfully';
-      toast.success(message);
-      form.reset();
+      toast.success('Status updated successfully');
       router.push('/dashboard/query');
+      queryData.refetch();
     },
-    onError: (error) => {
-      toast.error('Something went wrong');
+    onError: () => {
+      toast.error('Failed to update status');
     }
   });
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  // write code to get categories from serve by tanstack query
-
-  const { data: faq } = useQuery({
-    queryKey: ['answer', segments[4]],
+  const queryData = useQuery({
+    queryKey: ['query-details', queryId],
     queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/query/${segments[4]}`
-      );
+      const response = await axiosInstance.get(`${apiUrl}/query/${queryId}`);
       return response.data;
     },
-    enabled: isEdit // Only fetch when in edit mode
+    onSuccess: (data) => {
+      if (data?.data?.status) {
+        form.reset({ status: data.data.status });
+      }
+    }
   });
 
-  React.useEffect(() => {
-    if (faq?.data) {
-      form.reset({
-        question: faq.data.question,
-        answer: faq.data.answer
-      });
-    }
-  }, [faq, form]);
+  function onSubmit(values: z.infer<typeof statusSchema>) {
+    mutate(values);
+  }
 
   return (
-    <Card className="mx-auto w-full">
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-left text-2xl font-bold">
-          Add Questions and its Answers
-        </CardTitle>
+        <CardTitle className="text-xl font-semibold">Query Details</CardTitle>
       </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-1">
+      <CardContent className="space-y-6">
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Question</label>
+            <Input 
+              value={queryData.data?.data.query || ''} 
+              readOnly 
+              className="bg-gray-50"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Query Related To</label>
+            <Input 
+              value={queryData.data?.data.queryRelatedTo || ''} 
+              readOnly 
+              className="bg-gray-50"
+            />
+          </div>
+        </div>
+
+        <div className="border-t pt-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="question"
+                name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Questions</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Write  the  question" {...field} />
-                    </FormControl>
+                    <FormLabel>Status</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Open">Open</SelectItem>
+                        <SelectItem value="Closed">Closed</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="answer"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Answers</FormLabel>
-                    <FormControl>
-                      <Controller
-                        name="answer"
-                        control={form.control}
-                        render={({ field }) => (
-                          <CustomEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <Button type="submit" disabled={isSubmitting}>
-              Submit
-            </Button>
-          </form>
-        </Form>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="w-full"
+              >
+                {isSubmitting ? 'Updating...' : 'Update Status'}
+              </Button>
+            </form>
+          </Form>
+        </div>
       </CardContent>
     </Card>
   );

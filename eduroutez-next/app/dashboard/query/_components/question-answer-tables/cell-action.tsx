@@ -23,6 +23,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const role=localStorage.getItem('role');
   const router = useRouter();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const deleteQuestionAnswerMutation = useMutation({
@@ -70,7 +71,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-          {(data.role === 'institute' || data.role === 'counselor') && (
+          {(role === 'institute' || role === 'counselor') && (
             <DropdownMenuItem
               onClick={() =>
                 router.push(`/dashboard/query/update/${data._id}/`)
