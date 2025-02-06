@@ -261,18 +261,19 @@ class UserRepository extends CrudRepository {
   //counselorDashboard
   async counselorDashboard(counselorId) {
     try {
+      console.log('counselorId', counselorId);
       //get all schedule slots by counselor
-      const scheduleSlots = await ScheduleSlot.find({ counselor: counselorId });
+      const scheduleSlots = await ScheduleSlot.find({ counselorId: counselorId });
 
       const earning = scheduleSlots.length * 500 * 0.30; 
 
 
 
       //get all completed schedule slots by counselor
-      const completedScheduleSlots = await ScheduleSlot.find({ counselor: counselorId, status: 'completed' });
+      const completedScheduleSlots = await ScheduleSlot.find({ counselorId: counselorId, status: 'completed' });
 
       //pending schedule slots
-      const pendingScheduleSlots = await ScheduleSlot.find({ counselor: counselorId, status: 'pending' });
+      const pendingScheduleSlots = await ScheduleSlot.find({ counselorId: counselorId, status: 'scheduled' });
 
       const counselor = await Counselor.findById(counselorId);
       var averageRating = 0;

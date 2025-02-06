@@ -340,6 +340,7 @@ export async function instituteDashboard(req, res) {
 export async function counselorDashboard(req, res) {
   try {
     const userId = req.user._id;
+    console.log('userId:', userId);
     const response = await userService.counselorDashboard(userId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the dashboard details";

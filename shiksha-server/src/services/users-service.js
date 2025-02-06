@@ -199,7 +199,7 @@ async earningReports(userId = '') {
 }
 
   //counselorDashboard
-  async counselorDashboard(userId = '') {
+  async counselorDashboard(userId) {
   try {
     const user = await this.userRepository.counselorDashboard(userId);
     return user;
