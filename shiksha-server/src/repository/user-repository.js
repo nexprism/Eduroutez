@@ -154,16 +154,28 @@ class UserRepository extends CrudRepository {
   }
 
   //getStatesCities
-  async getStatesCities(search) {
+  async getStatesCities(search = '') {
     try {
-      //get states and cities with search query
-      const states = await State.find({ name: { $regex: search, $options: 'i' } });
-      const cities = await City.find({ name: { $regex: search, $options: 'i' } });
+      //get states and cities with search query if search is empty return all states and cities
+
+      console.log('search',search);
+
+      if(search === '') {
+        const states = await State.find({country_id: 101});
+        const cities = await City.find({});
+        const merged = [...states, ...cities];
+        return merged;
+
+      } else {
+        const states = await State.find({country_id: 101, name : { $regex: search, $options: 'i' } });
+        const cities = await City.find({name : { $regex: search, $options: 'i' } }); 
+        const merged = [...states, ...cities];
+
+        return merged;
+      }
 
       //merge states and cities
-      const merged = [...states, ...cities];
 
-      return merged;
 
     } catch (error) {
 

@@ -248,7 +248,7 @@ export const verifyEmail = async (req, res) => {
 export const getStatesCities = async (req, res) => {
   try {
     const search = req.query.search;
-    const states = await userService.getStatesCities(search);
+    const states = await userService.getStatesCities(req.query);
     return res.status(200).json({
       success: true,
       message: "Successfully fetched states and cities",

@@ -28,10 +28,11 @@ class UserService {
   }
 
   //getStatesCities
-  async getStatesCities(search) {
+  async getStatesCities(query) {
     try {
       
       //get state cities with search query
+      const { search } = query;
       const states = await this.userRepository.getStatesCities(search);
       return states;
       
