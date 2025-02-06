@@ -127,6 +127,12 @@ const courseSchema = new mongoose.Schema(
     applicationEndDate: {
       type: Date,
     },
+    pros: {
+      type: String,
+    },
+    cons: {
+      type: String,
+    },
     status: {
       type: String,
     },
