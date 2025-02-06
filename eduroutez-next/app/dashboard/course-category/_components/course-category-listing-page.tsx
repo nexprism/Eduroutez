@@ -14,13 +14,12 @@ import axiosInstance from '@/lib/axios';
 type TCourseCategoryListingPage = {};
 
 export default function CourseCategoryListingPage({}: TCourseCategoryListingPage) {
-  // const queryClient = useQueryClient()
-  const { searchQuery, page, limit } = useCourseCategoryTableFilters();
+  const { searchQuery, page, limit, setPage } = useCourseCategoryTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['course-categories', searchQuery],
+    queryKey: ['course-categories', searchQuery, page],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/course-categories`, {
         params: {
@@ -33,7 +32,7 @@ export default function CourseCategoryListingPage({}: TCourseCategoryListingPage
       return response.data;
     }
   });
-  console.log(data?.data);
+
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -56,6 +55,8 @@ export default function CourseCategoryListingPage({}: TCourseCategoryListingPage
             <CourseCategoryTable
               data={data.data.result}
               totalData={data.data.totalDocuments}
+              currentPage={page}
+              onPageChange={setPage}
             />
           </div>
         )
