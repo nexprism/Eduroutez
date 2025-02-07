@@ -18,12 +18,7 @@ export default function UserTable({
   return (
     <div className="space-y-4 ">
       <div className="flex flex-wrap items-center gap-4">
-        <DataTableSearch
-          searchKey="name"
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          setPage={setPage}
-        />
+    
         {/* <DataTableFilterBox
           filterKey="role"
           title="Role"
