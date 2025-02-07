@@ -503,7 +503,7 @@ export default function CreateCourse() {
           isCourseFree: course.data.isCourseFree,
           isCourseDiscounted: course.data.isCourseDiscounted,
           courseType: course.data.courseType,
-          category: course.data.category,
+          category: course.data.category._id,
           status: course.data.status,
           instituteCategory: course.data.instituteCategory,
           visibility: course.data.visibility,
@@ -988,7 +988,7 @@ export default function CreateCourse() {
                                       !field.value && 'text-muted-foreground'
                                     )}
                                   >
-                                    {field.value && !isNaN(field.value.getTime()) ? (
+                                    {field.value ? (
                                       format(field.value, 'PPP')
                                     ) : (
                                       <span>Pick a date</span>
@@ -1035,7 +1035,7 @@ export default function CreateCourse() {
                                       !field.value && 'text-muted-foreground'
                                     )}
                                   >
-                                    {field.value && !isNaN(field.value.getTime()) ? (
+                                    {field.value ? (
                                       format(field.value, 'PPP')
                                     ) : (
                                       <span>Pick a date</span>
