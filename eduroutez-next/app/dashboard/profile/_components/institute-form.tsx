@@ -323,10 +323,10 @@ console.log('Error updating institute:', error.message); }
 
   const deleteFacility = async (facility: string) => {
     try {
-      const id = segments[4];
+      const id = segments[4] || localStorage.getItem('instituteId');
       console.log('Deleting facility:', facility);
       const response = await axiosInstance.post(`${apiUrl}/delete-facility/${id}`, {
-        data: { facility }
+        facility 
       });
       
       // Update the facilities list after successful deletion
