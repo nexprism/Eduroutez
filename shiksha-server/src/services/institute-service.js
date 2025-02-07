@@ -94,7 +94,7 @@ console.log('updatesInstitute',updatesInstitute);
         } else if (value === "false") {
           filterConditions[key] = false;
         } else {
-            if (key === 'streams' || key === 'specialization') {
+          if (key === 'streams' || key === 'specialization') {
             if (Array.isArray(value)) {
               const regexPattern = value.join('|'); // Convert array to regex pattern
               filterConditions.$or = filterConditions.$or || [];
@@ -103,9 +103,47 @@ console.log('updatesInstitute',updatesInstitute);
               filterConditions.$or = filterConditions.$or || [];
               filterConditions.$or.push({ [key]: { $regex: value, $options: 'i' } });
             }
-            } else {
-            filterConditions[key] = value;
+          } else if (key === 'fees') {
+            // Handling multiple min and max fee filters
+            console.log("fees value", value);
+
+            if (Array.isArray(value)) {
+              filterConditions.$and = filterConditions.$and || [];
+
+              value.forEach(range => {
+                const min = parseInt(range.minFees, 10);
+                const max = parseInt(range.maxFees, 10);
+
+                const feeCondition = {};
+                if (!isNaN(min)) {
+                  feeCondition.minFees = { $gte: min };
+                }
+                if (!isNaN(max)) {
+                  feeCondition.maxFees = { $lte: max };
+                }
+
+                if (Object.keys(feeCondition).length > 0) {
+                  filterConditions.$and.push(feeCondition);
+                }
+              });
             }
+          } else if (key === 'examAccepted') {
+
+            
+            if (Array.isArray(value)) {
+            filterConditions.$and = filterConditions.$and || [];
+            value.forEach(exam => {
+              filterConditions.$and.push({ [key]: { $regex: `(^|,)${exam}(,|$)`, $options: 'i' } });
+            });
+            } else {
+            filterConditions.$and = filterConditions.$and || [];
+            filterConditions.$and.push({ [key]: { $regex: `(^|,)${value}(,|$)`, $options: 'i' } });
+            }
+          
+          }else {
+            filterConditions[key] = value;
+          }
+
         }
 
       }
