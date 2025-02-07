@@ -94,10 +94,24 @@ console.log('updatesInstitute',updatesInstitute);
         } else if (value === "false") {
           filterConditions[key] = false;
         } else {
-          filterConditions[key] = value;
+            if (key === 'streams' || key === 'specialization') {
+            if (Array.isArray(value)) {
+              const regexPattern = value.join('|'); // Convert array to regex pattern
+              filterConditions.$or = filterConditions.$or || [];
+              filterConditions.$or.push({ [key]: { $regex: regexPattern, $options: 'i' } });
+            } else {
+              filterConditions.$or = filterConditions.$or || [];
+              filterConditions.$or.push({ [key]: { $regex: value, $options: 'i' } });
+            }
+            } else {
+            filterConditions[key] = value;
+            }
         }
 
       }
+
+
+      console.log("filterConditions", filterConditions);
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
