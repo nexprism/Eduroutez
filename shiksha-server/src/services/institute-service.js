@@ -113,12 +113,34 @@ console.log('updatesInstitute',updatesInstitute);
             // Handling multiple min and max fee filters
             console.log("fees value", value);
 
+              //items: ["> 5 Lakh", "3 - 5 Lakh", "1 - 3 Lakh", "< 1 Lakh"],
+
+
+
             if (Array.isArray(value)) {
               filterConditions.$and = filterConditions.$and || [];
+              
 
               value.forEach(range => {
-                const min = parseInt(range.minFees, 10);
-                const max = parseInt(range.maxFees, 10);
+                if(range === "> 5 Lakh"){
+
+                const min = 0;
+                const max = 500000;
+
+                }else if(range === "3 - 5 Lakh"){
+                  const min = 300000;
+                  const max = 500000;
+
+                }else if(range === "1 - 3 Lakh"){
+                  const min = 100000;
+                  const max = 300000;
+
+                }else if(range === "< 1 Lakh"){
+                  const min = 0;
+                  const max = 100000;
+
+                }
+
 
                 const feeCondition = {};
                 if (!isNaN(min)) {
