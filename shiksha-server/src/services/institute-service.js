@@ -109,10 +109,48 @@ console.log('updatesInstitute',updatesInstitute);
               filterConditions.$or = filterConditions.$or || [];
               filterConditions.$or.push({ [key]: { $regex: value, $options: 'i' } });
             }
+          } else if (key === 'fees') {
+            // Handling multiple min and max fee filters
+            console.log("fees value", value);
+
+            if (Array.isArray(value)) {
+              filterConditions.$and = filterConditions.$and || [];
+
+              value.forEach(range => {
+                const min = parseInt(range.minFees, 10);
+                const max = parseInt(range.maxFees, 10);
+
+                const feeCondition = {};
+                if (!isNaN(min)) {
+                  feeCondition.minFees = { $gte: min };
+                }
+                if (!isNaN(max)) {
+                  feeCondition.maxFees = { $lte: max };
+                }
+
+                if (Object.keys(feeCondition).length > 0) {
+                  filterConditions.$and.push(feeCondition);
+                }
+              });
+            }
+          } else if (key === 'examAccepted') {
+
+            
+            if (Array.isArray(value)) {
+            filterConditions.$and = filterConditions.$and || [];
+            value.forEach(exam => {
+              filterConditions.$and.push({ [key]: { $regex: `(^|,)${exam}(,|$)`, $options: 'i' } });
+            });
             } else {
               console.log("hello")
-            filterConditions[key] = value;
+            filterConditions.$and = filterConditions.$and || [];
+            filterConditions.$and.push({ [key]: { $regex: `(^|,)${value}(,|$)`, $options: 'i' } });
             }
+          
+          }else {
+            filterConditions[key] = value;
+          }
+
         }
 
       }
