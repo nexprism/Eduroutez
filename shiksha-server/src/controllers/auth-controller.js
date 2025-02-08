@@ -51,6 +51,56 @@ export const getCitiesByState = async (req, res) => {
   }
 };
 
+
+
+//sendOtp 
+export async function sendOtp(req, res) {
+  try {
+    const user = await userService.getUserByEmail(req.body.email);
+    if (user) {
+      return res.status(400).json({
+        message: "Email already exists",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+    // console.log('user', user);
+    //contact number length check
+    if (req.body.contact_number.length !== 10) {
+
+      return res.status(400).json({
+        message: "Contact number should be of 10 digits",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+
+    if (req.body.referal_Code) {
+      const referalUser = await userService.getUserByReferalCode(req.body.referal_Code);
+      if (!referalUser) {
+        return res.status(400).json({
+          message: "Referal code Invalid",
+          data: {},
+          success: false,
+          err: {},
+        });
+      }
+    }
+
+    var  otp = Math.floor(100000 + Math.random() * 900000);
+    const response = await userService.sendOtp(otp, req.body.contact_number);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched users";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.log('error in sendOtp',error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 export const signup = async (req, res) => {
   console.log(req.body);
   //req parms refercode

@@ -208,6 +208,16 @@ async earningReports(userId = '') {
   }
 }
 
+  //sendSms
+  async sendSms(userId, message) {
+  try {
+    const user = await this.userRepository.getById(userId);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 //getRedeemHistory
 async getRedeemHistory(userId) {

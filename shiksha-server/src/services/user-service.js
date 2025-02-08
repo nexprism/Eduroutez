@@ -2,6 +2,7 @@ import { ServerConfig } from "../config/index.js";
 import { EmailVerificationRepository, UserRepository } from "../repository/index.js";
 import { sendEmail } from "../utils/Email/email.js";
 import { Token } from "../utils/index.js";
+import unirest from "unirest";
 import bcrypt from "bcrypt";
 class UserService {
   constructor() {
@@ -95,6 +96,38 @@ console.log('user',user)
       throw error;
     }
   }
+
+  //sendOtp
+  async sendOtp(otp,phone) {
+    try {
+      var req = unirest("POST", "https://www.fast2sms.com/dev/bulkV2");
+
+      req.headers({
+        "authorization": process.env.FAST2SMS_API_KEY,
+      });
+
+      req.form({
+        "sender_id": "Edurtz",
+        "message": "179135",
+        "variables_values": otp,
+        "route": "dlt",
+        "numbers": phone,
+      });
+
+      req.end(function (res) {
+        if (res.error) throw new Error(res.error);
+
+        console.log(res.body);
+        
+      });
+    } catch (error) {
+
+      throw error;
+    }
+  }
+
+      
+
 
   //getUserByReferalCode
   async getUserByReferalCode(referalCode) {

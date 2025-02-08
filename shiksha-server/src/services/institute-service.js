@@ -109,7 +109,7 @@ console.log('updatesInstitute',updatesInstitute);
               filterConditions.$or = filterConditions.$or || [];
               filterConditions.$or.push({ [key]: { $regex: value, $options: 'i' } });
             }
-          } else if (key === 'fees') {
+            } else if (key === 'Fees') {
             // Handling multiple min and max fee filters
             console.log("fees value", value);
 
@@ -117,44 +117,26 @@ console.log('updatesInstitute',updatesInstitute);
 
 
 
-            if (Array.isArray(value)) {
-              filterConditions.$and = filterConditions.$and || [];
-              
+              if (Array.isArray(value)) {
+                filterConditions.$or = filterConditions.$or || [];
 
-              value.forEach(range => {
-                if(range === "> 5 Lakh"){
+                value.forEach(range => {
+                  let condition = {};
 
-                const min = 0;
-                const max = 500000;
+                    if (range === "> 5 Lakh") {
+                    condition = { minFees: { $gt: 500000 } };
+                    } else if (range === "3 - 5 Lakh") {
+                    condition = { minFees: { $gt: 300000 }, maxFees: { $lte: 500000 } };
+                    } else if (range === "1 - 3 Lakh") {
+                    condition = { minFees: { $gt: 100000 }, maxFees: { $lte: 300000 } };
+                    } else if (range === "< 1 Lakh") {
+                    condition = { maxFees: { $lte: 100000 } };
+                    }
 
-                }else if(range === "3 - 5 Lakh"){
-                  const min = 300000;
-                  const max = 500000;
-
-                }else if(range === "1 - 3 Lakh"){
-                  const min = 100000;
-                  const max = 300000;
-
-                }else if(range === "< 1 Lakh"){
-                  const min = 0;
-                  const max = 100000;
-
-                }
-
-
-                const feeCondition = {};
-                if (!isNaN(min)) {
-                  feeCondition.minFees = { $gte: min };
-                }
-                if (!isNaN(max)) {
-                  feeCondition.maxFees = { $lte: max };
-                }
-
-                if (Object.keys(feeCondition).length > 0) {
-                  filterConditions.$and.push(feeCondition);
-                }
-              });
-            }
+                  console.log("Condition", condition);
+                  filterConditions.$or.push(condition);
+                });
+              }
           } else if (key === 'examAccepted') {
 
             
