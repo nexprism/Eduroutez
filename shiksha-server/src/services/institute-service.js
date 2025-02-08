@@ -88,13 +88,19 @@ console.log('updatesInstitute',updatesInstitute);
       // Build filter conditions for multiple fields
       const filterConditions = {};
 
-      for (const [key, value] of Object.entries(parsedFilters)) {
+      for (var [key, value] of Object.entries(parsedFilters)) {
+        if(key=== 'Exam'){
+           key="examAccepted"
+        }
+        
+        
+        
         if (value === "true") {
           filterConditions[key] = true;
         } else if (value === "false") {
           filterConditions[key] = false;
         } else {
-            if (key === 'streams' || key === 'specialization') {
+            if (key === 'streams' || key === 'specialization' || key === 'state' || key === 'city'  || key === 'examAccepted' || key==='organisationType') {
             if (Array.isArray(value)) {
               const regexPattern = value.join('|'); // Convert array to regex pattern
               filterConditions.$or = filterConditions.$or || [];
@@ -104,6 +110,7 @@ console.log('updatesInstitute',updatesInstitute);
               filterConditions.$or.push({ [key]: { $regex: value, $options: 'i' } });
             }
             } else {
+              console.log("hello")
             filterConditions[key] = value;
             }
         }
