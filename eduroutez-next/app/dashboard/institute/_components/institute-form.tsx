@@ -435,13 +435,20 @@ console.log('Error updating institute:', error.message); }
     }
   };
 
-  const removeMultipleImage = (index: number) => {
-    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
-    const currentPictures = form.getValues('pictures');
-    form.setValue(
-      'pictures',
-      currentPictures.filter((_, i) => i !== index)
-    );
+  const removeImage = async (url: string, index: number) => {
+    try {
+      const id = segments[4];
+      const imageName = url.split('/').pop(); // Extract the image name from the URL
+      const response = await axiosInstance.post(`${apiUrl}/deleteGallery/${id}`, {
+        image: imageName
+      });
+      console.log('Image deleted successfully:', response.data);
+      toast.success('Image deleted successfully!');
+      setGalleryImages((prev) => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error('Failed to delete image');
+    }
   };
 
   return (
@@ -695,15 +702,15 @@ console.log('Error updating institute:', error.message); }
                 height={150}
                 className="rounded-md object-cover w-full h-full"
               />
-              <Button
+                <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-white rounded-full"
-                onClick={() => removeMultipleImage(index)}
-              >
+                onClick={() => removeImage(url, index)}
+                >
                 <X size={16} />
-              </Button>
+                </Button>
             </div>
           ))}
         </div>
