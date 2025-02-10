@@ -4,6 +4,7 @@ import UserService from "../services/user-service.js";
 import StudentService from "../services/student-service.js";
 import InstituteService from "../services/institute-service.js";
 import CounselorService from "../services/counselor-service.js";
+import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 const singleUploader = FileUpload.upload.single("image");
 
 const userService = new UserService();
@@ -91,15 +92,75 @@ export async function sendOtp(req, res) {
 
     var  otp = Math.floor(100000 + Math.random() * 900000);
     const response = await userService.sendOtp(otp, req.body.contact_number);
-    SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully fetched users";
-    return res.status(StatusCodes.OK).json(SuccessResponse);
+    if (!response.data.return) 
+      return res.status(400).json({
+        message: response.data.message,
+        data: {},
+        success: false,
+        err: {},
+      });
+    SuccessResponse.data = response.data;
+    SuccessResponse.message = "Successfully sent OTP";
+    return res.status(200).json(SuccessResponse);
   } catch (error) {
     console.log('error in sendOtp',error.message);
-    ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(500).json({
+      message: error.message,
+      data: {},
+      success: false,
+      err: error.message,
+    });
   }
 }
+
+//verifyOtp
+export async function verifyOtp(req, res) {
+  try {
+
+    //contact number length check
+    if (req.body.contact_number.length !== 10) {
+
+      return res.status(400).json({
+        message: "Contact number should be of 10 digits",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+    console.log('req.body.otp', req.body.otp.length);
+    if (req.body.otp.length !== 6) {
+
+      return res.status(400).json({
+        message: "OTP should be of 6 digits",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+
+    const response = await userService.verifyOtp(req.body.otp, req.body.contact_number);
+    if (!response){
+      return res.status(400).json({
+        
+        message: "Invalid OTP",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+    
+    SuccessResponse.message = "Successfully verified OTP";  
+    return res.status(200).json(SuccessResponse);
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+      data: {},
+      success: false,
+      err: error.message,
+    });
+  }
+}
+
 
 export const signup = async (req, res) => {
   console.log(req.body);
@@ -123,6 +184,27 @@ export const signup = async (req, res) => {
 
       return res.status(400).json({
         message: "Contact number should be of 10 digits",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+
+    if(req.body.otp.length !== 6){
+
+      return res.status(400).json({
+        message: "OTP should be of 6 digits",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+
+    //check otp
+    const otpResponse = await userService.verifyOtp(req.body.otp, req.body.contact_number);
+    if (!otpResponse){
+      return res.status(400).json({
+        message: "Invalid OTP",
         data: {},
         success: false,
         err: {},
