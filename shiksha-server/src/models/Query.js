@@ -22,6 +22,12 @@ const querySchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        instituteIds: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Institute",
+            },
+        ],
         query: {
             type: String,
             required: true,
