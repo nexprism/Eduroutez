@@ -55,10 +55,10 @@ const formSchema = z.object({
   highestPackage: z.any().optional(),
   streams:z.any().optional(),
   specialization:z.any().optional(),
-  state: z.string({
+  state: z.any({
     required_error: 'Please select a state.'
   }),
-  city: z.string({
+  city: z.any({
     required_error: 'Please select a city.'
   }),
   institutePhone: z.string({
@@ -105,6 +105,20 @@ const GeneralInfo = () => {
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
+interface State {
+  id: string;
+  _id: string;
+  name: string;
+}
+
+interface City {
+  id: Key | null | undefined;
+  _id: string;
+  name: string;
+}
+
+const [states, setStates] = React.useState<State[]>([]);
+const [cities, setCities] = React.useState<City[]>([]);
     const fileInputBrochureRef = React.useRef<HTMLInputElement | null>(null);
 
   const pathname = usePathname();
@@ -117,6 +131,16 @@ const GeneralInfo = () => {
       const id = segments[4];
       const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
+  if(instituteData?.state) {
+      var stateResponse = await axiosInstance.post(`${apiUrl}/state-city-by-id/${instituteData.state}`, { type: "state" });
+      console.log('State response:', stateResponse.data?.data[0]);
+      var stateData = stateResponse.data?.data[0];
+  }
+  if(instituteData?.city) {
+      var cityResponse = await axiosInstance.post(`${apiUrl}/state-city-by-id/${instituteData.city}`, { type: "city" });
+      console.log('City response:', cityResponse.data?.data[0]);
+      var stateCityData = cityResponse.data?.data[0];
+  }
 
       form.reset({
         instituteName: instituteData.instituteName,
@@ -125,8 +149,8 @@ const GeneralInfo = () => {
         establishedYear: instituteData.establishedYear,
         organisationType: instituteData.organisationType,
         website: instituteData.website,
-        city: instituteData.city,
-        state: instituteData.state,
+        city: stateCityData?.id,
+        state: stateData?.id,
         address: instituteData.address,
         about: instituteData.about,
         minFees: instituteData.minFees,
@@ -141,6 +165,8 @@ const GeneralInfo = () => {
         brochure: instituteData.brochure,
         examAccepted: instituteData.examAccepted
       });
+
+      console.log('State/City data:', stateCityData);
       console.log('Institute fetch nb:', `${baseURL}/${instituteData.thumbnailImage}`);
               // Get images URLs 
                 setPreviewThumbnailUrl(instituteData.thumbnailImage ? `${baseURL}/${instituteData.thumbnailImage}` : null);
@@ -262,6 +288,41 @@ const GeneralInfo = () => {
         form.setValue('brochure', undefined);
       }
     };
+
+// Fetch all states on component mount
+useEffect(() => {
+  const fetchStates = async () => {
+    try {
+      const res = await axiosInstance.get(`${apiUrl}/states`);
+      setStates(res.data?.data);
+    } catch (err) {
+      console.error("Failed to fetch states:", err);
+      toast.error("Failed to load states");
+    }
+  };
+  fetchStates();
+}, []);
+
+// Fetch cities when a state is selected
+useEffect(() => {
+  const fetchCities = async () => {
+    const selectedState = form.getValues('state');
+    console.log('Selected state:', selectedState);
+    console.log('Form:', form.getValues());
+    if (selectedState) {
+      try {
+        const res = await axiosInstance.get(`${apiUrl}/cities-by-state/${selectedState}`);
+        setCities(res.data?.data);
+      } catch (err) {
+        console.error("Failed to fetch cities:", err);
+        toast.error("Failed to load cities");
+      }
+    } else {
+      setCities([]); // Reset cities when no state is selected
+    }
+  };
+  fetchCities();
+}, [form.watch('state')]);
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -474,32 +535,71 @@ const GeneralInfo = () => {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter State" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter City" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    
+    <FormField
+  control={form.control}
+  name="state"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>State</FormLabel>
+      <Select
+        onValueChange={(value) => {
+          const selectedState = states.find(state => state.name === value);
+          field.onChange(selectedState ? selectedState.id : '');
+        }}
+        value={states.find(state => state.id === field.value)?.name || ''}
+      >
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select State" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {states.map((state) => (
+            <SelectItem key={state.id} value={state.name}>
+              {state.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+<FormField
+  control={form.control}
+  name="city"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>City</FormLabel>
+      <Select
+        onValueChange={(value) => {
+          const selectedCity = cities.find(city => city.name === value);
+          field.onChange(selectedCity ? selectedCity.id : '');
+        }}
+        value={cities.find(city => city.id === field.value)?.name || ''}
+        disabled={!form.getValues('state')}
+      >
+        <FormControl>
+          <SelectTrigger>
+            <SelectValue placeholder="Select City" />
+          </SelectTrigger>
+        </FormControl>
+        <SelectContent>
+          {cities.map((city) => (
+            <SelectItem key={city.id} value={city.name}>
+              {city.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+
               <FormField
                 control={form.control}
                 name="minFees"

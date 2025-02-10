@@ -1,4 +1,3 @@
-'use client';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -20,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useTransition, useState, useEffect } from 'react';
+import { useTransition, useState, useEffect, useRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -32,21 +31,28 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle
-} from '@/components/ui/alert-dialog'; // Ensure this component is correctly imported
+} from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
-  name: z.string().nonempty({ message: 'Name is required' }),
+  name: z.string().min(1, { message: 'Name is required' }),
   contact_number: z
     .string()
     .regex(/^\d+$/, { message: 'Enter a valid phone number' })
-    .nonempty({ message: 'Contact number is required' }),
-  role: z.string().nonempty({ message: 'Role is required' }),
+    .min(1, { message: 'Contact number is required' }),
+  role: z.string().min(1, { message: 'Role is required' }),
   email: z.string().email({ message: 'Enter a valid email address' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
   confirmPassword: z
     .string()
     .min(8, { message: 'Password must be at least 8 characters' }),
-  is_verified: z.boolean().optional()
+  is_verified: z.boolean().optional(),
+  otp: z.string().optional()
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword']
@@ -59,12 +65,89 @@ const roleTypes = [
 
 type UserFormValue = z.infer<typeof formSchema>;
 
+interface OTPInputProps {
+  otp: string;
+  setOtp: (value: string) => void;
+  maxLength?: number;
+}
+
+const OTPInput: React.FC<OTPInputProps> = ({ setOtp, maxLength = 6 }) => {
+  const [otpValues, setOtpValues] = useState<string[]>(Array(maxLength).fill(''));
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    const combinedOtp = otpValues.join('');
+    setOtp(combinedOtp);
+  }, [otpValues, setOtp]);
+
+  const handleChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtpValues = [...otpValues];
+    newOtpValues[index] = value;
+    setOtpValues(newOtpValues);
+
+    if (value && index < maxLength - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text');
+    const pastedNumbers = pastedData.replace(/[^\d]/g, '').split('').slice(0, maxLength);
+    
+    const newOtpValues = [...otpValues];
+    pastedNumbers.forEach((value, index) => {
+      if (index < maxLength) {
+        newOtpValues[index] = value;
+      }
+    });
+    setOtpValues(newOtpValues);
+
+    const nextEmptyIndex = newOtpValues.findIndex(value => !value);
+    const focusIndex = nextEmptyIndex === -1 ? maxLength - 1 : nextEmptyIndex;
+    inputRefs.current[focusIndex]?.focus();
+  };
+
+  return (
+    <div className="flex gap-2 justify-center">
+      {otpValues.map((value, index) => (
+        <input
+          key={index}
+          type="text"
+          maxLength={1}
+          value={value}
+          ref={el => inputRefs.current[index] = el}
+          onChange={e => handleChange(index, e.target.value)}
+          onKeyDown={e => handleKeyDown(index, e)}
+          onPaste={handlePaste}
+          className="w-12 h-12 text-center border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
+          autoComplete="off"
+        />
+      ))}
+    </div>
+  );
+};
+
 export default function UserSignupForm({ setToggle, toggle }: { setToggle: (value: boolean) => void; toggle: boolean }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [showAlert, setShowAlert] = useState(false);
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [otp, setOtp] = useState('');
   const [role, setRole] = useState<string>('');
+  const [timeLeft, setTimeLeft] = useState(90);
+  const [canResend, setCanResend] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const [formData, setFormData] = useState<UserFormValue | null>(null);
 
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
@@ -75,11 +158,53 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
       email: '',
       password: '',
       confirmPassword: '',
-      is_verified: false
+      is_verified: false,
+      otp: ''
     }
   });
 
-  const mutation = useMutation({
+  useEffect(() => {
+    if (timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
+      }, 1000);
+    } else {
+      setCanResend(true);
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [timeLeft]);
+
+  const sendOtpMutation = useMutation({
+    mutationFn: async (credentials: { email: string; contact_number: string }) => {
+      const response = await axiosInstance.post(
+        `${apiUrl}/send-otp`,
+        credentials,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      if (!showOtpDialog) {
+        setShowOtpDialog(true);
+        setTimeLeft(90);
+        setCanResend(false);
+      }
+    },
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message || 'Failed to send OTP';
+      toast.error(errorMessage);
+    }
+  });
+
+  const signupMutation = useMutation({
     mutationFn: async (credentials: UserFormValue) => {
       const response = await axiosInstance.post(
         `${apiUrl}/signup`,
@@ -100,13 +225,12 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
         localStorage.setItem('accessToken', JSON.stringify(data.data.accessToken));
         localStorage.setItem('refreshToken', JSON.stringify(data.data.refreshToken));
         startTransition(() => router.push('/'));
+      } else {
+        setShowAlert(true);
+        localStorage.setItem('accessToken', JSON.stringify(data.data.accessToken));
+        localStorage.setItem('refreshToken', JSON.stringify(data.data.refreshToken));
+        startTransition(() => router.push('/'));
       }
-      else{
-      setShowAlert(true);
-      localStorage.setItem('accessToken', JSON.stringify(data.data.accessToken));
-      localStorage.setItem('refreshToken', JSON.stringify(data.data.refreshToken));
-      startTransition(() => router.push('/'));
-    }
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || 'Failed to sign up';
@@ -114,12 +238,78 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
     }
   });
 
-  const onSubmit = (data: UserFormValue) => {
-    if (data.role === 'counsellor') {
-      data.is_verified = true;
-    }
-    mutation.mutate(data);
+  const onSubmit = async (data: UserFormValue) => {
+    setFormData(data); // Store form data
+    await sendOtpMutation.mutateAsync({
+      email: data.email,
+      contact_number: data.contact_number
+    });
   };
+
+  const handleResendOtp = async () => {
+    if (formData) {
+      await sendOtpMutation.mutateAsync({
+        email: formData.email,
+        contact_number: formData.contact_number
+      });
+    }
+  };
+
+  const verifyAndSignup = () => {
+    if (formData) {
+      const dataToSubmit = { ...formData };
+      if (dataToSubmit.role === 'counsellor') {
+        dataToSubmit.is_verified = true;
+      }
+      dataToSubmit.otp = otp;
+      signupMutation.mutate(dataToSubmit);
+      setShowOtpDialog(false);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const OtpDialog = useMemo(() => (
+    <Dialog open={showOtpDialog} onOpenChange={setShowOtpDialog}>
+      <DialogContent className="sm:max-w-md" aria-describedby="otp-dialog-description">
+        <DialogHeader>
+          <DialogTitle className="text-center">Enter Verification Code</DialogTitle>
+          <div id="otp-dialog-description" className="text-center text-sm text-gray-500 mt-2">
+            We have sent a verification code to your email and phone number
+          </div>
+        </DialogHeader>
+        <div className="space-y-6">
+          <OTPInput otp={otp} setOtp={setOtp} maxLength={6} />
+          <div className="text-center text-sm">
+            {!canResend ? (
+              <p className="text-gray-500">
+                Resend code in <span className="font-medium">{formatTime(timeLeft)}</span>
+              </p>
+            ) : (
+              <button
+                onClick={handleResendOtp}
+                disabled={!canResend || sendOtpMutation.isPending}
+                className="text-blue-600 hover:text-blue-800 font-medium disabled:text-gray-400"
+              >
+                Resend Code
+              </button>
+            )}
+          </div>
+          <Button 
+            onClick={verifyAndSignup} 
+            className="w-full"
+            disabled={otp.length !== 6 || signupMutation.isPending}
+          >
+            {signupMutation.isPending ? 'Verifying...' : 'Verify & Sign Up'}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  ), [showOtpDialog, otp, canResend, timeLeft, sendOtpMutation.isPending, signupMutation.isPending]);
 
   const SignupAlert = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -147,9 +337,6 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
     </AlertDialog>
   );
 
-  const isLoading = mutation.status === 'pending';
-
-  // Update role dynamically
   useEffect(() => {
     if (form.watch('role')) {
       setRole(form.watch('role'));
@@ -162,133 +349,145 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
     ? 'Counsellor Name'
     : 'Name';
 
+  const isLoading = signupMutation.status === 'pending' || sendOtpMutation.status === 'pending';
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{roleSpecificLabel}</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder={`Enter your ${roleSpecificLabel.toLowerCase()}`}
-                  disabled={isLoading}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="contact_number"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone No</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder="Enter your Contact number"
-                  disabled={isPending}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder="Enter your email..."
-                  disabled={isPending}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Role Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{roleSpecificLabel}</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Role Type" />
-                  </SelectTrigger>
+                  <Input
+                    type="text"
+                    placeholder={`Enter your ${roleSpecificLabel.toLowerCase()}`}
+                    disabled={isLoading}
+                    {...field}
+                  />
                 </FormControl>
-                <SelectContent>
-                  {roleTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="Enter your password..."
-                  disabled={isPending}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="confirmPassword"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="Enter your password..."
-                  disabled={isPending}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <button className='w-full justify-end text-blue-600 ml-0' onClick={() => setToggle(!toggle)} type='button'>Already have an account? Sign In</button>
-        <Button
-          disabled={isPending}
-          className="ml-auto w-full"
-          type="submit"
-        >
-          {isPending ? 'Signing Up...' : 'Sign Up'}
-        </Button>
-      </form>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="contact_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone No</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Enter your Contact number"
+                    disabled={isPending}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="Enter your email..."
+                    disabled={isPending}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Role Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Role Type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {roleTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+              
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Enter your password..."
+                    disabled={isPending}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Enter your password..."
+                    disabled={isPending}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <button 
+            className="w-full justify-end text-blue-600 ml-0" 
+            onClick={() => setToggle(!toggle)} 
+            type="button"
+          >
+            Already have an account? Sign In
+          </button>
+          <Button
+            disabled={isLoading}
+            className="ml-auto w-full"
+            type="submit"
+          >
+            {isLoading ? 'Please wait...' : 'Sign Up'}
+          </Button>
+        </form>
+      </Form>
+      {OtpDialog}
       <SignupAlert isOpen={showAlert} onClose={() => setShowAlert(false)} />
-    </Form>
+    </>
   );
 }
