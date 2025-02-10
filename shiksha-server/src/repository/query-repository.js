@@ -10,7 +10,7 @@ class QueryRepository extends CrudRepository {
 
   async getQueryByInstitute(instituteId) {
     try {
-      const query = await Query.find({ instituteId : instituteId }).populate("instituteId");
+      const query = await QueryAllocation.find({ institute : instituteId }).populate("query");
       return query;
 
     } catch (error) {
@@ -92,9 +92,19 @@ class QueryRepository extends CrudRepository {
               $push: { allocatedQueries: query._id }
             });
 
+            //add instituteId to query
+
+            await Query.findByIdAndUpdate(query._id, { 
+              $push: { instituteIds: instituteId }
+            });
+
+
+
+
             assignedQueries++;
           }
         }
+
       }
 
       console.log(`Query allocation completed. Total allocations: ${assignedQueries}`);
@@ -107,7 +117,7 @@ class QueryRepository extends CrudRepository {
   //get
   async get(id) {
     try {
-      const query = await Query.findById(id).populate("instituteId");
+      const query = await Query.findById(id).populate("instituteIds");
       return query;
     } catch (error) {
       throw error;
