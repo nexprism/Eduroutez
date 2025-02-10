@@ -126,6 +126,12 @@ const instituteSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    allocatedQueries: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Query",
+      },
+    ],
     gallery: [
       {
         type: String,
@@ -148,7 +154,7 @@ const instituteSchema = new mongoose.Schema(
     plan:{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subscription",
-      default:"67921a8896ff8884c3a795a7"
+      default:"67934e383ab889ea870789c3"
     },
     planName:{
       type:String,

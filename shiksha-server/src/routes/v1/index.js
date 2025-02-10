@@ -38,7 +38,7 @@ import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../.
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
 import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot, getScheduleSlots, updateScheduleSlot} from "../../controllers/counselorSlot-controller.js";
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
-import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, updateQuery } from "../../controllers/query-controller.js";
+import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, updateQuery, QueryAllocation } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ ,getFAQsByInstitute} from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage } from "../../controllers/customPage-controller.js";
 import { upload } from "../../middlewares/upload-middleware.js";
@@ -120,6 +120,8 @@ router.get("/query/:id", getQuery);
 router.get("/query-by-institute/:id", getQueryByInstitute);
 router.patch("/query/:id",  updateQuery);
 router.delete("/query/:id", deleteQuery);
+//QueryAllocation
+router.get("/lead-allocation", QueryAllocation);
 
 
 //states

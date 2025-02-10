@@ -1,4 +1,5 @@
 import { QueryRepository } from "../repository/query-repository.js";
+import AppError from "../utils/errors/app-error.js";
 
 class questionAnswerService {
   constructor() {
@@ -59,6 +60,14 @@ class questionAnswerService {
   async get(id) {
     const questionAnswer = await this.queryRepository.get(id);
     return questionAnswer;
+  }
+
+  //QueryAllocation
+  async QueryAllocation(data) {
+    
+      const questionAnswer = await this.queryRepository.QueryAllocation(data);
+      return questionAnswer;
+    
   }
 
   //getByInstitute

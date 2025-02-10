@@ -59,6 +59,21 @@ export async function getQuery(req, res) {
   }
 }
 
+//QueryAllocation
+export async function QueryAllocation(req, res) {
+  try {
+    const response = await questionAnswerService.QueryAllocation(req.body);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the question and answer";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.log("Error in QueryAllocation", error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+
 //getQueryByInstitute
 export async function getQueryByInstitute(req, res) {
   try {
