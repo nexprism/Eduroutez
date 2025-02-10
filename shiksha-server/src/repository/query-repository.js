@@ -84,13 +84,13 @@ class QueryRepository extends CrudRepository {
         console.log("Institute allocation: ", instituteAllocation);
 
         const allocatedQueries = queries.splice(0, instituteAllocation);
-        console.log("Allocated queries: ", allocatedQueries.length);
+        console.log("Allocated queries: ", allocatedQueries);
 
-        // for (const query of allocatedQueries) {
-        //   await QueryAllocation.create({ query: query._id, institute: instituteId });
-        //   // await Query.findByIdAndUpdate(query._id, { status: "Open" });
-        //   await Institute.findByIdAndUpdate(instituteId, { $push: { allocatedQueries: query._id } });
-        // }
+        for (const query of allocatedQueries) {
+          await QueryAllocation.create({ query: query._id, institute: instituteId });
+          // await Query.findByIdAndUpdate(query._id, { status: "Open" });
+          await Institute.findByIdAndUpdate(instituteId, { $push: { allocatedQueries: query._id } });
+        }
 
         assignedQueries += allocatedQueries.length;
 
