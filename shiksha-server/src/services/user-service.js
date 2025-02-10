@@ -5,7 +5,7 @@ import { Token } from "../utils/index.js";
 import bcrypt from "bcrypt";
 import axios from "axios";
 import NodeCache from "node-cache";
-const otpCache = new NodeCache({ stdTTL: 300 }); // OTP expires in 5 minutes
+const otpCache = new NodeCache({ stdTTL: 90 }); // OTP expires in 90 seconds
 
 
 class UserService {
