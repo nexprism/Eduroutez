@@ -161,6 +161,28 @@ export async function verifyOtp(req, res) {
   }
 }
 
+//getStateCityById
+export const getStateCityById = async (req, res) => {
+
+  try {
+    const type = req.body.type;
+    const stateCity = await userService.getStateCityById(req.params.id, type);
+    return res.status(200).json({
+      success: true,
+      message: "Successfully fetched state and city",
+      data: stateCity,
+      err: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong",
+      data: {},
+      success: false,
+      err: error.message,
+    });
+  }
+};
+
 
 export const signup = async (req, res) => {
   console.log(req.body);

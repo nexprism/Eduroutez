@@ -173,6 +173,23 @@ class UserRepository extends CrudRepository {
     }
   }
 
+  //getStateCityById
+  async getStateCityById(id,type) {
+    try {
+      //get state or city by id
+      if(type === 'state') {
+        const state = await State.find({ id: id });
+        return state;
+      } else {
+        const city = await City.find({ id: id });
+        return city;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
 
   //dashboardDetails
   async dashboardDetails() {

@@ -112,6 +112,16 @@ class UserService {
     }
   }
 
+  //getStateCityById
+  async getStateCityById(id,type) {
+    try {
+      const stateCity = await this.userRepository.getStateCityById(id,type);
+      return stateCity;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   //verifyOtp
   async verifyOtp(otp,phone) {
     try {
@@ -131,7 +141,7 @@ class UserService {
         return true;
       }else{
         return false;
-        
+
       }
     }else{
       return false;
