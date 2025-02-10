@@ -115,18 +115,27 @@ class UserService {
   //verifyOtp
   async verifyOtp(otp,phone) {
     try {
-      console.log('phone',phone)
-      const cacheOtps = otpCache.set(otp,phone);
+      // console.log('phone',phone)
+      // const cacheOtps = otpCache.set(phone,otp);
+      // console.log('set cacheOtps',cacheOtps)
       //get all otpcache
-      const cacheOtp = otpCache.get();
+      // console.log('otpCache',otpCache)
+
+      if (otpCache.data){
+        var cache_Otp = otpCache.get(phone);
+      
       
       console.log('otp', otp)
-      console.log('cacheOtp',cacheOtp)
-      if(otp === cacheOtp){
+      console.log('cacheOtp', cache_Otp)
+      if (otp == cache_Otp){
         return true;
       }else{
         return false;
+        
       }
+    }else{
+      return false;
+    }
     } catch (error) {
       throw error;
     }
