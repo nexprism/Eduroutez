@@ -1,4 +1,6 @@
 'use client';
+
+import { useState } from 'react';
 import PageContainer from '@/components/layout/page-container';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
@@ -7,10 +9,27 @@ import QuestionAnswerTable from './question-answer-tables';
 import { useQuestionAnswerTableFilters } from './question-answer-tables/use-question-answer-table-filters';
 import axiosInstance from '@/lib/axios';
 
+// Define the query interface based on the data structure
+interface Query {
+  _id: string;
+  name: string;
+  email: string;
+  phoneNo: string;
+  city: string;
+  queryRelatedTo: string;
+  query: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  instituteId: string[];
+  instituteIds: string[];
+}
+
 type TQuestionAnswerListingPage = {};
 
 export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage) {
-  const { searchQuery, page, limit } = useQuestionAnswerTableFilters();
+  const { searchQuery, limit } = useQuestionAnswerTableFilters();
+  const [page, setPage] = useState(1);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const id = typeof window !== 'undefined' ? localStorage.getItem('instituteId') : null;
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
@@ -23,47 +42,81 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
       // Prepare base params for both roles
       const baseParams = {
         page: page,
-        limit: limit,
+        limit: page === 1 ? 10 : limit,
         sort: JSON.stringify({ createdAt: 'desc' })
       };
 
       // Add search fields if needed
-      const params = role !== 'SUPER_ADMIN' 
+      const params = role !== 'SUPER_ADMIN'
         ? {
             ...baseParams,
             searchFields: JSON.stringify({})
           }
         : baseParams;
 
-      const response = await axiosInstance.get(
-        role === 'SUPER_ADMIN'
-          ? `${apiUrl}/queries`
-          : `${apiUrl}/query-by-institute/${id}`,
-        { params }
-      );
+      // Choose endpoint based on role
+      const endpoint = role === 'SUPER_ADMIN'
+        ? `${apiUrl}/queries`
+        : `${apiUrl}/query-by-institute/${id}`;
 
-      // Handle different response structures for SUPER_ADMIN and other roles
+      const response = await axiosInstance.get(endpoint, { params });
+
+      // Transform the data based on role
       if (role === 'SUPER_ADMIN') {
+        const transformedData = (response.data?.data?.result || []).map((item: any) => ({
+          id: item._id,
+          name: item.name,
+          email: item.email,
+          phoneNo: item.phoneNo,
+          city: item.city,
+          queryRelatedTo: item.queryRelatedTo,
+          query: item.query,
+          status: item.status,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          instituteIds: item.instituteIds || item.instituteId || []
+        }));
+
         return {
-          data: response.data?.data?.result || [],
+          data: transformedData,
           totalData: response.data?.data?.totalDocuments || 0,
           currentPage: page,
           totalPages: Math.ceil((response.data?.data?.totalDocuments || 0) / limit)
         };
       } else {
+        const transformedData = (response.data?.data || []).map((item: any) => {
+          const queryData = item.query || item;
+          return {
+            id: queryData._id,
+            name: queryData.name,
+            email: queryData.email,
+            phoneNo: queryData.phoneNo,
+            city: queryData.city,
+            queryRelatedTo: queryData.queryRelatedTo,
+            query: queryData.query,
+            status: queryData.status,
+            createdAt: queryData.createdAt,
+            updatedAt: queryData.updatedAt,
+            instituteIds: queryData.instituteIds || queryData.instituteId || []
+          };
+        });
+
         return {
-          data: response.data?.data || [],
-          totalData: response.data?.data?.length || 0,
+          data: transformedData,
+          totalData: transformedData.length,
           currentPage: page,
-          totalPages: Math.ceil((response.data?.total || 0) / limit)
+          totalPages: Math.ceil((response.data?.total || transformedData.length) / limit)
         };
       }
     },
     enabled: !!id && !!role
   });
 
-  // Calculate the total count for display
   const totalCount = data?.totalData ?? 0;
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
 
   return (
     <PageContainer scrollable>
@@ -85,6 +138,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
               currentPage={data?.currentPage ?? 1}
               totalPages={data?.totalPages ?? 1}
               isLoading={isLoading}
+              onPageChange={handlePageChange}
             />
           </div>
         )

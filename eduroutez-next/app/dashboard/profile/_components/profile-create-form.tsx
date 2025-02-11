@@ -64,7 +64,8 @@ export const profileSchema = z.object({
   language:z.string(),
   ExperienceYear:z.string(),
   country: z.string().min(1, { message: 'Please select a category' }),
-  city: z.string().min(1, { message: 'Please select a category' }),
+  city: z.any(),
+  state:z.any(),
   gender: z.string(),
   dateOfBirth: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
     message: 'Start date should be in the format YYYY-MM-DD'
@@ -138,8 +139,7 @@ interface ProfileFormType {
   categories: any;
 }
 const ProfileCreateForm: React.FC<ProfileFormType> = ({
-  initialData,
-  categories
+  initialData
 }) => {
   const [streamCategories, setStreamCategories] = useState<any[]>([]);
   const [, setOpen] = useState(false);
@@ -167,6 +167,21 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   >(null);
   const [data, setData] = useState({});
   const [isEdit, setIsEdit] = React.useState(false);
+  
+    interface State {
+      id: string;
+      _id: string;
+      name: string;
+    }
+    
+    interface City {
+      id: Key | null | undefined;
+      _id: string;
+      name: string;
+    }
+    
+    const [states, setStates] = React.useState<State[]>([]);
+    const [cities, setCities] = React.useState<City[]>([]);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const delta = currentStep - previousStep;
@@ -224,6 +239,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         'contactno',
         'country',
         'city',
+        'state',
         'gender',
         'dateOfBirth',
         'language',
@@ -290,6 +306,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       formData.append('email', values.email);
       formData.append('contactno', values.contactno.toString());
       formData.append('country', values.country);
+      formData.append('state', values.state);
       formData.append('city', values.city);
       formData.append('gender', values.gender);
       formData.append('dateOfBirth', values.dateOfBirth);
@@ -480,41 +497,114 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
 
 
   React.useEffect(() => {
-    if (counselor?.data) {
-      form.reset({
-        firstname: counselor.data[0]?.firstname,
-        lastname: counselor.data[0]?.lastname,
-        email: counselor.data[0]?.email,
-        contactno: counselor.data[0]?.contactno,
-        country: counselor.data[0]?.country,
-        category: counselor.data[0]?.category,
-        instituteEmail: counselor.data[0]?.instituteEmail,
-        city: counselor.data[0]?.city,
-        gender: counselor.data[0]?.gender,
-        dateOfBirth: counselor.data[0]?.dateOfBirth?.split('T')[0] || '', // Format date
-        experiences: counselor.data[0]?.experiences || [],
-        bankName: counselor.data[0]?.bankName,
-        accountNumber: counselor.data[0]?.accountNumber, // Add this line
-        accountHolderName: counselor.data[0]?.accountHolderName, // Add this line
-        ifscCode: counselor.data[0]?.ifscCode,
-        language: counselor.data[0]?.language,
-        ExperienceYear: counselor.data[0]?.ExperienceYear
-      });
-      if (counselor.data[0].panCard) {
-        const panCardFileName = counselor.data[0].panCard.split('\\').pop()?.split('/').pop();
-        setPreviewPanCardUrl(`${IMAGE_URL}/${panCardFileName}`);
+    const fetchStateAndCity = async () => {
+      if (counselor?.data?.length > 0) {
+        let stateData = null;
+        let stateCityData = null;
+  
+        if (counselor.data[0]?.state) {
+          try {
+            const stateResponse = await axiosInstance.post(
+              `${apiUrl}/state-city-by-id/${counselor.data[0].state}`,
+              { type: "state" }
+            );
+            console.log("State response:", stateResponse?.data?.data?.[0]);
+            stateData = stateResponse?.data?.data?.[0];
+          } catch (error) {
+            console.error("Error fetching state data:", error);
+          }
+        }
+  
+        if (counselor.data[0]?.city) {
+          try {
+            const cityResponse = await axiosInstance.post(
+              `${apiUrl}/state-city-by-id/${counselor.data[0].city}`,
+              { type: "city" }
+            );
+            console.log("City response:", cityResponse?.data?.data?.[0]);
+            stateCityData = cityResponse?.data?.data?.[0];
+          } catch (error) {
+            console.error("Error fetching city data:", error);
+          }
+        }
+  
+        form.reset({
+          firstname: counselor.data[0]?.firstname,
+          lastname: counselor.data[0]?.lastname,
+          email: counselor.data[0]?.email,
+          contactno: counselor.data[0]?.contactno,
+          country: counselor.data[0]?.country,
+          category: counselor.data[0]?.category,
+          instituteEmail: counselor.data[0]?.instituteEmail,
+          state: stateData?.id,
+          city: stateCityData?.id,
+
+          gender: counselor.data[0]?.gender,
+          dateOfBirth: counselor.data[0]?.dateOfBirth?.split("T")[0] || "",
+          experiences: counselor.data[0]?.experiences || [],
+          bankName: counselor.data[0]?.bankName,
+          accountNumber: counselor.data[0]?.accountNumber,
+          accountHolderName: counselor.data[0]?.accountHolderName,
+          ifscCode: counselor.data[0]?.ifscCode,
+          language: counselor.data[0]?.language,
+          ExperienceYear: counselor.data[0]?.ExperienceYear,
+        });
+  
+        if (counselor.data[0].panCard) {
+          const panCardFileName = counselor.data[0].panCard.split("\\").pop()?.split("/").pop();
+          setPreviewPanCardUrl(`${IMAGE_URL}/${panCardFileName}`);
+        }
+  
+        if (counselor.data[0].adharCard) {
+          const adharCardFileName = counselor.data[0].adharCard.split("\\").pop()?.split("/").pop();
+          setPreviewAdharCardUrl(`${IMAGE_URL}/${adharCardFileName}`);
+        }
+  
+        if (counselor.data[0].profilePhoto) {
+          const profilePhoto = counselor.data[0].profilePhoto.split("\\").pop()?.split("/").pop();
+          setPreviewProfilePhotoUrl(`${IMAGE_URL}/${profilePhoto}`);
+        }
       }
-      if (counselor.data[0].adharCard) {
-        const adharCardFileName = counselor.data[0]?.adharCard.split('\\').pop()?.split('/').pop();
-        setPreviewAdharCardUrl(`${IMAGE_URL}/${adharCardFileName}`);
-      }
-      if (counselor.data[0].profilePhoto) {
-        const profilePhoto = counselor.data[0]?.profilePhoto.split('\\').pop()?.split('/').pop();
-        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${profilePhoto}`);
-      }
-      // console.log(datOfBirth);
-    }
+    };
+  
+    fetchStateAndCity();
   }, [counselor, form]);
+  
+
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const res = await axiosInstance.get(`${apiUrl}/states`);
+        setStates(res.data?.data);
+      } catch (err) {
+        console.error("Failed to fetch states:", err);
+        toast.error("Failed to load states");
+      }
+    };
+    fetchStates();
+  }, []);
+  
+  // Fetch cities when a state is selected
+  useEffect(() => {
+    const fetchCities = async () => {
+      const selectedState = form.getValues('state');
+      console.log('Selected state:', selectedState);
+      console.log('Form:', form.getValues());
+      if (selectedState) {
+        try {
+          const res = await axiosInstance.get(`${apiUrl}/cities-by-state/${selectedState}`);
+          setCities(res.data?.data);
+        } catch (err) {
+          console.error("Failed to fetch cities:", err);
+          toast.error("Failed to load cities");
+        }
+      } else {
+        setCities([]); // Reset cities when no state is selected
+      }
+    };
+    fetchCities();
+  }, [form.watch('state')]);
+
 
   return (
     <>
@@ -761,23 +851,69 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                     </FormItem>
                   )}
                 />
+
                 <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={loading}
-                          placeholder="Your City"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                 control={form.control}
+                 name="state"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>State</FormLabel>
+                     <Select
+                       onValueChange={(value) => {
+                         const selectedState = states.find(state => state.name === value);
+                         field.onChange(selectedState ? selectedState.id : '');
+                       }}
+                       value={states.find(state => state.id === field.value)?.name || ''}
+                     >
+                       <FormControl>
+                         <SelectTrigger>
+                           <SelectValue placeholder="Select State" />
+                         </SelectTrigger>
+                       </FormControl>
+                       <SelectContent>
+                         {states.map((state) => (
+                           <SelectItem key={state.id} value={state.name}>
+                             {state.name}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
+               
+               <FormField
+                 control={form.control}
+                 name="city"
+                 render={({ field }) => (
+                   <FormItem>
+                     <FormLabel>City</FormLabel>
+                     <Select
+                       onValueChange={(value) => {
+                         const selectedCity = cities.find(city => city.name === value);
+                         field.onChange(selectedCity ? selectedCity.id : '');
+                       }}
+                       value={cities.find(city => city.id == field.value)?.name || ''}
+                       disabled={!form.getValues('state')}
+                     >
+                       <FormControl>
+                         <SelectTrigger>
+                           <SelectValue placeholder="Select City" />
+                         </SelectTrigger>
+                       </FormControl>
+                       <SelectContent>
+                         {cities.map((city) => (
+                           <SelectItem key={city.id} value={city.name}>
+                             {city.name}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
                
                  <FormField
     control={form.control}
