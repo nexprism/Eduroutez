@@ -48,7 +48,7 @@ class questionAnswerService {
       }
 
       // Execute query with dynamic filters, sorting, and pagination
-      const populateFields = ["instituteId"];
+      const populateFields = ["instituteIds"];
       const questionAnswers = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
 
       return questionAnswers;

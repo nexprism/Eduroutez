@@ -10,7 +10,7 @@ class QueryRepository extends CrudRepository {
 
   async getQueryByInstitute(instituteId) {
     try {
-      const query = await Query.find({ instituteId : instituteId }).populate("instituteId");
+      const query = await QueryAllocation.find({ institute : instituteId }).populate("query");
       return query;
 
     } catch (error) {
@@ -20,7 +20,7 @@ class QueryRepository extends CrudRepository {
   }
 
   //queryRepository
-  async QueryAllocation(data) {
+  async QueryAllocation(instituteId) {
     try {
       console.log("Starting query allocation...");
 
@@ -32,7 +32,6 @@ class QueryRepository extends CrudRepository {
 
       const queries = await Query.find({
         createdAt: { $gte: startOfDay, $lte: endOfDay },
-        status: "Pending"
       });
 
       console.log("Queries length: ", queries.length);
@@ -42,28 +41,23 @@ class QueryRepository extends CrudRepository {
         return;
       }
 
+      // Get all institutes and their plans
       const institutes = await Institute.find().populate("plan");
 
-        // console.log("Institutes: ", institutes);
-
-      const allocationData = {};
+      let allocationData = {};
       let totalAllocation = 0;
 
+      // Extract allocation percentage from plan features
       institutes.forEach((institute) => {
-        // console.log("Institute: ", institute.plan.features);
-        if (institute.plan){
-        if (institute.plan.features) {
-          //get Lead Allocation feature
-
-          for(const feature of institute.plan.features) {
+        if (institute.plan && institute.plan.features) {
+          for (const feature of institute.plan.features) {
             if (feature.key === "Lead Allocation") {
-              allocationData[institute._id] = feature.value;
-              totalAllocation += parseInt(feature.value);
+              const allocationValue = parseInt(feature.value) || 0;
+              allocationData[institute._id] = allocationValue;
+              totalAllocation += allocationValue;
             }
           }
-
         }
-      }
       });
 
       if (totalAllocation === 0) {
@@ -71,46 +65,59 @@ class QueryRepository extends CrudRepository {
         return;
       }
 
-       const sortedInstitutes = Object.entries(allocationData)
-            .sort((a, b) => b[1] - a[1])
-            .map(([id]) => id);
+      // Sort institutes by allocation percentage (higher first)
+      const sortedInstitutes = Object.entries(allocationData)
+        .sort((a, b) => b[1] - a[1])
+        .map(([id]) => id);
 
+      console.log("Total allocation: ", totalAllocation);
+      console.log("Sorted Institutes: ", sortedInstitutes);
 
       let assignedQueries = 0;
 
       // Allocate queries proportionally
-      for (const instituteId of sortedInstitutes) {
-        const instituteAllocation = Math.floor((allocationData[instituteId] / 100) * queries.length);
-        console.log("Institute allocation: ", instituteAllocation);
+      for (const query of queries) {
+        for (const instituteId of sortedInstitutes) {
+          const allocationPercentage = allocationData[instituteId];
 
-        const allocatedQueries = queries.splice(0, instituteAllocation);
-        console.log("Allocated queries: ", allocatedQueries);
+          // Determine if this institute should receive the query
+          const shouldAllocate = Math.random() * 100 < allocationPercentage;
 
-        for (const query of allocatedQueries) {
-          await QueryAllocation.create({ query: query._id, institute: instituteId });
-          // await Query.findByIdAndUpdate(query._id, { status: "Open" });
-          await Institute.findByIdAndUpdate(instituteId, { $push: { allocatedQueries: query._id } });
+          if (shouldAllocate) {
+            // Save allocation
+            await QueryAllocation.create({ query: query._id, institute: instituteId });
+
+            // Add query to institute's allocated list
+            await Institute.findByIdAndUpdate(instituteId, {
+              $push: { allocatedQueries: query._id }
+            });
+
+            //add instituteId to query
+
+            await Query.findByIdAndUpdate(query._id, { 
+              $push: { instituteIds: instituteId }
+            });
+
+
+
+
+            assignedQueries++;
+          }
         }
 
-        assignedQueries += allocatedQueries.length;
-
-        if (queries.length === 0) break;
       }
 
-      console.log("Total allocation: ", totalAllocation);
-      console.log("sortedInstitutes data: ", sortedInstitutes);
+      console.log(`Query allocation completed. Total allocations: ${assignedQueries}`);
+    } catch (error) {
+      console.error("Error in query allocation:", error);
+    }
 
-      console.log("Query allocation completed.");
-    }
-    catch (error) {
-      throw error;
-    }
   }
 
   //get
   async get(id) {
     try {
-      const query = await Query.findById(id).populate("instituteId");
+      const query = await Query.findById(id).populate("instituteIds");
       return query;
     } catch (error) {
       throw error;
