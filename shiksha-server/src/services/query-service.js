@@ -121,14 +121,11 @@ class questionAnswerService {
 
   async update(id, data) {
     try {
-      const questionAnswer = await this.queryAllocationRepository.findByIdAndUpdate({
-        query: id,
-        data,
-      });
+      const questionAnswer = await this.queryAllocationRepository.updateQuery(id, data);
 
       return questionAnswer;
     } catch (error) {
-      throw new AppError("Cannot update the questionAnswer ", StatusCodes.INTERNAL_SERVER_ERROR);
+      throw new AppError("Cannot update the questionAnswer ", error.message);
     }
   }
 
