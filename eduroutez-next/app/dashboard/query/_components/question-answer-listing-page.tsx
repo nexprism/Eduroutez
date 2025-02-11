@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PageContainer from '@/components/layout/page-container';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
@@ -9,29 +9,31 @@ import QuestionAnswerTable from './question-answer-tables';
 import { useQuestionAnswerTableFilters } from './question-answer-tables/use-question-answer-table-filters';
 import axiosInstance from '@/lib/axios';
 
-
 type TQuestionAnswerListingPage = {};
 
 export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage) {
-  const { searchQuery, limit } = useQuestionAnswerTableFilters();
-  const [page, setPage] = useState(1);
+  const { searchQuery, page, limit, setPage } = useQuestionAnswerTableFilters();
+  
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const id = typeof window !== 'undefined' ? localStorage.getItem('instituteId') : null;
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
 
-  const { data, isLoading, isSuccess, refetch } = useQuery({
+  const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['question-answers', searchQuery, page, limit, role],
     queryFn: async () => {
       if (!id || !role) return null;
 
-      // Prepare base params for both roles
       const baseParams = {
-        page: page,
-        limit: page === 1 ? 10 : limit,
-        sort: JSON.stringify({ createdAt: 'desc' })
+        page,
+        limit,
+        sort: JSON.stringify({ createdAt: 'desc' }),
+        searchFields: JSON.stringify({
+          name: searchQuery || '',
+          email: searchQuery || '',
+          query: searchQuery || ''
+        })
       };
 
-      // Add search fields if needed
       const params = role !== 'SUPER_ADMIN'
         ? {
             ...baseParams,
@@ -39,15 +41,12 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           }
         : baseParams;
 
-      // Choose endpoint based on role
       const endpoint = role === 'SUPER_ADMIN'
         ? `${apiUrl}/queries`
         : `${apiUrl}/query-by-institute/${id}`;
 
       const response = await axiosInstance.get(endpoint, { params });
-      console.log('data', response.data);
 
-      // Transform the data based on role
       if (role === 'SUPER_ADMIN') {
         const transformedData = (response.data?.data?.result || []).map((item: any) => ({
           id: item._id,
@@ -89,7 +88,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
 
         return {
           data: transformedData,
-          totalData: response.data?.data.totalDocuments || 0,
+          totalData: response.data?.data?.totalDocuments || 0,
           currentPage: page,
           totalPages: Math.ceil((response.data?.data?.totalPages || transformedData.length) / limit)
         };
@@ -99,15 +98,6 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   });
 
   const totalCount = data?.totalData ?? 0;
-
-  const handlePageChange = (newPage: number) => {
-    console.log('newPage', newPage);
-    setPage(newPage);
-  };
-
-  useEffect(() => {
-    refetch();
-  }, [page, refetch]);
 
   return (
     <PageContainer scrollable>
@@ -129,11 +119,11 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
               currentPage={data?.currentPage ?? 1}
               totalPages={data?.totalPages ?? 1}
               isLoading={isLoading}
-              onPageChange={handlePageChange}
+              onPageChange={setPage}
             />
           </div>
         )
       )}
     </PageContainer>
   );
-}        
+}
