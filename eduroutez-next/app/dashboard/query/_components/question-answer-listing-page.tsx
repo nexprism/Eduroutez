@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageContainer from '@/components/layout/page-container';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
@@ -9,21 +9,6 @@ import QuestionAnswerTable from './question-answer-tables';
 import { useQuestionAnswerTableFilters } from './question-answer-tables/use-question-answer-table-filters';
 import axiosInstance from '@/lib/axios';
 
-// Define the query interface based on the data structure
-interface Query {
-  _id: string;
-  name: string;
-  email: string;
-  phoneNo: string;
-  city: string;
-  queryRelatedTo: string;
-  query: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  instituteId: string[];
-  instituteIds: string[];
-}
 
 type TQuestionAnswerListingPage = {};
 
@@ -34,7 +19,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const id = typeof window !== 'undefined' ? localStorage.getItem('instituteId') : null;
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
 
-  const { data, isLoading, isSuccess } = useQuery({
+  const { data, isLoading, isSuccess, refetch } = useQuery({
     queryKey: ['question-answers', searchQuery, page, limit, role],
     queryFn: async () => {
       if (!id || !role) return null;
@@ -95,7 +80,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             city: queryData.city,
             queryRelatedTo: queryData.queryRelatedTo,
             query: queryData.query,
-            status: queryData.status,
+            status: item.status,
             createdAt: queryData.createdAt,
             updatedAt: queryData.updatedAt,
             instituteIds: queryData.instituteIds || queryData.instituteId || []
@@ -104,9 +89,9 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
 
         return {
           data: transformedData,
-          totalData: transformedData.length,
+          totalData: response.data?.data.totalDocuments || 0,
           currentPage: page,
-          totalPages: Math.ceil((response.data?.total || transformedData.length) / limit)
+          totalPages: Math.ceil((response.data?.data?.totalPages || transformedData.length) / limit)
         };
       }
     },
@@ -116,8 +101,13 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const totalCount = data?.totalData ?? 0;
 
   const handlePageChange = (newPage: number) => {
+    console.log('newPage', newPage);
     setPage(newPage);
   };
+
+  useEffect(() => {
+    refetch();
+  }, [page, refetch]);
 
   return (
     <PageContainer scrollable>
@@ -146,4 +136,4 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
       )}
     </PageContainer>
   );
-}
+}        

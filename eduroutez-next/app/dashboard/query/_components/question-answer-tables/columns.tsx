@@ -44,7 +44,7 @@ export const columns: ColumnDef<Query>[] = [
   {
     header: 'Status',
     accessorKey: 'query',
-    cell: ({ row }) => <div>{row.original.status}</div>,
+    cell: ({ row }) => <div>{row.original.status || row.original.status}</div>,
   },
   {
     header: 'Created At',
