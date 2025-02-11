@@ -1,6 +1,7 @@
 import { QueryRepository } from "../repository/query-repository.js";
 import AppError from "../utils/errors/app-error.js";
 import { QueryAllocationRepository } from "../repository/query-allocation-repository.js";
+import { query } from "express";
 
 class questionAnswerService {
   constructor() {
@@ -120,7 +121,10 @@ class questionAnswerService {
 
   async update(id, data) {
     try {
-      const questionAnswer = await this.queryRepository.update(id, data);
+      const questionAnswer = await this.queryAllocationRepository.findByIdAndUpdate({
+        query: id,
+        data,
+      });
 
       return questionAnswer;
     } catch (error) {
