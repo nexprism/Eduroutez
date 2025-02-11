@@ -117,8 +117,18 @@ class QueryRepository extends CrudRepository {
   //get
   async get(id) {
     try {
-      const query = await Query.findById(id).populate("instituteIds",);
+      const query = await Query.findById(id).populate({
+        path: 'instituteIds',
+        select: 'name email phoneNumber',
+        populate: {
+          path: 'allocatedQueries',
+          match: { _id: id }
+        }
+      });
+
+      console.log('dfghj', query.instituteIds);
       return query;
+
     } catch (error) {
       throw error;
     }
