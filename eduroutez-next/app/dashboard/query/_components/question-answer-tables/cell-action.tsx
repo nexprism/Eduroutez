@@ -95,38 +95,46 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           {detailsLoading ? (
             <div className="p-4 text-center">Loading...</div>
           ) : (
-            <div className="space-y-4">
-              <div>
-              <h3 className="font-medium">Query Related To:</h3>
-              <p>{detailsData?.queryRelatedTo}</p>
-              </div>
-              <div>
-              <h3 className="font-medium">Query:</h3>
-              <p>{detailsData?.query}</p>
-              </div>
-              <div>
-              <h3 className="font-medium">Name:</h3>
-              <p>{detailsData?.name}</p>
-              </div>
-              <div>
-              <h3 className="font-medium">Email:</h3>
-              <p>{detailsData?.email}</p>
-              </div>
-              <div>
-              <h3 className="font-medium">Phone Number:</h3>
-              <p>{detailsData?.phoneNo}</p>
-              </div>
-              <div>
-              <h3 className="font-medium">City:</h3>
-              <p>{detailsData?.city}</p>
-              </div>
-              <div>
-              <h3 className="font-medium">Created At:</h3>
-              <p>{new Date(detailsData?.createdAt).toLocaleString()}</p>
-              </div>
-            
-              {/* Add more fields as needed based on your API response */}
-            </div>
+            <div className="bg-gray-100 p-4 rounded-lg shadow-md">
+  <h2 className="text-lg font-semibold mb-4">Query Details</h2>
+  <div className="space-y-4 max-h-[400px] overflow-y-auto p-2">
+    {[
+      { label: "Query Related To", value: detailsData?.queryRelatedTo },
+      { label: "Query", value: detailsData?.query },
+      { label: "Name", value: detailsData?.name },
+      { label: "Email", value: detailsData?.email },
+      { label: "Phone Number", value: detailsData?.phoneNo },
+      { label: "City", value: detailsData?.city },
+      { label: "Created At", value: new Date(detailsData?.createdAt).toLocaleString() },
+      { label: "Status", value: detailsData?.status },
+    ].map((item, index) => (
+      <div key={index} className="border-b pb-2">
+        <h3 className="font-medium text-gray-700">{item.label}:</h3>
+        <p className="text-gray-900">{item.value || "N/A"}</p>
+      </div>
+    ))}
+
+    {/* Institute IDs Section */}
+    {detailsData?.instituteIds?.length > 0 && (
+      <div>
+        <h3 className="font-medium text-gray-700">Institute Query status Details:</h3>
+        <ul className="mt-2 space-y-2">
+          {detailsData.instituteIds.map((institute: any) => (
+            <li key={institute._id} className="p-2 border rounded-md bg-white shadow-sm">
+                            <p className="text-gray-900"><span className="font-medium">Name:</span> {institute.instituteName}</p>
+
+              <p className="text-gray-900"><span className="font-medium">Email:</span> {institute.email}</p>
+              <p className="text-gray-900">
+                <span className="font-medium">Status:</span> {institute.allocatedQueries.find((query: any) => query._id === data.id)?.status || "N/A"}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+</div>
+
           )}
         </DialogContent>
       </Dialog>
@@ -150,7 +158,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           {(role === 'institute' || role === 'counselor') && (
             <DropdownMenuItem
               onClick={() =>
-                router.push(`/dashboard/query/update/${data._id}/`)
+                router.push(`/dashboard/query/update/${data?.id}/`)
               }
             >
               <Edit className="mr-2 h-4 w-4" /> Update

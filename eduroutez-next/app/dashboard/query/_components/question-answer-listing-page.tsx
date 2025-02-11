@@ -60,6 +60,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
         : `${apiUrl}/query-by-institute/${id}`;
 
       const response = await axiosInstance.get(endpoint, { params });
+      console.log('data', response.data);
 
       // Transform the data based on role
       if (role === 'SUPER_ADMIN') {
@@ -84,7 +85,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           totalPages: Math.ceil((response.data?.data?.totalDocuments || 0) / limit)
         };
       } else {
-        const transformedData = (response.data?.data || []).map((item: any) => {
+        const transformedData = (response.data?.data?.result || []).map((item: any) => {
           const queryData = item.query || item;
           return {
             id: queryData._id,
