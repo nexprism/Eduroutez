@@ -119,7 +119,7 @@ class QueryRepository extends CrudRepository {
     try {
       const query = await Query.findById(id).populate({
         path: 'instituteIds',
-        select: 'name email phoneNumber',
+        select: 'instituteName email phoneNumber',
         populate: {
           path: 'allocatedQueries',
           match: { _id: id }
