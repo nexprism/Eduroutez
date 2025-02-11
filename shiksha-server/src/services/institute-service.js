@@ -188,6 +188,16 @@ console.log('updatesInstitute',updatesInstitute);
     }
   }
 
+  //megamenuCollages
+  async megamenuCollages() {
+    try {
+      const institutes = await this.instituteRepository.megamenuCollages();
+      return institutes;
+    } catch (error) {
+      throw new AppError("Cannot fetch data of all the institutes", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async get(id) {
     const institute = await this.instituteRepository.get(id);
 

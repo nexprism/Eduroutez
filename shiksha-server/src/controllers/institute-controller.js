@@ -175,6 +175,20 @@ export async function getInstitutes(req, res) {
   }
 }
 
+//megamenuCollages
+export async function megamenuCollages(req, res) {
+  try {
+    const response = await instituteService.megamenuCollages();
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched mega menu colleges";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Get mega menu colleges error:", error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || 500).json(ErrorResponse);
+  }
+}
+
 //bestRatedInstitute
 export async function bestRatedInstitute(req, res) {
   try {

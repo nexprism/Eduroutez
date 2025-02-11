@@ -24,6 +24,7 @@ class CrudRepository {
       throw error;
     }
   }
+  
 
   async get(id, populateFields = []) {
     try {

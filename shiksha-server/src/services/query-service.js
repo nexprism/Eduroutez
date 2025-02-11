@@ -1,9 +1,11 @@
 import { QueryRepository } from "../repository/query-repository.js";
 import AppError from "../utils/errors/app-error.js";
+import { QueryAllocationRepository } from "../repository/query-allocation-repository.js";
 
 class questionAnswerService {
   constructor() {
     this.queryRepository = new QueryRepository();
+    this.queryAllocationRepository = new QueryAllocationRepository();
   }
 
   async create(data) {
@@ -71,9 +73,48 @@ class questionAnswerService {
   }
 
   //getByInstitute
-  async getByInstitute(id) {
-    console.log("id", id);
-    const questionAnswer = await this.queryRepository.getQueryByInstitute(id);
+  async getByInstitute(id,query) {
+
+    console.log("req.params.id", id);
+    console.log("req.query", query);
+    const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+
+    
+
+    // Parse JSON strings from query parameters to objects
+    const parsedFilters = JSON.parse(filters);
+    const parsedSearchFields = JSON.parse(searchFields);
+    const parsedSort = JSON.parse(sort);
+
+    parsedFilters.institute = id;
+
+    // Build filter conditions for multiple fields
+    const filterConditions = {};
+
+    for (const [key, value] of Object.entries(parsedFilters)) {
+      filterConditions[key] = value;
+    }
+
+    // Build search conditions for multiple fields with partial matching
+    const searchConditions = [];
+    for (const [field, term] of Object.entries(parsedSearchFields)) {
+      searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+    }
+    if (searchConditions.length > 0) {
+      filterConditions.$or = searchConditions;
+    }
+
+    // Build sort conditions
+    const sortConditions = {};
+    for (const [field, direction] of Object.entries(parsedSort)) {
+      sortConditions[field] = direction === "asc" ? 1 : -1;
+    }
+
+    // Execute query with dynamic filters, sorting, and pagination
+    const populateFields = ["query"];
+    const questionAnswer = await this.queryAllocationRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
     return questionAnswer
   }
 

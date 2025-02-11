@@ -78,7 +78,7 @@ export async function QueryAllocation(req, res) {
 export async function getQueryByInstitute(req, res) {
   try {
     console.log("req.params.id", req.params.id);
-    const response = await questionAnswerService.getByInstitute(req.params.id);
+    const response = await questionAnswerService.getByInstitute(req.params.id,req.query);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the question and answer";
     return res.status(StatusCodes.OK).json(SuccessResponse);

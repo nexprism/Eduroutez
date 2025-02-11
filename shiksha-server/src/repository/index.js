@@ -25,6 +25,7 @@ export { NewsRepository } from "./news-repository.js";
 export { PayoutRepository } from "./payout-repository.js";
 export { FeedbackRepository } from "./feedback-repository.js";
 export { QuestionAnswerRepository } from "./question-answer-repository.js";
+export { QueryAllocationRepository } from "./query-allocation-repository.js";
 export { WishlistRepository } from "./wishlist-repository.js";
 export { WebinarRepository } from "./webinar-repository.js";
 export { LevelRepository } from "./level-repository.js";

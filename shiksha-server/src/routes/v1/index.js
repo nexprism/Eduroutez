@@ -15,7 +15,7 @@ import { createStream, deleteStream, getStream, getStreams, updateStream } from 
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure } from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure, megamenuCollages } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer ,getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview, getCounselorById, getCounselorsByCategory } from "../../controllers/counselor-controller.js";
@@ -122,6 +122,9 @@ router.patch("/query/:id",  updateQuery);
 router.delete("/query/:id", deleteQuery);
 //QueryAllocation
 router.get("/lead-allocation", QueryAllocation);
+
+//megamenu/colleges
+router.get("/megamenu/colleges", megamenuCollages);
 
 
 //states
