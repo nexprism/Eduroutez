@@ -40,14 +40,40 @@ export default function WebinarListingPage({}: TWebinarListingPage) {
   const { searchQuery, page, limit } = useWebinarTableFilters();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  // Function to get the appropriate API endpoint based on user role
+  const getApiEndpoint = () => {
+    const userRole = localStorage.getItem('role');
+    const instituteId = localStorage.getItem('instituteId');
+
+    if (userRole === 'SUPER_ADMIN') {
+      return `${apiUrl}/webinars`;
+    }
+    return `${apiUrl}/webinars-by-institute/${instituteId}`;
+  };
+
   const { data, isLoading, isSuccess } = useQuery<WebinarResponse>({
     queryKey: ['webinars', searchQuery],
     queryFn: async () => {
-      const instituteId = localStorage.getItem('instituteId');
-      const response = await axiosInstance.get(`${apiUrl}/webinars-by-institute/${instituteId}`);
+      const response = await axiosInstance.get(getApiEndpoint());
       return response.data;
     }
   });
+
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center p-6 bg-gray-100 rounded-md shadow-md">
+      <div className="text-gray-500 text-lg font-semibold mb-2">
+        No Webinars Found
+      </div>
+      <div className="text-gray-400 text-sm mb-4">
+        It seems there are no webinars available at the moment. Please create a webinar.
+      </div>
+      <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+        <Link href="/dashboard/webinar/new">
+          Add Webinar
+        </Link>
+      </button>
+    </div>
+  );
 
   return (
     <PageContainer scrollable>
@@ -67,21 +93,13 @@ export default function WebinarListingPage({}: TWebinarListingPage) {
             </Button>
           </div>
           <Separator />
-          {isSuccess && data ? (
+          {isSuccess && data?.data?.length ? (
             <WebinarTable
-              data={data.data || []}
-              totalData={data.data?.length || 0}
+              data={data.data}
+              totalData={data.data.length}
             />
           ) : (
-<div className="flex flex-col items-center justify-center p-6 bg-gray-100 rounded-md shadow-md">
-  <div className="text-gray-500 text-lg font-semibold mb-2">No Webinars Found</div>
-  <div className="text-gray-400 text-sm mb-4">It seems there are no webinars available at the moment. Please create a webinar.</div>
-  <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
-  <Link href="/dashboard/webinar/new">
-    Add Webinar
-  </Link>
-  </button>
-</div>
+            <EmptyState />
           )}
         </div>
       )}

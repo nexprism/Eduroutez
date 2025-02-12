@@ -2,7 +2,8 @@ import { StatusCodes } from "http-status-codes";
 import PayoutService from "../services/payout-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 const payoutService = new PayoutService();
-
+import UserService from "../services/users-service.js";
+const userService=new UserService();
 /**
  * POST : /payout
  * req.body {}

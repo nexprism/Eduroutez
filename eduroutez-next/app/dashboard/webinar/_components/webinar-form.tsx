@@ -40,6 +40,8 @@ const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 const formSchema = z.object({
   title: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
+  }).nonempty({
+    message: 'Title is required.'
   }),
   time: z.string().nonempty({
     message: 'Time is required.'
@@ -52,12 +54,18 @@ const formSchema = z.object({
   }),
   webinarLink: z.string().url({
     message: 'Invalid URL format.'
+  }).nonempty({
+    message: 'Webinar Link is required.'
   }),
-  description: z.string(),
+  description: z.string().nonempty({
+    message: 'Description is required.'
+  }),
   webinarCreatedBy: z.string().optional(),
   image: z
     .instanceof(File)
-    .optional()
+    .refine((file) => file !== undefined, {
+      message: 'Image is required.'
+    })
     .refine((file) => !file || file.size <= 1024 * 1024, {
       message: 'Image size must be less than 1 MB.'
     })
@@ -69,7 +77,6 @@ const formSchema = z.object({
       }
     )
 });
-
 export default function WebinarForm() {
   const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
