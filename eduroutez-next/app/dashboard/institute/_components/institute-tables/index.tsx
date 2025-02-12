@@ -1,9 +1,8 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import { DataTable } from '@/components/ui/table/data-table';
-import { DataTableSearch } from '@/components/ui/table/data-table-search';
 import { columns } from './columns';
-import { useInstituteTableFilters } from './use-institute-table-filters';
 import { Institute } from '@/types';
 
 export default function UserTable({
@@ -13,30 +12,25 @@ export default function UserTable({
   data: Institute[];
   totalData: number;
 }) {
-  const { searchQuery, setPage, setSearchQuery } = useInstituteTableFilters();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredData = useMemo(() => {
+    const regex = new RegExp(searchQuery, 'i');
+    return data.filter(institute => regex.test(institute.instituteName));
+  }, [searchQuery, data]);
 
   return (
-    <div className="space-y-4 ">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4">
-        <DataTableSearch
-          searchKey="name"
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          setPage={setPage}
+        <input
+          type="text"
+          placeholder="Search by name"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border p-2 rounded"
         />
-        {/* <DataTableFilterBox
-          filterKey="role"
-          title="Role"
-          options={ROLE_OPTIONS}
-          setFilterValue={setRoleFilter}
-          filterValue={roleFilter}
-        />
-        <DataTableResetFilter
-          isFilterActive={isAnyFilterActive}
-          onReset={resetFilters}
-        /> */}
       </div>
-      <DataTable columns={columns} data={data} totalItems={totalData} />
+      <DataTable columns={columns} data={filteredData} totalItems={totalData} />
     </div>
   );
 }
