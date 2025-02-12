@@ -36,7 +36,7 @@ export default function CounselorListingPage({}: TCounselorListingPage) {
       );
 
 
-      return role === 'SUPER_ADMIN' ? response.data?.data?.result : response.data;
+      return role === 'SUPER_ADMIN' ? response.data?.data : response.data;
 
     },
     enabled: !!role && (role === 'SUPER_ADMIN' || !!instituteId)
@@ -51,21 +51,22 @@ export default function CounselorListingPage({}: TCounselorListingPage) {
             <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-              title={`Counselor (${role === 'SUPER_ADMIN' ? data?.length : data?.data?.length})`}
+              title={`Counselor (${role === 'SUPER_ADMIN' ? data?.result?.length : data?.data?.length})`}
               description="All counselors online and offline are listed here."
               />
               <Button asChild className="w-fit whitespace-nowrap px-2">
               <Link href="/dashboard/counselor/new">
-                <Plus className="mr-1 h-4 w-4" /> Add New
+              <Plus className="mr-1 h-4 w-4" /> Add New
               </Link>
               </Button>
             </div>
             <Separator />
             <CounselorTable
-              data={role === 'SUPER_ADMIN' ? data : data?.data}
-              totalData={role === 'SUPER_ADMIN' ? data?.length : data?.data?.length}
+              data={role === 'SUPER_ADMIN' ? data?.result : data?.data}
+              totalData={role === 'SUPER_ADMIN' ? data?.totalDocuments : data?.data?.totalDocuments}
             />
             </div>
+            
         )
       )}
     </PageContainer>
