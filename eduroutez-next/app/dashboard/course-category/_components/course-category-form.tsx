@@ -217,7 +217,7 @@ export default function CourseCategoryForm() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Course Title</FormLabel>
+                    <FormLabel>Category Title</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter Title" {...field} />
                     </FormControl>
@@ -232,7 +232,7 @@ export default function CourseCategoryForm() {
                   name="parentCategory"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel>Parent Category</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
