@@ -358,6 +358,16 @@ console.log('updatesInstitute',updatesInstitute);
     }
   }
 
+  //getIssue
+  async getIssue(id){
+    try {
+      const issue = await this.instituteIssuesRepository.getIssueById(id);
+      return issue;
+    } catch (error) {
+      throw new AppError("Cannot fetch the issue ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   //updateIssue
   async updateIssue(id,data){
     try {

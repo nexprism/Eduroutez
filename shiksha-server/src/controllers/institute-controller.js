@@ -175,6 +175,20 @@ export async function getInstitutes(req, res) {
   }
 }
 
+//getIssue
+export async function getIssue(req, res) {
+  try {
+    const response = await instituteService.getIssue(req.params.id);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched issue";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Get issue error:", error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || 500).json(ErrorResponse);
+  }
+}
+
 //megamenuCollages
 export async function megamenuCollages(req, res) {
   try {
