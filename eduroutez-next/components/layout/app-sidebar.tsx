@@ -61,6 +61,8 @@ export default function AppSidebar({
         ? [
             'Institutes',
             'Users',
+            'Sales',
+            'Earnings',
             'Queries',
             'Promotions',
             'Refer and Earn',
