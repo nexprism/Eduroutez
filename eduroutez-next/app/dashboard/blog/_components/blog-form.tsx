@@ -46,9 +46,15 @@ const formSchema = z.object({
         message: 'Please select a category.'
       }
     ),
+  stream: z
+    .string()
+    .min(1, { message: 'Stream is required.' }),
   image: z
     .instanceof(File)
     .optional()
+    .refine((file) => file !== undefined, {
+      message: 'Image is required.'
+    })
     .refine((file) => !file || file.size <= 1024 * 1024, {
       message: 'Image size must be less than 1 MB.'
     })
@@ -62,6 +68,9 @@ const formSchema = z.object({
   thumbnail: z
     .instanceof(File)
     .optional()
+    .refine((file) => file !== undefined, {
+      message: 'Thumbnail is required.'
+    })
     .refine((file) => !file || file.size <= 1024 * 1024, {
       message: 'Thumbnail size must be less than 1 MB.'
     })
@@ -101,6 +110,7 @@ export default function BlogForm() {
     defaultValues: {
       title: '',
       category: '',
+      stream: '',
       description: '',
       thumbnail: undefined
     }
@@ -116,6 +126,7 @@ export default function BlogForm() {
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('category', values.category);
+    formData.append('stream', values.stream);
     formData.append('description', values.description);
     formData.append('blogCreatedBy', instituteId);
     if(instituteId) {
@@ -126,7 +137,6 @@ export default function BlogForm() {
       formData.append('images', values.image);
     }
 
-    // Append thumbnail
     if (thumbnail) {
       formData.append('thumbnail', thumbnail.file);
     }
@@ -243,11 +253,20 @@ export default function BlogForm() {
     }
   });
 
+  const { data: streams } = useQuery({
+    queryKey: ['streams'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/streams`);
+      return response.data.data.result;
+    }
+  });
+
   React.useEffect(() => {
     if (blog?.data) {
       form.reset({
         title: blog.data.title,
         category: blog.data.category,
+        stream: blog.data.stream,
         description: blog.data.description,
       });
 
@@ -255,11 +274,10 @@ export default function BlogForm() {
         setPreviewImageUrl(`${IMAGE_URL}/${blog.data.image}`);
       }
       
-      // Load existing thumbnail if any
       if (blog.data.thumbnail) {
         setThumbnail({
           preview: `${IMAGE_URL}/${blog.data.thumbnail}`,
-          file: new File([], blog.data.thumbnail) // placeholder file object
+          file: new File([], blog.data.thumbnail)
         });
       }
     }
@@ -309,6 +327,32 @@ export default function BlogForm() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="stream"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Stream</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a stream" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {streams?.map((stream: any) => (
+                        <SelectItem key={stream.name} value={stream.name}>
+                          {stream.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -364,7 +408,6 @@ export default function BlogForm() {
               )}
             />
 
-            {/* Thumbnail Section */}
             <FormField
               control={form.control}
               name="thumbnail"
@@ -416,7 +459,7 @@ export default function BlogForm() {
               )}
             />
 
-            <FormField
+              <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
