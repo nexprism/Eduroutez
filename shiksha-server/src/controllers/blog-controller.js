@@ -149,6 +149,11 @@ export async function updateBlog(req, res) {
 
       }
 
+      //stream 
+      if(req.body.stream){
+        payload.stream = req.body.stream;
+      }
+
       // Check if a new image is uploaded
       console.log("req.file", req.file);
       if (req.files && req.files["images"]) {

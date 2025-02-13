@@ -51,6 +51,10 @@ const instituteSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
+    isTopInstitute: {
+      type: Boolean,
+      default: false,
+    },
     brochure: {
       type: String,
     }, //image
@@ -128,6 +132,7 @@ const instituteSchema = new mongoose.Schema(
     ],
     allocatedQueries: [
       {
+
         type: mongoose.Schema.Types.ObjectId,
         ref: "Query",
       },

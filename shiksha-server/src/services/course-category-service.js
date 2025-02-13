@@ -15,7 +15,7 @@ class CourseCategoryService {
   }
   async getAll(query) {
     try {
-      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 0, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -51,6 +51,7 @@ class CourseCategoryService {
 
       return courseCategories;
     } catch (error) {
+      console.log("error", error.message);  
       throw new AppError("Cannot fetch data of all the courseCategories", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }

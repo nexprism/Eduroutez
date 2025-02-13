@@ -26,6 +26,10 @@ const blogSchema = new mongoose.Schema(
       // ref: "BlogCategory", // Reference to the category associated with the coupon
       type:String
     },
+    stream: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Stream",
+    },
     metaTitle: {
       type: String,
     },

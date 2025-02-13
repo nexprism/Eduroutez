@@ -57,12 +57,21 @@ class CrudRepository {
 
   async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = []) {
     console.log('dfgh',filterCon)
-    let query = this.model
+    let query;
+    if(pageNum > 0){
+    query = this.model
       .find(filterCon)
       .sort(sortCon)
       .skip((pageNum - 1) * limitNum)
       .limit(limitNum)
       .collation({ locale: 'en', strength: 2 });
+    }else{
+      query = this.model
+      .find(filterCon)
+      .sort(sortCon)
+      .collation({ locale: 'en', strength: 2 });
+    }
+    
 
     // Populate fields if any
     if (populateFields?.length > 0) {

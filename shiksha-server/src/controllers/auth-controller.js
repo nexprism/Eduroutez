@@ -341,6 +341,7 @@ const studentResponse = await studentService.create(studentPayload);
       institutePhone: req.body.contact_number,
       password: req.body.password,
       _id: userId,
+      status: status,
     };
 
     console.log('institutePayload',institutePayload);
