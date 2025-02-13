@@ -100,7 +100,7 @@ export const createCounselor = async (req, res) => {
 export const getCounselorsByInstitute = async (req, res) => { 
   try {
     const instituteId = req.params.institute;
-    const response = await counselorService.getCounselorsByInstitute(instituteId);
+    const response = await counselorService.getCounselorsByInstitute(instituteId, req.query);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched counselors";
     return res.status(StatusCodes.OK).json(SuccessResponse);

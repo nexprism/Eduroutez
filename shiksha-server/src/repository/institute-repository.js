@@ -19,6 +19,20 @@ class InstituteRepository extends CrudRepository {
     }
   }
 
+  //megamenuCollages
+  async megamenuCollages() {
+    try {
+      
+      //get popular institutes
+      
+      
+    } catch (error) {
+      throw error;
+    }
+
+  }
+
+
   //updateCourse
   async updateCourse(instituteId, courseId, data) {
     try {
