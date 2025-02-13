@@ -122,7 +122,7 @@ const formSchema = z.object({
   cons: z.string().optional(),
 
   coursePrice: z.any().optional(),
-  courseDiscount: z.string().optional(),
+  courseDiscount: z.any().optional(),
   courseDiscountType: z.string().optional(),
   coursePreviewType: z.string().optional(),
   coursePreviewUrl: z.string().optional(),
@@ -136,8 +136,8 @@ const formSchema = z.object({
     required_error: 'You need to select one option.'
   }),
   isCourseDiscounted: z.enum(['yes', 'no']).optional(),
-  applicationStartDate: z.date().optional(),
-  applicationEndDate: z.date().optional(),
+  applicationStartDate: z.date().nullable().optional(),
+  applicationEndDate: z.date().nullable().optional(),
   isCoursePopular: z.boolean().optional(),
   isCourseTreanding: z.boolean().optional(),
 });
@@ -181,6 +181,8 @@ export default function CreateCourse() {
       isCourseDiscounted: 'no',
       isCoursePopular: false,  // Add this
       isCourseTreanding: false, 
+      applicationStartDate: null, // Set default to null
+      applicationEndDate: null,
     }
   });
 
@@ -342,17 +344,12 @@ export default function CreateCourse() {
       if (values.courseDurationMonths !== undefined) {
         formData.append('courseDurationMonths', values.courseDurationMonths);
       }
-      if (values.applicationStartDate !== undefined) {
-        formData.append(
-          'applicationStartDate',
-          values.applicationStartDate.toISOString()
-        );
+      if (values.applicationStartDate instanceof Date && !isNaN(values.applicationStartDate.getTime())) {
+        formData.append('applicationStartDate', values.applicationStartDate.toISOString());
       }
-      if (values.applicationEndDate !== undefined) {
-        formData.append(
-          'applicationEndDate',
-          values.applicationEndDate.toISOString()
-        );
+      
+      if (values.applicationEndDate instanceof Date && !isNaN(values.applicationEndDate.getTime())) {
+        formData.append('applicationEndDate', values.applicationEndDate.toISOString());
       }
       if (values.courseOverview !== undefined) {
         formData.append('courseOverview', values.courseOverview);
@@ -514,8 +511,8 @@ export default function CreateCourse() {
           ranking: course.data.ranking,
           courseDurationYears: course.data.courseDurationYears,
           courseDurationMonths: course.data.courseDurationMonths,
-          applicationStartDate: new Date(course.data.applicationStartDate),
-          applicationEndDate: new Date(course.data.applicationEndDate),
+          applicationStartDate: course.data.applicationStartDate ? new Date(course.data.applicationStartDate) : null,
+          applicationEndDate: course.data.applicationEndDate ? new Date(course.data.applicationEndDate) : null,
           courseOverview: course.data.courseOverview,
           courseEligibility: course.data.courseEligibility,
           courseCurriculum: course.data.courseCurriculum,
@@ -624,32 +621,32 @@ export default function CreateCourse() {
                     )}
                   />
 
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <FormField
                       control={form.control}
                       name="courseType"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Course Type</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Course Type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {courseTypes.map((type) => (
-                                <SelectItem key={type.value} value={type.value}>
-                                  {type.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
+                      <FormItem>
+                        <FormLabel>Course Type</FormLabel>
+                        <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        >
+                        <FormControl>
+                          <SelectTrigger>
+                          <SelectValue placeholder="Select Course Type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {courseTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                          ))}
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
 
@@ -657,111 +654,111 @@ export default function CreateCourse() {
                       control={form.control}
                       name="category"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Course Category" />
-                              </SelectTrigger>
-                            </FormControl>
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        >
+                        <FormControl>
+                          <SelectTrigger>
+                          <SelectValue placeholder="Select Course Category" />
+                          </SelectTrigger>
+                        </FormControl>
 
-                            <SelectContent>
-                              {courseCategories &&
-                              courseCategories?.data?.result?.length > 0
-                                ? courseCategories.data.result.map(
-                                    (category: CourseCategory) => (
-                                      <SelectItem
-                                        key={category._id}
-                                        value={category._id}
-                                      >
-                                        {category.title}
-                                      </SelectItem>
-                                    )
-                                  )
-                                : null}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
+                        <SelectContent>
+                          {courseCategories &&
+                          courseCategories?.data?.result?.length > 0
+                          ? courseCategories.data.result.map(
+                            (category: CourseCategory) => (
+                              <SelectItem
+                              key={category._id}
+                              value={category._id}
+                              >
+                              {category.title}
+                              </SelectItem>
+                            )
+                            )
+                          : null}
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
                     {/* a */}
                     <FormField
-  control={form.control}
-  name="instituteCategory"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Institute Category</FormLabel>
-      {isInstituteRole ? (
-        <div className="flex items-center space-x-2">
-          <Input
-            value={instituteCategories?.data?.result?.find((category: Institute) => category._id === field.value)?.instituteName || ''}
-            readOnly
+            control={form.control}
+            name="instituteCategory"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Institute Category</FormLabel>
+                {isInstituteRole ? (
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      value={instituteCategories?.data?.result?.find((category: Institute) => category._id === field.value)?.instituteName || ''}
+                      readOnly
+                    />
+                  </div>
+                ) : (
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Institute" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {instituteCategories?.data?.result?.length > 0
+                        ? instituteCategories.data.result.map(
+                            (category: Institute) => (
+                              <SelectItem
+                                key={category._id}
+                                value={category._id}
+                              >
+                                {category.instituteName}
+                              </SelectItem>
+                            )
+                          )
+                        : <SelectItem value="">No Institutes Available</SelectItem>}
+                    </SelectContent>
+                  </Select>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-      ) : (
-        <Select
-          onValueChange={field.onChange}
-          value={field.value}
-        >
-          <FormControl>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Institute" />
-            </SelectTrigger>
-          </FormControl>
-          <SelectContent>
-            {instituteCategories?.data?.result?.length > 0
-              ? instituteCategories.data.result.map(
-                  (category: Institute) => (
-                    <SelectItem
-                      key={category._id}
-                      value={category._id}
-                    >
-                      {category.instituteName}
-                    </SelectItem>
-                  )
-                )
-              : <SelectItem value="">No Institutes Available</SelectItem>}
-          </SelectContent>
-        </Select>
-      )}
-      <FormMessage />
-    </FormItem>
-  )}
-/>
 
                     <FormField
                       control={form.control}
                       name="status"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Status</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        >
+                        <FormControl>
+                          <SelectTrigger>
+                          <SelectValue placeholder="Select Status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {statuses.map((status) => (
+                          <SelectItem
+                            key={status.value}
+                            value={status.value}
                           >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Status" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {statuses.map((status) => (
-                                <SelectItem
-                                  key={status.value}
-                                  value={status.value}
-                                >
-                                  {status.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
+                            {status.label}
+                          </SelectItem>
+                          ))}
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
 
@@ -769,115 +766,115 @@ export default function CreateCourse() {
                       control={form.control}
                       name="visibility"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Visibility</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
+                      <FormItem>
+                        <FormLabel>Visibility</FormLabel>
+                        <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        >
+                        <FormControl>
+                          <SelectTrigger>
+                          <SelectValue placeholder="Select Visibility" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {visibilities.map((visibility) => (
+                          <SelectItem
+                            key={visibility.value}
+                            value={visibility.value}
                           >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Visibility" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {visibilities.map((visibility) => (
-                                <SelectItem
-                                  key={visibility.value}
-                                  value={visibility.value}
-                                >
-                                  {visibility.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
+                            {visibility.label}
+                          </SelectItem>
+                          ))}
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
-                 
+                   
 
-                 <FormField
-      control={form.control}
-      name="isCoursePopular"
-      render={({ field }) => (
-        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-          <FormControl>
-            <Checkbox
-              checked={field.value}
-              onCheckedChange={field.onChange}
-              disabled={!isPopularEnabled}
+                   <FormField
+              control={form.control}
+              name="isCoursePopular"
+              render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={!isPopularEnabled}
+                />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                <FormLabel>
+                  Popular Course
+                </FormLabel>
+                <FormDescription>
+                  {isPopularEnabled 
+                  ? "Mark this course as popular"
+                  : "Popular course feature is not available in your current plan"}
+                </FormDescription>
+                </div>
+              </FormItem>
+              )}
             />
-          </FormControl>
-          <div className="space-y-1 leading-none">
-            <FormLabel>
-              Popular Course
-            </FormLabel>
-            <FormDescription>
+
+
+          <FormField
+            control={form.control}
+            name="isCourseTreanding"
+            render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+              <FormControl>
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                disabled={!isPopularEnabled}
+
+              />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+              <FormLabel>
+                Trending Course
+              </FormLabel>
+              <FormDescription>
               {isPopularEnabled 
-                ? "Mark this course as popular"
-                : "Popular course feature is not available in your current plan"}
-            </FormDescription>
-          </div>
-        </FormItem>
-      )}
-    />
-
-
-<FormField
-  control={form.control}
-  name="isCourseTreanding"
-  render={({ field }) => (
-    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-      <FormControl>
-        <Checkbox
-          checked={field.value}
-          onCheckedChange={field.onChange}
-          disabled={!isPopularEnabled}
-
-        />
-      </FormControl>
-      <div className="space-y-1 leading-none">
-        <FormLabel>
-          Trending Course
-        </FormLabel>
-        <FormDescription>
-        {isPopularEnabled 
-                ? "Mark this course as popular"
-                : "Trending course feature is not available in your current plan"}        </FormDescription>
-      </div>
-    </FormItem>
-  )}
-/>
+                  ? "Mark this course as popular"
+                  : "Trending course feature is not available in your current plan"}        </FormDescription>
+              </div>
+            </FormItem>
+            )}
+          />
 
                     <FormField
                       control={form.control}
                       name="language"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Language</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
+                      <FormItem>
+                        <FormLabel>Language</FormLabel>
+                        <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        >
+                        <FormControl>
+                          <SelectTrigger>
+                          <SelectValue placeholder="Select Language" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {languages.map((language) => (
+                          <SelectItem
+                            key={language.value}
+                            value={language.value}
                           >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Language" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {languages.map((language) => (
-                                <SelectItem
-                                  key={language.value}
-                                  value={language.value}
-                                >
-                                  {language.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
+                            {language.label}
+                          </SelectItem>
+                          ))}
+                        </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
 
@@ -885,11 +882,11 @@ export default function CreateCourse() {
                       control={form.control}
                       name="examAccepted"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Exam Accepted</FormLabel>
-                          <Input placeholder="Enter Exam Accepted" {...field} />
-                          <FormMessage />
-                        </FormItem>
+                      <FormItem>
+                        <FormLabel>Exam Accepted</FormLabel>
+                        <Input placeholder="Enter Exam Accepted" {...field} />
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
 
@@ -897,11 +894,11 @@ export default function CreateCourse() {
                       control={form.control}
                       name="eligibility"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Eligibility</FormLabel>
-                          <Input placeholder="Enter Eligibility" {...field} />
-                          <FormMessage />
-                        </FormItem>
+                      <FormItem>
+                        <FormLabel>Eligibility</FormLabel>
+                        <Input placeholder="Enter Eligibility" {...field} />
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
 
@@ -909,11 +906,11 @@ export default function CreateCourse() {
                       control={form.control}
                       name="cutOff"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cut off</FormLabel>
-                          <Input placeholder="Enter Cut off" {...field} />
-                          <FormMessage />
-                        </FormItem>
+                      <FormItem>
+                        <FormLabel>Cut off</FormLabel>
+                        <Input placeholder="Enter Cut off" {...field} />
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
 
@@ -921,14 +918,14 @@ export default function CreateCourse() {
                       control={form.control}
                       name="ranking"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Ranking</FormLabel>
-                          <Input placeholder="Enter Ranking" {...field} />
-                          <FormMessage />
-                        </FormItem>
+                      <FormItem>
+                        <FormLabel>Ranking</FormLabel>
+                        <Input placeholder="Enter Ranking" {...field} />
+                        <FormMessage />
+                      </FormItem>
                       )}
                     />
-                  </div>
+                    </div>
                   <div className="flex flex-col">
                     <Label htmlFor="" className="text-md font-semibold">
                       Course Duration
@@ -970,101 +967,93 @@ export default function CreateCourse() {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-2">
-                    <div className="flex flex-col gap-4">
-                      <Label>Application Start Date</Label>
-                      <FormField
-                        control={form.control}
-                        name="applicationStartDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant={'outline'}
-                                    className={cn(
-                                      'w-[240px] pl-3 text-left font-normal',
-                                      !field.value && 'text-muted-foreground'
-                                    )}
-                                  >
-                                    {field.value ? (
-                                      format(field.value, 'PPP')
-                                    ) : (
-                                      <span>Pick a date</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-auto p-0"
-                                align="start"
-                              >
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                  disabled={(date) =>
-                                    date <= new Date()
-                                  }
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <div className="mt-4 flex flex-col gap-4 lg:mt-0">
-                      <Label>Application End Date</Label>
+               
 
-                      <FormField
-                        control={form.control}
-                        name="applicationEndDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button
-                                    variant={'outline'}
-                                    className={cn(
-                                      'w-[240px] pl-3 text-left font-normal',
-                                      !field.value && 'text-muted-foreground'
-                                    )}
-                                  >
-                                    {field.value ? (
-                                      format(field.value, 'PPP')
-                                    ) : (
-                                      <span>Pick a date</span>
-                                    )}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-auto p-0"
-                                align="start"
-                              >
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                  disabled={(date) =>
-                                    date < new Date('1900-01-01')
-                                  }
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2">
+      {/* Application Start Date */}
+      <div className="flex flex-col gap-4">
+        <Label>Application Start Date (Optional)</Label>
+        <FormField
+          control={form.control}
+          name="applicationStartDate"
+          render={({ field }) => (
+            <FormItem>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'w-[240px] pl-3 text-left font-normal',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value instanceof Date && !isNaN(field.value.getTime()) ? (
+                        format(field.value, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value instanceof Date && !isNaN(field.value.getTime()) ? field.value : undefined}
+                    onSelect={(date) => field.onChange(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+
+      {/* Application End Date */}
+      <div className="mt-4 flex flex-col gap-4 lg:mt-0">
+        <Label>Application End Date (Optional)</Label>
+        <FormField
+          control={form.control}
+          name="applicationEndDate"
+          render={({ field }) => (
+            <FormItem>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'w-[240px] pl-3 text-left font-normal',
+                        !field.value && 'text-muted-foreground'
+                      )}
+                    >
+                      {field.value instanceof Date && !isNaN(field.value.getTime()) ? (
+                        format(field.value, 'PPP')
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value instanceof Date && !isNaN(field.value.getTime()) ? field.value : undefined}
+                    onSelect={(date) => field.onChange(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </div>
 
                   <div className="flex justify-end">
                     <Button onClick={() => setActiveTab('requirements')}>
@@ -1599,18 +1588,30 @@ export default function CreateCourse() {
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                    if (Object.keys(errors).length > 0) {
-                      toast.error(
-                        'Please correct the errors in the form before submitting.'
-                      );
-                    }
+                  console.log('Object error', Object.keys(errors));
+                  if (Object.keys(errors).length > 0) {
+                    const errorMessages: { [key: string]: string } = {
+                    language: 'Please select a language.',
+                    courseTitle: 'Title must be at least 2 characters.',
+                    courseType: 'Please select a course type.',
+                    category: 'Please select a category.',
+                    instituteCategory: 'Please select an institute category.',
+                    status: 'Please select a status.',
+                    visibility: 'Please select a visibility option.',
+                    isCourseFree: 'You need to select one option.',
+                    };
+
+                    const firstErrorKey = Object.keys(errors)[0];
+                    const errorMessage = errorMessages[firstErrorKey] || 'Please correct the errors in the form before submitting.';
+                    toast.error(errorMessage);
+                  }
                   })}
                   className="space-y-8"
                 >
                   <FormField
-                    control={form.control}
-                    name="metaTitle"
-                    render={({ field }) => (
+                  control={form.control}
+                  name="metaTitle"
+                  render={({ field }) => (
                       <FormItem>
                         <FormLabel>Meta Title</FormLabel>
                         <Input placeholder="Enter meta Title" {...field} />

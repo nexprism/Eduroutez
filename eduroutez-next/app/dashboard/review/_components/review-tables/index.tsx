@@ -1,7 +1,7 @@
 'use client';
 
+import { useState } from 'react';
 import { DataTable } from '@/components/ui/table/data-table';
-import { DataTableSearch } from '@/components/ui/table/data-table-search';
 import { columns } from './columns';
 import { Review } from '@/types';
 import { useReviewTableFilters } from './use-review-table-filters';
@@ -13,16 +13,25 @@ export default function ReviewTable({
   data: Review[];
   totalData: number;
 }) {
-  const { searchQuery, setPage, setSearchQuery } = useReviewTableFilters();
+  const { setPage } = useReviewTableFilters();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredData = data.filter((review) =>
+    new RegExp(searchQuery, 'i').test(review.fullName)
+  );
 
   return (
     <div className="space-y-4 ">
       <div className="flex flex-wrap items-center gap-4">
-        <DataTableSearch
-          searchKey="name"
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          setPage={setPage}
+        <input
+          type="text"
+          placeholder="Search by name"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setPage(1); // Reset to the first page on search
+          }}
+          className="border p-2 rounded"
         />
         {/* <DataTableFilterBox
           filterKey="role"
@@ -36,7 +45,7 @@ export default function ReviewTable({
           onReset={resetFilters}
         /> */}
       </div>
-      <DataTable columns={columns} data={data} totalItems={totalData} />
+      <DataTable columns={columns} data={filteredData} totalItems={totalData} />
     </div>
   );
 }

@@ -90,7 +90,7 @@ export default function AppSidebar({
             'Webinars',
             'Help And Support'
           ] // Titles to exclude for 'counsellor'
-        : ['Online counselling','Slots','Subscription',,'Review','Profile','Support','Redeem']; // Default: no exclusions
+        : ['Online counselling','Slots','Subscription',,'Review','Profile','Support','Redeem',"Recruiter"]; // Default: no exclusions
 
     const filteredItems = navItems.filter(
       (item) => !excludedTitles.includes(item.title)

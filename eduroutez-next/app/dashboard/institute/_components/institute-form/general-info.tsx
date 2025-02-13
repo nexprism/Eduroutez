@@ -67,9 +67,7 @@ const formSchema = z.object({
   email: z.string({
     required_error: 'Please enter an email.'
   }),
-  establishedYear: z.any({
-    required_error: 'Please enter an established year.'
-  }),
+  establishedYear: z.any().optional(),
   website: z.string({
     required_error: 'Please enter a website.'
   }),
@@ -179,6 +177,9 @@ const [cities, setCities] = React.useState<City[]>([]);
     }
   };
   
+
+
+
   useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
       setIsEdit(true);
@@ -209,13 +210,21 @@ const [cities, setCities] = React.useState<City[]>([]);
     }
   });
 
+
   function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(Object.keys(form.formState.errors))
     console.log('hi')
+    if (Object.keys(form.formState.errors).length > 0) {
+      toast.error('Please correct the errors in the form before submitting.');
+      return;
+    }
     const formData = new FormData();
     formData.append('instituteName', values.instituteName);
     formData.append('institutePhone', values.institutePhone);
     formData.append('email', values.email);
-    formData.append('establishedYear', values.establishedYear);
+    if (values.establishedYear) {
+      formData.append('establishedYear', values.establishedYear);
+    }
     formData.append('organisationType', values.organisationType);
     formData.append('website', values.website);
     formData.append('city', values.city);

@@ -3,40 +3,46 @@
 import { DataTable } from '@/components/ui/table/data-table';
 import { DataTableSearch } from '@/components/ui/table/data-table-search';
 import { columns } from './columns';
-import { QuestionAnswer,Query } from '@/types';
+import { Query } from '@/types';
 import { useQuestionAnswerTableFilters } from './use-question-answer-table-filters';
+
+interface QuestionAnswerTableProps {
+  data: Query[];
+  totalData: number;
+  currentPage: number;
+  totalPages: number;
+  isLoading: boolean;
+  onPageChange: (page: number) => void;
+}
 
 export default function QuestionAnswerTable({
   data,
-  totalData
-}: {
-  data: Query[];
-  totalData: number;
-}) {
-  const { searchQuery, setPage, setSearchQuery } = useQuestionAnswerTableFilters();
-  console.log('hi',data);
+  totalData,
+  currentPage,
+  totalPages,
+  isLoading,
+  onPageChange
+}: QuestionAnswerTableProps) {
+  const { searchQuery, setSearchQuery } = useQuestionAnswerTableFilters();
+
   return (
-    <div className="space-y-4 ">
-      <div className="flex flex-wrap items-center gap-4">
+    <div className="space-y-4">
+      {/*<div className="flex flex-wrap items-center gap-4">
         <DataTableSearch
-          searchKey="name"
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          setPage={setPage}
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by name"
         />
-        {/* <DataTableFilterBox
-          filterKey="role"
-          title="Role"
-          options={ROLE_OPTIONS}
-          setFilterValue={setRoleFilter}
-          filterValue={roleFilter}
-        />
-        <DataTableResetFilter
-          isFilterActive={isAnyFilterActive}
-          onReset={resetFilters}
-        /> */}
-      </div>
-      <DataTable columns={columns} data={data} totalItems={totalData} />
+      </div>*/}
+      <DataTable 
+        columns={columns} 
+        data={data} 
+        totalItems={totalData}
+        pageCount={totalPages}
+        currentPage={currentPage}
+        onPageChange={onPageChange}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

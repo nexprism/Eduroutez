@@ -14,13 +14,12 @@ import axiosInstance from '@/lib/axios';
 type TPromotionListingPage = {};
 
 export default function PromotionListingPage({}: TPromotionListingPage) {
-  // const queryClient = useQueryClient()
   const { searchQuery, page, limit } = usePromotionTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['Promotions', searchQuery],
+    queryKey: ['Promotions', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/promotions`, {
         params: {
@@ -33,6 +32,7 @@ export default function PromotionListingPage({}: TPromotionListingPage) {
       return response.data;
     }
   });
+
   return (
     <PageContainer scrollable>
       {isLoading ? (

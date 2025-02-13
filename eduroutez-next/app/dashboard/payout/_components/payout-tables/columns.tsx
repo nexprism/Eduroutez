@@ -1,83 +1,120 @@
 'use client';
+
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
-import { Payout } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Building2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-export const columns: ColumnDef<Payout>[] = [
-  // {
-  //   id: 'select',
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={table.getIsAllPageRowsSelected()}
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false
-  // },
-  
+export const columns: ColumnDef[] = [
   {
     header: 'ID',
-    cell: ({ row }) => <div>{`${row.index+1}`}</div>
+    cell: ({ row }: { row: any }) => {
+      console.log(row);
+      return `${row.index + 1}`;
+    }
   },
   {
-    header: 'USER ',
-    // cell: ({ row }) => <div>{`${row.original.userType}`}</div>
+    header: 'ACCOUNT HOLDER',
+    cell: ({ row }: { row: any }) => (
+      <div className="flex flex-col">
+        <span className="font-medium">{row.original.user.accountHolderName}</span>
+        <span className="text-sm text-muted-foreground">{row.original.userType}</span>
+      </div>
+    )
   },
   {
-    header: 'USER TYPE',
-    cell: ({ row }) => <div>{`${row.original.userType}`}</div>
+    header: 'BANK DETAILS',
+    cell: ({ row }: { row: any }) => (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2"
+          >
+            <Building2 className="w-4 h-4" />
+            View Bank Details
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Bank Account Details</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-medium text-sm">Bank Name</span>
+                <span className="col-span-3">{row.original.user.bankName}</span>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-medium text-sm">Account No.</span>
+                <span className="col-span-3">{row.original.user.accountNumber}</span>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-medium text-sm">IFSC Code</span>
+                <span className="col-span-3">{row.original.user.ifscCode}</span>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <span className="font-medium text-sm">Holder Name</span>
+                <span className="col-span-3">{row.original.user.accountHolderName}</span>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
   },
-
   {
-    header: 'REQUEST AMOUNT',
-    cell: ({ row }) => <div>{`${row.original.requestedAmount}`}</div>
+    header: 'AMOUNT',
+    cell: ({ row }: { row: any }) => (
+      <div className="font-medium">
+        ₹{row.original.requestedAmount}
+      </div>
+    )
   },
   {
     header: 'PAYMENT METHOD',
-    cell: ({ row }) => <div>{`${row.original.paymentMethod}`}</div>
+    cell: ({ row }: { row: any }) => row.original.paymentMethod
   },
   {
-    accessorKey: 'status',
     header: 'STATUS',
-    cell: ({ row }) => (
-      <div className="flex w-32 space-x-1">
-        <Badge
-          variant={!row.original.paymentStatus ? 'secondary' : 'default'}
-          className="text-xs "
-        >
-          {row.original.status}
-        </Badge>
-      </div>
+    cell: ({ row }: { row: any }) => (
+      <Badge 
+        className={
+          row.original.status === "PAID" 
+            ? "bg-green-100 text-green-800" 
+            : "bg-yellow-100 text-yellow-800"
+        }
+      >
+        {row.original.status}
+      </Badge>
     )
   },
   {
-    accessorKey: 'status',
     header: 'PAYMENT STATUS',
-    cell: ({ row }) => (
-      <div className="flex w-32 space-x-1">
-        <Badge
-          variant={row.original.paymentStatus=='PENDING' ? 'secondary' : 'outline'}
-          className="text-xs "
-        >
-          {row.original.paymentStatus}
-        </Badge>
-      </div>
+    cell: ({ row }: { row: any }) => (
+      <Badge 
+        className={
+          row.original.paymentStatus === "Completed" 
+            ? "bg-green-100 text-green-800" 
+            : "bg-yellow-100 text-yellow-800"
+        }
+      >
+        {row.original.paymentStatus}
+      </Badge>
     )
   },
-
   {
     id: 'actions',
-    cell: ({ row }) => <CellAction data={row.original} />
+    cell: ({ row }: { row: any }) => <CellAction data={row.original} />
   }
 ];
