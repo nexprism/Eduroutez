@@ -49,38 +49,42 @@ const formSchema = z.object({
   stream: z
     .string()
     .min(1, { message: 'Stream is required.' }),
-  image: z
+    image: z
     .instanceof(File)
     .optional()
-    .refine((file) => file !== undefined, {
-      message: 'Image is required.'
-    })
-    .refine((file) => !file || file.size <= 1024 * 1024, {
+    .nullable()
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return file.size <= 1024 * 1024;
+    }, {
       message: 'Image size must be less than 1 MB.'
     })
-    .refine(
-      (file) =>
-        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
-      {
-        message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
-      }
-    ),
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return ['image/png', 'image/jpeg', 'image/webp'].includes(file.type);
+    }, {
+      message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
+    }),
   thumbnail: z
     .instanceof(File)
     .optional()
-    .refine((file) => file !== undefined, {
-      message: 'Thumbnail is required.'
-    })
-    .refine((file) => !file || file.size <= 1024 * 1024, {
+    .nullable()
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return file.size <= 1024 * 1024;
+    }, {
       message: 'Thumbnail size must be less than 1 MB.'
     })
-    .refine(
-      (file) =>
-        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
-      {
-        message: 'Invalid thumbnail format. Only PNG, JPEG, and WEBP are allowed.'
-      }
-    ),
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return ['image/png', 'image/jpeg', 'image/webp'].includes(file.type);
+    }, {
+      message: 'Invalid thumbnail format. Only PNG, JPEG, and WEBP are allowed.'
+    }),
   description: z.string().min(1, { message: 'Description is required.' })
 });
 
@@ -346,7 +350,7 @@ export default function BlogForm() {
                     </FormControl>
                     <SelectContent>
                       {streams?.map((stream: any) => (
-                        <SelectItem key={stream.name} value={stream.name}>
+                        <SelectItem key={stream._id} value={stream._id}>
                           {stream.name}
                         </SelectItem>
                       ))}

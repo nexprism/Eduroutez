@@ -51,7 +51,7 @@ export default function CounselorListingPage({}: TCounselorListingPage) {
             <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-              title={`Counselor (${role === 'SUPER_ADMIN' ? data?.result?.length : data?.data?.length})`}
+              title={`Counselor (${role === 'SUPER_ADMIN' ? data?.result?.length : data?.data?.result?.length})`}
               description="All counselors online and offline are listed here."
               />
               <Button asChild className="w-fit whitespace-nowrap px-2">
@@ -61,8 +61,9 @@ export default function CounselorListingPage({}: TCounselorListingPage) {
               </Button>
             </div>
             <Separator />
+            {console.log('ghj', data)}
             <CounselorTable
-              data={role === 'SUPER_ADMIN' ? data?.result : data?.data}
+              data={role === 'SUPER_ADMIN' ? data?.result : data?.data?.result}
               totalData={role === 'SUPER_ADMIN' ? data?.totalDocuments : data?.data?.totalDocuments}
             />
             </div>
