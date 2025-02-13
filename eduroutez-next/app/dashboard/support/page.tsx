@@ -22,8 +22,6 @@ const SupportPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-
-
     const formData = new FormData();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     const instituteId = localStorage.getItem('instituteId');
@@ -67,7 +65,7 @@ const SupportPage = () => {
   };
 
   return (
-    <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 h-screen overflow-y-auto">
       {/* Header Section */}
       <div className="max-w-7xl mx-auto text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">

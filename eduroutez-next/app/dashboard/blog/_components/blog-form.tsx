@@ -46,32 +46,45 @@ const formSchema = z.object({
         message: 'Please select a category.'
       }
     ),
-  image: z
+  stream: z
+    .string()
+    .min(1, { message: 'Stream is required.' }),
+    image: z
     .instanceof(File)
     .optional()
-    .refine((file) => !file || file.size <= 1024 * 1024, {
+    .nullable()
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return file.size <= 1024 * 1024;
+    }, {
       message: 'Image size must be less than 1 MB.'
     })
-    .refine(
-      (file) =>
-        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
-      {
-        message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
-      }
-    ),
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return ['image/png', 'image/jpeg', 'image/webp'].includes(file.type);
+    }, {
+      message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
+    }),
   thumbnail: z
     .instanceof(File)
     .optional()
-    .refine((file) => !file || file.size <= 1024 * 1024, {
+    .nullable()
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return file.size <= 1024 * 1024;
+    }, {
       message: 'Thumbnail size must be less than 1 MB.'
     })
-    .refine(
-      (file) =>
-        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
-      {
-        message: 'Invalid thumbnail format. Only PNG, JPEG, and WEBP are allowed.'
-      }
-    ),
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return ['image/png', 'image/jpeg', 'image/webp'].includes(file.type);
+    }, {
+      message: 'Invalid thumbnail format. Only PNG, JPEG, and WEBP are allowed.'
+    }),
   description: z.string().min(1, { message: 'Description is required.' })
 });
 
@@ -101,6 +114,7 @@ export default function BlogForm() {
     defaultValues: {
       title: '',
       category: '',
+      stream: '',
       description: '',
       thumbnail: undefined
     }
@@ -116,6 +130,7 @@ export default function BlogForm() {
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('category', values.category);
+    formData.append('stream', values.stream);
     formData.append('description', values.description);
     formData.append('blogCreatedBy', instituteId);
     if(instituteId) {
@@ -126,7 +141,6 @@ export default function BlogForm() {
       formData.append('images', values.image);
     }
 
-    // Append thumbnail
     if (thumbnail) {
       formData.append('thumbnail', thumbnail.file);
     }
@@ -243,11 +257,20 @@ export default function BlogForm() {
     }
   });
 
+  const { data: streams } = useQuery({
+    queryKey: ['streams'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/streams`);
+      return response.data.data.result;
+    }
+  });
+
   React.useEffect(() => {
     if (blog?.data) {
       form.reset({
         title: blog.data.title,
         category: blog.data.category,
+        stream: blog.data.stream,
         description: blog.data.description,
       });
 
@@ -255,11 +278,10 @@ export default function BlogForm() {
         setPreviewImageUrl(`${IMAGE_URL}/${blog.data.image}`);
       }
       
-      // Load existing thumbnail if any
       if (blog.data.thumbnail) {
         setThumbnail({
           preview: `${IMAGE_URL}/${blog.data.thumbnail}`,
-          file: new File([], blog.data.thumbnail) // placeholder file object
+          file: new File([], blog.data.thumbnail)
         });
       }
     }
@@ -309,6 +331,32 @@ export default function BlogForm() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="stream"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Stream</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a stream" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {streams?.map((stream: any) => (
+                        <SelectItem key={stream._id} value={stream._id}>
+                          {stream.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -364,7 +412,6 @@ export default function BlogForm() {
               )}
             />
 
-            {/* Thumbnail Section */}
             <FormField
               control={form.control}
               name="thumbnail"
@@ -416,7 +463,7 @@ export default function BlogForm() {
               )}
             />
 
-            <FormField
+              <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
