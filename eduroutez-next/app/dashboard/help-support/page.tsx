@@ -20,6 +20,13 @@ interface Issue {
     __v: number;
 }
 
+interface Inquiry {
+    instituteName: string;
+    email: string;
+    institutePhone: string;
+    // Add other fields as needed
+}
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const ImageUrl = process.env.NEXT_PUBLIC_NEW_IMAGES;
 
@@ -38,6 +45,8 @@ const HelpSupportPage: React.FC = () => {
     const [issues, setIssues] = useState<Issue[]>([]);
     const [loading, setLoading] = useState(true);
     const [displayCount, setDisplayCount] = useState(10);
+    const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
+    const [inquiryData, setInquiryData] = useState<Inquiry | null>(null);
 
     useEffect(() => {
         const fetchIssues = async () => {
@@ -88,6 +97,21 @@ const HelpSupportPage: React.FC = () => {
         };
     };
 
+    const handleOpenModal = async (issueId: string) => {
+        setSelectedIssueId(issueId);
+        try {
+            const response = await axiosInstance.get(`${apiUrl}/institute-inquiry/${issueId}`);
+            setInquiryData(response.data);
+        } catch (error) {
+            console.error('Error fetching inquiry data:', error);
+        }
+    };
+
+    const handleCloseModal = () => {
+        setSelectedIssueId(null);
+        setInquiryData(null);
+    };
+
     const displayedIssues = issues.slice(0, displayCount);
     const hasMoreIssues = displayCount < issues.length;
 
@@ -102,13 +126,13 @@ const HelpSupportPage: React.FC = () => {
     return (
         <div className="h-screen flex flex-col bg-gray-50">
             <div className="p-6 bg-white shadow-sm">
-                <div className="max-w-7xl mx-auto">
+                <div className="">
                     <h1 className="text-3xl font-bold text-gray-900">Help & Support Dashboard</h1>
                 </div>
             </div>
 
             <div className="flex-1 overflow-auto p-6">
-                <div className="max-w-7xl mx-auto">
+                <div className="">
                     {issues.length > 0 ? (
                         <div className="bg-white rounded-lg shadow overflow-hidden">
                             <div className="overflow-x-auto">
@@ -155,12 +179,18 @@ const HelpSupportPage: React.FC = () => {
                                                         <div>Created: {new Date(issue.createdAt).toLocaleDateString()}</div>
                                                         <div>Updated: {new Date(issue.updatedAt).toLocaleDateString()}</div>
                                                     </td>
-                                                    <td className="px-6 py-4">
+                                                    <td className="px-6 py-4 space-y-2">
                                                         <button 
                                                             onClick={() => handleStatusUpdate(issue._id, issue.status === 'open' ? 'closed' : 'open')}
                                                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium"
                                                         >
                                                             {issue.status === 'open' ? 'Close Issue' : 'Reopen Issue'}
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleOpenModal(issue._id)}
+                                                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium"
+                                                        >
+                                                            Open Inquiry
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -187,6 +217,23 @@ const HelpSupportPage: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {selectedIssueId && inquiryData && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-96"></div>
+                        <h2 className="text-xl font-bold mb-4">Institute Inquiry</h2>
+                        <p>Institute Name: {inquiryData.instituteName}</p>
+                        <p>Email: {inquiryData.email}</p>
+                        <p>Phone: {inquiryData.institutePhone}</p>
+                        {/* Add other fields as needed */}
+                        <button 
+                            onClick={handleCloseModal}
+                            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium"
+                        >
+                            Close
+                        </button>
+                    </div>
+            )}
         </div>
     );
 };

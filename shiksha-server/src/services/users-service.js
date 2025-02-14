@@ -246,13 +246,16 @@ async getMyRefferal(id) {
       // Fetch all users where 'refer_by' is not null and populate the 'refer_by' field
       const all_refferal = await this.userRepository.getAll({
         refer_by: { $ne: null }
-      }); // Populating the 'refer_by' field with user details
+      });
+
+      // Populating the 'refer_by' field with user details
+      const populatedReferrals = await this.userRepository.model.populate(all_refferal, { path: 'refer_by' });
 
       // Log the count of referrals fetched
       console.log('all_refferal count:', all_refferal);
 
       // Return the populated list of referrals
-      return all_refferal;
+      return populatedReferrals;
     } catch (error) {
       console.error('Error fetching referral data:', error.message);
       throw error;

@@ -26,8 +26,8 @@ export const columns: ColumnDef[] = [
     header: 'ACCOUNT HOLDER',
     cell: ({ row }: { row: any }) => (
       <div className="flex flex-col">
-        <span className="font-medium">{row.original.user.accountHolderName}</span>
-        <span className="text-sm text-muted-foreground">{row.original.userType}</span>
+        <span className="font-medium">{row.original.user?.accountHolderName ?? 'N/A'}</span>
+        <span className="text-sm text-muted-foreground">{row.original.userType ?? 'N/A'}</span>
       </div>
     )
   },
@@ -53,19 +53,19 @@ export const columns: ColumnDef[] = [
             <div className="space-y-4">
               <div className="grid grid-cols-4 items-center gap-4">
                 <span className="font-medium text-sm">Bank Name</span>
-                <span className="col-span-3">{row.original.user.bankName}</span>
+                <span className="col-span-3">{row.original.user?.bankName ?? 'N/A'}</span>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <span className="font-medium text-sm">Account No.</span>
-                <span className="col-span-3">{row.original.user.accountNumber}</span>
+                <span className="col-span-3">{row.original.user?.accountNumber ?? 'N/A'}</span>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <span className="font-medium text-sm">IFSC Code</span>
-                <span className="col-span-3">{row.original.user.ifscCode}</span>
+                <span className="col-span-3">{row.original.user?.ifscCode ?? 'N/A'}</span>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <span className="font-medium text-sm">Holder Name</span>
-                <span className="col-span-3">{row.original.user.accountHolderName}</span>
+                <span className="col-span-3">{row.original.user?.accountHolderName ?? 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -77,13 +77,13 @@ export const columns: ColumnDef[] = [
     header: 'AMOUNT',
     cell: ({ row }: { row: any }) => (
       <div className="font-medium">
-        ₹{row.original.requestedAmount}
+        ₹{row.original.requestedAmount ?? 'N/A'}
       </div>
     )
   },
   {
     header: 'PAYMENT METHOD',
-    cell: ({ row }: { row: any }) => row.original.paymentMethod
+    cell: ({ row }: { row: any }) => row.original.paymentMethod ?? 'N/A'
   },
   {
     header: 'STATUS',
@@ -95,7 +95,7 @@ export const columns: ColumnDef[] = [
             : "bg-yellow-100 text-yellow-800"
         }
       >
-        {row.original.status}
+        {row.original.status ?? 'N/A'}
       </Badge>
     )
   },
@@ -109,7 +109,7 @@ export const columns: ColumnDef[] = [
             : "bg-yellow-100 text-yellow-800"
         }
       >
-        {row.original.paymentStatus}
+        {row.original.paymentStatus ?? 'N/A'}
       </Badge>
     )
   },

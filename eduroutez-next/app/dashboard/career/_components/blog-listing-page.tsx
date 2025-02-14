@@ -73,7 +73,7 @@ export default function CareerListingPage({}: TCareerListingPage) {
           <div className="space-y-4">
             <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
               <Heading
-                title={`Career (${data?.result?.length})`}
+                title={`Career (${data?.totalDocuments})`}
                 description="All careers online and offline are listed here."
               />
               <div className="flex gap-4">
