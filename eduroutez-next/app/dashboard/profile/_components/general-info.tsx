@@ -128,6 +128,23 @@ const GeneralInfo = () => {
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
+  const [streams, setStreams] = React.useState<Stream[]>([]);
+  const [selectedStreams, setSelectedStreams] = React.useState<string[]>([]);
+
+  // Add this useEffect to fetch streams
+  useEffect(() => {
+    const fetchStreams = async () => {
+      try {
+        const response = await axiosInstance.get(`${apiUrl}/streams`);
+        console.log('streams',response.data);
+        setStreams(response.data?.data?.result || []);
+      } catch (error) {
+        console.error('Error fetching streams:', error);
+        toast.error('Failed to load streams');
+      }
+    };
+    fetchStreams();
+  }, []);
 
 
     useEffect(() => {
@@ -145,6 +162,10 @@ const GeneralInfo = () => {
           var cityResponse = await axiosInstance.post(`${apiUrl}/state-city-by-id/${instituteData.city}`, { type: "city" });
           console.log('City response:', cityResponse.data?.data[0]);
           var stateCityData = cityResponse.data?.data[0];
+      }
+
+      if (instituteData?.streams) {
+        setSelectedStreams(instituteData.streams);
       }
 
         form.reset({
@@ -649,23 +670,70 @@ useEffect(() => {
                 )}
               />
             </div>
-                <FormField
-                  control={form.control}
-                  name="streams"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Streams (comma separated)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Add streams like -> designing, developing, marketing"
-                          {...field}
-                          onChange={(e) => field.onChange(e.target.value.split(',').map(item => item.trim()))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                   <FormField
+                     control={form.control}
+                     name="streams"
+                     render={({ field }) => (
+                       <FormItem>
+                         <FormLabel>Streams</FormLabel>
+                         <FormControl>
+                           <div className="relative">
+                             <Select
+                               onValueChange={(value) => {
+                                 const currentStreams = field.value || [];
+                                 if (!currentStreams.includes(value)) {
+                                   const newStreams = [...currentStreams, value];
+                                   field.onChange(newStreams);
+                                   setSelectedStreams(newStreams);
+                                 }
+                               }}
+                             >
+                               <SelectTrigger className="w-full">
+                                 <SelectValue placeholder="Select streams" />
+                               </SelectTrigger>
+                               <SelectContent>
+                                 {streams.map((stream) => (
+                                   <SelectItem
+                                     key={stream.id}
+                                     value={stream.name}
+                                     disabled={selectedStreams.includes(stream.name)}
+                                   >
+                                     {stream.name}
+                                   </SelectItem>
+                                 ))}
+                               </SelectContent>
+                             </Select>
+                             
+                             {/* Selected streams display */}
+                             <div className="mt-2 flex flex-wrap gap-2">
+                               {selectedStreams.map((streamName) => (
+                                 <div
+                                   key={streamName}
+                                   className="flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1"
+                                 >
+                                   <span>{streamName}</span>
+                                   <button
+                                     type="button"
+                                     onClick={() => {
+                                       const newStreams = selectedStreams.filter(
+                                         (s) => s !== streamName
+                                       );
+                                       setSelectedStreams(newStreams);
+                                       field.onChange(newStreams);
+                                     }}
+                                     className="ml-1 text-red-500 hover:text-red-700"
+                                   >
+                                     <X className="h-3 w-3" />
+                                   </button>
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+                         </FormControl>
+                         <FormMessage />
+                       </FormItem>
+                     )}
+                   />
                 <FormField
                   control={form.control}
                   name="specialization"
