@@ -19,7 +19,8 @@ const AdminReferralsPage = () => {
   const [sortField, setSortField] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
   const [totalReferrals, setTotalReferrals] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(3);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   // Safe string conversion utility that handles null/undefined
@@ -98,6 +99,12 @@ const AdminReferralsPage = () => {
     }
   });
 
+  // Calculate total pages
+  const totalPages = Math.ceil(sortedReferrals.length / itemsPerPage);
+
+  // Get referrals for the current page
+  const currentReferrals = sortedReferrals.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   const handleSort = (field: keyof Referral) => {
     if (field === sortField) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -107,16 +114,12 @@ const AdminReferralsPage = () => {
     }
   };
 
-  const handleSeeMore = () => {
-    setVisibleCount(prevCount => prevCount + 10);
-  };
-
-  const handleSeeLess = () => {
-    setVisibleCount(3);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-6  space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -170,18 +173,16 @@ const AdminReferralsPage = () => {
                     <ArrowUpDown className="w-4 h-4" />
                   </div>
                 </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Reward</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {sortedReferrals.slice(0, visibleCount).map((referral, index) => (
+              {currentReferrals.map((referral, index) => (
                 <tr key={referral.id || index} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm text-gray-900">{referral.referrer || 'N/A'}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{referral.referrerEmail || 'N/A'}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{referral.referred || 'N/A'}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{referral.referredEmail || 'N/A'}</td>
                   <td className="px-6 py-4 text-sm text-gray-600">{referral.date || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{referral.rewardPaid || '0'}</td>
                 </tr>
               ))}
             </tbody>
@@ -189,24 +190,17 @@ const AdminReferralsPage = () => {
         </div>
       </div>
 
-      {/* Pagination Buttons */}
-      <div className="flex justify-center space-x-4 mt-4">
-        {visibleCount < sortedReferrals.length && (
+      {/* Pagination */}
+      <div className="flex justify-end space-x-4 mt-4">
+        {Array.from({ length: totalPages }, (_, index) => (
           <button
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            onClick={handleSeeMore}
+            key={index}
+            className={`px-4 py-2 rounded-lg transition-colors ${currentPage === index + 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            onClick={() => handlePageChange(index + 1)}
           >
-            See More
+            {index + 1}
           </button>
-        )}
-        {visibleCount > 10 && (
-          <button
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            onClick={handleSeeLess}
-          >
-            See Less
-          </button>
-        )}
+        ))}
       </div>
     </div>
   );
