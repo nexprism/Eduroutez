@@ -17,7 +17,7 @@ class CrudRepository {
   async destroy(id) {
     try {
       // console.log('iddcfvghju',id);
-      const result = await this.model.findByIdAndDelete(id);
+      const result = await this.model.findByIdAndUpdate({ _id: id }, { deletedAt: new Date(), deleted: true });
       return result;
       console.log('result',result);
     } catch (error) {

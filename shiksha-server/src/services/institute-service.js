@@ -1,12 +1,14 @@
 import { StatusCodes } from "http-status-codes";
 import { InstituteRepository } from "../repository/index.js";
 import { InstituteIssuesRepository } from "../repository/index.js";
+import { UserRepository } from "../repository/index.js";
 
 import AppError from "../utils/errors/app-error.js";
 class InstituteService {
   constructor() {
     this.instituteRepository = new InstituteRepository();
     this.instituteIssuesRepository = new InstituteIssuesRepository();
+    this.userRepository = new UserRepository
   }
   
 
@@ -86,7 +88,7 @@ console.log('updatesInstitute',updatesInstitute);
       const parsedSort = JSON.parse(sort);
 
       // Build filter conditions for multiple fields
-      const filterConditions = {};
+    const filterConditions = { deletedAt: null };
 
       for (var [key, value] of Object.entries(parsedFilters)) {
         if(key=== 'Exam'){
@@ -179,9 +181,24 @@ console.log('updatesInstitute',updatesInstitute);
 
       // Execute query with dynamic filters, sorting, and pagination
       const populateFields = ["reviews","plan"];
+      
       const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
-
-      return institutes;
+      console.log('all institutes', institutes.result.length);
+      //push state and city name from id in institute
+      for (let i = 0; i < institutes.result.length; i++) {
+        console.log('state of inst',institutes.result[i].state);
+        if (institutes.result[i].state) {
+          const state = await this.userRepository.getStateCityById(institutes.result[i].state, 'state');
+          // console.log('state name',state[0].name);
+          institutes.result[i].state = state[0].name;
+        }
+        if (institutes.result[i].city) {
+          const city = await this.userRepository.getStateCityById(institutes.result[i].city, 'city');
+          // console.log('city name', city[0].name);
+          institutes.result[i].city = city[0].name;
+        }
+      }
+    return institutes;
     } catch (error) {
       console.log(error);
       throw new AppError("Cannot fetch data of all the institutes", StatusCodes.INTERNAL_SERVER_ERROR);
@@ -200,6 +217,17 @@ console.log('updatesInstitute',updatesInstitute);
 
   async get(id) {
     const institute = await this.instituteRepository.get(id);
+
+    //push state and city name from id in institute
+    if (institute.state) {
+      const state = await this.userRepository.getStateCityById(institute.state, 'state');
+      institute.state = state[0].name;
+    }
+
+    if (institute.city) {
+      const city = await this.userRepository.getStateCityById(institute.city, 'city');
+      institute.city = city[0].name;
+    }
 
     
 
@@ -329,9 +357,10 @@ console.log('updatesInstitute',updatesInstitute);
 
   async delete(id) {
     try {
-      const institute = await this.instituteRepository.destroy(id);
+      const institute = await this.instituteRepository.deleteById(id);
       return institute;
     } catch (error) {
+      console.log('delete error',error.message);
       if (error.statusCode === StatusCodes.NOT_FOUND) {
         throw new AppError("The institute you requested to delete is not present", error.statusCode);
       }

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const transactionSchema = new mongoose.Schema(
   {
@@ -36,4 +37,5 @@ const transactionSchema = new mongoose.Schema(
 );
 
 const Transaction = mongoose.model("Transaction", transactionSchema);
+applySoftDelete(transactionSchema);
 export default Transaction;

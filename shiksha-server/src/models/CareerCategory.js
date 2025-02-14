@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const careerCategorySchema = new mongoose.Schema(
   {
@@ -15,4 +16,5 @@ const careerCategorySchema = new mongoose.Schema(
 );
 
 const CareerCategory = mongoose.model("CareerCategory", careerCategorySchema);
+applySoftDelete(careerCategorySchema);
 export default CareerCategory;

@@ -2,6 +2,7 @@
 // both roles and access are defined already in the database
 
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -129,4 +130,5 @@ const userSchema = new mongoose.Schema(
 );
 
 const User = mongoose.model("User", userSchema);
+applySoftDelete(userSchema);
 export default User;

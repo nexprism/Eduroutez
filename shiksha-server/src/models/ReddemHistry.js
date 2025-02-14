@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const reddemHistrySchema = new mongoose.Schema(
   {
@@ -35,4 +36,5 @@ const reddemHistrySchema = new mongoose.Schema(
 );
 
 const ReddemHistry = mongoose.model("ReddemHistry", reddemHistrySchema);
+applySoftDelete(reddemHistrySchema);
 export default ReddemHistry;

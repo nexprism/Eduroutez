@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const newsSchema = new mongoose.Schema(
     {
@@ -34,5 +35,6 @@ const newsSchema = new mongoose.Schema(
 );
 
 const News = mongoose.model("News", newsSchema);
+applySoftDelete(newsSchema);
 export default News;
     

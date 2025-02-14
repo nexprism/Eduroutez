@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const payoutSchema = new mongoose.Schema(
   {
@@ -38,4 +39,5 @@ const payoutSchema = new mongoose.Schema(
 );
 
 const Payout = mongoose.model("Payout", payoutSchema);
+applySoftDelete(payoutSchema);
 export default Payout;
