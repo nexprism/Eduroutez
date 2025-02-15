@@ -128,7 +128,7 @@ export async function updatePayout(req, res) {
     if (payload.status == 'PAID'){
       const payout = await payoutService.get(couponId);
       console.log("payout", payout);
-      const user = await userService.get(payout.user);
+      const user = await userService.getUserById(payout.user);
       console.log("user", user);
       const newBalance = user.balance - payout.requestedAmount;
       console.log("newBalance", newBalance);
