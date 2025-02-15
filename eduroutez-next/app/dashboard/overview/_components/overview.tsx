@@ -43,6 +43,8 @@ const Dashboard = () => {
     averageRating: number;
     pendingSlots: number;
     totalSlots: number;
+    level: string;
+    points: number;
 
     // Add other institute-specific fields as needed
   }
@@ -243,6 +245,20 @@ const fetchCounselorData = async () => {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+            title="Level"
+            value={counselorData?.level || "Career Advisor"}
+            icon={BookOpen}
+            color="bg-green-500"
+            description="Counsellor level"
+          />
+            <StatCard
+            title="Points"
+            value={counselorData?.points || 0}
+            icon={BookOpen}
+            color="bg-green-500"
+            description="Counsellor points"
+          />
           <StatCard
             title="Earnings"
             value={counselorData?.earning || 0}
@@ -278,6 +294,7 @@ const fetchCounselorData = async () => {
             color="bg-green-500"
             description="All counselling sessions"
           />
+          
         </div>
       </div>
     );

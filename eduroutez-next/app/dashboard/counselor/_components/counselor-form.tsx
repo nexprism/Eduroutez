@@ -93,10 +93,14 @@ export default function CounselorForm() {
 
   // Fetch categories/streams
   const { data: categories } = useQuery({
-    queryKey: ['streams'],
+    queryKey: ['streams', 0], // Added page to queryKey
     queryFn: async () => {
       try {
-        const response = await axiosInstance.get(`${apiUrl}/streams`);
+        const response = await axiosInstance.get(`${apiUrl}/streams`, {
+          params: {
+            page: 0
+          }
+        });
         return response.data?.data?.result || [];
       } catch (error) {
         console.error('Error fetching streams:', error);

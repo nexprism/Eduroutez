@@ -30,7 +30,14 @@ class FAQRepository extends CrudRepository {
   async getAll(filter, sort, page, limit) {
     try {
       const questionAnswers = await this.model.find(filter).sort(sort).skip((page - 1) * limit).limit(limit).exec();
-      return questionAnswers;
+      const totalDocuments = await this.model.countDocuments(filter);
+
+      return {
+        result: questionAnswers,
+        currentPage: page,
+        totalPages: Math.ceil(totalDocuments / limit),
+        totalDocuments,
+      };
     } catch (error) {
       throw error;
     }
@@ -38,6 +45,7 @@ class FAQRepository extends CrudRepository {
 
   async get(id) {
     const questionAnswer = await this.model.findById(id);
+    
     return questionAnswer;
   }
 

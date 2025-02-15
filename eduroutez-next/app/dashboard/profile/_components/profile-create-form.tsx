@@ -120,12 +120,12 @@ export const profileSchema = z.object({
         .string()
         .min(3, { message: 'Product Name must be at least 3 characters' }),
       description: z.string().optional(),
-      startdate: z
+      startDate: z
         .string()
         .refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
           message: 'Start date should be in the format YYYY-MM-DD'
         }),
-      enddate: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
+      endDate: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
         message: 'End date should be in the format YYYY-MM-DD'
       })
     })
@@ -192,10 +192,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       {
         title: '',
         employmentType: '',
-        startdate: '',
-        enddate: '',
-        location: '',
         startDate: '',
+        location: '',
         endDate: '',
         description: ''
 
@@ -255,8 +253,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         ?.map((_, index) => [
           `experiences.${index}.title`,
           `experiences.${index}.companyName`,
-          `experiences.${index}.startdate`,
-          `experiences.${index}.enddate`,
+          `experiences.${index}.startDate`,
+          `experiences.${index}.endDate`,
           `experiences.${index}.location`
           // Add other field names as needed
         ])
@@ -319,8 +317,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       values.experiences.forEach((exp, index) => {
         formData.append(`experiences[${index}][title]`, exp.title);
         formData.append(`experiences[${index}][employmentType]`, exp.employmentType);
-        formData.append(`experiences[${index}][startdate]`, exp.startdate);
-        formData.append(`experiences[${index}][enddate]`, exp.enddate);
+        formData.append(`experiences[${index}][startDate]`, exp.startDate);
+        formData.append(`experiences[${index}][endDate]`, exp.endDate);
         formData.append(`experiences[${index}][location]`, exp.location || '');
         formData.append(`experiences[${index}][description]`, exp.description || '');
         formData.append(`experiences[${index}][companyName]`, exp.companyName);
@@ -1100,7 +1098,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           />
                           <FormField
                             control={form.control}
-                            name={`experiences.${index}.startdate`}
+                            name={`experiences.${index}.startDate`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Start date</FormLabel>
@@ -1117,7 +1115,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           />
                           <FormField
                             control={form.control}
-                            name={`experiences.${index}.enddate`}
+                            name={`experiences.${index}.endDate`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>End date</FormLabel>
@@ -1166,8 +1164,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         title: '',
                         employmentType: '',
                         companyName: '',
-                        startdate: '',
-                        enddate: '',
+                        startDate: '',
+                        endDate: '',
                         location: '',
                         description: ''
                       })
