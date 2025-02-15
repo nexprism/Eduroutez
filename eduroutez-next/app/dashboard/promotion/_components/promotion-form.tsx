@@ -19,6 +19,7 @@ const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 const LOCATION_PRICING = {
   BLOG_PAGE: 1000,
   INSTITUTE_PAGE: 2000,
+  INSTITUTE_PAGE_RECTANGLE:2000,
   HOME_PAGE: 2000,
   REVIEW_PAGE: 1500,
   CAREER_PAGE: 1000,
@@ -46,6 +47,14 @@ const PROMOTION_LOCATIONS = {
     label: 'Institute Page Banner',
     width: 300,
     height: 250,
+    category: 'Institute',
+    description: 'Main banner on institute profile pages'
+  },
+  INSTITUTE_PAGE_RECTANGLE: {
+    id: 'INSTITUTE_PAGE_RECTANGLE',
+    label: 'Institute Page Banner Rectangle',
+    width: 728,
+    height: 90,
     category: 'Institute',
     description: 'Main banner on institute profile pages'
   },

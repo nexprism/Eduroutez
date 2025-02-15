@@ -34,7 +34,7 @@ const RedeemPage = () => {
 
   useEffect(() => {
     if (counselor) {
-      setAvailableCoins(counselor?.data[0]?.balance || 0);
+      setAvailableCoins(counselor?.data[0]?.points || 0);
     }
     fetchRedeemHistory();
   }, [counselor]);

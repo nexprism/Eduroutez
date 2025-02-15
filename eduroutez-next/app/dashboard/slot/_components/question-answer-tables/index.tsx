@@ -14,6 +14,7 @@ export default function QuestionAnswerTable({
   totalData: number;
 }) {
   const { searchQuery, setPage, setSearchQuery } = useQuestionAnswerTableFilters();
+  
 
   return (
     <div className="space-y-4 ">
