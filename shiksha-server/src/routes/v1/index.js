@@ -204,7 +204,7 @@ router.post(
     upload.none(),
     createCounselor
   );//get couselor by institute
-router.get("/counselors-by-institute/:institute", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorsByInstitute);
+router.get("/counselors-by-institute/:institute",  getCounselorsByInstitute);
 router.get("/counselors", getCounselors);
 router.get("/counselor/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselor);
 router.get("/counselor-by-id/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorById);

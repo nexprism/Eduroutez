@@ -1,5 +1,7 @@
 
 import { CourseCategoryRepository } from "../repository/index.js";
+import AppError from "../utils/errors/app-error.js";
+import { StatusCodes } from "http-status-codes";
 class CourseCategoryService {
   constructor() {
     this.courseCategoryRepository = new CourseCategoryRepository();
@@ -15,7 +17,7 @@ class CourseCategoryService {
   }
   async getAll(query) {
     try {
-      const { page = 0, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
