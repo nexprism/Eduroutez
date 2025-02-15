@@ -59,7 +59,7 @@ export const createCounselor = async (req, res) => {
 
         counselorpayload = {
           ...payload,
-          userId: userId,
+          _id: userId,
         };
 
       }

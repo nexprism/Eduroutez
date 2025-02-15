@@ -185,20 +185,35 @@ console.log('updatesInstitute',updatesInstitute);
       const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
       console.log('all institutes', institutes.result.length);
       //push state and city name from id in institute
+      // Convert each institute model to plain object and add state/city names
       for (let i = 0; i < institutes.result.length; i++) {
-        console.log('state of inst',institutes.result[i].state);
+        // Convert the model to a plain JavaScript object
+        if (typeof institutes.result[i].toObject === 'function') {
+          institutes.result[i] = institutes.result[i].toObject();
+        } else if (typeof institutes.result[i].toJSON === 'function') {
+          institutes.result[i] = institutes.result[i].toJSON();
+        } else {
+          institutes.result[i] = JSON.parse(JSON.stringify(institutes.result[i]));
+        }
+
+        // Now we can safely add properties
         if (institutes.result[i].state) {
           const state = await this.userRepository.getStateCityById(institutes.result[i].state, 'state');
-          // console.log('state name',state[0].name);
-          institutes.result[i].state = state[0].name;
+          if (state && state.length > 0) {
+            institutes.result[i].stateName = state[0].name;
+          }
         }
+
         if (institutes.result[i].city) {
           const city = await this.userRepository.getStateCityById(institutes.result[i].city, 'city');
-          // console.log('city name', city[0].name);
-          institutes.result[i].city = city[0].name;
+          if (city && city.length > 0) {
+            institutes.result[i].cityName = city[0].name;
+          }
         }
       }
-    return institutes;
+
+      return institutes;
+
     } catch (error) {
       console.log(error);
       throw new AppError("Cannot fetch data of all the institutes", StatusCodes.INTERNAL_SERVER_ERROR);
@@ -216,20 +231,44 @@ console.log('updatesInstitute',updatesInstitute);
   }
 
   async get(id) {
-    const institute = await this.instituteRepository.get(id);
+    // Get the institute model
+    const instituteModel = await this.instituteRepository.get(id);
 
-    //push state and city name from id in institute
+    // Convert model to plain JavaScript object
+    // Different ORMs have different methods to do this:
+    let institute;
+
+    // For Mongoose
+    if (typeof instituteModel.toObject === 'function') {
+      institute = instituteModel.toObject();
+    }
+    // For Sequelize
+    else if (typeof instituteModel.get === 'function' && typeof instituteModel.get({ plain: true }) !== 'undefined') {
+      institute = instituteModel.get({ plain: true });
+    }
+    // For TypeORM or generic case
+    else if (typeof instituteModel.toJSON === 'function') {
+      institute = instituteModel.toJSON();
+    }
+    // Fallback: manual conversion using object spread
+    else {
+      institute = JSON.parse(JSON.stringify(instituteModel));
+    }
+
+    // Now you can add properties safely
     if (institute.state) {
       const state = await this.userRepository.getStateCityById(institute.state, 'state');
-      institute.state = state[0].name;
+      if (state && state.length > 0) {
+        institute.stateName = state[0].name;
+      }
     }
 
     if (institute.city) {
       const city = await this.userRepository.getStateCityById(institute.city, 'city');
-      institute.city = city[0].name;
+      if (city && city.length > 0) {
+        institute.cityName = city[0].name;
+      }
     }
-
-    
 
     return institute;
   }
