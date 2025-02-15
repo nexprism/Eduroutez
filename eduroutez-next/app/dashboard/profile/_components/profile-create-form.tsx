@@ -59,7 +59,7 @@ export const profileSchema = z.object({
     .string()
     .email({ message: 'Product Name must be at least 3 characters' }),
   instituteEmail: z
-    .string(),
+    .string().min(1, { message: ' lastName must be at least 3 characters' }),
   contactno: z.coerce.number(),
   language:z.string(),
   ExperienceYear:z.string(),
@@ -198,8 +198,10 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         startDate: '',
         endDate: '',
         description: ''
+
       }
     ],
+    instituteEmail:'N/A',
     accountNumber: '', // Add this line
     accountHolderName: '', // Add this line
   };
@@ -661,12 +663,33 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         <form
           onSubmit={form.handleSubmit(onSubmit, (errors) => {
             if (Object.keys(errors).length > 0) {
-              console.log('hi2');
-              console.log(errors);
-              console.log(form);
-              toast.error(
-                'Please correct the errors in the form before submitting.'
-              );
+              const errorMessages: { [key: string]: string } = {
+          firstname: 'First name must be at least 3 characters.',
+          lastname: 'Last name must be at least 3 characters.',
+          email: 'Please enter a valid email address.',
+          contactno: 'Please enter a valid contact number.',
+          country: 'Please select a country.',
+          city: 'Please select a city.',
+          state: 'Please select a state.',
+          gender: 'Please select a gender.',
+          dateOfBirth: 'Date of birth should be in the format YYYY-MM-DD.',
+          language: 'Please select a language.',
+          ExperienceYear: 'Please enter your years of experience.',
+          category: 'Please select a category.',
+          instituteEmail: 'Please enter a valid institute email.',
+          panCard: 'Please upload a valid PAN card image.',
+          adharCard: 'Please upload a valid Aadhar card image.',
+          profilePhoto: 'Please upload a valid profile photo.',
+          bankName: 'Please enter your bank name.',
+          accountNumber: 'Please enter your account number.',
+          accountHolderName: 'Please enter the account holder name.',
+          ifscCode: 'Please enter a valid IFSC code.',
+          experiences: 'Please fill out all experience fields correctly.'
+              };
+              const errorMessage = Object.keys(errors)
+          .map((key) => errorMessages[key as keyof typeof errorMessages])
+          .join(', ');
+              toast.error(`Please correct the errors in the form before submitting: ${errorMessage}`);
             }
           })}
           className="w-full space-y-8"
