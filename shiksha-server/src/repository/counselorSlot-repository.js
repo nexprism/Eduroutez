@@ -39,24 +39,38 @@ class CounselorSlotRepository extends CrudRepository {
   }
 
   //getScheduleSlots
-  async getScheduleSlots(id) {
+  async getScheduleSlots(id,query) {
     try {
       const user = await User.findOne({ _id: id });
+      const { page, limit } = query;
       console.log('user',user);
       if(user) {
         if (user.role === 'counsellor') {
-          const scheduledSlots = await ScheduleSlot.find({
-            counselorId: id,
-          }).populate('studentId');
-          console.log('scheduledSlots',scheduledSlots);
-          return scheduledSlots;
+         var filter = {counselorId: id};
+         var model = ScheduleSlot;
+         var populateFields = ['studentId'];
         }
         if(user.role === 'student') {
-          const scheduledSlots = await ScheduleSlot.find({
-            studentId: id,
-          }).populate('counselorId');
-          return scheduledSlots;
+          var filter = {studentId: id};
+          var model = ScheduleSlot;
+          var populateFields = ['counselorId'];
         }
+
+        const result = await model.find(filter).populate(populateFields).sort({createdAt: -1})
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .collation({ locale: 'en', strength: 2 });
+
+        const totalDocuments = await model.countDocuments(filter);
+
+        return {
+          result,
+          currentPage: page,
+          totalPages: Math.ceil(totalDocuments / limit),
+          totalDocuments,
+        };
+        
+
       }
     } catch (error) {
       throw error;

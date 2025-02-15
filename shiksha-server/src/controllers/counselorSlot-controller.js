@@ -61,7 +61,7 @@ export const getCounselorSlot = async (req, res) => {
 export const getScheduleSlots = async (req, res) => {
   try {
     // console.log(req.params.email);
-    const response = await counselorSlotService.getScheduleSlots(req.params.id);
+    const response = await counselorSlotService.getScheduleSlots(req.params.id,req.query);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the counselor slot";
     return res.status(StatusCodes.OK).json(SuccessResponse);

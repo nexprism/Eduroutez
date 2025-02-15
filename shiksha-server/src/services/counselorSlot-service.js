@@ -67,8 +67,8 @@ class questionAnswerService {
   }
 
   //getScheduleSlots
-  async getScheduleSlots(id) {
-    const questionAnswer = await this.counselorSlotRepository.getScheduleSlots(id);
+  async getScheduleSlots(id,query) {
+    const questionAnswer = await this.counselorSlotRepository.getScheduleSlots(id,query);
     return questionAnswer;
   }
 
