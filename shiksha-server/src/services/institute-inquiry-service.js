@@ -29,7 +29,7 @@ class InstituteInquiryService {
       const parsedSort = JSON.parse(sort);
 
       // Build filter conditions for multiple fields
-      const filterConditions = {};
+    const filterConditions = { deletedAt: null };
 
       for (const [key, value] of Object.entries(parsedFilters)) {
         filterConditions[key] = value;

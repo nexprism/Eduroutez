@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { courseSchema } from "./Course.js";
+import { applySoftDelete } from "../middlewares/softDelete.js";
+
 
 const instituteSchema = new mongoose.Schema(
   {
@@ -181,6 +183,6 @@ const instituteSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+applySoftDelete(instituteSchema);
 const Institute = mongoose.model("Institute", instituteSchema);
 export default Institute;

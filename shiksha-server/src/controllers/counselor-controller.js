@@ -100,7 +100,20 @@ export const createCounselor = async (req, res) => {
 export const getCounselorsByInstitute = async (req, res) => { 
   try {
     const instituteId = req.params.institute;
-    const response = await counselorService.getCounselorsByInstitute(instituteId, req.query);
+    console.log("InstituteId:", instituteId);
+    const query = req.query;
+
+    // Add instituteId to the filters in the query
+    if (!query.filters) {
+      query.filters = JSON.stringify({ instituteId });
+    } else {
+      const filters = JSON.parse(query.filters);
+      filters.instituteId = instituteId;
+      query.filters = JSON.stringify(filters);
+    }
+    // console.log("Query:", query);
+
+    const response = await counselorService.getAll(query);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched counselors";
     return res.status(StatusCodes.OK).json(SuccessResponse);

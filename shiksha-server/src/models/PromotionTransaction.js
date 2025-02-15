@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const promotionTransactionSchema = new mongoose.Schema(
     {
@@ -40,4 +41,5 @@ const promotionTransactionSchema = new mongoose.Schema(
 );
 
 const PromotionTransaction = mongoose.model("PromotionTransaction", promotionTransactionSchema);
+applySoftDelete(promotionTransactionSchema);
 export default PromotionTransaction;

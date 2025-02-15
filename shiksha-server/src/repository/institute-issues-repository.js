@@ -18,8 +18,25 @@ class InstituteIssuesRepository extends CrudRepository {
 
     async getHelpList() {
       try {
-        const issues = await InstituteIssues.find().populate("institute");
+        const issues = await InstituteIssues.find()
+          .populate({
+            path: "institute",
+            select: "instituteName email institutePhone"
+          });
         return issues;
+      } catch (error) {
+        throw error;
+      }
+    }
+
+    //getIssueById
+    async getIssueById(id) {
+      try {
+        const issue = await InstituteIssues.findById(id).populate({
+          path: "institute",
+          select: "instituteName email institutePhone"
+        });
+        return issue;
       } catch (error) {
         throw error;
       }

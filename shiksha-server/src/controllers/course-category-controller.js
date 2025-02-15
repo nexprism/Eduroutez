@@ -51,6 +51,7 @@ export async function getCourseCategories(req, res) {
     SuccessResponse.message = "Successfully fetched categories";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.error("Error in getCourseCategories:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }

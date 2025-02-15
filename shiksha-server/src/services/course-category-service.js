@@ -1,5 +1,7 @@
 
 import { CourseCategoryRepository } from "../repository/index.js";
+import AppError from "../utils/errors/app-error.js";
+import { StatusCodes } from "http-status-codes";
 class CourseCategoryService {
   constructor() {
     this.courseCategoryRepository = new CourseCategoryRepository();
@@ -15,7 +17,7 @@ class CourseCategoryService {
   }
   async getAll(query) {
     try {
-      const { page = 0, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -25,7 +27,7 @@ class CourseCategoryService {
       const parsedSort = JSON.parse(sort);
 
       // Build filter conditions for multiple fields
-      const filterConditions = {};
+    const filterConditions = { deletedAt: null };
 
       for (const [key, value] of Object.entries(parsedFilters)) {
         filterConditions[key] = value;

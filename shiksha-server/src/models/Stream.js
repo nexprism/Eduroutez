@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const streamSchema = new mongoose.Schema(
   {
@@ -15,4 +16,5 @@ const streamSchema = new mongoose.Schema(
 );
 
 const Stream = mongoose.model("Stream", streamSchema);
+applySoftDelete(streamSchema);
 export default Stream;

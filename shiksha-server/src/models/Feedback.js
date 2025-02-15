@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const feedbackSchema = new mongoose.Schema(
   {
@@ -15,4 +16,5 @@ const feedbackSchema = new mongoose.Schema(
 );
 
 const Feedback = mongoose.model("Feedback", feedbackSchema);
+applySoftDelete(feedbackSchema);
 export default Feedback;

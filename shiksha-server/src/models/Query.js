@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import { applySoftDelete } from "../middlewares/softDelete.js";
 const querySchema = new mongoose.Schema(
     {
         name: {
@@ -42,4 +42,5 @@ const querySchema = new mongoose.Schema(
 );
 
 const Query = mongoose.model("Query", querySchema);
+applySoftDelete(querySchema);
 export default Query;

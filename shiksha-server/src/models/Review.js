@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -234,4 +235,5 @@ const reviewSchema = new mongoose.Schema(
 );
 
 const Review = mongoose.model("Review", reviewSchema);
+applySoftDelete(reviewSchema);
 export default Review;

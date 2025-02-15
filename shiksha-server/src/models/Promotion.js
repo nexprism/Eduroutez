@@ -1,5 +1,6 @@
 import e from "express";
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";  
 
 const promotionSchema = new mongoose.Schema(
   {
@@ -46,4 +47,5 @@ const promotionSchema = new mongoose.Schema(
 );
 
 const Promotion = mongoose.model("Promotion", promotionSchema);
+applySoftDelete(promotionSchema);
 export default Promotion;

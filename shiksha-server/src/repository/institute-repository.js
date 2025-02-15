@@ -1,5 +1,6 @@
 import Institute from "../models/Institute.js";
 import CrudRepository from "./crud-repository.js";
+import User from "../models/User.js";
 
 class InstituteRepository extends CrudRepository {
   constructor() {
@@ -80,6 +81,23 @@ class InstituteRepository extends CrudRepository {
       throw error;
     }
   }
+
+  
+
+  //deleteInstitute
+  async deleteById(id) {
+    try {
+      //soft delete user by id
+      const deleteuser = await User.findByIdAndUpdate({ _id: id }, { deletedAt: new Date(),deleted:true });
+      
+      const result = await this.model.findByIdAndUpdate({ _id: id }, { deletedAt: new Date(),deleted:true });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
 
 
 
