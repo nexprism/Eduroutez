@@ -31,8 +31,8 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
     }
   });
 
-  const students = data?.data ?? [];
-  const totalDocuments = data?.data?.length ?? 0;
+  const students = data?.data?.result ?? [];
+  const totalDocuments = data?.data?.totalDocuments ?? 0;
 
   return (
     <PageContainer scrollable>
