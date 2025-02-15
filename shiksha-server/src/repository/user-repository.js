@@ -305,6 +305,12 @@ class UserRepository extends CrudRepository {
 
       const earning = scheduleSlots.length * 500 * 0.30; 
 
+      const counsellor_user = await User.findById(counselorId);
+      console.log('counsellor_user', counsellor_user);
+      var level = counsellor_user.level;
+      var points = counsellor_user.points;
+
+
 
 
       //get all completed schedule slots by counselor
@@ -329,8 +335,13 @@ class UserRepository extends CrudRepository {
         completedSlots: completedScheduleSlots.length,
         totalSlots: scheduleSlots.length,
         pendingSlots: pendingScheduleSlots.length,
-        averageRating
+        averageRating,
+        level,
+        points
     };
+
+
+    console.log('dash response', response);
 
       return response;
     } catch (error) {
