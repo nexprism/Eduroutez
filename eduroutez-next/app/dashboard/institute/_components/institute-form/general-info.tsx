@@ -129,7 +129,13 @@ const [cities, setCities] = React.useState<City[]>([]);
   useEffect(() => {
     const fetchStreams = async () => {
       try {
-        const response = await axiosInstance.get(`${apiUrl}/streams`);
+        const response = await axiosInstance.get(`${apiUrl}/streams`,
+          {
+            params: {
+              page: 0
+            }
+          }
+        );
         console.log('streams',response.data);
         setStreams(response.data?.data?.result || []);
       } catch (error) {
@@ -539,7 +545,7 @@ useEffect(() => {
                           <SelectValue placeholder="Select Organization Type" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="max-h-60 overflow-y-auto">
                         {orgTypes.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
@@ -583,7 +589,7 @@ useEffect(() => {
             <SelectValue placeholder="Select State" />
           </SelectTrigger>
         </FormControl>
-        <SelectContent>
+        <SelectContent className="max-h-60 overflow-y-auto">
           {states.map((state) => (
             <SelectItem key={state.id} value={state.name}>
               {state.name}
@@ -615,7 +621,7 @@ useEffect(() => {
             <SelectValue placeholder="Select City" />
           </SelectTrigger>
         </FormControl>
-        <SelectContent>
+        <SelectContent className="max-h-60 overflow-y-auto">
           {cities.map((city) => (
             <SelectItem key={city.id} value={city.name}>
               {city.name}
@@ -703,7 +709,7 @@ useEffect(() => {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select streams" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60 overflow-y-auto">
                   {streams.map((stream) => (
                     <SelectItem
                       key={stream.id}

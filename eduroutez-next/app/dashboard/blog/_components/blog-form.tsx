@@ -260,7 +260,11 @@ export default function BlogForm() {
   const { data: streams } = useQuery({
     queryKey: ['streams'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/streams`);
+      const response = await axiosInstance.get(`${apiUrl}/streams`,{
+        params: {
+          page: 0
+        }
+      });
       return response.data.data.result;
     }
   });
@@ -323,7 +327,7 @@ export default function BlogForm() {
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="max-h-60 overflow-y-auto">
                       {categories?.map((category: any) => (
                         <SelectItem key={category.name} value={category.name}>
                           {category.name}
@@ -348,7 +352,7 @@ export default function BlogForm() {
                         <SelectValue placeholder="Select a stream" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="max-h-60 overflow-y-auto">
                       {streams?.map((stream: any) => (
                         <SelectItem key={stream._id} value={stream._id}>
                           {stream.name}
