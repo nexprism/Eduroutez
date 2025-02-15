@@ -473,7 +473,7 @@ router.delete("/template/:id", accessTokenAutoRefresh, passport.authenticate("jw
  * promotion routes
  */
 router.post("/promotion", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createPromotion);
-router.get("/promotions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPromotions);
+router.get("/promotions", getPromotions);
 router.get("/promotion/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPromotion);
 router.patch("/promotion/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updatePromotion);
 router.delete("/promotion/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deletePromotion);

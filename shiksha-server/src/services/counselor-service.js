@@ -79,11 +79,18 @@ class CounselorService {
     if(!counselor) {
       //find in user by email
       const user = await this.userRepository.get(email);
+      console.log('counselor user',user);
       if(user) {
         
         //create counselor
         const counselor = await this.create({userId:user._id,email:user.email,firstname:user.name,lastname:user.lastname});
       }
+    }
+
+    const userResponse = await this.userRepository.getById(counselor[0]._id);
+    if(userResponse) {
+      counselor[0].level = userResponse.level;
+      counselor[0].points = userResponse.points;
     }
 
     if (counselor[0].reviews.length > 0) {
