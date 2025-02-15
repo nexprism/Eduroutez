@@ -309,6 +309,7 @@ class UserRepository extends CrudRepository {
       console.log('counsellor_user', counsellor_user);
       var level = counsellor_user.level;
       var points = counsellor_user.points;
+      var balance = counsellor_user.balance;
 
 
 
@@ -337,7 +338,8 @@ class UserRepository extends CrudRepository {
         pendingSlots: pendingScheduleSlots.length,
         averageRating,
         level,
-        points
+        points,
+        balance
     };
 
 
