@@ -223,7 +223,7 @@ router.get("/counselorslots", getCounselors);
 router.get("/counselorslots/:email", getCounselorSlot);
 //get scheduled slots
 router.get("/scheduled-slots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getScheduleSlots);
-router.get("/scheduled-slots", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getAllScheduleSlots);
+router.get("/scheduled-slots", getAllScheduleSlots);
 //update scheduled slots
 router.patch("/scheduled-slots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateScheduleSlot);
 
