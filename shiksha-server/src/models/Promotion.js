@@ -18,7 +18,7 @@ const promotionSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      default: "approved",
     },
     paymentId: {
       type: String,
