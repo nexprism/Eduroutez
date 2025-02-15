@@ -72,6 +72,21 @@ export const getScheduleSlots = async (req, res) => {
   }
 };
 
+//getAllScheduleSlots
+export const getAllScheduleSlots = async (req, res) => {
+  try {
+    // console.log(req.params.email);
+    const response = await counselorSlotService.getAllScheduleSlots(req.query);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the counselor slot";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Get schedule slots error:", error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+};
+
 
 //updateScheduleSlot
 

@@ -77,6 +77,28 @@ class CounselorSlotRepository extends CrudRepository {
     }
   }
 
+  //getAllScheduleSlots
+  async getAllScheduleSlots(query) {
+    try {
+      const { page, limit } = query;
+      const result = await ScheduleSlot.find().populate('counselorId').populate('studentId').sort({createdAt: -1})
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .collation({ locale: 'en', strength: 2 });
+
+      const totalDocuments = await ScheduleSlot.countDocuments();
+
+      return {
+        result,
+        currentPage: page,
+        totalPages: Math.ceil(totalDocuments / limit),
+        totalDocuments,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   //updateScheduleSlot
   async updateScheduleSlot(id,data) {
     try {
