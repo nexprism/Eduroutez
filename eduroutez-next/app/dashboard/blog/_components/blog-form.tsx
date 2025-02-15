@@ -260,7 +260,11 @@ export default function BlogForm() {
   const { data: streams } = useQuery({
     queryKey: ['streams'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/streams`);
+      const response = await axiosInstance.get(`${apiUrl}/streams`,{
+        params: {
+          page: 0
+        }
+      });
       return response.data.data.result;
     }
   });

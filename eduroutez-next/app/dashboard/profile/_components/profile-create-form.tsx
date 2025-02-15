@@ -379,7 +379,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axiosInstance.get(`${apiUrl}/streams`);
+        const response = await axiosInstance.get(`${apiUrl}/streams`, {
+          params: {
+            page: 0
+          }
+        });
         setStreamCategories(response.data.data.result|| []);
       } catch (error) {
         console.error('Failed to fetch stream categories', error);
