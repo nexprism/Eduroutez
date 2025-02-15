@@ -42,20 +42,18 @@ class CounselorSlotRepository extends CrudRepository {
   async getScheduleSlots(id) {
     try {
       const user = await User.findOne({ _id: id });
-      // console.log('user',user);
+      console.log('user',user);
       if(user) {
         if (user.role === 'counsellor') {
-          const counselor = await Counselor.findOne({ email: user.email });
           const scheduledSlots = await ScheduleSlot.find({
-            counselorId: counselor._id,
+            counselorId: id,
           }).populate('studentId');
+          console.log('scheduledSlots',scheduledSlots);
           return scheduledSlots;
         }
-
         if(user.role === 'student') {
-          const student = await Student.findOne({ email: user.email });
           const scheduledSlots = await ScheduleSlot.find({
-            studentId: student._id,
+            studentId: id,
           }).populate('counselorId');
           return scheduledSlots;
         }
