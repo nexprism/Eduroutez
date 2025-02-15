@@ -17,6 +17,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const { searchQuery, page, limit } = useQuestionAnswerTableFilters();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  const userRole = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['question-answers', searchQuery, page, limit],
     queryFn: async () => {
@@ -65,9 +66,9 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
               </Button>
             </div>
             <Separator />
-            {data && data.length > 0 ? (
+            {data  ? (
               <QuestionAnswerTable
-                data={data}
+                data={userRole === 'SUPER_ADMIN' ? data?.result : data}
                 totalData={data.totalDocuments}
               />
             ) : (
