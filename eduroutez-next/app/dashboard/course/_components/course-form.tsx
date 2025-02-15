@@ -637,7 +637,7 @@ export default function CreateCourse() {
                           <SelectValue placeholder="Select Course Type" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           {courseTypes.map((type) => (
                           <SelectItem key={type.value} value={type.value}>
                             {type.label}
@@ -666,7 +666,7 @@ export default function CreateCourse() {
                           </SelectTrigger>
                         </FormControl>
 
-                        <SelectContent>
+                        <SelectContent className="max-h-60 overflow-y-auto">
                           {courseCategories &&
                           courseCategories?.data?.result?.length > 0
                           ? courseCategories.data.result.map(
@@ -710,7 +710,7 @@ export default function CreateCourse() {
                         <SelectValue placeholder="Select Institute" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent  className="max-h-60 overflow-y-auto">
                       {instituteCategories?.data?.result?.length > 0
                         ? instituteCategories.data.result.map(
                             (category: Institute) => (
@@ -746,7 +746,7 @@ export default function CreateCourse() {
                           <SelectValue placeholder="Select Status" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent  className="max-h-60 overflow-y-auto">
                           {statuses.map((status) => (
                           <SelectItem
                             key={status.value}
@@ -777,7 +777,7 @@ export default function CreateCourse() {
                           <SelectValue placeholder="Select Visibility" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent  className="max-h-60 overflow-y-auto">
                           {visibilities.map((visibility) => (
                           <SelectItem
                             key={visibility.value}
@@ -862,7 +862,7 @@ export default function CreateCourse() {
                           <SelectValue placeholder="Select Language" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent  className="max-h-60 overflow-y-auto">
                           {languages.map((language) => (
                           <SelectItem
                             key={language.value}
@@ -1365,7 +1365,7 @@ export default function CreateCourse() {
                                       <SelectValue placeholder="Select Discount Type" />
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent>
+                                  <SelectContent  className="max-h-60 overflow-y-auto">
                                     <SelectItem value={'fixed'}>
                                       Fixed
                                     </SelectItem>

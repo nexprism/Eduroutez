@@ -845,7 +845,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                             />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent  className="max-h-60 overflow-y-auto">
                           {/* @ts-ignore  */}
                           {gender.map((country) => (
                             <SelectItem key={country.id} value={country.id}>
@@ -891,7 +891,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                            <SelectValue placeholder="Select State" />
                          </SelectTrigger>
                        </FormControl>
-                       <SelectContent>
+                       <SelectContent  className="max-h-60 overflow-y-auto">
                          {states.map((state) => (
                            <SelectItem key={state.id} value={state.name}>
                              {state.name}
@@ -923,7 +923,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                            <SelectValue placeholder="Select City" />
                          </SelectTrigger>
                        </FormControl>
-                       <SelectContent>
+                       <SelectContent  className="max-h-60 overflow-y-auto">
                          {cities.map((city) => (
                            <SelectItem key={city.id} value={city.name}>
                              {city.name}
@@ -956,7 +956,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
               />
             </SelectTrigger>
           </FormControl>
-          <SelectContent>
+          <SelectContent  className="max-h-60 overflow-y-auto">
             {streamCategories?.map((category) => (
               <SelectItem 
                 key={category?._id ?? ''} 

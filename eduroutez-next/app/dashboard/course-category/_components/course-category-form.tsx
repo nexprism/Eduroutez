@@ -242,7 +242,7 @@ export default function CourseCategoryForm() {
                             <SelectValue placeholder="Select Category" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent  className="max-h-60 overflow-y-auto">
                           {courseCategories &&
                           courseCategories?.data?.result?.length > 0
                             ? courseCategories.data.result.map(

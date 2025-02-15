@@ -316,7 +316,7 @@ export default function CounselorForm() {
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="max-h-60 overflow-y-auto">
                         {Array.isArray(categories) && categories.map((category: any) => (
                           <SelectItem 
                             key={category?.name || 'default'} 

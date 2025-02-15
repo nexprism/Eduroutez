@@ -182,7 +182,7 @@ export default function CounselorForm() {
                           <SelectValue placeholder="Select Status" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent  className="max-h-60 overflow-y-auto">
                         {statuses.map((status) => (
                           <SelectItem key={status.value} value={status.value}>
                             {status.label}

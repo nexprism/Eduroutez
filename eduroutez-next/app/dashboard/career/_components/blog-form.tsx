@@ -318,7 +318,7 @@ export default function CounselorForm() {
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="max-h-60 overflow-y-auto">
                         {categories?.data.result.map((category: any) => (
                           <SelectItem key={category.id} value={category.name}>
                             {category.name}
