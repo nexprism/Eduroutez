@@ -34,6 +34,8 @@ import { UserNav } from './user-nav';
 import { useEffect } from 'react';
 import axiosInstance from '@/lib/axios';
 import { useQuery } from '@tanstack/react-query';
+import {Button} from '@/components/ui/button';
+import Image from 'next/image';
 
 export const company = {
   name: 'Eduroutez App Inc.',
@@ -284,6 +286,12 @@ export default function AppSidebar({
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
+            <Button variant="ghost" className="relative flex items-center gap-2 px-4 py-2 hover:text-white transition-colors" onClick={() => window.location.href = 'https://eduroutez.com/'}>
+          <Image src="/homeIcon.png" 
+          width={20}
+          height={20}
+          alt="Visit Website" className="h-8 w-8" />
+        </Button>
             <Breadcrumbs />
           </div>
           <div className=" hidden w-1/3 items-center gap-2 px-4 md:flex ">

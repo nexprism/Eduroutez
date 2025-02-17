@@ -57,13 +57,7 @@ export function UserNav() {
   };
   return (
     <DropdownMenu>
-        <Button variant="ghost" className="relative flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-700 hover:text-white transition-colors" onClick={() => window.location.href = 'https://eduroutez.com/'}>
-          <Image src="/back.png" 
-          width={20}
-          height={20}
-          alt="Visit Website" className="h-8 w-8" />
-          Visit Website
-        </Button>
+       
       <DropdownMenuTrigger asChild>
     
 
