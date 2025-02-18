@@ -88,21 +88,19 @@ console.log('updatesInstitute',updatesInstitute);
       const parsedSort = JSON.parse(sort);
 
       // Build filter conditions for multiple fields
-    const filterConditions = { deletedAt: null };
+      const filterConditions = { deletedAt: null };
 
       for (var [key, value] of Object.entries(parsedFilters)) {
-        if(key=== 'Exam'){
-           key="examAccepted"
+        if (key === 'Exam') {
+          key = "examAccepted";
         }
-        
-        
-        
+
         if (value === "true") {
           filterConditions[key] = true;
         } else if (value === "false") {
           filterConditions[key] = false;
         } else {
-            if (key === 'streams' || key === 'specialization' || key === 'state' || key === 'city'  || key === 'examAccepted' || key==='organisationType') {
+          if (key === 'streams' || key === 'specialization' || key === 'state' || key === 'city' || key === 'examAccepted' || key === 'organisationType') {
             if (Array.isArray(value)) {
               const regexPattern = value.join('|'); // Convert array to regex pattern
               filterConditions.$or = filterConditions.$or || [];
@@ -111,63 +109,59 @@ console.log('updatesInstitute',updatesInstitute);
               filterConditions.$or = filterConditions.$or || [];
               filterConditions.$or.push({ [key]: { $regex: value, $options: 'i' } });
             }
-            } else if (key === 'Fees') {
+          } else if (key === 'Fees') {
             // Handling multiple min and max fee filters
             console.log("fees value", value);
 
-              //items: ["> 5 Lakh", "3 - 5 Lakh", "1 - 3 Lakh", "< 1 Lakh"],
+            //items: ["> 5 Lakh", "3 - 5 Lakh", "1 - 3 Lakh", "< 1 Lakh"],
 
-
-
-              if (Array.isArray(value)) {
-                filterConditions.$or = filterConditions.$or || [];
-
-                value.forEach(range => {
-                  let condition = {};
-
-                    if (range === "> 5 Lakh") {
-                    condition = { minFees: { $gt: 500000 } };
-                    } else if (range === "3 - 5 Lakh") {
-                    condition = { minFees: { $gt: 300000 }, maxFees: { $lte: 500000 } };
-                    } else if (range === "1 - 3 Lakh") {
-                    condition = { minFees: { $gt: 100000 }, maxFees: { $lte: 300000 } };
-                    } else if (range === "< 1 Lakh") {
-                    condition = { maxFees: { $lte: 100000 } };
-                    }
-
-                  console.log("Condition", condition);
-                  filterConditions.$or.push(condition);
-                });
-              }
-          } else if (key === 'examAccepted') {
-
-            
             if (Array.isArray(value)) {
-            filterConditions.$and = filterConditions.$and || [];
-            value.forEach(exam => {
-              filterConditions.$and.push({ [key]: { $regex: `(^|,)${exam}(,|$)`, $options: 'i' } });
-            });
+              filterConditions.$or = filterConditions.$or || [];
+
+              value.forEach(range => {
+                let condition = {};
+
+                if (range === "> 5 Lakh") {
+                  condition = { minFees: { $gt: 500000 } };
+                } else if (range === "3 - 5 Lakh") {
+                  condition = { minFees: { $gt: 300000 }, maxFees: { $lte: 500000 } };
+                } else if (range === "1 - 3 Lakh") {
+                  condition = { minFees: { $gt: 100000 }, maxFees: { $lte: 300000 } };
+                } else if (range === "< 1 Lakh") {
+                  condition = { maxFees: { $lte: 100000 } };
+                }
+
+                console.log("Condition", condition);
+                filterConditions.$or.push(condition);
+              });
+            }
+          } else if (key === 'examAccepted') {
+            if (Array.isArray(value)) {
+              filterConditions.$and = filterConditions.$and || [];
+              value.forEach(exam => {
+                filterConditions.$and.push({ [key]: { $regex: `(^|,)${exam}(,|$)`, $options: 'i' } });
+              });
             } else {
               console.log("hello")
-            filterConditions.$and = filterConditions.$and || [];
-            filterConditions.$and.push({ [key]: { $regex: `(^|,)${value}(,|$)`, $options: 'i' } });
+              filterConditions.$and = filterConditions.$and || [];
+              filterConditions.$and.push({ [key]: { $regex: `(^|,)${value}(,|$)`, $options: 'i' } });
             }
-          
-          }else {
+          } else {
             filterConditions[key] = value;
           }
-
         }
-
       }
-
 
       console.log("filterConditions", filterConditions);
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
       for (const [field, term] of Object.entries(parsedSearchFields)) {
-        searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+        if (field === 'courseTitle') {
+          searchConditions.push({ 'courses.courseTitle': { $regex: term, $options: "i" } });
+        } else {
+          searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+        }
       }
       if (searchConditions.length > 0) {
         filterConditions.$or = searchConditions;
@@ -180,8 +174,8 @@ console.log('updatesInstitute',updatesInstitute);
       }
 
       // Execute query with dynamic filters, sorting, and pagination
-      const populateFields = ["reviews","plan"];
-      
+      const populateFields = ["reviews", "plan"];
+
       const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
       console.log('all institutes', institutes.result.length);
       //push state and city name from id in institute

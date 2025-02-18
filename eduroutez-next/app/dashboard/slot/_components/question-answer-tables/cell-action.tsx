@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import { Edit, MoreHorizontal, Trash } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { Edit, MoreHorizontal } from 'lucide-react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
 
 export const CellAction = ({ data }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [link, setLink] = useState('');
     const [status, setStatus] = useState('');
@@ -15,42 +13,31 @@ export const CellAction = ({ data }) => {
     const queryClient = useQueryClient();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-    const deleteQuestionAnswerMutation = useMutation({
-        mutationFn: async (questionAnswerId) => {
-            const response = await axios({
-                url: `${apiUrl}/question-answer/${questionAnswerId}`,
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            return response;
+    // Query for fetching slot data
+    const { data: slotData } = useQuery({
+        queryKey: ['scheduled-slot', data._id],
+        queryFn: async () => {
+            const response = await axiosInstance.get(`${apiUrl}/scheduled-slots/${data._id}`);
+            return response.data;
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['question-answers'] });
-        },
-        onSettled: () => {
-            setIsDeleteModalOpen(false);
-            setLoading(false);
-        }
+        enabled: false // Query won't run automatically
     });
 
     const updateScheduledSlotMutation = useMutation({
         mutationFn: async () => {
             const response = await axiosInstance({
-              url: `${apiUrl}/scheduled-slots/${data._id}`,
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              data: { status, link }
+                url: `${apiUrl}/scheduled-slots/${data._id}`,
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                data: { status, link }
             });
-            window.location.reload();
             return response;
-          
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['scheduled-slots'] });
+            window.location.reload();
         },
         onSettled: () => {
             setIsUpdateModalOpen(false);
@@ -58,24 +45,28 @@ export const CellAction = ({ data }) => {
         }
     });
 
-    const handleDelete = async () => {
-        setLoading(true);
-        deleteQuestionAnswerMutation.mutate(data._id);
-    };
-
-    const handleUpdate = async () => {
+    const handleUpdate = () => {
         setLoading(true);
         updateScheduledSlotMutation.mutate();
     };
 
-    // Close dropdown when clicking outside
-    const handleClickOutside = (e) => {
-        if (isDropdownOpen) {
-            setIsDropdownOpen(false);
+    const handleOpenUpdateModal = async () => {
+        const response = await axiosInstance.get(`${apiUrl}/scheduled-slot/${data._id}`);
+        if (response?.data) {
+            setLink(response.data?.data?.link || '');
+            setStatus(response?.data?.data?.status || '');
         }
+        setIsUpdateModalOpen(true);
     };
 
-    React.useEffect(() => {
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e:any) => {
+            if (isDropdownOpen) {
+                setIsDropdownOpen(false);
+            }
+        };
+
         document.addEventListener('click', handleClickOutside);
         return () => {
             document.removeEventListener('click', handleClickOutside);
@@ -84,7 +75,6 @@ export const CellAction = ({ data }) => {
 
     return (
         <div className="relative inline-block text-left">
-            {/* Dropdown Trigger */}
             <button 
                 onClick={(e) => {
                     e.stopPropagation();
@@ -95,7 +85,6 @@ export const CellAction = ({ data }) => {
                 <MoreHorizontal className="h-4 w-4 text-gray-600" />
             </button>
 
-            {/* Dropdown Menu */}
             {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
                     <div className="py-1">
@@ -105,7 +94,7 @@ export const CellAction = ({ data }) => {
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                setIsUpdateModalOpen(true);
+                                handleOpenUpdateModal();
                                 setIsDropdownOpen(false);
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
@@ -113,12 +102,10 @@ export const CellAction = ({ data }) => {
                             <Edit className="mr-2 h-4 w-4" />
                             Update
                         </button>
-                   
                     </div>
                 </div>
             )}
 
-            {/* Update Modal */}
             {isUpdateModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div 
@@ -171,8 +158,6 @@ export const CellAction = ({ data }) => {
                     </div>
                 </div>
             )}
-
-        
         </div>
     );
 };

@@ -99,6 +99,21 @@ class CounselorSlotRepository extends CrudRepository {
     }
   }
 
+  async getScheduleSlotbyId(id) {
+    try {
+      const result = await ScheduleSlot.findOne({ _id: id });
+
+      if (result) {
+        return result;
+      }
+
+      return result;
+
+    } catch (error) {
+      throw error;
+    }
+  }
+
   //updateScheduleSlot
   async updateScheduleSlot(id,data) {
     try {

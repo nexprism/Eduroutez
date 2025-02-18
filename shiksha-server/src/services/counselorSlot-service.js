@@ -72,6 +72,12 @@ class questionAnswerService {
     return questionAnswer;
   }
 
+  async getScheduleSlotbyId(id) {
+    const slot= await this.counselorSlotRepository.getScheduleSlotbyId(id);
+    return slot;
+
+  }
+
   //getAllScheduleSlots
   async getAllScheduleSlots(query) {
     const questionAnswer = await this.counselorSlotRepository.getAllScheduleSlots(query);

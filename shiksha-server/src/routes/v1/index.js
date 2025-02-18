@@ -36,7 +36,7 @@ import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../.
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
-import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot, getScheduleSlots, updateScheduleSlot, getAllScheduleSlots } from "../../controllers/counselorSlot-controller.js";
+import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot, getScheduleSlots, updateScheduleSlot, getAllScheduleSlots ,getScheduleSlotbyId } from "../../controllers/counselorSlot-controller.js";
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
 import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, updateQuery, QueryAllocation } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ ,getFAQsByInstitute} from "../../controllers/faq-controller.js";
@@ -226,7 +226,7 @@ router.get("/scheduled-slots/:id", accessTokenAutoRefresh, passport.authenticate
 router.get("/scheduled-slots", getAllScheduleSlots);
 //update scheduled slots
 router.patch("/scheduled-slots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateScheduleSlot);
-
+router.get("/scheduled-slot/:id", getScheduleSlotbyId);
 
 router.patch("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselorSlot);
 //delete counselor slot
