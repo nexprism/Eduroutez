@@ -26,7 +26,8 @@ const LOCATION_PRICING = {
   COURSES_PAGE: 1500,
   COUNSELING_PAGE_MAIN: 2500,
   COUNSELING_PAGE_SIDEBAR: 2000,
-  QA_PAGE: 1000
+  QA_PAGE: 1000,
+  SEARCH_PAGE:2000,
 };
 
 // Define all promotion locations with their requirements
@@ -39,6 +40,15 @@ const PROMOTION_LOCATIONS = {
     height: 250,
     category: 'Blog',
     description: 'Advertisement space on blog posts'
+  },
+
+  SEARCH_PAGE: {
+    id: 'SEARCH_PAGE',
+    label: 'Search Page Banner',
+    width: 1663,
+    height: 320,
+    category: 'Search',
+    description: 'Main banner on search  page'
   },
 
   // Institute Pages
