@@ -28,6 +28,17 @@ class NewsRepository extends CrudRepository {
         }
     }
 
+    async getAllSuperAdminNews() {
+
+        try {
+            const news = await News.find({ institute: null });
+            return news;
+        }
+        catch (error) {
+            throw error;
+        }
+    }   
+
     //delete    
     async delete(id) {
         try {

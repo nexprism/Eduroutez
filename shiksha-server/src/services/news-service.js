@@ -82,6 +82,15 @@ class NewsService {
     }
   }
     
+  // getnewaapi where institute key role is Super_admin getAllNewsofSuperAdmin
+  async getAllNewsofSuperAdmin() {
+    try {
+      const news = await this.newsRepository.getAllSuperAdminNews();
+      return news;
+    } catch (error) {
+      throw new Error("Error fetching news article: " + error.message);
+    }
+  }
 
     //getNewsByInstitute
     async getNewsByInstitute(id) {

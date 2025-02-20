@@ -120,6 +120,21 @@ export async function getNewsByInstitute(req, res) {
   }
 }
 
+// getnewaapi where institute key role is Super_admin
+export async function getNewsBySuperAdmin(req, res) {
+  try {
+    const response = await newsService.getAllNewsofSuperAdmin();
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the news article";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.log('error',error.message);
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+
 /**
  * PATCH : /news/:id
  * req.body {title: "New Title"}

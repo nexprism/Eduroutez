@@ -143,7 +143,9 @@ export default function NewsForm() {
     formData.append('title', values.title);
     formData.append('description', values.description);
     formData.append('date', values.date.toISOString());
-    formData.append('instituteId', instituteId);
+    const role = localStorage.getItem('role');
+    console.log('role',role);
+    formData.append('instituteId', role == 'SUPER_ADMIN' ? 'null' : instituteId);
 
     if (values.image) formData.append('image', values.image);
 
