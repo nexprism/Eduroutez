@@ -18,7 +18,6 @@ const newsSchema = new mongoose.Schema(
         institute: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Institute",
-            required: true,
         },
         date: {
             type: Date,

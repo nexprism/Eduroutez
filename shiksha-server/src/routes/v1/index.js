@@ -26,7 +26,7 @@ import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCateg
 import { createCareerCategory, deleteCareerCategory, getCareerCategories, getCareerCategory, updateCareerCategory } from "../../controllers/career-category-controller.js";
 import { createRecruiter, deleteRecruiter, getRecruiters, getRecruitersByInstitute, getRecruiter, updateRecruiter } from "../../controllers/recruiters-controller.js";
 import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog,getBlogsByInstitute } from "../../controllers/blog-controller.js";
-import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, updateNews } from "../../controllers/news-controller.js";
+import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, getNewsBySuperAdmin, updateNews } from "../../controllers/news-controller.js";
 import { createPayout, deletePayout, getPayout, getPayouts, updatePayout, getPayoutsByUser } from "../../controllers/payout-controller.js";
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
 import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer ,getQuestionAnswerByEmail} from "../../controllers/question-answer-controller.js";
@@ -318,6 +318,7 @@ router.delete("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", 
 //newsa
 router.post("/create-news", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createNews);
 router.get("/news", getNews);
+router.get("/news/superadmin",getNewsBySuperAdmin)
 router.get("/news/:institute", getNewsByInstitute);
 router.get("/news/data/:id", getNewsById);
 router.get("/news-by-institute/:id", getNewsByInstitute);
