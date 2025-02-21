@@ -52,12 +52,26 @@ export async function createRecruiter(req, res) {
  */
 export async function getRecruitersByInstitute(req, res) {
     try {
-        const instituteId = req.params.id;
-        const response = await recruiterService.getRecruitersByInstitute(instituteId);
+        const institute = req.params.id;
+        const query = req.query;
+
+        // Add instituteId to the filters in the query
+        if (!query.filters) {
+            query.filters = JSON.stringify({ institute });
+        } else {
+            const filters = JSON.parse(query.filters);
+            filters.institute = instituteId;
+            query.filters = JSON.stringify(filters);
+        }
+        console.log("Query:", query);
+
+        const response = await recruiterService.getAll(query);
+        // const response = await recruiterService.getRecruitersByInstitute(instituteId);
         SuccessResponse.data = response;
         SuccessResponse.message = "Successfully fetched recruiters";
         return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
+        console.error("Error in getRecruitersByInstitute:", error.message);
         ErrorResponse.error = error;
         return res.status(error.statusCode).json(ErrorResponse);
     }
@@ -127,6 +141,7 @@ export async function deleteRecruiter(req, res) {
         SuccessResponse.message = "Successfully deleted the recruiter";
         return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
+        console.error("Delete recruiter error:", error.message);
         ErrorResponse.error = error;
         return res.status(error.statusCode).json(ErrorResponse);
     }

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const recruiterSchema = new mongoose.Schema(
     {
@@ -20,4 +21,5 @@ const recruiterSchema = new mongoose.Schema(
 );
 
 const Recruiter = mongoose.model("Recruiter", recruiterSchema);
+applySoftDelete(recruiterSchema);
 export default Recruiter;
