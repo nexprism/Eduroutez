@@ -30,6 +30,9 @@ export const createNews = async (req, res) => {
   try {
     const instituteId = req.user;
     console.log('instituteId',instituteId);
+
+  
+
     multiUploader(req, res, async function (err) {
       if (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err });
@@ -46,7 +49,15 @@ export const createNews = async (req, res) => {
         //     throw new AppError("Institute not found", StatusCodes.NOT_FOUND);
         // }
 
+// search user by id if role is SUPER_ADMIN then send null in institute key
+        const user = await usersevice.getUserById(instituteId);
+        if(user.role === 'SUPER_ADMIN'){  
+          payload.institute = null;
+        }else{
+
+
       payload.institute = instituteId;
+        }
 
       const response = await newsService.create(payload);
 

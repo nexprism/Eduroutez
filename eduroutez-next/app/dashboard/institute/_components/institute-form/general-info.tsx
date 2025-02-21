@@ -193,10 +193,11 @@ const [cities, setCities] = React.useState<City[]>([]);
       console.log('State/City data:', stateCityData);
       console.log('Institute fetch nb:', `${baseURL}/${instituteData.thumbnailImage}`);
               // Get images URLs 
-                setPreviewThumbnailUrl(instituteData.thumbnailImage ? `${baseURL}/${instituteData.thumbnailImage}` : null);
-                setPreviewCoverUrl(instituteData.coverImage ? `${baseURL}/${instituteData.coverImage}` : null);
-                setPreviewLogoUrl(instituteData.instituteLogo ? `${baseURL}/${instituteData.instituteLogo}` : null);
-                setPreviewbrochure(instituteData.brochure ? `${baseURL}/${instituteData.brochure}` : null);
+               
+        setPreviewThumbnailUrl(instituteData.thumbnailImage != "null" ? `${baseURL}/${instituteData.thumbnailImage}` : null);
+        setPreviewCoverUrl(instituteData.coverImage != "null" ? `${baseURL}/${instituteData.coverImage}` : null);
+        setPreviewLogoUrl(instituteData.instituteLogo != "null" ? `${baseURL}/${instituteData.instituteLogo}` : null);
+        setPreviewbrochure(instituteData.brochure != "null" ? `${baseURL}/${instituteData.brochure}` : null);
       console.log('Institute fetch successfully:', instituteData);
     } catch (error: any) {
       console.log('Error fetching institute:', error.message);
@@ -264,18 +265,11 @@ const [cities, setCities] = React.useState<City[]>([]);
     formData.append('streams', values.streams);
     formData.append('specialization', values.specialization);
     formData.append('examAccepted', values.examAccepted);
-    if (values.logo) {
-      formData.append('instituteLogo', values.logo);
-    }
-    if (values.thumbnail) {
-      formData.append('thumbnailImage', values.thumbnail);
-    }
-    if (values.cover) {
-      formData.append('coverImage', values.cover);
-    }
-    if (values.brochure) {
-      formData.append('brochure', values.brochure);
-    }
+    formData.append('thumbnailImage', values.thumbnail == null ? 'null' : (values.thumbnail || ''));
+    formData.append('coverImage', values.cover == null ? 'null' : (values.cover || ''));
+    formData.append('instituteLogo', values.logo == null ? 'null' : (values.logo || ''));
+    formData.append('brochure', values.brochure == null ? 'null' : (values.brochure || ''));
+  
 
     mutate(formData);
   }
@@ -422,7 +416,7 @@ useEffect(() => {
 
   const removeThumbnailImage = () => {
     setPreviewThumbnailUrl(null);
-    form.setValue('thumbnail', undefined);
+    form.setValue('thumbnail', null);
     if (fileInputThumbnailRef.current) {
       fileInputThumbnailRef.current.value = ''; // Reset the file input
     }
@@ -430,7 +424,7 @@ useEffect(() => {
 
   const removeCoverImage = () => {
     setPreviewCoverUrl(null);
-    form.setValue('cover', undefined);
+    form.setValue('cover', null);
     if (fileInputCoverRef.current) {
       fileInputCoverRef.current.value = ''; // Reset the file input
     }
@@ -438,7 +432,7 @@ useEffect(() => {
 
   const removeLogo = () => {
     setPreviewLogoUrl(null);
-    form.setValue('logo', undefined);
+    form.setValue('logo', null);
     if (fileInputLogoRef.current) {
       fileInputLogoRef.current.value = ''; // Reset the file input
     }
@@ -446,7 +440,7 @@ useEffect(() => {
 
   const removeBrochure = () => {
     setPreviewbrochure(null);
-    form.setValue('brochure', undefined);
+    form.setValue('brochure', null);
     if (fileInputBrochureRef.current) {
       fileInputBrochureRef.current.value = ''; // Reset the file input
     }
