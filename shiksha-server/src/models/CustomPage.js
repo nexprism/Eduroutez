@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const pageSchema = new mongoose.Schema(
   {
@@ -26,4 +27,5 @@ const pageSchema = new mongoose.Schema(
 );
 
 const Page = mongoose.model("Page", pageSchema);
+applySoftDelete(pageSchema);
 export default Page;

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const wishlistSchema = new mongoose.Schema(
   {
@@ -23,4 +24,5 @@ const wishlistSchema = new mongoose.Schema(
 );
 
 const Wishlist = mongoose.model("Wishlist", wishlistSchema);
+applySoftDelete(wishlistSchema);
 export default Wishlist;
