@@ -2,12 +2,15 @@ import { ServerConfig } from "../config/index.js";
 import { courseSchema } from "../models/Course.js";
 import { CounselorRepository } from "../repository/index.js";
 import { UserRepository } from "../repository/index.js";
+import  ScheduleSlot  from "../models/ScheduleSlots.js";
+import  { CounselorSlotRepository }  from "../repository/counselorSlot-repository.js";
 import bcrypt from "bcrypt";
 
 class CounselorService {
   constructor() {
     this.counselorRepository = new CounselorRepository();
     this.userRepository = new UserRepository();
+    this.counselorSlotRepository = new CounselorSlotRepository();
   }
 
   hashPassword(password) {
@@ -63,6 +66,50 @@ class CounselorService {
       // Execute query with dynamic filters, sorting, and pagination
       const populateFields = [];
       const counselors = await this.counselorRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+
+      for (let i = 0; i < counselors.result.length; i++) {
+        // Convert the model to a plain JavaScript object
+        if (typeof counselors.result[i].toObject === 'function') {
+          counselors.result[i] = counselors.result[i].toObject();
+        } else if (typeof counselors.result[i].toJSON === 'function') {
+          counselors.result[i] = counselors.result[i].toJSON();
+        } else {
+          counselors.result[i] = JSON.parse(JSON.stringify(counselors.result[i]));
+        }
+
+        // Now we can safely add properties
+        if (counselors.result[i] && counselors.result[i].state) {
+          const state = await this.userRepository.getStateCityById(counselors.result[i].state, 'state');
+          if (state && state.length > 0) {
+            counselors.result[i].stateName = state[0].name;
+          }
+        }
+        
+        if (counselors.result[i] && counselors.result[i].city && !isNaN(Number(counselors.result[i].city))) {
+          console.log('city',counselors.result[i].city);
+          const city = await this.userRepository.getStateCityById(counselors.result[i].city, 'city');
+          if (city && city.length > 0) {
+            counselors.result[i].cityName = city[0].name;
+          }
+        }
+
+        //get all schedules slots of counselor
+        const schedules = await ScheduleSlot.find({ counselorId:counselors.result[i]._id});
+        if(schedules) {
+          counselors.result[i].schedules = schedules.length;
+        }else{
+          counselors.result[i].schedules = 0;
+        }
+
+        //get all slots from counselorSlot model
+        const slots = await this.counselorSlotRepository.get(counselors.result[i].email);
+        console.log('slots',slots);
+        if(slots) {
+          counselors.result[i].slots = slots;
+        }
+
+
+      }
 
       return counselors;
     } catch (error) {
