@@ -16,7 +16,12 @@ import type { Recruiter } from '@/types';
 type RecruiterResponse = {
   success: boolean;
   message: string;
-  data: Recruiter[];
+  data: {
+    result: Recruiter[];
+    currentPage: number;
+    totalPages: number;
+    totalDocuments: number;
+  };
   error: Record<string, unknown>;
 };
 
@@ -27,7 +32,7 @@ export default function RecruiterListingPage({}: TRecruiterListingPage) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess, error } = useQuery<RecruiterResponse>({
-    queryKey: ['recruiters', searchQuery],
+    queryKey: ['recruiters', searchQuery, page],
     queryFn: async () => {
       try {
         const instituteId = localStorage.getItem('instituteId');
@@ -37,7 +42,9 @@ export default function RecruiterListingPage({}: TRecruiterListingPage) {
           throw new Error('Institute ID not found in localStorage');
         }
 
-        const response = await axiosInstance.get(`${apiUrl}/recruiters-by-institute/${instituteId}`);
+        const response = await axiosInstance.get(`${apiUrl}/recruiters-by-institute/${instituteId}`, {
+          params: { page, limit }
+        });
         return response.data;
       } catch (error) {
         console.error('Error in queryFn:', error);
@@ -57,7 +64,7 @@ export default function RecruiterListingPage({}: TRecruiterListingPage) {
           <div className="space-y-4">
             <div className="flex flex-col gap-2 lg:flex-row items-start justify-between">
               <Heading
-                title={`Recruiter (${data.data.length})`}
+                title={`Recruiter (${data.data?.totalDocuments})`}
                 description="All recruiters are listed here."
               />
               <div className="flex gap-4">
@@ -70,8 +77,8 @@ export default function RecruiterListingPage({}: TRecruiterListingPage) {
             </div>
             <Separator />
             <BlogTable
-              data={data.data}
-              totalData={data.data.length}
+              data={data.data?.result}
+              totalData={data?.data?.totalDocuments}
             />
           </div>
         )
