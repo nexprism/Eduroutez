@@ -9,7 +9,7 @@ import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from 
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
-import { getUsers, updateUser, allowUser, denyUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard,counselorDashboard } from "../../controllers/users-controller.js";
+import { getUsers, updateUser, allowUser, denyUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory,getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
@@ -94,6 +94,9 @@ router.get("/course-categories", getCourseCategories);
 router.get("/course-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCourseCategory);
 router.patch("/course-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCourseCategory);
 router.delete("/course-category/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCourseCategory);
+
+//like-dislike
+router.post("/like-dislike", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), likeDislike);
 
 
 

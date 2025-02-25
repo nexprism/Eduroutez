@@ -16,6 +16,9 @@ class BlogService {
   }
   async get(id) {
     const blog = await this.blogRepository.get(id);
+    //update views by 1
+    const views = blog.views + 1;
+    await this.blogRepository.update(id, { views });
     return blog;
   }
   async getAll(query) {

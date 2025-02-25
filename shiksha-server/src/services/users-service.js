@@ -208,6 +208,16 @@ async earningReports(userId = '') {
   }
 }
 
+  //likeDislike
+  async likeDislike(userId, courseId, like, type) {
+  try {
+    const user = await this.userRepository.likeDislike(userId, courseId, like, type);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
   //sendSms
   async sendSms(userId, message) {
   try {

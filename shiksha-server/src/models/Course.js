@@ -137,6 +137,16 @@ const courseSchema = new mongoose.Schema(
     status: {
       type: String,
     },
+    views: {
+      type: Number,
+      default: 0,
+    },
+    likes: [
+      {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

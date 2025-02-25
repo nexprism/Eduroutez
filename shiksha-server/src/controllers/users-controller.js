@@ -352,6 +352,28 @@ export async function counselorDashboard(req, res) {
   }
 }
 
+//likeDislike
+export async function likeDislike(req, res) {
+  try {
+    const userId = req.user._id;
+    const courseId = req.body.id;
+    const like = req.body.like;
+    const type = req.body.type;
+    const response = await userService.likeDislike(userId, courseId, like, type);
+    SuccessResponse.data = response;
+    if(like == 1){
+      SuccessResponse.message = "Successfully Liked";
+    }else{
+      SuccessResponse.message = "Successfully Disliked";
+    }
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.error('Error in likeDislike:', error.message);
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 //getRedeemHistory
 export async function getRedeemHistory(req, res) {
   try {

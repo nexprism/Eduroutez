@@ -11,6 +11,8 @@ import ReddemHistry from "../models/ReddemHistry.js";
 import Query from "../models/Query.js";
 import Course from "../models/Course.js";
 import Counselor from "../models/Counselor.js";
+import Blog from "../models/Blog.js";
+import Career from "../models/Career.js";
 
 class UserRepository extends CrudRepository {
   constructor() {
@@ -295,6 +297,35 @@ class UserRepository extends CrudRepository {
       throw error;
     }
   }
+  //likeDislike
+  async likeDislike(userId, courseId, like, type) {
+    try {
+      if(type === 'course') {
+        var model = Course;
+      }else if(type === 'blog') {
+        var model = Blog;
+      }else{
+        var model = Career;
+      }
+
+      //get course by id
+      const item = await model.findById(courseId);
+      if(like == 1) {
+        item.likes.push(userId);
+      }else{
+        //pull user from likes array
+        item.likes.pull(userId);
+
+      }
+
+      //save course
+      await item.save();
+      return item;
+    } catch (error) {
+      throw error;
+    }
+  }
+
 
   //counselorDashboard
   async counselorDashboard(counselorId) {
