@@ -9,7 +9,7 @@ import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from 
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
-import { getUsers, updateUser, allowUser, denyUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike } from "../../controllers/users-controller.js";
+import { getUsers, updateUser, allowUser, denyUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike,submitReview } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory,getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
@@ -436,6 +436,8 @@ router.post("/purchase-plan", accessTokenAutoRefresh, passport.authenticate("jwt
 
 //submit-counsellor-feedback
 router.post("/submit-counsellor-review", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitcounsellorReview);
+//submit-review
+router.post("/submit-review", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitReview);
 
 
 

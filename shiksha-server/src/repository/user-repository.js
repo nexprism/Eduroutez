@@ -326,6 +326,32 @@ class UserRepository extends CrudRepository {
     }
   }
 
+  //submitReview
+  async submitReview(itemId, reviewpayload, type) {
+    try {
+      if(type === 'course') {
+        var model = Course;
+      }else if(type === 'blog') {
+        var model = Blog;
+      }
+      else{
+        var model = Career;
+      }
+
+      //get course by id
+      const item = await model.findById(itemId);
+      //push review to reviews array
+      item.reviews.push(reviewpayload);
+      //save course
+      await item.save();
+      return item;
+    }
+    catch (error) {
+      throw error;
+    }
+  }
+  
+
 
   //counselorDashboard
   async counselorDashboard(counselorId) {

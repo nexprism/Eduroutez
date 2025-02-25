@@ -28,7 +28,7 @@ class CrudRepository {
 
   async get(id, populateFields = []) {
     try {
-      // console.log('hello',id);
+      console.log('hello',id);
       
       let result = await this.model.findById(id);
       
@@ -40,6 +40,7 @@ class CrudRepository {
         result = await this.model.findById(id).populate(populateFields);
       }
       
+      console.log('result',result);
       return result;
     } catch (error) {
       throw error;

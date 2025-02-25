@@ -144,7 +144,23 @@ const courseSchema = new mongoose.Schema(
     likes: [
       {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
+          ref: "Student",
+      },
+    ],
+    reviews: [
+      {
+        studentId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Student",
+        },
+        rating: {
+          type: Number,
+          // required: true,
+        },
+        comment: {
+          type: String,
+          // required: true,
+        }
       },
     ],
   },

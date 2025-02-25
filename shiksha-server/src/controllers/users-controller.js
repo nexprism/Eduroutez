@@ -374,6 +374,27 @@ export async function likeDislike(req, res) {
   }
 }
 
+//submitReview
+export async function submitReview(req, res) {
+  try {
+    const studentId = req.user._id;
+    const itemId = req.body.id;
+    const comment = req.body.comment;
+    const rating = req.body.rating;
+    const type = req.body.type;
+    const reviewpayload = {studentId, rating, comment};
+    const response = await userService.submitReview(itemId, reviewpayload, type);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully submitted the review";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.error('Error in submitReview:', error.message);
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+  
+
 //getRedeemHistory
 export async function getRedeemHistory(req, res) {
   try {

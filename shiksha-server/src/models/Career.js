@@ -41,13 +41,29 @@ const careerSchema = new mongoose.Schema(
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Student",
       },
     ],
     views: {
       type: Number,
       default: 0,
     },
+    reviews: [
+          {
+            studentId: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: "Student",
+            },
+            rating: {
+              type: Number,
+              // required: true,
+            },
+            comment: {
+              type: String,
+              // required: true,
+            }
+          },
+        ],
     instituteId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institute",

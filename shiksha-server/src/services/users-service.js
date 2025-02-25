@@ -218,6 +218,16 @@ async earningReports(userId = '') {
   }
 }
 
+  //submitReview
+  async submitReview(itemId, reviewpayload, type) {
+  try {
+    const user = await this.userRepository.submitReview(itemId, reviewpayload, type);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
   //sendSms
   async sendSms(userId, message) {
   try {
