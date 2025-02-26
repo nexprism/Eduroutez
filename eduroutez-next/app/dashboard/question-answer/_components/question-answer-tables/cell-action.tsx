@@ -42,7 +42,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['question-answers'] });
       toast.success('FAQ deleted successfully');
-      router.push('/dashboard/answer');
+      router.push('/dashboard/question-answer');
     },
     onSettled: () => {
       setOpen(false);

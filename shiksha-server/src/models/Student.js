@@ -27,7 +27,17 @@ const studentSchema = new mongoose.Schema(
       type: String,
     },
     country: {
-      type: String,
+      type: {
+        id: Number,
+        name: String,
+        iso2: String,
+        iso3: String,
+        phonecode: String,
+        capital: String,
+        currency: String,
+        native: String,
+        emoji: String,
+      },
       // required: true,
     },
     state: {

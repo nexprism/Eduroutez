@@ -160,9 +160,13 @@ const courseSchema = new mongoose.Schema(
         comment: {
           type: String,
           // required: true,
-        }
+        },
+        reviewedAt: {
+          type: Date,
+          default: Date.now,
       },
-    ],
+    },
+  ],
   },
   { timestamps: true }
 );
