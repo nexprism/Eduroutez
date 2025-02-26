@@ -1,9 +1,11 @@
 
 import { CourseRepository } from "../repository/index.js";
+import { StudentRepository } from "../repository/index.js";
 import { StatusCodes } from "http-status-codes";
 class CourseService {
   constructor() {
     this.courseRepository = new CourseRepository();
+    this.studentRepository = new StudentRepository();
   }
 
   async create(data) {
@@ -92,8 +94,65 @@ class CourseService {
     //update views by 1
     const views = course.views + 1;
     await this.courseRepository.update(id, { views });
-    
-    return course;
+
+    if (!blog) {
+      return null;
+    }
+
+    const careerCopy = JSON.parse(JSON.stringify(course));
+
+    if (careerCopy.reviews && Array.isArray(careerCopy.reviews) && careerCopy.reviews.length > 0) {
+      try {
+        console.log("Processing reviews:", careerCopy.reviews);
+        careerCopy.reviews = await Promise.all(
+          careerCopy.reviews.map(async (review) => {
+            if (!review || !review.studentId) {
+              return {
+                _id: review?._id || null,
+                rating: review?.rating || 0,
+                comment: review?.comment || "",
+                studentId: null,
+                studentName: "Unknown",
+                studentEmail: "Unknown"
+              };
+            }
+
+            try {
+              // console.log("Fetching stud  ent:", review.studentId);
+              const student = await await this.studentRepository.get(review.studentId);
+              console.log("Student drftyguhj:", student);
+              return {
+                _id: review._id,
+                rating: review.rating,
+                comment: review.comment,
+                studentId: review.studentId,
+                studentName: student?.name || "Unknown",
+                studentEmail: student?.email || "Unknown"
+              };
+            } catch (err) {
+              console.error("Error fetching student:", err.message);
+              return {
+                _id: review._id,
+                rating: review.rating,
+                comment: review.comment,
+                studentId: review.studentId,
+                studentName: "Unknown",
+                studentEmail: "Unknown"
+              };
+            }
+          })
+        );
+      } catch (err) {
+        console.error("Error processing reviews:", err);
+        careerCopy.reviews = [];
+      }
+    } else {
+      console.log("Career reviews not found, not an array, or empty - initializing as empty array");
+      careerCopy.reviews = [];
+    }
+    // console.log("Career cobnhmjpy:", careerCopy);
+
+    return careerCopy;
   }
 
   async update(id, data) {
