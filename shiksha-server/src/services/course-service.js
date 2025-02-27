@@ -95,9 +95,7 @@ class CourseService {
     const views = course.views + 1;
     await this.courseRepository.update(id, { views });
 
-    if (!blog) {
-      return null;
-    }
+   
 
     const careerCopy = JSON.parse(JSON.stringify(course));
 
