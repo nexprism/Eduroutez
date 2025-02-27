@@ -28,7 +28,7 @@ class BlogService {
     const careerCopy = JSON.parse(JSON.stringify(blog));
     if (careerCopy.reviews && Array.isArray(careerCopy.reviews) && careerCopy.reviews.length > 0) {
       try {
-        console.log("Processing reviews:", careerCopy.reviews);
+        // console.log("Processing reviews:", careerCopy.reviews);
         careerCopy.reviews = await Promise.all(
           careerCopy.reviews.map(async (review) => {
             if (!review || !review.studentId) {

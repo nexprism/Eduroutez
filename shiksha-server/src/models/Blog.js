@@ -53,9 +53,13 @@ const blogSchema = new mongoose.Schema(
             comment: {
               type: String,
               // required: true,
-            }
+            },
+            reviewedAt: {
+              type: Date,
+              default: Date.now,
           },
-        ],
+        },
+      ],
     metaTitle: {
       type: String,
     },

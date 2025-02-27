@@ -2,7 +2,7 @@ import express from "express";
 import { EventEmitter } from "events";
 EventEmitter.defaultMaxListeners = 20;``
 
-import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset, getStates, getCitiesByState, getStatesCities, sendOtp,getStateCityById, verifyOtp } from "../../controllers/auth-controller.js";
+import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset, getCountries, getStatesByCountry, getCitiesByState, getStatesCities, sendOtp,getStateCityById, verifyOtp } from "../../controllers/auth-controller.js";
 import accessTokenAutoRefresh from "../../middlewares/accessTokenAutoRefresh.js";
 import passport from "passport";  
 import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from "../../controllers/coupon-controller.js";
@@ -130,11 +130,14 @@ router.get("/lead-allocation", QueryAllocation);
 router.get("/megamenu/colleges", megamenuCollages);
 
 
+//countries
+router.get("/countries", getCountries);
 //states
-router.get("/states", getStates);
+router.get("/states-by-country", getStatesByCountry);
+
 router.post("/state-city-by-id/:id", getStateCityById);
 
-router.get("/cities-by-state/:id", getCitiesByState);
+router.get("/cities-by-state", getCitiesByState);
 //get state and city
 router.get("/state-cities", getStatesCities);
 

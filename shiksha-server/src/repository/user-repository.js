@@ -339,7 +339,12 @@ class UserRepository extends CrudRepository {
       }
 
       //get course by id
+      console.log('itemId',itemId);
+      console.log('model',model);
       const item = await model.findById(itemId);
+      if (!item) {
+        throw new Error(`${type} not found`);
+      }
       //push review to reviews array
       item.reviews.push(reviewpayload);
       //save course

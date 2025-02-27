@@ -5,6 +5,7 @@ import StudentService from "../services/student-service.js";
 import InstituteService from "../services/institute-service.js";
 import CounselorService from "../services/counselor-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
+import axios from "axios";  
 const singleUploader = FileUpload.upload.single("image");
 
 const userService = new UserService();
@@ -12,44 +13,107 @@ const instituteService = new InstituteService();
 const counselorService = new CounselorService();
 const studentService = new StudentService();
 
+//getCountries
+export const getCountries = async (req, res) => {
+  
+    var config = {
+      method: 'get',
+      url: 'https://api.countrystatecity.in/v1/countries',
+      headers: {
+        'X-CSCAPI-KEY': process.env.COUNTRY_STATE_CITY_API_KEY
+      }
+    };
+
+    axios(config)
+      .then(function (response) {
+        const countries = JSON.stringify(response.data);
+        return res.status(200).json({
+          success: true,
+          message: "Successfully fetched countries",
+          data: response.data,
+          err: {},
+        });
+      })
+      .catch(function (error) {
+        return res.status(500).json({
+          message: "Something went wrong",
+          data: {},
+          success: false,
+          err: error.message,
+        });
+      });
+    
+    
+  
+}
+
 //getStates
-export const getStates = async (req, res) => {
-  try {
-    const states = await userService.getStates();
-    return res.status(200).json({
-      success: true,
-      message: "Successfully fetched states",
-      data: states,
-      err: {},
+export const getStatesByCountry = async (req, res) => {
+  
+  const countryCode = req.body.countryCode;
+  var config = {
+    method: 'get',
+    url: 'https://api.countrystatecity.in/v1/countries/' + countryCode +'/states',
+    headers: {
+      'X-CSCAPI-KEY': process.env.COUNTRY_STATE_CITY_API_KEY
+    }
+  };
+
+  axios(config)
+    .then(function (response) {
+      const states = JSON.stringify(response.data);
+      return res.status(200).json({
+        success: true,
+        message: "Successfully fetched States",
+        data: response.data,
+        err: {},
+      });
+    })
+    .catch(function (error) {
+      return res.status(500).json({
+        message: "Something went wrong",
+        data: {},
+        success: false,
+        err: error.message,
+      });
     });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Something went wrong",
-      data: {},
-      success: false,
-      err: error,
-    });
-  }
+    
+  
 };
 
 //getCitiesByState
 export const getCitiesByState = async (req, res) => {
-  try {
-    const cities = await userService.getCitiesByState(req.params.id);
-    return res.status(200).json({
-      success: true,
-      message: "Successfully fetched cities",
-      data: cities,
-      err: {},
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Something went wrong",
-      data: {},
-      success: false,
-      err: error.message,
-    });
-  }
+  
+    const stateCode = req.body.stateCode;
+    const countryCode = req.body.countryCode;
+
+    var config = {
+      method: 'get',
+      url: 'https://api.countrystatecity.in/v1/countries/' + countryCode +'/states/'+stateCode+'/cities',
+      headers: {
+        'X-CSCAPI-KEY': process.env.COUNTRY_STATE_CITY_API_KEY
+      }
+    };
+
+    axios(config)
+      .then(function (response) {
+        const cities = JSON.stringify(response.data);
+        return res.status(200).json({
+          success: true,
+          message: "Successfully fetched Citites",
+          data: response.data,
+          err: {},
+        });
+      })
+      .catch(function (error) {
+        return res.status(500).json({
+          message: "Something went wrong",
+          data: {},
+          success: false,
+          err: error.message,
+        });
+      });
+    
 };
 
 

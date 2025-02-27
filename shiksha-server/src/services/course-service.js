@@ -95,7 +95,9 @@ class CourseService {
     const views = course.views + 1;
     await this.courseRepository.update(id, { views });
 
-   
+    if (!course) {
+      return null;
+    }
 
     const careerCopy = JSON.parse(JSON.stringify(course));
 
@@ -118,7 +120,7 @@ class CourseService {
             try {
               // console.log("Fetching stud  ent:", review.studentId);
               const student = await await this.studentRepository.get(review.studentId);
-              console.log("Student drftyguhj:", student);
+              // console.log("Student drftyguhj:", student);
               return {
                 _id: review._id,
                 rating: review.rating,
