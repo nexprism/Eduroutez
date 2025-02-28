@@ -249,17 +249,51 @@ const GeneralInfo = () => {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log('hi')
+    console.log('hi');
     const formData = new FormData();
+    
+    // Basic institute information
     formData.append('instituteName', values.instituteName);
     formData.append('institutePhone', values.institutePhone);
     formData.append('email', values.email);
     formData.append('establishedYear', values.establishedYear);
     formData.append('organisationType', values.organisationType);
     formData.append('website', values.website);
-    formData.append('city', values.city);
-    formData.append('state', values.state);
+    
+    // Location data with proper objects
+    if (values.country) {
+      const selectedCountry = countries.find(country => country.id.toString() === values.country.toString());
+      if (selectedCountry) {
+        formData.append('country', JSON.stringify({
+          name: selectedCountry.name,
+          iso2: selectedCountry.iso2
+        }));
+      }
+    }
+    
+    if (values.state) {
+      const selectedState = states.find(state => state.id.toString() === values.state.toString());
+      if (selectedState) {
+        formData.append('state', JSON.stringify({
+          name: selectedState.name,
+          iso2: selectedState.iso2
+        }));
+      }
+    }
+    
+    if (values.city) {
+      const selectedCity = cities.find(city => city.id.toString() === values.city.toString());
+      if (selectedCity) {
+        formData.append('city', JSON.stringify({
+          name: selectedCity.name
+        }));
+      }
+    }
+    
+    // Original address field
     formData.append('address', values.address);
+    
+    // Other institute details
     formData.append('about', values.about);
     formData.append('minFees', values.minFees);
     formData.append('maxFees', values.maxFees);
@@ -269,13 +303,12 @@ const GeneralInfo = () => {
     formData.append('specialization', values.specialization);
     formData.append('examAccepted', values.examAccepted);
     
+    // File uploads
     formData.append('thumbnailImage', values.thumbnail === null ? 'null' : (values.thumbnail || ''));
-  formData.append('coverImage', values.cover === null ? 'null' : (values.cover || ''));
-  formData.append('instituteLogo', values.logo === null ? 'null' : (values.logo || ''));
-  formData.append('brochure', values.brochure === null ? 'null' : (values.brochure || ''));
-
-
-
+    formData.append('coverImage', values.cover === null ? 'null' : (values.cover || ''));
+    formData.append('instituteLogo', values.logo === null ? 'null' : (values.logo || ''));
+    formData.append('brochure', values.brochure === null ? 'null' : (values.brochure || ''));
+    
     mutate(formData);
   }
 
