@@ -295,6 +295,7 @@ async getMyRefferal(id) {
 
 
   async update(id, data) {
+    
     try {
       const institute = await this.userRepository.update(id, data);
 

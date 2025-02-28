@@ -57,10 +57,15 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
     city: {
-      type: String,
+      type: {
+        name: String,
+      }
     },
     state: {
-      type: String,
+      type: {
+        name: String,
+        iso2: String,
+      }
     },
     referalCode: {
       type: String,
@@ -76,7 +81,10 @@ const userSchema = new mongoose.Schema(
       },
     ],
     country: {
-      type: String,
+      type: {
+        name: String,
+        iso2: String,
+      },
     },
     date_of_birth: {
       type: Date,

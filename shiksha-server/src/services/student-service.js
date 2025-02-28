@@ -1,3 +1,4 @@
+import { count } from "console";
 import { StudentRepository } from "../repository/index.js";
 import { UserRepository } from "../repository/index.js";
 
@@ -102,18 +103,21 @@ class StudentService {
   }
   async update(id, data) {
     try {
-
+      console.log('data',data)
       const userpayload = {
         name: data.name,
         email: data.email,
-        contact_number: data.contactno,
+        contact_number: data.phone,
+        country: data.country,
+        state: data.state,
+        city: data.city,
       };
 
-    
+      console.log('userpayload', userpayload)
       const userResponse = await this.userRepository.update(id, userpayload);
 
 
-
+      console.log('student data', data)
       const student = await this.studentRepository.update(id, data);
       return student;
 

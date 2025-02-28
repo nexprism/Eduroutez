@@ -133,11 +133,11 @@ router.get("/megamenu/colleges", megamenuCollages);
 //countries
 router.get("/countries", getCountries);
 //states
-router.get("/states-by-country", getStatesByCountry);
+router.post("/states-by-country", getStatesByCountry);
 
 router.post("/state-city-by-id/:id", getStateCityById);
 
-router.get("/cities-by-state", getCitiesByState);
+router.post("/cities-by-state", getCitiesByState);
 //get state and city
 router.get("/state-cities", getStatesCities);
 

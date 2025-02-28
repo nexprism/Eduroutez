@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import StudentService from "../services/student-service.js";
+import UserService from "../services/users-service.js";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "adharCardImage",
@@ -35,6 +36,7 @@ const multiUploader = FileUpload.upload.fields([
   },
 ]);
 const studentService = new StudentService();
+const userService = new UserService();
 
 /**
  * POST : /student
@@ -177,13 +179,13 @@ export async function updateStudent(req, res) {
 
     try {
       const studentId = req.params.id;
-      const payload = {};
+      const payload = { ...req.body };
       let oldImagePath;
 
+      console.log("freq.body", req.body);
+
       // Check if a new title is provided
-      if (req.body.name) {
-        payload.name = req.body.name;
-      }
+      
 
       // Check if a new image is uploaded
       if (req.file) {
@@ -201,20 +203,34 @@ export async function updateStudent(req, res) {
       // Update the student with new data
       const response = await studentService.update(studentId, payload);
 
-      const user_payload = {};
-      if (req.body.email) {
-        user_payload.email = req.body.email;
-      } 
+      // const user_payload = {};
+      // if (req.body.email) {
+      //   user_payload.email = req.body.email;
+      // } 
 
-      if (req.body.name) {
-        user_payload.name = req.body.name;
-      }
+      // if (req.body.name) {
+      //   user_payload.name = req.body.name;
+      // }
 
-      if (req.body.phone) {
-        user_payload.contact_number = req.body.phone;
-      }
+      // if (req.body.phone) {
+      //   user_payload.contact_number = req.body.phone;
+      // }
 
-      const user = await userService.update(studentId, user_payload);
+      // if (req.body.country) {
+      //   user_payload.country = req.body.country;
+      // }
+
+      // if (req.body.state) {
+      //   user_payload.state = req.body.state;
+      // }
+
+      // if (req.body.city) {
+      //   user_payload.city = req.body.city;
+      // }
+
+      
+      // console.log("user_payload", user_payload);
+      // const user = await userService.update(response.user, user_payload);
 
       // Delete the old image only if the update is successful and old image exists
       if (oldImagePath) {
