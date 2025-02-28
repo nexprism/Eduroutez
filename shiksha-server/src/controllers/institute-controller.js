@@ -381,7 +381,7 @@ export async function updateInstitute(req, res) {
       const instituteId = req.params.id;
       const payload = req.body;
       let oldImagePath;
-     console.log('hjkl',req.files);
+      console.log('hjkl',req.files);
       // console.log(req.file);
       // Check if a new title is provided
       // if (req.body.title) {

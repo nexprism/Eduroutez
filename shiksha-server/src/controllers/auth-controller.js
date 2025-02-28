@@ -348,6 +348,7 @@ export const signup = async (req, res) => {
         role: req.body?.role,
         city:req.body.city,
         state:req.body.state,
+        country:req.body.country,
         is_verified: is_verified,
         referalCode: referalCode,
       ...referdata  
@@ -385,6 +386,9 @@ if(req.body.referal_Code){
     name: req.body.name,
     email: req.body.email,
     phone: req.body.contact_number,
+    country: req.body.country,
+    state: req.body.state,
+    city: req.body.city,
   };
 
 const studentResponse = await studentService.create(studentPayload);
@@ -406,6 +410,9 @@ const studentResponse = await studentService.create(studentPayload);
       password: req.body.password,
       _id: userId,
       status: status,
+      country: req.body.country,
+      state: req.body.state,
+      city: req.body.city,
     };
 
     console.log('institutePayload',institutePayload);
@@ -422,6 +429,9 @@ const studentResponse = await studentService.create(studentPayload);
         email: req.body.email,
         contactno: req.body.contact_number,
         _id: userId,
+        country: req.body.country,
+        state: req.body.state,
+        city: req.body.city,
       };
     
       const counselorResponse = await counselorService.create(counsellorpayload);
