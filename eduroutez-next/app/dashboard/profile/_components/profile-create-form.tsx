@@ -48,8 +48,8 @@ export const profileSchema = z.object({
   category: z
     .string(),
   bankName: z.string().min(3, { message: 'Account Name characters' }),
-  accountNumber: z.string().min(10, { message: 'Account Number must be at least 10 characters' }), // Add this line
-  accountHolderName: z.string().min(3, { message: 'Account Holder Name must be at least 3 characters' }), // Add this line
+  accountNumber: z.string().min(10, { message: 'Account Number must be at least 10 characters' }),
+  accountHolderName: z.string().min(3, { message: 'Account Holder Name must be at least 3 characters' }),
   ifscCode: z
     .string()
     .min(3, { message: 'Product Name must be at least 3 characters' }),
@@ -142,13 +142,10 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const [streamCategories, setStreamCategories] = useState<any[]>([]);
   const [, setOpen] = useState(false);
   const [loading] = useState(false);
-  // const [imgLoading, setImgLoading] = useState(false);
-  const title = initialData ? 'Edit product' : 'Create Your Profile';
+  const title = initialData ? 'Edit profile' : 'Create Your Profile';
   const description = initialData
-    ? 'Edit a product.'
+    ? 'Edit your profile information.'
     : 'To create your resume, we first need some basic information about you.';
-  // const toastMessage = initialData ? 'Product updated.' : 'Product created.';
-  // const action = initialData ? 'Save changes' : 'Create';
   const [previousStep, setPreviousStep] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
   const fileInputPanCardRef = React.useRef<HTMLInputElement | null>(null);
@@ -164,32 +161,34 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     string | null
   >(null);
   const [data, setData] = useState({});
-  const [isEdit, setIsEdit] = React.useState(false);
+  const [isEdit, setIsEdit] = React.useState(!!initialData);
   
-    interface State {
-      iso2: any;
-      id: string;
-      _id: string;
-      name: string;
-    }
-    
-    interface City {
-      id: Key | null | undefined;
-      _id: string;
-      name: string;
-    }
-    
-    const [states, setStates] = React.useState<State[]>([]);
-    const [cities, setCities] = React.useState<City[]>([]);
-    const [countries, setCountries] = React.useState<any[]>([]);
-    const [statesLoaded, setStatesLoaded] = useState(false);
+  interface State {
+    iso2: any;
+    id: string;
+    _id: string;
+    name: string;
+  }
+  
+  interface City {
+    id: any;
+    _id: string;
+    name: string;
+  }
+  
+  const [states, setStates] = React.useState<State[]>([]);
+  const [cities, setCities] = React.useState<City[]>([]);
+  const [countries, setCountries] = React.useState<any[]>([]);
+  const [statesLoaded, setStatesLoaded] = useState(false);
   const [citiesLoaded, setCitiesLoaded] = useState(false);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const IMAGE_URL = process.env.NEXT_PUBLIC_NEW_IMAGES;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const delta = currentStep - previousStep;
 
   const defaultValues = {
-    email:localStorage.getItem('email') || '',
+    email: localStorage.getItem('email') || '',
     experiences: [
       {
         title: '',
@@ -197,14 +196,91 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         startDate: '',
         location: '',
         endDate: '',
-        description: ''
-
+        description: '',
+        companyName: ''
       }
     ],
-    instituteEmail:'N/A',
-    accountNumber: '', // Add this line
-    accountHolderName: '', // Add this line
+    instituteEmail: 'N/A',
+    accountNumber: '',
+    accountHolderName: '',
   };
+
+  // Query to fetch counselor data
+  const { data: counselorData, isLoading: isCounselorLoading } = useQuery({
+    queryKey: ['counselor'],
+    queryFn: async () => {
+      const email = localStorage.getItem('email');
+      const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`);
+      return response.data;
+    },
+  });
+
+  // Update form with initial data from API response
+  useEffect(() => {
+    if (counselorData && counselorData.data && counselorData.data.length > 0) {
+      const counselor = counselorData.data[0];
+      setIsEdit(true);
+      
+      // Format date from ISO to YYYY-MM-DD
+      const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+      };
+
+      // Format experiences dates
+      const formattedExperiences = counselor.experiences.length > 0 
+        ? counselor.experiences.map(exp => ({
+            ...exp,
+            startDate: formatDate(exp.startDate),
+            endDate: formatDate(exp.endDate)
+          }))
+        : [defaultValues.experiences[0]];
+
+      // Set image previews if available
+      if (counselor.panCard) {
+        setPreviewPanCardUrl(`${IMAGE_URL}/${counselor.panCard}`);
+      }
+      if (counselor.adharCard) {
+        setPreviewAdharCardUrl(`${IMAGE_URL}/${counselor.adharCard}`);
+      }
+      if (counselor.profilePhoto) {
+        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.profilePhoto}`);
+      }
+
+      // Reset form with counselor data
+      form.reset({
+        firstname: counselor.firstname || '',
+        lastname: counselor.lastname || '',
+        email: counselor.email || '',
+        contactno: parseInt(counselor.contactno) || 0,
+        gender: counselor.gender || '',
+        dateOfBirth: formatDate(counselor.dateOfBirth) || '',
+        category: counselor.category || '',
+        instituteEmail: counselor.instituteEmail || 'N/A',
+        language: counselor.language || '',
+        ExperienceYear: counselor.ExperienceYear || '',
+        bankName: counselor.bankName || '',
+        accountNumber: counselor.accountNumber || '',
+        accountHolderName: counselor.accountHolderName || '',
+        ifscCode: counselor.ifscCode || '',
+        country: counselor.country ? counselor.country._id : '',
+        state: counselor.state ? counselor.state._id : '',
+        city: counselor.city ? counselor.city._id : '',
+        experiences: formattedExperiences,
+      });
+
+      // When country is populated, fetch states
+      if (counselor.country) {
+        fetchStatesForCountry(counselor.country.iso2);
+      }
+      
+      // When state is populated, fetch cities
+      if (counselor.country && counselor.state) {
+        fetchCitiesForState(counselor.country.iso2, counselor.state.iso2);
+      }
+    }
+  }, [counselorData]);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -245,7 +321,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         'gender',
         'dateOfBirth',
         'language',
-        'ExpereinceYear'
+        'ExperienceYear'
       ]
     },
     {
@@ -331,7 +407,6 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   
       const formData = new FormData();
 
-
       // Add location data as objects, not IDs
       if (values.country) {
         const selectedCountry = countries.find(country => country.id.toString() === values.country.toString());
@@ -356,8 +431,6 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         }
       }
   
-      // Now create FormData and append the file uploads
-      
       // Append each field from submissionData to FormData
       Object.entries(submissionData).forEach(([key, value]) => {
         if (key === 'experiences') {
@@ -376,14 +449,14 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         }
       });
       
-      // Append files
-      if (values.panCard) {
+      // Append files - only append if new files are selected
+      if (values.panCard instanceof File) {
         formData.append('panCard', values.panCard);
       }
-      if (values.adharCard) {
+      if (values.adharCard instanceof File) {
         formData.append('adharCard', values.adharCard);
       }
-      if (values.profilePhoto) {
+      if (values.profilePhoto instanceof File) {
         formData.append('profilePhoto', values.profilePhoto);
       }
   
@@ -395,15 +468,14 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   }
 
   const router = useRouter();
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: any) => {
-      const Institute=localStorage.getItem('instituteId') || '';
-      const endpoint =`${apiUrl}/counselor/${Institute}`; 
+      const Institute = localStorage.getItem('instituteId') || '';
+      const endpoint = `${apiUrl}/counselor/${Institute}`; 
       const response = await axiosInstance({
         url: `${endpoint}`,
-        method:'patch',
+        method: 'patch',
         data: formData,
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -426,7 +498,6 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     }
   });
 
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -435,19 +506,16 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
             page: 0
           }
         });
-        setStreamCategories(response.data.data.result|| []);
+        setStreamCategories(response.data.data.result || []);
       } catch (error) {
         console.error('Failed to fetch stream categories', error);
-        // Optionally show a toast error
         toast.error('Unable to load categories');
       }
     };
 
     fetchCategories();
-  }, []);
+  }, [apiUrl]);
 
-
-  
   useEffect(() => {
     const fetchCountries = async () => {
       try {
@@ -460,6 +528,83 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     fetchCountries();
   }, [apiUrl]);
 
+  // Helper functions for fetching states and cities
+  const fetchStatesForCountry = async (countryCode) => {
+    try {
+      const res = await axiosInstance.post(
+        `${apiUrl}/states-by-country`,
+        { countryCode: countryCode }
+      );
+      setStates(res.data?.data || []);
+      setStatesLoaded(true);
+    } catch (err) {
+      console.error("Failed to fetch states:", err);
+    }
+  };
+
+  const fetchCitiesForState = async (countryCode, stateCode) => {
+    try {
+      const res = await axiosInstance.post(`${apiUrl}/cities-by-state`, {
+        countryCode: countryCode,
+        stateCode: stateCode,
+      });
+      setCities(res.data?.data || []);
+      setCitiesLoaded(true);
+    } catch (err) {
+      console.error("Failed to fetch cities:", err);
+    }
+  };
+
+  // Watch for country changes to load states
+  useEffect(() => {
+    const countryValue = form.watch("country");
+
+    if (!countryValue || countries.length === 0) return;
+
+    const fetchStates = async () => {
+      try {
+        const selectedCountry = countries.find(
+          (country) => country.id.toString() === countryValue.toString()
+        );
+
+        if (selectedCountry) {
+          fetchStatesForCountry(selectedCountry.iso2);
+        }
+      } catch (err) {
+        console.error("Failed to fetch states:", err);
+      }
+    };
+
+    fetchStates();
+  }, [form.watch("country"), countries, apiUrl]);
+
+  // Watch for state changes to load cities
+  useEffect(() => {
+    const fetchCities = async () => {
+      const selectedStateId = form.watch("state");
+      const selectedCountryId = form.watch("country");
+
+      if (!selectedStateId || !selectedCountryId) return;
+
+      try {
+        const selectedCountry = countries.find(country => country.id.toString() === selectedCountryId.toString());
+        const selectedState = states.find(state => state.id.toString() === selectedStateId.toString());
+
+        if (selectedCountry && selectedState) {
+          fetchCitiesForState(selectedCountry.iso2, selectedState.iso2);
+        }
+      } catch (err) {
+        console.error("Failed to fetch cities:", err);
+      }
+    };
+
+    setCities([]); // Clear previous cities when state changes
+    setCitiesLoaded(false); // Reset city loading state
+
+    if (states.length > 0 && form.watch("state")) {
+      fetchCities();
+    }
+  }, [form.watch("state"), form.watch("country"), states, countries, apiUrl]);
 
   const handlePanCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -542,119 +687,16 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     }
   };
 
-  // const countries = [{ id: 'wow', name: 'india' }];
-  // const cities = [{ id: '2', name: 'kerala' }];
   const gender = [
     { id: 'male', name: 'Male' },
     { id: 'female', name: 'Female' },
     { id: 'other', name: 'Other' }
-
   ];
 
-  const { data: counselor } = useQuery({
-    queryKey: ['answer'],
-    queryFn: async () => {
-      const email =localStorage.getItem('email') ;
-      console.log('hi',email);
-      const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`);
-      // console.log(response.data);
-      return response.data;
-    },
-  // Only fetch when in edit mode
-  });
-  const IMAGE_URL = process.env.NEXT_PUBLIC_NEW_IMAGES;
-
-
-  
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        const res = await axiosInstance.get(`${apiUrl}/countries`);
-        setCountries(res.data?.data || []);
-      } catch (err) {
-        console.error("Failed to fetch countries:", err);
-      }
-    };
-    fetchCountries();
-  }, [apiUrl]);
-// Mapping countries in JSX
-
-
-useEffect(() => {
-  const countryValue = form.watch("country"); // Watch for country changes
-
-  console.log("Fetching states for country:", countryValue);
-
-  if (!countryValue || countries.length === 0) return;
-
-  const fetchStates = async () => {
-    try {
-      const selectedCountry = countries.find(
-        (country) => country.id.toString() === countryValue.toString()
-      );
-
-      console.log("Selected Country:", selectedCountry);
-
-      if (selectedCountry) {
-        const res = await axiosInstance.post(
-          `${apiUrl}/states-by-country`,
-          { countryCode: selectedCountry.iso2 }
-        );
-
-        setStates(res.data?.data || []);
-        setStatesLoaded(true);
-      }
-    } catch (err) {
-      console.error("Failed to fetch states:", err);
-    }
-  };
-
-  fetchStates();
-}, [form.watch("country"), countries, apiUrl]); // Watch for country selection
-
-
-
-
-
-
-useEffect(() => {
-  const fetchCities = async () => {
-    const selectedStateId = form.watch("state");
-    const selectedCountryId = form.watch("country");
-
-    if (!selectedStateId || !selectedCountryId) return;
-
-    console.log("Fetching cities for state:", selectedStateId);
-
-    try {
-      const selectedCountry = countries.find(country => country.id.toString() === selectedCountryId.toString());
-      const selectedState = states.find(state => state.id.toString() === selectedStateId.toString());
-
-      if (selectedCountry && selectedState) {
-        const res = await axiosInstance.post(`${apiUrl}/cities-by-state`, {
-          countryCode: selectedCountry.iso2,
-          stateCode: selectedState.iso2,
-        });
-
-        setCities(res.data?.data || []);
-        setCitiesLoaded(true);
-      }
-    } catch (err) {
-      console.error("Failed to fetch cities:", err);
-    }
-  };
-
-  setCities([]); // Clear previous cities when state changes
-  setCitiesLoaded(false); // Reset city loading state
-
-  if (states.length > 0 && form.watch("state")) {
-    fetchCities();
+  // Render form with loading state
+  if (isCounselorLoading) {
+    return <div>Loading profile data...</div>;
   }
-}, [form.watch("state"), form.watch("country"), states, countries, apiUrl]); // Now watching state changes
-
-
-
-
 
   return (
     <>
@@ -842,7 +884,9 @@ useEffect(() => {
             setStates([]); // Reset states on country change
             setStatesLoaded(false);
           }}
-          value={field.value || ""} // Ensure it's not undefined
+          value={field.value || ""} 
+          defaultValue={field.value}// Ensure it's not undefined
+
         >
           <SelectTrigger>
             <SelectValue placeholder="Select Country">
@@ -980,7 +1024,8 @@ useEffect(() => {
             <FormControl>
               <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues("state") || cities.length === 0}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select City" />
+                  <SelectValue
+                   placeholder="Select City" />
                 </SelectTrigger>
                 <SelectContent>
                   {cities.map((city) => (
