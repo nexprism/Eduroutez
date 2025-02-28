@@ -329,46 +329,34 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         }))
       };
   
+      const formData = new FormData();
+
+
       // Add location data as objects, not IDs
-      console.log('Selected cfvgbhnm,Country:', values.country);
       if (values.country) {
         const selectedCountry = countries.find(country => country.id.toString() === values.country.toString());
-        console.log('Selectedfghjncfvgbhnm,Country:', selectedCountry);
-
         if (selectedCountry) {
-          submissionData.country = {
-            name: selectedCountry.name,
-            iso2: selectedCountry.iso2
-          };
+          formData.append('country[name]', selectedCountry.name);
+          formData.append('country[iso2]', selectedCountry.iso2);
         }
       }
       
-
-      console.log('Selected cfvgbhnm,Country:', values.state);
-
       if (values.state) {
         const selectedState = states.find(state => state.id.toString() === values.state.toString());
-        console.log('Selectedfghjncfvggvhbmjn,.bhnm,Country:', selectedState);
-
         if (selectedState) {
-          submissionData.state = {
-            name: selectedState.name,
-            iso2: selectedState.iso2
-          };
+          formData.append('state[name]', selectedState.name);
+          formData.append('state[iso2]', selectedState.iso2);
         }
       }
       
       if (values.city) {
         const selectedCity = cities.find(city => city.id.toString() === values.city.toString());
         if (selectedCity) {
-          submissionData.city = {
-            name: selectedCity.name
-          };
+          formData.append('city[name]', selectedCity.name);
         }
       }
   
       // Now create FormData and append the file uploads
-      const formData = new FormData();
       
       // Append each field from submissionData to FormData
       Object.entries(submissionData).forEach(([key, value]) => {

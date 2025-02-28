@@ -261,32 +261,28 @@ const GeneralInfo = () => {
     formData.append('website', values.website);
     
     // Location data with proper objects
+    
+
     if (values.country) {
       const selectedCountry = countries.find(country => country.id.toString() === values.country.toString());
       if (selectedCountry) {
-        formData.append('country', JSON.stringify({
-          name: selectedCountry.name,
-          iso2: selectedCountry.iso2
-        }));
+        formData.append('country[name]', selectedCountry.name);
+        formData.append('country[iso2]', selectedCountry.iso2);
       }
     }
     
     if (values.state) {
       const selectedState = states.find(state => state.id.toString() === values.state.toString());
       if (selectedState) {
-        formData.append('state', JSON.stringify({
-          name: selectedState.name,
-          iso2: selectedState.iso2
-        }));
+        formData.append('state[name]', selectedState.name);
+        formData.append('state[iso2]', selectedState.iso2);
       }
     }
     
     if (values.city) {
       const selectedCity = cities.find(city => city.id.toString() === values.city.toString());
       if (selectedCity) {
-        formData.append('city', JSON.stringify({
-          name: selectedCity.name
-        }));
+        formData.append('city[name]', selectedCity.name);
       }
     }
     

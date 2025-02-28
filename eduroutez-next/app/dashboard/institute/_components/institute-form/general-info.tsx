@@ -269,8 +269,7 @@ interface Country {
     }
     formData.append('organisationType', values.organisationType);
     formData.append('website', values.website);
-    formData.append('city', values.city);
-    formData.append('state', values.state);
+
     formData.append('address', values.address);
     formData.append('about', values.about);
     formData.append('minFees', values.minFees);
@@ -284,6 +283,29 @@ interface Country {
     formData.append('coverImage', values.cover == null ? 'null' : (values.cover || ''));
     formData.append('instituteLogo', values.logo == null ? 'null' : (values.logo || ''));
     formData.append('brochure', values.brochure == null ? 'null' : (values.brochure || ''));
+
+    if (values.country) {
+      const selectedCountry = countries.find(country => country.id.toString() === values.country.toString());
+      if (selectedCountry) {
+        formData.append('country[name]', selectedCountry.name);
+        formData.append('country[iso2]', selectedCountry.iso2);
+      }
+    }
+    
+    if (values.state) {
+      const selectedState = states.find(state => state.id.toString() === values.state.toString());
+      if (selectedState) {
+        formData.append('state[name]', selectedState.name);
+        formData.append('state[iso2]', selectedState.iso2);
+      }
+    }
+    
+    if (values.city) {
+      const selectedCity = cities.find(city => city.id.toString() === values.city.toString());
+      if (selectedCity) {
+        formData.append('city[name]', selectedCity.name);
+      }
+    }
   
 
     mutate(formData);
