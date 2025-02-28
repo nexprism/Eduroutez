@@ -19,12 +19,15 @@ const counselorSchema = new mongoose.Schema(
       required: true,
     },
     state: {
-      type: String,
-      // required: true,
+      type: {
+        name: String,
+        iso2: String,
+      },
     },
     city: {
-      type: String,
-      // required: true,
+      type: {
+        name: String,
+      },
     },
     dateOfBirth: {
       type: Date,
@@ -38,8 +41,10 @@ const counselorSchema = new mongoose.Schema(
       type: String,
     },
     country: {
-      type: String,
-      // required: true,
+      type: {
+        name: String,
+        iso2: String,
+      },
     },
     profilePhoto: {
       type: String,

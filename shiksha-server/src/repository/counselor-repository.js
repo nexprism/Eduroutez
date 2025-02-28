@@ -145,7 +145,10 @@ class CounselorRepository extends CrudRepository {
         // If user exists, update the existing entry
         user.name = data.firstname + ' ' + data.lastname;
         user.email = data.email;
-        contact_number: data.contactno;
+        user.contact_number = data.contactno; 
+        user.country = data.country;
+        user.state = data.state;
+        user.city = data.city;
 
         await user.save();
         
