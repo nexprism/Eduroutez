@@ -302,29 +302,93 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
 
   function onSubmit(values: ProfileFormValues) {
     try {
+      // Create a base object for your submission
+      const submissionData: any = {
+        firstname: values.firstname,
+        lastname: values.lastname,
+        email: values.email,
+        contactno: values.contactno.toString(),
+        gender: values.gender,
+        dateOfBirth: values.dateOfBirth,
+        category: values.category,
+        instituteEmail: values.instituteEmail,
+        language: values.language,
+        ExperienceYear: values.ExperienceYear,
+        bankName: values.bankName,
+        accountNumber: values.accountNumber,
+        accountHolderName: values.accountHolderName,
+        ifscCode: values.ifscCode,
+        experiences: values.experiences.map(exp => ({
+          title: exp.title,
+          employmentType: exp.employmentType,
+          startDate: exp.startDate,
+          endDate: exp.endDate,
+          location: exp.location || '',
+          description: exp.description || '',
+          companyName: exp.companyName
+        }))
+      };
+  
+      // Add location data as objects, not IDs
+      console.log('Selected cfvgbhnm,Country:', values.country);
+      if (values.country) {
+        const selectedCountry = countries.find(country => country.id.toString() === values.country.toString());
+        console.log('Selectedfghjncfvgbhnm,Country:', selectedCountry);
+
+        if (selectedCountry) {
+          submissionData.country = {
+            name: selectedCountry.name,
+            iso2: selectedCountry.iso2
+          };
+        }
+      }
+      
+
+      console.log('Selected cfvgbhnm,Country:', values.state);
+
+      if (values.state) {
+        const selectedState = states.find(state => state.id.toString() === values.state.toString());
+        console.log('Selectedfghjncfvggvhbmjn,.bhnm,Country:', selectedState);
+
+        if (selectedState) {
+          submissionData.state = {
+            name: selectedState.name,
+            iso2: selectedState.iso2
+          };
+        }
+      }
+      
+      if (values.city) {
+        const selectedCity = cities.find(city => city.id.toString() === values.city.toString());
+        if (selectedCity) {
+          submissionData.city = {
+            name: selectedCity.name
+          };
+        }
+      }
+  
+      // Now create FormData and append the file uploads
       const formData = new FormData();
-      formData.append('firstname', values.firstname);
-      formData.append('lastname', values.lastname);
-      formData.append('email', values.email);
-      formData.append('contactno', values.contactno.toString());
-      formData.append('country', values.country);
-      formData.append('state', values.state);
-      formData.append('city', values.city);
-      formData.append('gender', values.gender);
-      formData.append('dateOfBirth', values.dateOfBirth);
-      formData.append('category', values.category);
-      formData.append('instituteEmail', values.instituteEmail);
-      formData.append('language', values.language);
-      formData.append('ExperienceYear', values.ExperienceYear);
-      values.experiences.forEach((exp, index) => {
-        formData.append(`experiences[${index}][title]`, exp.title);
-        formData.append(`experiences[${index}][employmentType]`, exp.employmentType);
-        formData.append(`experiences[${index}][startDate]`, exp.startDate);
-        formData.append(`experiences[${index}][endDate]`, exp.endDate);
-        formData.append(`experiences[${index}][location]`, exp.location || '');
-        formData.append(`experiences[${index}][description]`, exp.description || '');
-        formData.append(`experiences[${index}][companyName]`, exp.companyName);
+      
+      // Append each field from submissionData to FormData
+      Object.entries(submissionData).forEach(([key, value]) => {
+        if (key === 'experiences') {
+          // Handle experiences array
+          submissionData.experiences.forEach((exp, index) => {
+            Object.entries(exp).forEach(([expKey, expValue]) => {
+              formData.append(`experiences[${index}][${expKey}]`, expValue as string);
+            });
+          });
+        } else if (key === 'country' || key === 'state' || key === 'city') {
+          // For location objects, stringify them
+          formData.append(key, JSON.stringify(value));
+        } else {
+          // For primitive values
+          formData.append(key, value as string);
+        }
       });
+      
+      // Append files
       if (values.panCard) {
         formData.append('panCard', values.panCard);
       }
@@ -334,15 +398,12 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       if (values.profilePhoto) {
         formData.append('profilePhoto', values.profilePhoto);
       }
-      formData.append('bankName', values.bankName);
-      formData.append('accountNumber', values.accountNumber); // Add this line
-      formData.append('accountHolderName', values.accountHolderName); // Add this line
-      formData.append('ifscCode', values.ifscCode);
-      // console.log(formData);
-      console.log('hi');
-      console.log(values);
+  
+      console.log('Submitting form with location objects:', submissionData);
       mutate(formData);
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error in onSubmit:", error);
+    }
   }
 
   const router = useRouter();
