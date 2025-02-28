@@ -16,7 +16,10 @@ const reviewSchema = new mongoose.Schema(
       type: String,
     },
     country: {
-      type: String,
+      type: {
+        name: String,
+        iso2: String,
+      }
     },
     institute: {
       type: mongoose.Schema.Types.ObjectId,
