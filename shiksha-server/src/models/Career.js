@@ -6,6 +6,9 @@ const careerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    slug: {
+      type: String,
+    },
     image: {
       type: String,
       required: true,

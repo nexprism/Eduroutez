@@ -124,6 +124,7 @@ export async function updateCareer(req, res) {
       // Check if a new title is provided
       if (req.body.title) {
         payload.title = req.body.title;
+        payload.slug = req.body.title.toLowerCase().replace(/ /g, "-");
       }
 
       console.log("files:", req.files);

@@ -8,11 +8,18 @@ class BlogRepository extends CrudRepository {
 
   //getall()
   async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = []) {
-    let query = this.model
+    let query;
+    if (pageNum > 0){
+     query = this.model
       .find(filterCon)
       .sort(sortCon)
       .skip((pageNum - 1) * limitNum)
       .limit(limitNum);
+    }else{
+     query = this.model
+      .find(filterCon)
+      .sort(sortCon);
+    }
 
     // Populate fields if any
     if (populateFields?.length > 0) {

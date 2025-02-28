@@ -177,9 +177,6 @@ console.log('updatesInstitute',updatesInstitute);
       const populateFields = ["reviews", "plan"];
 
       const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
-      console.log('all institutes', institutes.result.length);
-     
-
       return institutes;
 
     } catch (error) {

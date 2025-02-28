@@ -18,6 +18,9 @@ const instituteSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    slug:{
+      type:String,
+    },
     address: {
       type: String,
     },
