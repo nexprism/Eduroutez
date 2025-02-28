@@ -25,14 +25,12 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-// import { profileSchema, type ProfileFormValues } from '@/lib/form-schema';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { m } from 'framer-motion';
 import { AlertTriangleIcon, Trash, Trash2Icon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-// import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
@@ -169,6 +167,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const [isEdit, setIsEdit] = React.useState(false);
   
     interface State {
+      iso2: any;
       id: string;
       _id: string;
       name: string;
@@ -182,6 +181,9 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     
     const [states, setStates] = React.useState<State[]>([]);
     const [cities, setCities] = React.useState<City[]>([]);
+    const [countries, setCountries] = React.useState<any[]>([]);
+    const [statesLoaded, setStatesLoaded] = useState(false);
+  const [citiesLoaded, setCitiesLoaded] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const delta = currentStep - previousStep;
@@ -396,6 +398,20 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   }, []);
 
 
+  
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await axiosInstance.get(`${apiUrl}/countries`);
+        setCountries(res.data?.data || []);
+      } catch (err) {
+        console.error("Failed to fetch countries:", err);
+      }
+    };
+    fetchCountries();
+  }, [apiUrl]);
+
+
   const handlePanCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -500,114 +516,95 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const IMAGE_URL = process.env.NEXT_PUBLIC_NEW_IMAGES;
 
 
-  React.useEffect(() => {
-    const fetchStateAndCity = async () => {
-      if (counselor?.data?.length > 0) {
-        let stateData = null;
-        let stateCityData = null;
   
-        if (counselor.data[0]?.state) {
-          try {
-            const stateResponse = await axiosInstance.post(
-              `${apiUrl}/state-city-by-id/${counselor.data[0].state}`,
-              { type: "state" }
-            );
-            console.log("State response:", stateResponse?.data?.data?.[0]);
-            stateData = stateResponse?.data?.data?.[0];
-          } catch (error) {
-            console.error("Error fetching state data:", error);
-          }
-        }
-  
-        if (counselor.data[0]?.city) {
-          try {
-            const cityResponse = await axiosInstance.post(
-              `${apiUrl}/state-city-by-id/${counselor.data[0].city}`,
-              { type: "city" }
-            );
-            console.log("City response:", cityResponse?.data?.data?.[0]);
-            stateCityData = cityResponse?.data?.data?.[0];
-          } catch (error) {
-            console.error("Error fetching city data:", error);
-          }
-        }
-  
-        form.reset({
-          firstname: counselor.data[0]?.firstname,
-          lastname: counselor.data[0]?.lastname,
-          email: counselor.data[0]?.email,
-          contactno: counselor.data[0]?.contactno,
-          country: counselor.data[0]?.country,
-          category: counselor.data[0]?.category,
-          instituteEmail: counselor.data[0]?.instituteEmail,
-          state: stateData?.id,
-          city: stateCityData?.id,
-
-          gender: counselor.data[0]?.gender,
-          dateOfBirth: counselor.data[0]?.dateOfBirth?.split("T")[0] || "",
-          experiences: counselor.data[0]?.experiences || [],
-          bankName: counselor.data[0]?.bankName,
-          accountNumber: counselor.data[0]?.accountNumber,
-          accountHolderName: counselor.data[0]?.accountHolderName,
-          ifscCode: counselor.data[0]?.ifscCode,
-          language: counselor.data[0]?.language,
-          ExperienceYear: counselor.data[0]?.ExperienceYear,
-        });
-  
-        if (counselor.data[0].panCard) {
-          const panCardFileName = counselor.data[0].panCard.split("\\").pop()?.split("/").pop();
-          setPreviewPanCardUrl(`${IMAGE_URL}/${panCardFileName}`);
-        }
-  
-        if (counselor.data[0].adharCard) {
-          const adharCardFileName = counselor.data[0].adharCard.split("\\").pop()?.split("/").pop();
-          setPreviewAdharCardUrl(`${IMAGE_URL}/${adharCardFileName}`);
-        }
-  
-        if (counselor.data[0].profilePhoto) {
-          const profilePhoto = counselor.data[0].profilePhoto.split("\\").pop()?.split("/").pop();
-          setPreviewProfilePhotoUrl(`${IMAGE_URL}/${profilePhoto}`);
-        }
-      }
-    };
-  
-    fetchStateAndCity();
-  }, [counselor, form]);
-  
-
   useEffect(() => {
-    const fetchStates = async () => {
+    const fetchCountries = async () => {
       try {
-        const res = await axiosInstance.get(`${apiUrl}/states`);
-        setStates(res.data?.data);
+        const res = await axiosInstance.get(`${apiUrl}/countries`);
+        setCountries(res.data?.data || []);
       } catch (err) {
-        console.error("Failed to fetch states:", err);
-        toast.error("Failed to load states");
+        console.error("Failed to fetch countries:", err);
       }
     };
-    fetchStates();
-  }, []);
-  
-  // Fetch cities when a state is selected
-  useEffect(() => {
-    const fetchCities = async () => {
-      const selectedState = form.getValues('state');
-      console.log('Selected state:', selectedState);
-      console.log('Form:', form.getValues());
-      if (selectedState) {
-        try {
-          const res = await axiosInstance.get(`${apiUrl}/cities-by-state/${selectedState}`);
-          setCities(res.data?.data);
-        } catch (err) {
-          console.error("Failed to fetch cities:", err);
-          toast.error("Failed to load cities");
-        }
-      } else {
-        setCities([]); // Reset cities when no state is selected
+    fetchCountries();
+  }, [apiUrl]);
+// Mapping countries in JSX
+
+
+useEffect(() => {
+  const countryValue = form.watch("country"); // Watch for country changes
+
+  console.log("Fetching states for country:", countryValue);
+
+  if (!countryValue || countries.length === 0) return;
+
+  const fetchStates = async () => {
+    try {
+      const selectedCountry = countries.find(
+        (country) => country.id.toString() === countryValue.toString()
+      );
+
+      console.log("Selected Country:", selectedCountry);
+
+      if (selectedCountry) {
+        const res = await axiosInstance.post(
+          `${apiUrl}/states-by-country`,
+          { countryCode: selectedCountry.iso2 }
+        );
+
+        setStates(res.data?.data || []);
+        setStatesLoaded(true);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch states:", err);
+    }
+  };
+
+  fetchStates();
+}, [form.watch("country"), countries, apiUrl]); // Watch for country selection
+
+
+
+
+
+
+useEffect(() => {
+  const fetchCities = async () => {
+    const selectedStateId = form.watch("state");
+    const selectedCountryId = form.watch("country");
+
+    if (!selectedStateId || !selectedCountryId) return;
+
+    console.log("Fetching cities for state:", selectedStateId);
+
+    try {
+      const selectedCountry = countries.find(country => country.id.toString() === selectedCountryId.toString());
+      const selectedState = states.find(state => state.id.toString() === selectedStateId.toString());
+
+      if (selectedCountry && selectedState) {
+        const res = await axiosInstance.post(`${apiUrl}/cities-by-state`, {
+          countryCode: selectedCountry.iso2,
+          stateCode: selectedState.iso2,
+        });
+
+        setCities(res.data?.data || []);
+        setCitiesLoaded(true);
+      }
+    } catch (err) {
+      console.error("Failed to fetch cities:", err);
+    }
+  };
+
+  setCities([]); // Clear previous cities when state changes
+  setCitiesLoaded(false); // Reset city loading state
+
+  if (states.length > 0 && form.watch("state")) {
     fetchCities();
-  }, [form.watch('state')]);
+  }
+}, [form.watch("state"), form.watch("country"), states, countries, apiUrl]); // Now watching state changes
+
+
+
 
 
   return (
@@ -778,23 +775,45 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={loading}
-                          placeholder="Select Country"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              
+
+
+              <FormField
+  control={form.control}
+  name="country"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Country</FormLabel>
+      <FormControl>
+        <Select
+          disabled={loading}
+          onValueChange={(value) => {
+            console.log("Selected Country ID:", value); // Debugging
+            field.onChange(value); // Update form state
+            setStates([]); // Reset states on country change
+            setStatesLoaded(false);
+          }}
+          value={field.value || ""} // Ensure it's not undefined
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select Country">
+              {countries.find((c) => c.id.toString() === field.value?.toString())?.name || "Select Country"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent  className="max-h-60 overflow-y-auto">
+            {countries.map((country) => (
+              <SelectItem key={country.id} value={country.id.toString()}>
+                {country.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
                 <FormField
                   control={form.control}
                   name="language"
@@ -877,68 +896,57 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                   )}
                 />
 
-                <FormField
-                 control={form.control}
-                 name="state"
-                 render={({ field }) => (
-                   <FormItem>
-                     <FormLabel>State</FormLabel>
-                     <Select
-                       onValueChange={(value) => {
-                         const selectedState = states.find(state => state.name === value);
-                         field.onChange(selectedState ? selectedState.id : '');
-                       }}
-                       value={states.find(state => state.id === field.value)?.name || ''}
-                     >
-                       <FormControl>
-                         <SelectTrigger>
-                           <SelectValue placeholder="Select State" />
-                         </SelectTrigger>
-                       </FormControl>
-                       <SelectContent  className="max-h-60 overflow-y-auto">
-                         {states.map((state) => (
-                           <SelectItem key={state.id} value={state.name}>
-                             {state.name}
-                           </SelectItem>
-                         ))}
-                       </SelectContent>
-                     </Select>
-                     <FormMessage />
-                   </FormItem>
-                 )}
-               />
-               
-               <FormField
-                 control={form.control}
-                 name="city"
-                 render={({ field }) => (
-                   <FormItem>
-                     <FormLabel>City</FormLabel>
-                     <Select
-                       onValueChange={(value) => {
-                         const selectedCity = cities.find(city => city.name === value);
-                         field.onChange(selectedCity ? selectedCity.id : '');
-                       }}
-                       value={cities.find(city => city.id == field.value)?.name || ''}
-                       disabled={!form.getValues('state')}
-                     >
-                       <FormControl>
-                         <SelectTrigger>
-                           <SelectValue placeholder="Select City" />
-                         </SelectTrigger>
-                       </FormControl>
-                       <SelectContent  className="max-h-60 overflow-y-auto">
-                         {cities.map((city) => (
-                           <SelectItem key={city.id} value={city.name}>
-                             {city.name}
-                           </SelectItem>
-                         ))}
-                       </SelectContent>
-                     </Select>
-                     <FormMessage />
-                   </FormItem>
-                 )}
-               />
+<FormField
+        control={form.control}
+        name="state"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>State</FormLabel>
+            <FormControl>
+              <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues("country") || states.length === 0}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select State" />
+                </SelectTrigger>
+                <SelectContent>
+                  {states.map((state) => (
+                    <SelectItem key={state.id} value={state.id.toString()}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* City Dropdown */}
+      <FormField
+        control={form.control}
+        name="city"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>City</FormLabel>
+            <FormControl>
+              <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues("state") || cities.length === 0}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select City" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.map((city) => (
+                    <SelectItem key={city.id} value={city.id.toString()}>
+                      {city.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    
                
                  <FormField
     control={form.control}
