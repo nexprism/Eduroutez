@@ -21,13 +21,23 @@ const instituteSchema = new mongoose.Schema(
     address: {
       type: String,
     },
+    country: {
+      type: {
+        name: String,
+        iso2: String,
+      }
+    },
     state: {
-      type: String,
-      // required: true,
+      type:{
+        name: String,
+        iso2: String,
+      }
     },
     city: {
-      type: String,
-      // required: true,
+      type: {
+        name: String,
+      }
+      
     },
     establishedYear: {
       type: Number,
