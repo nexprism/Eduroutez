@@ -77,21 +77,8 @@ class CounselorService {
           counselors.result[i] = JSON.parse(JSON.stringify(counselors.result[i]));
         }
 
-        // Now we can safely add properties
-        if (counselors.result[i] && counselors.result[i].state) {
-          const state = await this.userRepository.getStateCityById(counselors.result[i].state, 'state');
-          if (state && state.length > 0) {
-            counselors.result[i].stateName = state[0].name;
-          }
-        }
+       
         
-        if (counselors.result[i] && counselors.result[i].city && !isNaN(Number(counselors.result[i].city))) {
-          console.log('city',counselors.result[i].city);
-          const city = await this.userRepository.getStateCityById(counselors.result[i].city, 'city');
-          if (city && city.length > 0) {
-            counselors.result[i].cityName = city[0].name;
-          }
-        }
 
         //get all schedules slots of counselor
         const schedules = await ScheduleSlot.find({ counselorId:counselors.result[i]._id});
