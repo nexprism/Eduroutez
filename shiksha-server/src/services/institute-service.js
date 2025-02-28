@@ -178,33 +178,7 @@ console.log('updatesInstitute',updatesInstitute);
 
       const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
       console.log('all institutes', institutes.result.length);
-      //push state and city name from id in institute
-      // Convert each institute model to plain object and add state/city names
-      for (let i = 0; i < institutes.result.length; i++) {
-        // Convert the model to a plain JavaScript object
-        if (typeof institutes.result[i].toObject === 'function') {
-          institutes.result[i] = institutes.result[i].toObject();
-        } else if (typeof institutes.result[i].toJSON === 'function') {
-          institutes.result[i] = institutes.result[i].toJSON();
-        } else {
-          institutes.result[i] = JSON.parse(JSON.stringify(institutes.result[i]));
-        }
-
-        // Now we can safely add properties
-        if (institutes.result[i].state) {
-          const state = await this.userRepository.getStateCityById(institutes.result[i].state, 'state');
-          if (state && state.length > 0) {
-            institutes.result[i].stateName = state[0].name;
-          }
-        }
-
-        if (institutes.result[i].city) {
-          const city = await this.userRepository.getStateCityById(institutes.result[i].city, 'city');
-          if (city && city.length > 0) {
-            institutes.result[i].cityName = city[0].name;
-          }
-        }
-      }
+     
 
       return institutes;
 
@@ -249,20 +223,7 @@ console.log('updatesInstitute',updatesInstitute);
       institute = JSON.parse(JSON.stringify(instituteModel));
     }
 
-    // Now you can add properties safely
-    if (institute.state) {
-      const state = await this.userRepository.getStateCityById(institute.state, 'state');
-      if (state && state.length > 0) {
-        institute.stateName = state[0].name;
-      }
-    }
-
-    if (institute.city) {
-      const city = await this.userRepository.getStateCityById(institute.city, 'city');
-      if (city && city.length > 0) {
-        institute.cityName = city[0].name;
-      }
-    }
+    
 
     return institute;
   }
