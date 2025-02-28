@@ -1,3 +1,6 @@
+"use client";
+import { useState } from 'react';
+import { Key } from '@/types/index';
 import CustomEditor from '@/components/custom-editor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -87,7 +90,8 @@ const formSchema = z.object({
   organisationType: z.string({
     required_error: 'Please select an organization type.'
   }),
-  brochure: z.any().optional()
+  brochure: z.any().optional(),
+  country: z.any().optional()
 });
 
 
@@ -112,6 +116,7 @@ const GeneralInfo = () => {
   const fileInputBrochureRef = React.useRef<HTMLInputElement | null>(null);
 
   interface State {
+    iso2: any;
     id: string;
     _id: string;
     name: string;
@@ -123,13 +128,23 @@ const GeneralInfo = () => {
     name: string;
   }
   
-  const [states, setStates] = React.useState<State[]>([]);
-  const [cities, setCities] = React.useState<City[]>([]);
+  interface Country {
+    id: string;
+    name: string;
+    iso2: string;
+  }
+  
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [states, setStates] = useState<State[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [statesLoaded, setStatesLoaded] = useState(false);
+  const [citiesLoaded, setCitiesLoaded] = useState(false);
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
   const [streams, setStreams] = React.useState<Stream[]>([]);
   const [selectedStreams, setSelectedStreams] = React.useState<string[]>([]);
+
 
   // Add this useEffect to fetch streams
   useEffect(() => {
@@ -219,6 +234,8 @@ const GeneralInfo = () => {
       website:'',
       city:'',
       state:'',
+      country:'',
+      thumbnail: null,
       address:'',
       about:'',
       minFees:'',
@@ -302,41 +319,90 @@ const GeneralInfo = () => {
     }
   };
 
-
-  // Fetch all states on component mount
-useEffect(() => {
-  const fetchStates = async () => {
-    try {
-      const res = await axiosInstance.get(`${apiUrl}/states`);
-      setStates(res.data?.data);
-    } catch (err) {
-      console.error("Failed to fetch states:", err);
-      toast.error("Failed to load states");
-    }
-  };
-  fetchStates();
-}, []);
-
-// Fetch cities when a state is selected
-useEffect(() => {
-  const fetchCities = async () => {
-    const selectedState = form.getValues('state');
-    console.log('Selected state:', selectedState);
-    console.log('Form:', form.getValues());
-    if (selectedState) {
+  useEffect(() => {
+    const fetchCountries = async () => {
       try {
-        const res = await axiosInstance.get(`${apiUrl}/cities-by-state/${selectedState}`);
-        setCities(res.data?.data);
+        const res = await axiosInstance.get(`${apiUrl}/countries`);
+        setCountries(res.data?.data || []);
+      } catch (err) {
+        console.error("Failed to fetch countries:", err);
+      }
+    };
+
+    fetchCountries();
+  }, [apiUrl]);
+
+  // Fetch States when the selected country changes
+  useEffect(() => {
+    const selectedCountryId = form.watch("country");
+
+    if (!selectedCountryId || countries.length === 0) return;
+
+    console.log("Fetching states for country:", selectedCountryId);
+
+    const fetchStates = async () => {
+      try {
+        const selectedCountry = countries.find(
+          (country:any) => country.id.toString() === selectedCountryId.toString()
+        );
+
+        if (selectedCountry) {
+          const res = await axiosInstance.post(`${apiUrl}/states-by-country`, {
+            countryCode: selectedCountry.iso2,
+          });
+
+          setStates(res.data?.data || []);
+          setStatesLoaded(true);
+          form.setValue("state", ""); // Reset state when country changes
+          form.setValue("city", ""); // Reset city when country changes
+        }
+      } catch (err) {
+        console.error("Failed to fetch states:", err);
+      }
+    };
+
+    fetchStates();
+  }, [form.watch("country"), countries, apiUrl]);
+
+  // Fetch Cities when the selected state changes
+  useEffect(() => {
+    const selectedStateId = form.watch("state");
+    const selectedCountryId = form.watch("country");
+
+    if (!selectedStateId || !selectedCountryId) {
+      setCities([]);
+      setCitiesLoaded(false);
+      return;
+    }
+
+    console.log("Fetching cities for state:", selectedStateId);
+
+    const fetchCities = async () => {
+      try {
+        const selectedCountry = countries.find(
+          (country) => country.id.toString() === selectedCountryId.toString()
+        );
+        const selectedState = states.find(
+          (state) => state.id.toString() === selectedStateId.toString()
+        );
+
+        if (selectedCountry && selectedState) {
+          const res = await axiosInstance.post(`${apiUrl}/cities-by-state`, {
+            countryCode: selectedCountry.iso2,
+            stateCode: selectedState.iso2,
+          });
+
+          setCities(res.data?.data || []);
+          setCitiesLoaded(true);
+          form.setValue("city", ""); // Reset city when state changes
+        }
       } catch (err) {
         console.error("Failed to fetch cities:", err);
-        toast.error("Failed to load cities");
       }
-    } else {
-      setCities([]); // Reset cities when no state is selected
-    }
-  };
-  fetchCities();
-}, [form.watch('state')]);
+    };
+
+    fetchCities();
+  }, [form.watch("state"), form.watch("country"), states, countries, apiUrl]);
 
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -553,68 +619,102 @@ useEffect(() => {
               />
              
 
- <FormField
-  control={form.control}
-  name="state"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>State</FormLabel>
-      <Select
-        onValueChange={(value) => {
-          const selectedState = states.find(state => state.name === value);
-          field.onChange(selectedState ? selectedState.id : '');
-        }}
-        value={states.find(state => state.id === field.value)?.name || ''}
-      >
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder="Select State" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent className="max-h-60 overflow-y-auto">
-          {states.map((state) => (
-            <SelectItem key={state.id} value={state.name}>
-              {state.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+             <FormField
+        control={form.control}
+        name="country"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Country</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                const selectedCountry = countries.find((c) => c.name === value);
+                field.onChange(selectedCountry ? selectedCountry.id : "");
+              }}
+              value={countries.find((c) => c.id === field.value)?.name || ""}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Country" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent className="max-h-60 overflow-y-auto">
+                {countries.map((country) => (
+                  <SelectItem key={country.id} value={country.name}>
+                    {country.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-<FormField
-  control={form.control}
-  name="city"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>City</FormLabel>
-      <Select
-        onValueChange={(value) => {
-          const selectedCity = cities.find(city => city.name === value);
-          field.onChange(selectedCity ? selectedCity.id : '');
-        }}
-        value={cities.find(city => city.id === field.value)?.name || ''}
-        disabled={!form.getValues('state')}
-      >
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder="Select City" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent className="max-h-60 overflow-y-auto">
-          {cities.map((city) => (
-            <SelectItem key={city.id} value={city.name}>
-              {city.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+      {/* State Select */}
+      <FormField
+        control={form.control}
+        name="state"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>State</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                const selectedState = states.find((s) => s.name === value);
+                field.onChange(selectedState ? selectedState.id : "");
+              }}
+              value={states.find((s) => s.id === field.value)?.name || ""}
+              disabled={!statesLoaded}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select State" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent className="max-h-60 overflow-y-auto">
+                {states.map((state) => (
+                  <SelectItem key={state.id} value={state.name}>
+                    {state.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* City Select */}
+      <FormField
+        control={form.control}
+        name="city"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>City</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                const selectedCity = cities.find((c) => c.name === value);
+                field.onChange(selectedCity ? selectedCity.id : "");
+              }}
+              value={cities.find((c) => c.id === field.value)?.name || ""}
+              disabled={!citiesLoaded}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select City" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent className="max-h-60 overflow-y-auto">
+                {cities.map((city) => (
+                  <SelectItem key={city.id} value={city.name}>
+                    {city.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
 
 
