@@ -21,7 +21,7 @@ import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, 
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview, getCounselorById, getCounselorsByCategory } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
-import { createReview, deleteReview, getReview, getReviews, updateReview ,getReviewsByUser,getReviewByInstitute} from "../../controllers/review-controller.js";
+import { createReview, deleteReview, getReview, getReviews, updateReview, getReviewsByUser, getReviewByInstitute, getMyReviews } from "../../controllers/review-controller.js";
 import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCategory, updateBlogCategory } from "../../controllers/blog-category-controller.js";
 import { createCareerCategory, deleteCareerCategory, getCareerCategories, getCareerCategory, updateCareerCategory } from "../../controllers/career-category-controller.js";
 import { createRecruiter, deleteRecruiter, getRecruiters, getRecruitersByInstitute, getRecruiter, updateRecruiter } from "../../controllers/recruiters-controller.js";
@@ -270,8 +270,9 @@ router.get("/review", getReviews);
 router.get("/review/:id",  getReview);
 router.patch("/review/:id", updateReview);
 router.delete("/review/:id", deleteReview);
-router.get("/reviews-by-user/:email", getReviewsByUser);
-
+router.get("/reviews-by-user/:email",getReviewsByUser);
+//my-review
+router.post("/my-reviews", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyReviews);
 
 //getReviewByInstitute
 router.get("/review-by-institute/:id", getReviewByInstitute);

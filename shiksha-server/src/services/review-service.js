@@ -122,6 +122,16 @@ class ReviewService {
     }
   }
 
+  //getMyReviews
+  async getMyReviews(user, type) {
+    try {
+      const reviews = await this.reviewRepository.getMyReviews(user, type);
+      return reviews;
+    } catch (error) {
+      throw error;
+    }
+  }
+
 
   async getReviewsByUser(email) {
     try {

@@ -161,6 +161,21 @@ export async function getReviewByInstitute(req, res) {
     return res.status(500).json(ErrorResponse);
   }
 }
+//getMyReviews
+export async function getMyReviews(req, res) {
+  try {
+    const user = req.user;
+    const type = req.body.type;
+    const response = await reviewService.getMyReviews(user, type);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched reviews";
+    return res.status(200).json(SuccessResponse);
+  } catch (error) {
+    console.log("err", error.message);
+    ErrorResponse.error = error;
+    return res.status(500).json(ErrorResponse);
+  }
+}
 
 export async function getReviewsByUser(req, res) {
   try {
