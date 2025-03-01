@@ -51,9 +51,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   });
 
   const onConfirm = async () => {
-    setLoading(true);
-    await deleteQuestionAnswerMutation.mutateAsync(data._id);
-  };
+      setLoading(true);
+      await deleteQuestionAnswerMutation.mutateAsync(data._id);
+    };
 
   return (
     <>
