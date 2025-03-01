@@ -181,6 +181,9 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const [countries, setCountries] = React.useState<any[]>([]);
   const [statesLoaded, setStatesLoaded] = useState(false);
   const [citiesLoaded, setCitiesLoaded] = useState(false);
+   const [initialCountryName, setInitialCountryName] = useState("");
+   const [initialStateName, setInitialStateName] = useState("");
+ const [initialCityName, setInitialCityName] = useState("");
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const IMAGE_URL = process.env.NEXT_PUBLIC_NEW_IMAGES;
 
@@ -215,28 +218,54 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     },
   });
 
-  // Update form with initial data from API response
+
   useEffect(() => {
     if (counselorData && counselorData.data && counselorData.data.length > 0) {
       const counselor = counselorData.data[0];
       setIsEdit(true);
       
       // Format date from ISO to YYYY-MM-DD
-      const formatDate = (dateString) => {
+      const formatDate = (dateString: any) => {
         if (!dateString) return '';
         const date = new Date(dateString);
         return date.toISOString().split('T')[0];
       };
-
+      
+      // Set selected location IDs
+      if (counselor && counselor.country) {
+        // Save the country name for display purposes
+        setInitialCountryName(counselor.country.name);
+        
+        // Set the ID in the form
+        form.setValue("country", counselor.country.id);
+      }
+    
+      if (counselor && counselor.state) {
+        // Save the state name for display purposes
+        setInitialStateName(counselor.state.name);
+        
+        // Set the ID in the form
+        form.setValue("state", counselor.state.id);
+      }
+    
+      if (counselor && counselor.city) {
+        // Save the city name for display purposes
+        setInitialCityName(counselor.city.name);
+        
+        // Set the ID in the form
+        form.setValue("city", counselor.city.id);
+      }
+    
+      
       // Format experiences dates
-      const formattedExperiences = counselor.experiences.length > 0 
+      const formattedExperiences = counselor.experiences.length > 0
         ? counselor.experiences.map(exp => ({
             ...exp,
             startDate: formatDate(exp.startDate),
             endDate: formatDate(exp.endDate)
           }))
         : [defaultValues.experiences[0]];
-
+      
       // Set image previews if available
       if (counselor.panCard) {
         setPreviewPanCardUrl(`${IMAGE_URL}/${counselor.panCard}`);
@@ -247,7 +276,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       if (counselor.profilePhoto) {
         setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.profilePhoto}`);
       }
-
+      
       // Reset form with counselor data
       form.reset({
         firstname: counselor.firstname || '',
@@ -264,21 +293,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         accountNumber: counselor.accountNumber || '',
         accountHolderName: counselor.accountHolderName || '',
         ifscCode: counselor.ifscCode || '',
-        country: counselor.country ? counselor.country._id : '',
-        state: counselor.state ? counselor.state._id : '',
-        city: counselor.city ? counselor.city._id : '',
+        country: counselor.country ? counselor.country.id : '',
+        state: counselor.state ? counselor.state.id : '',
+        city: counselor.city ? counselor.city.id : '',
         experiences: formattedExperiences,
       });
-
-      // When country is populated, fetch states
-      if (counselor.country) {
-        fetchStatesForCountry(counselor.country.iso2);
-      }
-      
-      // When state is populated, fetch cities
-      if (counselor.country && counselor.state) {
-        fetchCitiesForState(counselor.country.iso2, counselor.state.iso2);
-      }
     }
   }, [counselorData]);
 
@@ -529,7 +548,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   }, [apiUrl]);
 
   // Helper functions for fetching states and cities
-  const fetchStatesForCountry = async (countryCode) => {
+  const fetchStatesForCountry = async (countryCode:any) => {
     try {
       const res = await axiosInstance.post(
         `${apiUrl}/states-by-country`,
@@ -542,7 +561,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     }
   };
 
-  const fetchCitiesForState = async (countryCode, stateCode) => {
+  const fetchCitiesForState = async (countryCode:any, stateCode:any) => {
     try {
       const res = await axiosInstance.post(`${apiUrl}/cities-by-state`, {
         countryCode: countryCode,
@@ -869,44 +888,6 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
               
 
 
-              <FormField
-  control={form.control}
-  name="country"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Country</FormLabel>
-      <FormControl>
-        <Select
-          disabled={loading}
-          onValueChange={(value) => {
-            console.log("Selected Country ID:", value); // Debugging
-            field.onChange(value); // Update form state
-            setStates([]); // Reset states on country change
-            setStatesLoaded(false);
-          }}
-          value={field.value || ""} 
-          defaultValue={field.value}// Ensure it's not undefined
-
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Country">
-              {countries.find((c) => c.id.toString() === field.value?.toString())?.name || "Select Country"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent  className="max-h-60 overflow-y-auto">
-            {countries.map((country) => (
-              <SelectItem key={country.id} value={country.id.toString()}>
-                {country.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-
                 <FormField
                   control={form.control}
                   name="language"
@@ -989,59 +970,116 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                   )}
                 />
 
-<FormField
-        control={form.control}
-        name="state"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>State</FormLabel>
-            <FormControl>
-              <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues("country") || states.length === 0}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select State" />
-                </SelectTrigger>
-                <SelectContent>
-                  {states.map((state) => (
-                    <SelectItem key={state.id} value={state.id.toString()}>
-                      {state.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
 
-      {/* City Dropdown */}
-      <FormField
-        control={form.control}
-        name="city"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>City</FormLabel>
-            <FormControl>
-              <Select onValueChange={field.onChange} value={field.value} disabled={!form.getValues("state") || cities.length === 0}>
-                <SelectTrigger>
-                  <SelectValue
-                   placeholder="Select City" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cities.map((city) => (
-                    <SelectItem key={city.id} value={city.id.toString()}>
-                      {city.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    
-               
+
+                     <FormField
+                                control={form.control}
+                                name="country"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Country</FormLabel>
+                                    <Select
+                                      onValueChange={(value) => {
+                              
+                                        field.onChange(value);
+                                      }}
+                                      value={field.value || ""}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select Country">
+                                            {console.log('fghjk',field.value)}
+                                            {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
+                                          </SelectValue>
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent className="max-h-60 overflow-y-auto">
+                                        {countries.map((country) => (
+                                          <SelectItem key={country.id} value={country.id}>
+                                            {country.name}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              
+                              
+                                    {/* State Select */}
+                                    <FormField
+                                      control={form.control}
+                                      name="state"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>State</FormLabel>
+                                          <Select
+                                      onValueChange={(value) => {
+                              
+                                        field.onChange(value);
+                                      }}
+                                      value={field.value || ""}
+                                    >
+                                            <FormControl>
+                                              <SelectTrigger>
+                                              <SelectValue placeholder="Select State">
+                                              {states.find((c) => c.id == field.value)?.name || initialStateName || ""}
+                                          </SelectValue>           
+                                               </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent className="max-h-60 overflow-y-auto">
+                                              {states.map((state) => (
+                                                <SelectItem key={state.id} value={state.id}>
+                                                  {state.name}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                              
+                                    {/* City Select */}
+                                    <FormField
+                                      control={form.control}
+                                      name="city"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>City</FormLabel>
+                                          <Select
+                                      onValueChange={(value) => {
+                              
+                                        field.onChange(value);
+                                      }}
+                                      value={field.value || ""}
+                                    >
+                                            <FormControl>
+                                              <SelectTrigger>
+                                                <SelectValue placeholder="Select City" >
+                                                {cities.find((c) => c.id == field.value)?.name || initialCityName || ""}
+                                                </SelectValue>
+                              
+                                              </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent className="max-h-60 overflow-y-auto">
+                                              {cities.map((city) => (
+                                                <SelectItem key={city.id} value={city.id}>
+                                                  {city.name}
+                                                </SelectItem>
+                                              ))}
+                                            </SelectContent>
+                                          </Select>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                    
+
+
+
                  <FormField
     control={form.control}
     name="category"
