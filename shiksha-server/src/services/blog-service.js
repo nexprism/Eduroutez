@@ -1,6 +1,7 @@
 import { BlogRepository } from "../repository/index.js";
 import AppError from "../utils/errors/app-error.js";
 import { StudentRepository } from "../repository/index.js";
+import { StatusCodes } from "http-status-codes";
 
 class BlogService {
   constructor() {
@@ -121,7 +122,7 @@ class BlogService {
 
       return blogs;
     } catch (error) {
-      console.log(error);
+      console.log('error on course', error.message);
       throw new AppError("Cannot fetch data of all the blogs", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }

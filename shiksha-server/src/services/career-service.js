@@ -62,6 +62,11 @@ async getCareerByinstituteId(instituteId) {
       // Execute query with dynamic filters, sorting, and pagination
       const careers = await this.careerRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
 
+      console.log("careers", careers.result);
+
+      //generate slug for each career and save in db
+      
+
       return careers;
     } catch (error) {
       throw new AppError("Cannot fetch data of all the careers", StatusCodes.INTERNAL_SERVER_ERROR);

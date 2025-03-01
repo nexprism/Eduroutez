@@ -216,6 +216,10 @@ export async function updateCourse(req, res) {
         payload.metaImage = req.files["metaImage"][0].filename;
       }
 
+      if(payload.courseTitle){
+        payload.slug = payload.courseTitle.toLowerCase().replace(/ /g, "-");
+      }
+
       const response = await courseService.update(courseId, payload);
       const resp = await instituteService.updateCourses(payload.instituteCategory, courseId, response);
 

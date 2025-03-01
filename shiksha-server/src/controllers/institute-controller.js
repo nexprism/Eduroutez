@@ -162,6 +162,8 @@ export const makeInstitute = async (req, res) => {
  * req.body {}
  */
 
+
+
 export async function getInstitutes(req, res) {
   try {
     const response = await instituteService.getAll(req.query);
@@ -381,7 +383,7 @@ export async function updateInstitute(req, res) {
       const instituteId = req.params.id;
       const payload = req.body;
       let oldImagePath;
-      console.log('hjkl',req.files);
+      // console.log('hjkl',req.files);
       // console.log(req.file);
       // Check if a new title is provided
       // if (req.body.title) {
@@ -416,12 +418,17 @@ export async function updateInstitute(req, res) {
       if (req.files["brochure"]) {
         payload.brochure = req.files["brochure"][0].filename;
       }
+
+      if (payload.instituteName) {
+        payload.slug = payload.instituteName.toLowerCase().replace(/ /g, "-");
+      }
+      
       // if (req.files["gallery"]) {
       //   payload.gallery = req.files["gallery"].map((file) => file.filename);
       // }
 
       // Update the institute with new data
-      console.log(payload);
+      // console.log(payload);
       const response = await instituteService.update(instituteId, payload);
       // console.log(response);
 

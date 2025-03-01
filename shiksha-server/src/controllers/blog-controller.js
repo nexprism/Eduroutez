@@ -139,6 +139,7 @@ export async function updateBlog(req, res) {
       // Check if a new title is provided
       if (req.body.title) {
         payload.title = req.body.title;
+        payload.slug = req.body.title.toLowerCase().replace(/ /g, "-");
       }
       if (req.body.description) {
         payload.description = req.body.description;
