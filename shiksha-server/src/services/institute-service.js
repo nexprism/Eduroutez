@@ -104,7 +104,11 @@ console.log('updatesInstitute',updatesInstitute);
             if (Array.isArray(value)) {
               const regexPattern = value.join('|'); // Convert array to regex pattern
               filterConditions.$or = filterConditions.$or || [];
+              if(key === 'state' || key === 'city') {
+                filterConditions.$or.push({ [`${key}.name`]: { $regex: regexPattern, $options: 'i' } });
+              } else {
               filterConditions.$or.push({ [key]: { $regex: regexPattern, $options: 'i' } });
+              }
             } else {
               filterConditions.$or = filterConditions.$or || [];
               filterConditions.$or.push({ [key]: { $regex: value, $options: 'i' } });
@@ -159,6 +163,10 @@ console.log('updatesInstitute',updatesInstitute);
       for (const [field, term] of Object.entries(parsedSearchFields)) {
         if (field === 'courseTitle') {
           searchConditions.push({ 'courses.courseTitle': { $regex: term, $options: "i" } });
+        } else if (field === 'state') {
+          searchConditions.push({ 'state.name': { $regex: term, $options: "i" } });
+        } else if (field === 'city') {
+          searchConditions.push({ 'city.name': { $regex: term, $options: "i" } });
         } else {
           searchConditions.push({ [field]: { $regex: term, $options: "i" } });
         }
@@ -166,6 +174,8 @@ console.log('updatesInstitute',updatesInstitute);
       if (searchConditions.length > 0) {
         filterConditions.$or = searchConditions;
       }
+
+      console.log("searchConditions", searchConditions);
 
       // Build sort conditions
       const sortConditions = {};
