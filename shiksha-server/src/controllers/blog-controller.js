@@ -39,6 +39,10 @@ export const createBlog = async (req, res) => {
         payload.thumbnail = req.files["thumbnail"][0].filename;
       }
 
+      if(payload.title){
+        payload.slug = payload.title.toLowerCase().replace(/ /g, "-");
+      }
+
       const response = await blogService.create(payload);
 
       SuccessResponse.data = response;

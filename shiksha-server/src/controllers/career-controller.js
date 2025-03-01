@@ -40,6 +40,10 @@ export const createCareer = async (req, res) => {
         payload.thumbnail = req.files["thumbnail"][0].filename;
       }
 
+      if(payload.title){
+        payload.slug = payload.title.toLowerCase().replace(/ /g, "-");
+      }
+
       const response = await careerService.create(payload);
 
       SuccessResponse.data = response;

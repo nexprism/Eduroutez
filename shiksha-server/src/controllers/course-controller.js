@@ -51,6 +51,9 @@ export const createCourse = async (req, res) => {
         payload.metaImage = req.files["metaImage"][0].filename;
       }
 
+      if(payload.courseTitle){
+        payload.slug = payload.courseTitle.toLowerCase().replace(/ /g, "-");
+      }
 
 
       console.log('payload',payload);

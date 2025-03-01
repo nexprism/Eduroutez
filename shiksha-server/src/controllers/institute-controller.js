@@ -71,11 +71,12 @@ export const createInstitute = async (req, res) => {
     const userResponse = await userService.signup(userPayload, res);
     console.log('userResponse',userResponse);
     const userId = userResponse.user._id;
-
+ const slug = req.body.instituteName.toLowerCase().replace(/ /g, "-");
     const institutePayload = {
       ...req.body,
       _id: userId,
       is_verified: true,
+      slug,
     };
     console.log('institutePayload',institutePayload);
     const instituteResponse = await instituteService.create(institutePayload);

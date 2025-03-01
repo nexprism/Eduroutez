@@ -59,6 +59,10 @@ export const createNews = async (req, res) => {
       payload.institute = instituteId;
         }
 
+      if(payload.title){
+        payload.slug = payload.title.toLowerCase().replace(/ /g, "-");
+      }
+
       const response = await newsService.create(payload);
 
       SuccessResponse.data = response;
