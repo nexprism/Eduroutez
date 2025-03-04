@@ -9,7 +9,7 @@ class WebinarRepository extends CrudRepository {
 
   async getAll() {
     try {
-      const blogs = await Webinar.find();
+      const blogs = await Webinar.find({ deletedAt: null });
       return blogs;
     } catch (error) {
       console.error('Error in BlogRepository.getAll:', error.message);
@@ -19,7 +19,7 @@ class WebinarRepository extends CrudRepository {
 
   getwebinarById(id) {
     try {
-      const webinar = Webinar.findById(id);
+      const webinar = Webinar.find({ _id: id , deletedAt: null });
       return webinar;
     } catch (error) {
       console.error('Error in WebinarRepository.getwebinarById:', error.message);
@@ -30,7 +30,7 @@ class WebinarRepository extends CrudRepository {
   getwebinarByCreatedBy(id) {
     try {
       // console.log("webinar", webinar);
-      const webinar = Webinar.find({ webinarCreatedBy: id });
+      const webinar = Webinar.find({ webinarCreatedBy: id , deletedAt: null });
       return webinar;
     } catch (error) {
       console.error('Error in WebinarRepository.getwebinarById:', error.message);
