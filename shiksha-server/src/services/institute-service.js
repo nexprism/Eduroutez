@@ -78,9 +78,11 @@ console.log('updatesInstitute',updatesInstitute);
   
   async getAll(query) {
     try {
-      const { page = 1, limit = 100000000000000, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 100000000000000, filters = "{}", searchFields = "{}", sort = "{}",select = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
+
+      console.log("select", select);
 
       // Parse JSON strings from query parameters to objects
       const parsedFilters = JSON.parse(filters);
@@ -185,8 +187,9 @@ console.log('updatesInstitute',updatesInstitute);
 
       // Execute query with dynamic filters, sorting, and pagination
       const populateFields = ["reviews", "plan"];
+      const selectFields = JSON.parse(select);
 
-      const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+      const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields, selectFields);
       return institutes;
 
     } catch (error) {
@@ -229,6 +232,12 @@ console.log('updatesInstitute',updatesInstitute);
     else {
       institute = JSON.parse(JSON.stringify(instituteModel));
     }
+
+    // Update views by 1
+    const views = institute.views + 1;
+    await this.instituteRepository.update(id, { views });
+
+    console.log('institute views',institute.views);
 
     
 

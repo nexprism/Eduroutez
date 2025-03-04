@@ -135,6 +135,10 @@ const instituteSchema = new mongoose.Schema(
         ref: "Review",
       },
     ],
+    views: {
+      type: Number,
+      default: 0,
+    },
     streams: [
       {
         type: String,

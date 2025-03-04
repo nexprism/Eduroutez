@@ -1,7 +1,8 @@
 import Review from "../models/Review.js";
 import CrudRepository from "./crud-repository.js";
 import Blog from "../models/Blog.js";
-import Career from "../models/Career.js";
+import Course from "../models/Course.js";
+import News from "../models/News.js";
 
 
 class ReviewRepository extends CrudRepository {
@@ -29,23 +30,45 @@ class ReviewRepository extends CrudRepository {
       if (type === "blog") {
         model = Blog;
         userId = user._id;
-      } else if (type === "career") {
-        model = Career;
+      } else if (type === "course") {
+        model = Course;
         userId = user._id;
       } else if (type === "news") {
         model = News;
         userId = user._id;
+      }else{
+        model = Review;
+        userId = user.email;
       }
 
       let reviews;
 
       if (type === "institute") {
-        reviews = await Review.find({ email: userId });
+        reviews = await Review.find({ email: userId }).populate('institute');
+        return reviews
       } else {
-         reviews = await model.find({ "reviews.studentId": userId });
+         const blogs = await model.find({ "reviews.studentId": userId });
+         
+        reviews = blogs.map(blog => {
+          return blog.reviews.map(review => {
+            
+            return {
+              _id: review._id,
+              ObjectId: blog._id,
+              onjectName: (type === "course") ? blog.courseTitle : blog.title,
+              slug: blog.slug,
+              rating: review.rating,
+              comment: review.comment,
+              studentId: review.studentId,
+              studentName: user.name,
+              studentEmail: user.email
+            };
+          });
+        }).flat();
+        return reviews;
+
       }
       
-      return reviews;
     } catch (error) {
       throw error;
     }

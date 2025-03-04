@@ -56,12 +56,13 @@ class CrudRepository {
     }
   }
 
-  async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = []) {
+  async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = [],selectFields = {}) {
     console.log('dfgh',filterCon)
     let query;
     if(pageNum > 0){
     query = this.model
       .find(filterCon)
+      .select(selectFields)
       .sort(sortCon)
       .skip((pageNum - 1) * limitNum)
       .limit(limitNum)
@@ -69,15 +70,16 @@ class CrudRepository {
     }else{
       query = this.model
       .find(filterCon)
+      .select(selectFields)
       .sort(sortCon)
       .collation({ locale: 'en', strength: 2 });
     }
     
 
     // Populate fields if any
-    if (populateFields?.length > 0) {
+    if (populateFields?.length > 0 && Object.keys(selectFields).length === 0) {
       populateFields?.forEach((field) => {
-        query = query.populate(field);
+      query = query.populate(field);
       });
     }
     const result = await query;
