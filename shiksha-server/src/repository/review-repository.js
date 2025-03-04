@@ -2,7 +2,7 @@ import Review from "../models/Review.js";
 import CrudRepository from "./crud-repository.js";
 import Blog from "../models/Blog.js";
 import Course from "../models/Course.js";
-import News from "../models/News.js";
+import Career from "../models/Career.js";
 
 
 class ReviewRepository extends CrudRepository {
@@ -33,10 +33,7 @@ class ReviewRepository extends CrudRepository {
       } else if (type === "course") {
         model = Course;
         userId = user._id;
-      } else if (type === "news") {
-        model = News;
-        userId = user._id;
-      }else{
+      } else{
         model = Review;
         userId = user.email;
       }
