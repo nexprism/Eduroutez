@@ -3,6 +3,7 @@ import CrudRepository from "./crud-repository.js";
 import Blog from "../models/Blog.js";
 import Course from "../models/Course.js";
 import Career from "../models/Career.js";
+import Counselor from "../models/Counselor.js";
 
 
 class ReviewRepository extends CrudRepository {
@@ -33,6 +34,9 @@ class ReviewRepository extends CrudRepository {
       } else if (type === "course") {
         model = Course;
         userId = user._id;
+      } else if (type === "counselor") {
+        model = Counselor;
+        userId = user.email;
       } else{
         model = Review;
         userId = user.email;
@@ -43,6 +47,25 @@ class ReviewRepository extends CrudRepository {
       if (type === "institute") {
         reviews = await Review.find({ email: userId }).populate('institute');
         return reviews
+      } else if (type === "counselor") {
+        const blogs = await model.find({ "reviews.studentEmail": userId });
+        reviews = blogs.map(blog => {
+          return blog.reviews.map(review => {
+
+            return {
+              _id: review._id,
+              ObjectId: blog._id,
+              objectName: (type === "counselor") ? blog.firstname + " " + blog.lastname: blog.title,
+              slug: '',
+              rating: review.rating,
+              comment: review.comment,
+              studentId: review.studentId,
+              studentName: user.name,
+              studentEmail: user.email
+            };
+          });
+        }).flat();
+        return reviews;
       } else {
          const blogs = await model.find({ "reviews.studentId": userId });
          
@@ -52,7 +75,7 @@ class ReviewRepository extends CrudRepository {
             return {
               _id: review._id,
               ObjectId: blog._id,
-              onjectName: (type === "course") ? blog.courseTitle : blog.title,
+              objectName: (type === "course") ? blog.courseTitle : blog.title,
               slug: blog.slug,
               rating: review.rating,
               comment: review.comment,
