@@ -92,6 +92,7 @@ console.log('updatesInstitute',updatesInstitute);
       // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
       var ratingFilter = 0;
+      var trendingFilter = 0;
       for (var [key, value] of Object.entries(parsedFilters)) {
         if (key === 'Exam') {
           key = "examAccepted";
@@ -154,7 +155,9 @@ console.log('updatesInstitute',updatesInstitute);
             }
           } else if (key === 'Ratings') {
             ratingFilter = 1;
-          }else {
+          } else if (key === 'isTrending') {
+            trendingFilter = 1;
+          } else {
             filterConditions[key] = value;
           }
         }
@@ -213,6 +216,18 @@ console.log('updatesInstitute',updatesInstitute);
           const ratingStrings = parsedFilters.Ratings.map(rating => rating.split(' ')[0]); // Extract numeric part from "1 star", "5 star", etc.
           console.log('institute.overallRating', ratingStrings);
           return ratingStrings.includes(institute.overallRating.toString());
+        });
+      }
+
+      // console.log('trendingFilter',trendingFilter);
+      // console.log('insti',institutes.result.length);
+
+      
+
+      //if in filter pass isTrending = 1 filter by trending
+      if (parsedFilters.isTrending && trendingFilter === 1) {
+        institutes.result = institutes.result.filter(institute => {
+          return institute.plan?.features?.some(feature => feature.key === "Trending Institutes" && feature.value === "Yes");
         });
       }
 
