@@ -91,7 +91,7 @@ console.log('updatesInstitute',updatesInstitute);
 
       // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
-
+      var ratingFilter = 0;
       for (var [key, value] of Object.entries(parsedFilters)) {
         if (key === 'Exam') {
           key = "examAccepted";
@@ -152,7 +152,10 @@ console.log('updatesInstitute',updatesInstitute);
               filterConditions.$and = filterConditions.$and || [];
               filterConditions.$and.push({ [key]: { $regex: `(^|,)${value}(,|$)`, $options: 'i' } });
             }
-          } else {
+          } else if (key === 'rating') {
+            console.log("rating", value);
+            ratingFilter = 1;
+          }else {
             filterConditions[key] = value;
           }
         }
@@ -190,6 +193,42 @@ console.log('updatesInstitute',updatesInstitute);
       const selectFields = JSON.parse(select);
 
       const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields, selectFields);
+      
+      institutes.result.forEach(institute => {
+
+      const overallRating = institute.reviews.length > 0
+        ? institute?.reviews.reduce((sum, review) => sum + (review.placementStars || 0) +
+          (review.campusLifeStars || 0) +
+          (review.facultyStars || 0) +
+          (review.suggestionsStars || 0), 0) / (institute?.reviews.length * 4 || 1)
+        : 0;
+
+      institute.overallRating = Math.round(overallRating);
+      });
+
+      //if in filter pass rating = 1/3/2/4/5 filter by rating
+      console.log('parsedFilters',parsedFilters);
+      console.log('ratingFilter',ratingFilter);
+      if(parsedFilters.rating && Array.isArray(parsedFilters.rating) && ratingFilter === 1){
+
+      institutes.result = institutes.result.filter(institute => {
+        console.log('institute.overallRating', institute.overallRating + " " + institute.instituteName);
+        if (parsedFilters.rating && Array.isArray(parsedFilters.rating)) {
+          return parsedFilters.rating.includes(institute.overallRating.toString());
+        }
+        
+        return true;
+      });
+
+      }
+
+      //update totalDocuments and totalPages
+      const totalDocuments = institutes.result.length;
+      const totalPages = Math.ceil(totalDocuments / limitNum);
+      institutes.totalPages = totalPages;
+      institutes.totalDocuments = totalDocuments;
+
+      
       return institutes;
 
     } catch (error) {
