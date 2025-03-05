@@ -152,8 +152,7 @@ console.log('updatesInstitute',updatesInstitute);
               filterConditions.$and = filterConditions.$and || [];
               filterConditions.$and.push({ [key]: { $regex: `(^|,)${value}(,|$)`, $options: 'i' } });
             }
-          } else if (key === 'rating') {
-            console.log("rating", value);
+          } else if (key === 'Ratings') {
             ratingFilter = 1;
           }else {
             filterConditions[key] = value;
@@ -207,19 +206,14 @@ console.log('updatesInstitute',updatesInstitute);
       });
 
       //if in filter pass rating = 1/3/2/4/5 filter by rating
-      console.log('parsedFilters',parsedFilters);
+      // console.log('parsedFilters',parsedFilters);
       console.log('ratingFilter',ratingFilter);
-      if(parsedFilters.rating && Array.isArray(parsedFilters.rating) && ratingFilter === 1){
-
-      institutes.result = institutes.result.filter(institute => {
-        console.log('institute.overallRating', institute.overallRating + " " + institute.instituteName);
-        if (parsedFilters.rating && Array.isArray(parsedFilters.rating)) {
-          return parsedFilters.rating.includes(institute.overallRating.toString());
-        }
-        
-        return true;
-      });
-
+      if (parsedFilters.Ratings && Array.isArray(parsedFilters.Ratings) && ratingFilter === 1) {
+        institutes.result = institutes.result.filter(institute => {
+          const ratingStrings = parsedFilters.Ratings.map(rating => rating.split(' ')[0]); // Extract numeric part from "1 star", "5 star", etc.
+          console.log('institute.overallRating', ratingStrings);
+          return ratingStrings.includes(institute.overallRating.toString());
+        });
       }
 
       //update totalDocuments and totalPages
