@@ -2,6 +2,8 @@ import { QueryRepository } from "../repository/query-repository.js";
 import AppError from "../utils/errors/app-error.js";
 import { QueryAllocationRepository } from "../repository/query-allocation-repository.js";
 import { query } from "express";
+import { StatusCodes } from "http-status-codes";
+
 
 class questionAnswerService {
   constructor() {
@@ -19,14 +21,16 @@ class questionAnswerService {
   }
   async getAll(query) {
     try {
-      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}", select = "{}",groupBy = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
-
+      
       // Parse JSON strings from query parameters to objects
       const parsedFilters = JSON.parse(filters);
       const parsedSearchFields = JSON.parse(searchFields);
       const parsedSort = JSON.parse(sort);
+      const parsedSelect = JSON.parse(select);
+      const parsedGroupBy = JSON.parse(groupBy);
 
       // Build filter conditions for multiple fields
     const filterConditions = { deletedAt: null };
@@ -52,9 +56,19 @@ class questionAnswerService {
 
       // Execute query with dynamic filters, sorting, and pagination
       const populateFields = ["instituteIds"];
-      const questionAnswers = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
 
-      return questionAnswers;
+      if(parsedGroupBy && parsedGroupBy.length > 0){
+        const questionAnswers = await this.queryRepository.getTrendingStreams(filterConditions, sortConditions, pageNum, limitNum, populateFields, parsedSelect, parsedGroupBy);
+        return questionAnswers;
+
+      }else{
+         const questionAnswers = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+         return questionAnswers;
+      }
+
+      // console.log("questionAnswers",questionAnswers);
+      
+
     } catch (error) {
       throw new AppError("Cannot fetch data of all the questionAnswers", StatusCodes.INTERNAL_SERVER_ERROR);
     }

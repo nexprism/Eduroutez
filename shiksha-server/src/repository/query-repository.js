@@ -18,6 +18,60 @@ class QueryRepository extends CrudRepository {
     }
 
   }
+  
+  //getTrendingStreams
+  async getTrendingStreams(filterCon = {}, sortCon = {}, pageNum = 1, limitNum = 10, populateFields = [], selectFields = {}, groupBy = {}) {
+    try {
+      // Ensure pagination parameters are valid
+      const page = Math.max(1, parseInt(pageNum)); // Ensure page is at least 1
+      const limit = Math.max(1, parseInt(limitNum)); // Ensure limit is at least 1
+
+      // Perform aggregation
+      const trendingStreams = await Query.aggregate([
+        {
+          $match: { ...filterCon, stream: { $exists: true, $ne: null }, level: { $exists: true, $ne: null } }, // Apply filters and ensure stream and level are set
+        },
+        {
+          $group: {
+            _id: { stream: "$stream", level: "$level" }, // Group by stream & level
+            count: { $sum: 1 }, // Count occurrences
+          },
+        },
+        {
+          $sort: { count: -1 }, // Sort by highest query count
+        },
+        {
+          $lookup: {
+            from: "streams", // Assuming "streams" collection contains stream details
+            localField: "_id.stream",
+            foreignField: "_id",
+            as: "streamDetails",
+          },
+        },
+        {
+          $skip: (page - 1) * limit, // Apply pagination: Skip previous pages
+        },
+        {
+          $limit: limit, // Limit results per page
+        },
+      ]);
+
+      // Return the response
+      return {
+        result: trendingStreams,
+        currentPage: page,
+        totalPages: Math.ceil(trendingStreams.length / limit), // Approximate since aggregation doesn't provide total count directly
+        totalDocuments: trendingStreams.length, // Total results after aggregation
+      };
+    } catch (error) {
+      console.error("Error in getTrendingStreams:", error.message);
+      throw new Error("Failed to fetch trending streams");
+    }
+  }
+
+
+
+
 
   //queryRepository
   async QueryAllocation(instituteId) {
