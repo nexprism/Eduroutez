@@ -40,7 +40,7 @@ import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCoun
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
 import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, updateQuery, QueryAllocation } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ ,getFAQsByInstitute} from "../../controllers/faq-controller.js";
-import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage } from "../../controllers/customPage-controller.js";
+import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage, getPageByStreamLevel } from "../../controllers/customPage-controller.js";
 import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
 
@@ -506,6 +506,8 @@ router.get("/page-by-institute/:instituteId", getPagesByInstitute);
 
 // router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
 router.get("/page/:id", getPage);
+//get page by strem and level
+router.get("/page/:stream/:level", getPageByStreamLevel);
 
 
 

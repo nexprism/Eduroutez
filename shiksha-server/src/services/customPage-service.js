@@ -18,6 +18,18 @@ class CustomPageService {
     const page = await this.customPageRepository.get(id);
     return page;
   }
+
+
+  //getByStreamLevel
+  async getByStreamLevel(stream, level) {
+    try {
+      const page = await this.customPageRepository.getByStreamLevel(stream, level);
+      return page;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getAll(query) {
     try {
       const {
