@@ -40,9 +40,15 @@ export default function CounselorForm() {
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
-  const [streams, setStreams] = React.useState([]);
+  const [streams, setStreams] = React.useState<{ _id: string; name: string }[]>([]);
   const [pageDataLoaded, setPageDataLoaded] = React.useState(false);
-  const [rawData, setRawData] = React.useState(null);
+  const [rawData, setRawData] = React.useState<{
+    title?: string;
+    description?: string;
+    status?: string;
+    stream?: string;
+    level?: string;
+  } | null>(null);
 
   React.useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
@@ -191,19 +197,19 @@ export default function CounselorForm() {
   }
 
   // Helper functions to get labels for selected values
-  const getStatusLabel = (value) => {
+  const getStatusLabel = (value:any) => {
     if (!value) return "Select Status";
     const status = statuses.find(s => s.value === value);
     return status ? status.label : "Select Status";
   };
 
-  const getLevelLabel = (value) => {
+  const getLevelLabel = (value:any) => {
     if (!value) return "Select Level";
     const level = levels.find(l => l.value === value);
     return level ? level.label : "Select Level";
   };
 
-  const getStreamName = (id) => {
+  const getStreamName = (id:any) => {
     if (!id || streams.length === 0) return "Select Stream";
     const stream = streams.find(s => s._id === id);
     return stream ? stream.name : "Select Stream";
