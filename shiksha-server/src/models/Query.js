@@ -22,6 +22,13 @@ const querySchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        stream: {
+            type: mongoose.Schema.Types.ObjectId,
+              ref: "Stream",
+        },
+        level: {
+            type: String,
+        },
         instituteIds: [
             {
                 type: mongoose.Schema.Types.ObjectId,

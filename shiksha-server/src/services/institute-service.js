@@ -197,7 +197,7 @@ console.log('updatesInstitute',updatesInstitute);
       const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields, selectFields);
       
       institutes.result.forEach(institute => {
-
+        if (institute.reviews){
       const overallRating = institute.reviews.length > 0
         ? institute?.reviews.reduce((sum, review) => sum + (review.placementStars || 0) +
           (review.campusLifeStars || 0) +
@@ -205,7 +205,10 @@ console.log('updatesInstitute',updatesInstitute);
           (review.suggestionsStars || 0), 0) / (institute?.reviews.length * 4 || 1)
         : 0;
 
-      institute.overallRating = Math.round(overallRating);
+        institute.overallRating = Math.round(overallRating);
+        }else{
+          institute.overallRating = 0;
+        }
       });
 
       //if in filter pass rating = 1/3/2/4/5 filter by rating

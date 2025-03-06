@@ -9,19 +9,26 @@ const pageSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-    //   required: true,
+      //   required: true,
     },
     description: {
       type: String,
       // required: true,
     },
-    status:{
-        type: String,
-        // required: true,
+    stream: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Stream",
+    },
+    level: {
+      type: String,
+    },
+    status: {
+      type: String,
+      // required: true,
     },
     section: {
-        type: String,
-      },
+      type: String,
+    },
   },
   { timestamps: true }
 );
