@@ -87,6 +87,22 @@ export async function getPage(req, res) {
   }
 }
 
+//getPageByStreamLevel
+export async function getPageByStreamLevel(req, res) {
+  try {
+    const response = await customPageService.getByStreamLevel(
+      req.params.stream,
+      req.params.level
+    );
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the page";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 /**
  * PATCH : /page/:id
  * req.body {capacity:200}
@@ -117,6 +133,14 @@ export async function updatePage(req, res) {
       }
       if (req.body.section) {
         payload.section = req.body.section;
+      }
+
+      if (req.body.stream) {
+        payload.stream = req.body.stream;
+      }
+
+      if(req.body.level){
+        payload.level = req.body.level;
       }
 
       // Check if a new image is uploaded

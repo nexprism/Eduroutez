@@ -1,7 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import StreamService from "../services/stream-service.js";
+import QuestionAnswerService from "../services/query-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 const streamService = new StreamService();
+const questionAnswerService = new QuestionAnswerService();
 
 /**
  * POST : /stream
@@ -39,6 +41,24 @@ export async function getStreams(req, res) {
   } catch (error) {
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+
+export async function trendingStreams(req, res) {
+  try {
+    const query = req.query;
+    query.select = JSON.stringify(["stream", "level"]);
+    query.groupBy = JSON.stringify(["stream", "level"]);
+    const response = await questionAnswerService.getAll(query);
+    console.log("Trending streams response:", response);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched streams";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    console.error("Error in trendingStreams:", error.message);
+    ErrorResponse.error = error;
+    return res.status(error.StatusCodes).json(ErrorResponse);
   }
 }
 

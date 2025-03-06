@@ -11,7 +11,7 @@ import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTempla
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
 import { getUsers, updateUser, allowUser, denyUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike,submitReview } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory,getCategory, updateCategory } from "../../controllers/category-controller.js";
-import { createStream, deleteStream, getStream, getStreams, updateStream } from "../../controllers/stream-controller.js";
+import { createStream, deleteStream, getStream, getStreams, trendingStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
@@ -40,7 +40,7 @@ import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCoun
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
 import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, updateQuery, QueryAllocation } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ ,getFAQsByInstitute} from "../../controllers/faq-controller.js";
-import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage } from "../../controllers/customPage-controller.js";
+import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage, getPageByStreamLevel } from "../../controllers/customPage-controller.js";
 import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
 
@@ -82,6 +82,8 @@ router.delete("/create-Email/:id", accessTokenAutoRefresh, passport.authenticate
  */
 router.post("/stream", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createStream);
 router.get("/streams", getStreams);
+//trending streams
+router.get("/trending-streams", trendingStreams);
 router.get("/stream/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getStream);
 router.patch("/stream/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateStream);
 router.delete("/stream/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteStream);
@@ -504,6 +506,8 @@ router.get("/page-by-institute/:instituteId", getPagesByInstitute);
 
 // router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
 router.get("/page/:id", getPage);
+//get page by strem and level
+router.get("/page/:stream/:level", getPageByStreamLevel);
 
 
 
