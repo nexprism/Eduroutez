@@ -61,7 +61,7 @@ export const profileSchema = z.object({
   contactno: z.coerce.number(),
   language:z.string(),
   ExperienceYear:z.string(),
-  country: z.string().min(1, { message: 'Please select a category' }),
+  country: z.string().optional(),
   city: z.any(),
   state:z.any(),
   gender: z.string(),
@@ -428,7 +428,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
 
       // Add location data as objects, not IDs
       if (values.country) {
-        const selectedCountry = countries.find(country => country.id.toString() === values.country.toString());
+        const selectedCountry = countries.find(country => country.id.toString() === (values?.country?.toString() ?? ''));
         if (selectedCountry) {
           formData.append('country[name]', selectedCountry.name);
           formData.append('country[iso2]', selectedCountry.iso2);
@@ -922,39 +922,30 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Gender</FormLabel>
-                      <Select
-                        disabled={loading}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              defaultValue={field.value}
-                              placeholder="Gender"
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent  className="max-h-60 overflow-y-auto">
-                          {/* @ts-ignore  */}
-                          {gender.map((country) => (
-                            <SelectItem key={country.id} value={country.id}>
-                              {country.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              
+
+              <FormField
+  control={form.control}
+  name="gender"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Gender</FormLabel>
+      <select
+        className="w-full rounded-md border border-input bg-background px-3 py-2"
+        disabled={loading}
+        onChange={(e) => field.onChange(e.target.value)}
+        value={field.value || ""}
+      >
+        <option value="" disabled>Select Gender</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other</option>
+      </select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
 
                 <FormField
                   control={form.control}
@@ -1079,28 +1070,47 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                     
 
 
-
-                 <FormField
-    control={form.control}
-    name="category"
-    render={({ field }) => (
+                    <FormField
+  control={form.control}
+  name="category"
+  render={({ field }) => {
+    // Debug log
+    console.log("Category field rendering with value:", field.value);
+    
+    // Always initialize the ref, never conditionally
+    const initialValueRef = React.useRef(field.value);
+    
+    // Update ref if needed, but don't skip the hook
+    React.useEffect(() => {
+      // Store the initial non-empty value
+      if (field.value && !initialValueRef.current) {
+        initialValueRef.current = field.value;
+      }
+      
+      // Restore from ref if needed
+      if (!field.value && initialValueRef.current) {
+        console.log("Restoring category value:", initialValueRef.current);
+        field.onChange(initialValueRef.current);
+      }
+    }, [field.value, field.onChange]);
+    
+    return (
       <FormItem>
         <FormLabel>Category</FormLabel>
         <Select
           disabled={loading}
           onValueChange={field.onChange}
-          value={field.value}
-          defaultValue={field.value}
+          value={field.value || initialValueRef.current || ""}
+          defaultValue={field.value || initialValueRef.current || ""}
         >
           <FormControl>
             <SelectTrigger>
-              <SelectValue
-                defaultValue={field.value}
-                placeholder="Select Category"
-              />
+              <SelectValue>
+                {field.value || initialValueRef.current || "Select Category"}
+              </SelectValue>
             </SelectTrigger>
           </FormControl>
-          <SelectContent  className="max-h-60 overflow-y-auto">
+          <SelectContent className="max-h-60 overflow-y-auto">
             {streamCategories?.map((category) => (
               <SelectItem 
                 key={category?._id ?? ''} 
@@ -1113,8 +1123,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         </Select>
         <FormMessage />
       </FormItem>
-    )}
-  />
+    );
+  }}
+/>
+
+
                 <FormField
                   control={form.control}
                   name="instituteEmail"
