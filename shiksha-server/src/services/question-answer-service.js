@@ -33,7 +33,13 @@ class questionAnswerService {
     const filterConditions = { deletedAt: null };
 
       for (const [key, value] of Object.entries(parsedFilters)) {
-        filterConditions[key] = value;
+         if (Array.isArray(value)) {
+              const regexPattern = value.join('|'); // Convert array to regex pattern
+              filterConditions.$and = filterConditions.$and || [];
+              filterConditions.$and.push({ [key]: { $regex: regexPattern, $options: 'i' } });
+            }else{
+              filterConditions[key] = value;
+            }
       }
 
       // Build search conditions for multiple fields with partial matching
@@ -56,6 +62,7 @@ class questionAnswerService {
 
       return questionAnswers;
     } catch (error) {
+      console.log('error on course', error.message);
       throw new AppError("Cannot fetch data of all the questionAnswers", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
