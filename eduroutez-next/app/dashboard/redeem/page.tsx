@@ -63,6 +63,10 @@ const RedeemPage = () => {
 
   const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (Number(coins) < 100) {
+      setError("Minimum points required to redeem is 100");
+      return;
+    }
     try {
       const response = await axiosInstance.post(`${apiUrl}/redeem-points`, { points: Number(coins) });
       setCoins("");
@@ -81,7 +85,7 @@ const RedeemPage = () => {
     }
 
     if (error) {
-      return <div className="text-center py-4 text-red-600">No redemption history available</div>;
+      return <div className="text-center py-4 text-red-600">{error}</div>;
     }
 
     if (redeemHistory.length === 0) {
@@ -160,11 +164,12 @@ const RedeemPage = () => {
                   min="0"
                   max={availableCoins}
                 />
+                <p className="text-sm text-purple-600">Minimum points required to redeem is 100</p>
               </div>
               <Button 
                 type="submit" 
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                disabled={isLoading}
+                disabled={isLoading || Number(coins) < 100}
               >
                 <Gift className="mr-2 h-4 w-4" />
                 Redeem Now
