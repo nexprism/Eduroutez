@@ -1,8 +1,10 @@
 import { QuestionAnswerRepository } from "../repository/question-answer-repository.js";
+import { UserRepository } from "../repository/user-repository.js";
 
 class questionAnswerService {
   constructor() {
     this.questionAnswerRepository = new QuestionAnswerRepository();
+    this.userRepository = new UserRepository();
   }
 
   async create(data) {
@@ -78,6 +80,19 @@ class questionAnswerService {
   async update(id, data) {
     try {
       const questionAnswer = await this.questionAnswerRepository.submitAnswer(id, data);
+
+      const existingUser = await this.userRepository.get(data.answeredBy);
+
+      // Check if email doesn't exists
+      if (!existingUser) {
+        return res.status(404).json({ status: "failed", message: "Email doesn't exists" });
+      }
+
+      //increment points of user
+      const userPayload = { points: existingUser.points + 50 };
+      console.log('userPayload',userPayload);
+      const userResponse = await this.userRepository.update(existingUser.id, userPayload);
+      console.log('userResponse',userResponse);
 
       return questionAnswer;
     } catch (error) {
