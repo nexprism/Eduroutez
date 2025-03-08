@@ -106,15 +106,15 @@ console.log('updatesInstitute',updatesInstitute);
           if (key === 'streams' || key === 'specialization' || key === 'state' || key === 'city' || key === 'examAccepted' || key === 'organisationType') {
             if (Array.isArray(value)) {
               const regexPattern = value.join('|'); // Convert array to regex pattern
-              filterConditions.$or = filterConditions.$or || [];
+              filterConditions.$and = filterConditions.$and || [];
               if(key === 'state' || key === 'city') {
-                filterConditions.$or.push({ [`${key}.name`]: { $regex: regexPattern, $options: 'i' } });
+                filterConditions.$and.push({ [`${key}.name`]: { $regex: regexPattern, $options: 'i' } });
               } else {
-              filterConditions.$or.push({ [key]: { $regex: regexPattern, $options: 'i' } });
+                filterConditions.$and.push({ [key]: { $regex: regexPattern, $options: 'i' } });
               }
             } else {
-              filterConditions.$or = filterConditions.$or || [];
-              filterConditions.$or.push({ [key]: { $regex: value, $options: 'i' } });
+              filterConditions.$and = filterConditions.$and || [];
+              filterConditions.$and.push({ [key]: { $regex: value, $options: 'i' } });
             }
           } else if (key === 'Fees') {
             // Handling multiple min and max fee filters
@@ -123,7 +123,7 @@ console.log('updatesInstitute',updatesInstitute);
             //items: ["> 5 Lakh", "3 - 5 Lakh", "1 - 3 Lakh", "< 1 Lakh"],
 
             if (Array.isArray(value)) {
-              filterConditions.$or = filterConditions.$or || [];
+              filterConditions.$and = filterConditions.$and || [];
 
               value.forEach(range => {
                 let condition = {};
@@ -139,7 +139,7 @@ console.log('updatesInstitute',updatesInstitute);
                 }
 
                 console.log("Condition", condition);
-                filterConditions.$or.push(condition);
+                filterConditions.$and.push(condition);
               });
             }
           } else if (key === 'examAccepted') {
