@@ -220,6 +220,10 @@ console.log('updatesInstitute',updatesInstitute);
           console.log('institute.overallRating', ratingStrings);
           return ratingStrings.includes(institute.overallRating.toString());
         });
+        const totalDocuments = institutes.result.length;
+        const totalPages = Math.ceil(totalDocuments / limitNum);
+        institutes.totalPages = totalPages;
+        institutes.totalDocuments = totalDocuments;
       }
 
       // console.log('trendingFilter',trendingFilter);
@@ -232,13 +236,13 @@ console.log('updatesInstitute',updatesInstitute);
         institutes.result = institutes.result.filter(institute => {
           return institute.plan?.features?.some(feature => feature.key === "Trending Institutes" && feature.value === "Yes");
         });
+        const totalDocuments = institutes.result.length;
+        const totalPages = Math.ceil(totalDocuments / limitNum);
+        institutes.totalPages = totalPages;
+        institutes.totalDocuments = totalDocuments;
       }
 
-      //update totalDocuments and totalPages
-      const totalDocuments = institutes.result.length;
-      const totalPages = Math.ceil(totalDocuments / limitNum);
-      institutes.totalPages = totalPages;
-      institutes.totalDocuments = totalDocuments;
+      // update totalDocuments and totalPages
 
       
       return institutes;
