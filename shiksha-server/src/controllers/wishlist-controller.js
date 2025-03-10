@@ -39,9 +39,29 @@ export const createWishlist = async (req, res) => {
         // Item exists, remove it
         user[wishlistField].splice(itemIndex, 1);
         await user.save();
+        if (wishlistField === 'college_wishlist') {
+          const college = await instituteService.get(itemId);
+          if (!college) {
+            throw new AppError("College not found", StatusCodes.NOT_FOUND);
+          }
+          // Fix: Ensure we're correctly comparing ObjectIDs by converting to strings
+          const updatedWishlist = college.wishlist.filter(id => id.toString() !== studentId.toString());
+          // Ensure this update is actually being applied correctly
+          await instituteService.update(itemId, { wishlist: updatedWishlist });
+        }
         return res.status(StatusCodes.OK).json({ message: removeMessage });
       } else {
         // Item doesn't exist, add it
+        if (wishlistField === 'college_wishlist') {
+          const college = await instituteService.get(itemId);
+          console.log("college wishlist ", college.instituteName);
+          if (!college) {
+            throw new AppError("College not found", StatusCodes.NOT_FOUND);
+          }
+          college.wishlist.push(studentId);
+          await instituteService.update(itemId, { wishlist: college.wishlist });
+        }
+
         user[wishlistField].push(itemId);
         await user.save();
         return res.status(StatusCodes.CREATED).json({ message: addMessage });

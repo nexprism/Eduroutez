@@ -191,6 +191,12 @@ const instituteSchema = new mongoose.Schema(
       type:Date,
       default: new Date(new Date().setMonth(new Date().getMonth() + 1)),
     },
+    wishlist:[
+      {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+    ],
     issues: [
       {
         type: mongoose.Schema.Types.ObjectId,
