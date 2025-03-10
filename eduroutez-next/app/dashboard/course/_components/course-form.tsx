@@ -68,11 +68,13 @@ const statuses = [
   { value: 'inactive', label: 'Inactive' }
 ];
 
-const visibilities = [
-  { value: 'trending', label: 'Trending' },
-  { value: 'popular', label: 'Popular' },
-  { value: 'default', label: 'Default' }
-];
+const baseURL = process.env.NEXT_PUBLIC_NEW_IMAGES;
+
+// const visibilities = [
+//   { value: 'trending', label: 'Trending' },
+//   { value: 'popular', label: 'Popular' },
+//   { value: 'default', label: 'Default' }
+// ];
 
 const languages = [
   { value: 'english', label: 'English' },
@@ -98,16 +100,16 @@ const formSchema = z.object({
   status: z.string({
     required_error: 'Please select a status.'
   }),
-  visibility: z.string({
-    required_error: 'Please select a visibility option.'
-  }),
+  // visibility: z.string({
+  //   required_error: 'Please select a visibility option.'
+  // }),
   language: z.string({
     required_error: 'Please select a language.'
   }),
 
   eligibility: z.string().optional(),
   cutOff: z.string().optional(),
-  ranking: z.string().optional(),
+  // ranking: z.string().optional(),
   examAccepted: z.string().optional(),
   courseDurationYears: z.any().optional(),
   courseDurationMonths: z.any().optional(),
@@ -278,7 +280,13 @@ export default function CreateCourse() {
   };
 
   const fetchCategories = async () => {
-    const response = await axiosInstance.get(`${apiUrl}/course-categories`);
+    const response = await axiosInstance.get(`${apiUrl}/course-categories`,
+      {
+        params: {
+          page: 0
+        }
+      }
+    );
     return response.data;
   };
   const {
@@ -321,7 +329,7 @@ export default function CreateCourse() {
       formData.append('category', values.category);
       formData.append('status', values.status);
       formData.append('instituteCategory', values.instituteCategory);
-      formData.append('visibility', values.visibility);
+      // formData.append('visibility', values.visibility);
       formData.append('language', values.language);
       formData.append('isCoursePopular', values.isCoursePopular?.toString() || 'false');
       formData.append('isCourseTrending', values.isCourseTreanding?.toString() || 'false');
@@ -335,9 +343,9 @@ export default function CreateCourse() {
       if (values.cutOff !== undefined) {
         formData.append('cutOff', values.cutOff);
       }
-      if (values.ranking !== undefined) {
-        formData.append('ranking', values.ranking);
-      }
+      // if (values.ranking !== undefined) {
+      //   formData.append('ranking', values.ranking);
+      // }
       if (values.courseDurationYears !== undefined) {
         formData.append('courseDurationYears', values.courseDurationYears);
       }
@@ -389,12 +397,11 @@ export default function CreateCourse() {
       }
       if (values.coursePreviewThumbnail !== undefined) {
         formData.append(
-          'coursePreviewThumbnail',
-          values.coursePreviewThumbnail
+          'coursePreviewThumbnail', `${baseURL}/${values.coursePreviewThumbnail}`
         );
       }
       if (values.coursePreviewCover !== undefined) {
-        formData.append('coursePreviewCover', values.coursePreviewCover);
+        formData.append('coursePreviewCover', `${baseURL}/${values.coursePreviewCover}`);
       }
       if (values.metaTitle !== undefined) {
         formData.append('metaTitle', values.metaTitle);
@@ -406,7 +413,7 @@ export default function CreateCourse() {
         formData.append('metaKeywords', values.metaKeywords);
       }
       if (values.metaImage !== undefined) {
-        formData.append('metaImage', values.metaImage);
+        formData.append('metaImage',  `${baseURL}/${values.metaImage}`);
       }
       if(values.pros !== undefined){
         formData.append('pros', values.pros);
@@ -492,50 +499,59 @@ export default function CreateCourse() {
     enabled: isEdit // Only fetch when in edit mode
   });
   React.useEffect(() => {
-      if (course?.data) {
-        form.reset({
-          courseTitle: course.data.courseTitle,
-          shortDescription: course.data.shortDescription,
-          longDescription: course.data.longDescription,
-          isCourseFree: course.data.isCourseFree,
-          isCourseDiscounted: course.data.isCourseDiscounted,
-          courseType: course.data.courseType,
-          category: course.data.category._id,
-          status: course.data.status,
-          instituteCategory: course.data.instituteCategory,
-          visibility: course.data.visibility,
-          language: course.data.language,
-          examAccepted: course.data.examAccepted,
-          eligibility: course.data.eligibility,
-          cutOff: course.data.cutOff,
-          ranking: course.data.ranking,
-          courseDurationYears: course.data.courseDurationYears,
-          courseDurationMonths: course.data.courseDurationMonths,
-          applicationStartDate: course.data.applicationStartDate ? new Date(course.data.applicationStartDate) : null,
-          applicationEndDate: course.data.applicationEndDate ? new Date(course.data.applicationEndDate) : null,
-          courseOverview: course.data.courseOverview,
-          courseEligibility: course.data.courseEligibility,
-          courseCurriculum: course.data.courseCurriculum,
-          courseFee: course.data.courseFee,
-          courseOpportunities: course.data.courseOpportunities,
-          coursePrice: course.data.coursePrice,
-          courseDiscount: course.data.courseDiscount,
-          courseDiscountType: course.data.courseDiscountType,
-          coursePreviewType: course.data.coursePreviewType,
-          coursePreviewUrl: course.data.coursePreviewUrl,
-          coursePreviewThumbnail: course.data.coursePreviewThumbnail,
-          coursePreviewCover: course.data.coursePreviewCover,
-          metaTitle: course.data.metaTitle,
-          metaDescription: course.data.metaDescription,
-          metaKeywords: course.data.metaKeywords,
-          metaImage: course.data.metaImage,
-      isCoursePopular: course.data.isCoursePopular || false,
-      isCourseTreanding: course.data.isCourseTrending || false,
-      pros: course.data.pros,
-      cons: course.data.cons,
-        });
+    if (course?.data) {
+      form.reset({
+        courseTitle: course.data.courseTitle,
+        shortDescription: course.data.shortDescription,
+        longDescription: course.data.longDescription,
+        isCourseFree: course.data.isCourseFree,
+        isCourseDiscounted: course.data.isCourseDiscounted,
+        courseType: course.data.courseType,
+        category: course.data.category._id,
+        status: course.data.status,
+        instituteCategory: course.data.instituteCategory,
+        // visibility: course.data.visibility,
+        language: course.data.language,
+        examAccepted: course.data.examAccepted,
+        eligibility: course.data.eligibility,
+        cutOff: course.data.cutOff,
+        // ranking: course.data.ranking,
+        courseDurationYears: course.data.courseDurationYears,
+        courseDurationMonths: course.data.courseDurationMonths,
+        applicationStartDate: course.data.applicationStartDate ? new Date(course.data.applicationStartDate) : null,
+        applicationEndDate: course.data.applicationEndDate ? new Date(course.data.applicationEndDate) : null,
+        courseOverview: course.data.courseOverview,
+        courseEligibility: course.data.courseEligibility,
+        courseCurriculum: course.data.courseCurriculum,
+        courseFee: course.data.courseFee,
+        courseOpportunities: course.data.courseOpportunities,
+        coursePrice: course.data.coursePrice,
+        courseDiscount: course.data.courseDiscount,
+        courseDiscountType: course.data.courseDiscountType,
+        coursePreviewType: course.data.coursePreviewType,
+        coursePreviewUrl: course.data.coursePreviewUrl,
+        metaTitle: course.data.metaTitle,
+        metaDescription: course.data.metaDescription,
+        metaKeywords: course.data.metaKeywords,
+        isCoursePopular: course.data.isCoursePopular || false,
+        isCourseTreanding: course.data.isCourseTrending || false,
+        pros: course.data.pros,
+        cons: course.data.cons,
+      });
+
+      if (course.data.coursePreviewThumbnail) {
+        setPreviewThumbnailUrl( `${baseURL}/${course.data.coursePreviewThumbnail}`);
       }
-    }, [course, form]);
+
+      if (course.data.coursePreviewCover) {
+        setPreviewCoverUrl(`${baseURL}/${course.data.coursePreviewCover}`);
+      }
+
+      if (course.data.metaImage) {
+        setPreviewMetaImageUrl(`${baseURL}/${course.data.metaImage}`);
+      }
+    }
+  }, [course, form]);
 
 
   
@@ -762,7 +778,7 @@ export default function CreateCourse() {
                       )}
                     />
 
-                    <FormField
+                    {/* <FormField
                       control={form.control}
                       name="visibility"
                       render={({ field }) => (
@@ -792,7 +808,7 @@ export default function CreateCourse() {
                       </FormItem>
                       )}
                     />
-                   
+                    */}
 
                    <FormField
               control={form.control}
@@ -914,7 +930,7 @@ export default function CreateCourse() {
                       )}
                     />
 
-                    <FormField
+                    {/* <FormField
                       control={form.control}
                       name="ranking"
                       render={({ field }) => (
@@ -924,7 +940,7 @@ export default function CreateCourse() {
                         <FormMessage />
                       </FormItem>
                       )}
-                    />
+                    /> */}
                     </div>
                   <div className="flex flex-col">
                     <Label htmlFor="" className="text-md font-semibold">
@@ -1597,7 +1613,7 @@ export default function CreateCourse() {
                     category: 'Please select a category.',
                     instituteCategory: 'Please select an institute category.',
                     status: 'Please select a status.',
-                    visibility: 'Please select a visibility option.',
+                    // visibility: 'Please select a visibility option.',
                     isCourseFree: 'You need to select one option.',
                     };
 
