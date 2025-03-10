@@ -82,7 +82,7 @@ console.log('updatesInstitute',updatesInstitute);
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
-      console.log("select", select);
+      // console.log("select", select);
 
       // Parse JSON strings from query parameters to objects
       const parsedFilters = JSON.parse(filters);
@@ -106,15 +106,15 @@ console.log('updatesInstitute',updatesInstitute);
           if (key === 'streams' || key === 'specialization' || key === 'state' || key === 'city' || key === 'examAccepted' || key === 'organisationType') {
             if (Array.isArray(value)) {
               const regexPattern = value.join('|'); // Convert array to regex pattern
-              filterConditions.$and = filterConditions.$and || [];
+              filterConditions.$or = filterConditions.$or || [];
               if(key === 'state' || key === 'city') {
-                filterConditions.$and.push({ [`${key}.name`]: { $regex: regexPattern, $options: 'i' } });
+                filterConditions.$or.push({ [`${key}.name`]: { $regex: regexPattern, $options: 'i' } });
               } else {
-                filterConditions.$and.push({ [key]: { $regex: regexPattern, $options: 'i' } });
+                filterConditions.$or.push({ [key]: { $regex: regexPattern, $options: 'i' } });
               }
             } else {
-              filterConditions.$and = filterConditions.$and || [];
-              filterConditions.$and.push({ [key]: { $regex: value, $options: 'i' } });
+              filterConditions.$or = filterConditions.$and || [];
+              filterConditions.$or.push({ [key]: { $regex: value, $options: 'i' } });
             }
           } else if (key === 'Fees') {
             // Handling multiple min and max fee filters
@@ -123,7 +123,7 @@ console.log('updatesInstitute',updatesInstitute);
             //items: ["> 5 Lakh", "3 - 5 Lakh", "1 - 3 Lakh", "< 1 Lakh"],
 
             if (Array.isArray(value)) {
-              filterConditions.$and = filterConditions.$and || [];
+              filterConditions.$or = filterConditions.$and || [];
 
               value.forEach(range => {
                 let condition = {};
@@ -139,7 +139,7 @@ console.log('updatesInstitute',updatesInstitute);
                 }
 
                 console.log("Condition", condition);
-                filterConditions.$and.push(condition);
+                filterConditions.$or.push(condition);
               });
             }
           } else if (key === 'examAccepted') {
