@@ -61,20 +61,6 @@ export const columns: ColumnDef<Course>[] = [
     )
   },
   {
-    accessorKey: 'visibility',
-    header: 'Visibilty',
-    cell: ({ row }) => (
-      <div className="flex w-32 space-x-1">
-        <Badge
-          variant={ 'outline'}
-          className="text-xs "
-        >
-          {row.original.visibility}
-        </Badge>
-      </div>
-    )
-  },
-  {
     accessorKey: 'status',
     header: 'STATUS',
     cell: ({ row }) => (

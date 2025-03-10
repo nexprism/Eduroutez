@@ -170,111 +170,105 @@ const [initialCityName, setInitialCityName] = useState("");
       const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
 
-  if (instituteData?.streams) {
-    setSelectedStreams(instituteData.streams);
-  }
+      console.log('Institute data received:', instituteData);
 
-  if (instituteData && instituteData.country) {
-    // Save the country name for display purposes
-    setInitialCountryName(instituteData.country.name);
-    
-    // Set the ID in the form
-    form.setValue("country", instituteData.country.id);
-  }
+      // Set streams state first
+      if (instituteData?.streams) {
+        setSelectedStreams(Array.isArray(instituteData.streams) ? instituteData.streams : []);
+      }
 
-  if (instituteData && instituteData.state) {
-    // Save the state name for display purposes
-    setInitialStateName(instituteData.state.name);
-    
-    // Set the ID in the form
-    form.setValue("state", instituteData.state.id);
-  }
+      // Set location display values
+      if (instituteData?.country) {
+        setInitialCountryName(instituteData.country.name);
+        form.setValue("country", instituteData.country.id);
+      }
 
-  if (instituteData && instituteData.city) {
-    // Save the city name for display purposes
-    setInitialCityName(instituteData.city.name);
-    
-    // Set the ID in the form
-    form.setValue("city", instituteData.city.id);
-  }
+      if (instituteData?.state) {
+        setInitialStateName(instituteData.state.name);
+        form.setValue("state", instituteData.state.id);
+      }
 
-  
+      if (instituteData?.city) {
+        setInitialCityName(instituteData.city.name);
+        form.setValue("city", instituteData.city.id);
+      }
 
-  console.log('countryna,e',instituteData.country?.name)
-  console.log('state',instituteData.state.name)
-
+      // Reset form with all values from API
       form.reset({
-        instituteName: instituteData.instituteName,
-        institutePhone: instituteData.institutePhone,
-        email: instituteData.email,
-        establishedYear: instituteData.establishedYear,
-        organisationType: instituteData.organisationType,
-        website: instituteData.website,
-        country:instituteData.country?.id,
-        city: instituteData?.city?.id,
-        state: instituteData?.state?.id,
-        address: instituteData.address,
-        about: instituteData.about,
-        minFees: instituteData.minFees,
-        maxFees: instituteData.maxFees,
-        affiliation: instituteData.affiliation,
-        highestPackage: instituteData.highestPackage,
-        streams:instituteData.streams,
-        specialization: instituteData.specialization,
+        instituteName: instituteData.instituteName || '',
+        institutePhone: instituteData.institutePhone || '',
+        email: instituteData.email || '',
+        establishedYear: instituteData.establishedYear || '',
+        organisationType: instituteData.organisationType || '',
+        website: instituteData.website || '',
+        country: instituteData.country?.id || '',
+        city: instituteData.city?.id || '',
+        state: instituteData.state?.id || '',
+        address: instituteData.address || '',
+        about: instituteData.about || '',
+        minFees: instituteData.minFees || '',
+        maxFees: instituteData.maxFees || '',
+        affiliation: instituteData.affiliation || '',
+        highestPackage: instituteData.highestPackage || '',
+        streams: instituteData.streams || [],
+        specialization: instituteData.specialization || '',
         thumbnail: instituteData.thumbnailImage,
         cover: instituteData.coverImage,
         logo: instituteData.instituteLogo,
         brochure: instituteData.brochure,
-        examAccepted: instituteData.examAccepted
+        examAccepted: instituteData.examAccepted || ''
       });
 
-      console.log('State/City data:', stateCityData);
-      console.log('Institute fetch nb:', `${baseURL}/${instituteData.thumbnailImage}`);
-              // Get images URLs 
-               
-        setPreviewThumbnailUrl(instituteData.thumbnailImage != "null" ? `${baseURL}/${instituteData.thumbnailImage}` : null);
-        setPreviewCoverUrl(instituteData.coverImage != "null" ? `${baseURL}/${instituteData.coverImage}` : null);
-        setPreviewLogoUrl(instituteData.instituteLogo != "null" ? `${baseURL}/${instituteData.instituteLogo}` : null);
-        setPreviewbrochure(instituteData.brochure != "null" ? `${baseURL}/${instituteData.brochure}` : null);
-      console.log('Institute fetch successfully:', instituteData);
-    } catch (error: any) {
-      console.log('Error fetching institute:', error.message);
+      // Update preview URLs with proper null handling
+      setPreviewThumbnailUrl(instituteData.thumbnailImage && instituteData.thumbnailImage !== "null" 
+        ? `${baseURL}/${instituteData.thumbnailImage}` : null);
+      setPreviewCoverUrl(instituteData.coverImage && instituteData.coverImage !== "null" 
+        ? `${baseURL}/${instituteData.coverImage}` : null);
+      setPreviewLogoUrl(instituteData.instituteLogo && instituteData.instituteLogo !== "null" 
+        ? `${baseURL}/${instituteData.instituteLogo}` : null);
+      setPreviewbrochure(instituteData.brochure && instituteData.brochure !== "null" 
+        ? `${baseURL}/${instituteData.brochure}` : null);
+      
+      console.log('Form values after reset:', form.getValues());
+    } catch (error) {
+      console.error('Error fetching institute:', error);
+      toast.error('Failed to load institute data');
     }
   };
   
 
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      instituteName: '',
+      institutePhone: '',
+      email: '',
+      establishedYear: '',
+      website: '',
+      organisationType: '',
+      country: '',
+      city: '',
+      state: '',
+      address: '',
+      about: '',
+      minFees: '',
+      maxFees: '',
+      affiliation: '',
+      highestPackage: '',
+      streams: [],
+      specialization: '',
+      examAccepted: ''
+    }
+  });
 
+  // Make sure to call fetch on component mount if we're in edit mode
   useEffect(() => {
     if (segments.length === 5 && segments[3] === 'update') {
       setIsEdit(true);
       fetchInstituteData();
     }
   }, []);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      instituteName:'',
-      institutePhone:'',
-      email:'',
-      establishedYear:'',
-      website:'',
-        organisationType: '',
-        country: '',
-      city:'',
-      state:'',
-      address:'',
-      about:'',
-      minFees:'',
-      maxFees:'',
-      affiliation:'',
-      highestPackage:'',
-      streams:'',
-      specialization:'',
-      examAccepted: ''
-    }
-  });
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -680,111 +674,111 @@ const [initialCityName, setInitialCityName] = useState("");
               />
     
 
+  <FormField
+            control={form.control}
+            name="country"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Country</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+          
+                    field.onChange(value);
+                  }}
+                  value={field.value || ""}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Country">
+                        {console.log('fghjk',field.value)}
+                        {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
+                      </SelectValue>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent className="max-h-60 overflow-y-auto">
+                    {countries.map((country) => (
+                      <SelectItem key={country.id} value={country.id}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          
+          
+                {/* State Select */}
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State</FormLabel>
+                      <Select
+                  onValueChange={(value) => {
+          
+                    field.onChange(value);
+                  }}
+                  value={field.value || ""}
+                >
+                        <FormControl>
+                          <SelectTrigger>
+                          <SelectValue placeholder="Select State">
+                          {states.find((c) => c.id == field.value)?.name || initialStateName || ""}
+                      </SelectValue>           
+                           </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {states.map((state) => (
+                            <SelectItem key={state.id} value={state.id}>
+                              {state.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+          
+                {/* City Select */}
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <Select
+                  onValueChange={(value) => {
+          
+                    field.onChange(value);
+                  }}
+                  value={field.value || ""}
+                >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select City" >
+                            {cities.find((c) => c.id == field.value)?.name || initialCityName || ""}
+                            </SelectValue>
+          
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {cities.map((city) => (
+                            <SelectItem key={city.id} value={city.id}>
+                              {city.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-    <FormField
-  control={form.control}
-  name="country"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Country</FormLabel>
-      <Select
-        onValueChange={(value) => {
-
-          field.onChange(value);
-        }}
-        value={field.value || ""}
-      >
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder="Select Country">
-              {console.log('fghjk',field.value)}
-              {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
-            </SelectValue>
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent className="max-h-60 overflow-y-auto">
-          {countries.map((country) => (
-            <SelectItem key={country.id} value={country.id}>
-              {country.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-
-
-
-      {/* State Select */}
-      <FormField
-        control={form.control}
-        name="state"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>State</FormLabel>
-            <Select
-        onValueChange={(value) => {
-
-          field.onChange(value);
-        }}
-        value={field.value || ""}
-      >
-              <FormControl>
-                <SelectTrigger>
-                <SelectValue placeholder="Select State">
-                {states.find((c) => c.id == field.value)?.name || initialStateName || ""}
-            </SelectValue>           
-                 </SelectTrigger>
-              </FormControl>
-              <SelectContent className="max-h-60 overflow-y-auto">
-                {states.map((state) => (
-                  <SelectItem key={state.id} value={state.id}>
-                    {state.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {/* City Select */}
-      <FormField
-        control={form.control}
-        name="city"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>City</FormLabel>
-            <Select
-        onValueChange={(value) => {
-
-          field.onChange(value);
-        }}
-        value={field.value || ""}
-      >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select City" >
-                  {cities.find((c) => c.id == field.value)?.name || initialCityName || ""}
-                  </SelectValue>
-
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent className="max-h-60 overflow-y-auto">
-                {cities.map((city) => (
-                  <SelectItem key={city.id} value={city.id}>
-                    {city.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
 
               <FormField
                 control={form.control}

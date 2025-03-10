@@ -131,7 +131,7 @@ export default function CourseListingPage({}: TCourseListingPage) {
             </div>
             <Separator />
             
-            {role === 'institute' && totalCourses > popularCourseFeature && (
+            {role === 'institute' && popularCourseFeature !== null && totalCourses > popularCourseFeature && (
               <Alert variant="default" className="mb-4">
                 <Lock className="h-4 w-4" />
                 <AlertDescription>
