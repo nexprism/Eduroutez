@@ -189,7 +189,7 @@ export default function EarningsReportPage() {
   const totalEarnings = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 h-dvh overflow-y-scroll">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Earnings Report</h1>
         <p className="text-sm text-muted-foreground">
