@@ -122,8 +122,6 @@ export async function getBlog(req, res) {
     }
 
 
-
-
     const response = await blogService.get(id, field);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the blog";

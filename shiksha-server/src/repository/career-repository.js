@@ -6,6 +6,17 @@ class CareerRepository extends CrudRepository {
     super(Career);
   }
 
+  //getByField
+    async getByField(value, field) {
+      try {
+        const career = await Career.findOne({ [field]: value });
+        return career;
+      } catch (error) {
+        console.error('Error in CareerRepository.getByField:', error.message);
+        throw error;
+      }
+    }
+
   async getCareer(instituteId) {
     try {
       console.log('id', instituteId);

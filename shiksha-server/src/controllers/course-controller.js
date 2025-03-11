@@ -154,8 +154,12 @@ export async function getPopularCourses(req, res) {
 
 export async function getCourse(req, res) {
   try {
-    // console.log(req.params.id);
-    const response = await courseService.get(req.params.id);
+    const id = req.params.id;
+    var field = '_id';
+    if (req.query.field) {
+      field = req.query.field;
+    }
+    const response = await courseService.get(id, field);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the course";
     return res.status(StatusCodes.OK).json(SuccessResponse);

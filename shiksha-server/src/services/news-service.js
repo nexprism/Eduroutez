@@ -61,11 +61,11 @@ class NewsService {
         }
     }
 
-  async get(id) {
+  async get(id, field = '_id') {
     try {
       console.log("Fetching news article with id: ", id);
-      const data= await News.findById(id);
-      console.log("data",data);
+      const data = await News.findOne({ [field]: id });
+      // console.log("data",data);
       return data;
     } catch (error) {
       throw new Error("Error fetching news article: " + error.message);

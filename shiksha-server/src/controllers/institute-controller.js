@@ -342,8 +342,13 @@ export const bulkAddInstitutes = async (req, res) => {
 
 export async function getInstitute(req, res) {
   try {
-    console.log('hello',req.params.id);
-    const response = await instituteService.get(req.params.id);
+    const id = req.params.id;
+    var field = '_id';
+    if (req.query.field) {
+      field = req.query.field;
+    }
+    // console.log('hello',req.params.id);
+    const response = await instituteService.get(id, field);
     console.log('response in getInstitute',response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the institute";

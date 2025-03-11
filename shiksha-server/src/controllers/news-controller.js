@@ -100,12 +100,17 @@ export async function getNews(req, res) {
  */
 export async function getNewsById(req, res) {
   try {
-    
-    const response = await newsService.get(req.params.id);
+    const id = req.params.id;
+    var field = '_id';
+    if (req.query.field) {
+      field = req.query.field;
+    }
+    const response = await newsService.get(id, field);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the news article";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.log('neew error',error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }

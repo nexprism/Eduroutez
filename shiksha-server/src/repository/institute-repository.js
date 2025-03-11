@@ -168,6 +168,26 @@ class InstituteRepository extends CrudRepository {
       throw error;
     }
   }
+  //getByField
+  async getByField(value,field = "_id") {
+    try {
+      console.log('value',value);
+      console.log('field',field);
+      let institute = await Institute.findOne({ [field]: value });
+
+        console.log('institute',institute);
+      if (institute.plan && institute.reviews) {
+        institute = await Institute.findOne({ [field]: value }).populate("plan").populate("reviews");
+      }
+
+      
+
+      return institute;
+    }
+    catch (error) {
+      throw error;
+    }
+  }
 
   //removeGallery
   async removeGallery(id, gallery) {

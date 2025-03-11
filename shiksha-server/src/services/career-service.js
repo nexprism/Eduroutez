@@ -73,8 +73,8 @@ async getCareerByinstituteId(instituteId) {
     }
   }
 
-  async get(id) {
-    const career = await this.careerRepository.get(id);
+  async get(id, field = '_id') {
+    const career = await this.careerRepository.getByField(id, field);
 
     const views = career.views || 0;
     await this.careerRepository.update(id, { views: views + 1 });

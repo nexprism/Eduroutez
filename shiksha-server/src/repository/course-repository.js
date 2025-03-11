@@ -7,6 +7,18 @@ class CourseRepository extends CrudRepository {
     super(Course);
   }
 
+  //getbyfield
+  async getByField(value, populateFields = [], field = "_id") {
+    try {
+      const course = await Course.findOne({ [field]: value }).populate(populateFields);
+      return course;
+    }
+    catch (error) {
+      throw error;
+    }
+
+  }
+
   //getCourseByInstitute
   async getCourseByInstitute(instituteId) {
     try {

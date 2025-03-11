@@ -263,10 +263,10 @@ console.log('updatesInstitute',updatesInstitute);
     }
   }
 
-  async get(id) {
+  async get(id, field = '_id') {
     // Get the institute model
-    const instituteModel = await this.instituteRepository.get(id);
-
+    const instituteModel = await this.instituteRepository.getByField(id, field);
+    console.log('instituteModel',instituteModel);
     // Convert model to plain JavaScript object
     // Different ORMs have different methods to do this:
     let institute;
@@ -290,7 +290,7 @@ console.log('updatesInstitute',updatesInstitute);
 
     // Update views by 1
     const views = institute.views + 1;
-    await this.instituteRepository.update(id, { views });
+    await this.instituteRepository.update(institute.id, { views });
 
     console.log('institute views',institute.views);
 
