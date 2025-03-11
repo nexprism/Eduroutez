@@ -397,11 +397,11 @@ export default function CreateCourse() {
       }
       if (values.coursePreviewThumbnail !== undefined) {
         formData.append(
-          'coursePreviewThumbnail', `${baseURL}/${values.coursePreviewThumbnail}`
+          'coursePreviewThumbnail', values.coursePreviewThumbnail
         );
       }
       if (values.coursePreviewCover !== undefined) {
-        formData.append('coursePreviewCover', `${baseURL}/${values.coursePreviewCover}`);
+        formData.append('coursePreviewCover',values.coursePreviewCover);
       }
       if (values.metaTitle !== undefined) {
         formData.append('metaTitle', values.metaTitle);
@@ -413,7 +413,7 @@ export default function CreateCourse() {
         formData.append('metaKeywords', values.metaKeywords);
       }
       if (values.metaImage !== undefined) {
-        formData.append('metaImage',  `${baseURL}/${values.metaImage}`);
+        formData.append('metaImage',  values.metaImage);
       }
       if(values.pros !== undefined){
         formData.append('pros', values.pros);
