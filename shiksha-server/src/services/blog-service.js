@@ -17,11 +17,12 @@ class BlogService {
       throw error;
     }
   }
-  async get(id) {
-    const blog = await this.blogRepository.get(id);
+  async get(id,field = '_id') {
+    const blog = await this.blogRepository.getByField(id,field);
     //update views by 1
     const views = blog.views + 1;
-    await this.blogRepository.update(id, { views });
+    console.log('views',views);
+    await this.blogRepository.update(blog._id, { views });
     if (!blog) {
       return null;
     }
@@ -69,7 +70,7 @@ class BlogService {
           })
         );
       } catch (err) {
-        console.error("Error processing reviews:", err);
+        console.error("Error processing reviews:", err.message);
         careerCopy.reviews = [];
       }
     } else {

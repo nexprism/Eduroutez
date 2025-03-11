@@ -507,7 +507,7 @@ export default function CreateCourse() {
         isCourseFree: course.data.isCourseFree,
         isCourseDiscounted: course.data.isCourseDiscounted,
         courseType: course.data.courseType,
-        category: course.data.category._id,
+        category: course.data.category?._id,
         status: course.data.status,
         instituteCategory: course.data.instituteCategory,
         // visibility: course.data.visibility,

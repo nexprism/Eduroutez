@@ -114,11 +114,22 @@ export async function getBlogsByInstitute(req, res) {
 
 export async function getBlog(req, res) {
   try {
-    const response = await blogService.get(req.params.id);
+
+    const id = req.params.id;
+    var field = '_id';
+    if (req.query.field) {
+      field = req.query.field;
+    }
+
+
+
+
+    const response = await blogService.get(id, field);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the blog";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
+    console.error("Error creating blog:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
   }

@@ -52,6 +52,19 @@ class BlogRepository extends CrudRepository {
     }
   }
 
+  //getByField
+  async getByField(value, field) {
+    try {
+      console.log('field',field);
+      console.log('value',value);
+      const blog = await Blog.findOne({ [field]: value });
+      return blog;
+    } catch (error) {
+      console.error('Error in BlogRepository.getByField:', error.message);
+      throw error;
+    }
+  }
+
 
 
 }

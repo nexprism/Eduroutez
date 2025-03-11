@@ -82,7 +82,7 @@ const courseSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    isCourseTreanding: {
+    isCourseTrending: {
       type: Boolean,
       default: false,
     },
