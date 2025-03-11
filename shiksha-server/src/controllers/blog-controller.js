@@ -117,10 +117,9 @@ export async function getBlog(req, res) {
 
     const id = req.params.id;
     var field = '_id';
-    if(req.body.field){
-      field = req.body.field;
+    if (req.query.field) {
+      field = req.query.field;
     }
-    
 
 
 
