@@ -133,6 +133,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           <DropdownMenuItem onClick={handleDeny}>
             <Trash className="mr-2 h-4 w-4" /> Deny
           </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDeny}>
+              
+              <span className="mr-2 h-4 w-4">⏸️</span> On Hold
+            </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>
