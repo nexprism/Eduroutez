@@ -90,7 +90,7 @@ console.log('updatesInstitute',updatesInstitute);
       const parsedSort = JSON.parse(sort);
 
       // Build filter conditions for multiple fields
-      const filterConditions = { deletedAt: null };
+      const filterConditions = { deletedAt: null, onhold: true };
       var ratingFilter = 0;
       var trendingFilter = 0;
       for (var [key, value] of Object.entries(parsedFilters)) {

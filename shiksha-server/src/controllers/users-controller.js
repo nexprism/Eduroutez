@@ -203,10 +203,19 @@ export async function holdUser(req, res) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    payload.is_verified = true;
+
+    const response = await userService.update(id, payload);
+
+    payload.status = true;
+
     const institute = await instituteService.get(id);
+
+
 
     if (institute) {
       institute.onhold = true;
+      payload.status = true;
       const instituteresponse = await instituteService.update(id, institute);
     }
 
