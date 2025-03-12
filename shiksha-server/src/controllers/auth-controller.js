@@ -307,7 +307,7 @@ export const signup = async (req, res) => {
     
     if (req.body.role === 'institute'){
       is_verified = false;
-      status = false;
+      status = true;
     }
 
     var referdata = {};

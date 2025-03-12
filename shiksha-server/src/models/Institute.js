@@ -106,7 +106,9 @@ const instituteSchema = new mongoose.Schema(
     ranking: {
       type: String,
     },
-
+    rank:{
+      type:Number,
+    },
     cutoff: {
       type: String,
     },

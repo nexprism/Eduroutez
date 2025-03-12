@@ -260,8 +260,8 @@ class CounselorService {
     try {
 
       //fetch counselor by id
-      console.log('id', id);
-      console.log('data', data);
+      // console.log('id', id);
+      // console.log('data', data);
      
 
       const counselor = await this.counselorRepository.updateCounsellor(id, data);
