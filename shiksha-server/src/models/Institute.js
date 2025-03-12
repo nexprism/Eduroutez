@@ -175,6 +175,10 @@ const instituteSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    onhold: {
+      type: Boolean,
+      default: false,
+    },
     plan:{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subscription",
