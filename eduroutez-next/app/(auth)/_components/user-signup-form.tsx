@@ -226,7 +226,7 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
         localStorage.setItem('refreshToken', JSON.stringify(data.data.refreshToken));
         startTransition(() => router.push('/'));
       } else {
-        setShowAlert(true);
+        setShowAlert(false);
         localStorage.setItem('accessToken', JSON.stringify(data.data.accessToken));
         localStorage.setItem('refreshToken', JSON.stringify(data.data.refreshToken));
         startTransition(() => router.push('/'));

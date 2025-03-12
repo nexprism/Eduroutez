@@ -236,10 +236,14 @@ const [initialCityName, setInitialCityName] = useState("");
           brochure: instituteData.brochure
         });
 
-        setPreviewThumbnailUrl(instituteData.thumbnailImage != "null" ? `${baseURL}/${instituteData.thumbnailImage}` : null);
-        setPreviewCoverUrl(instituteData.coverImage != "null" ? `${baseURL}/${instituteData.coverImage}` : null);
-        setPreviewLogoUrl(instituteData.instituteLogo != "null" ? `${baseURL}/${instituteData.instituteLogo}` : null);
-        setPreviewbrochure(instituteData.brochure != "null" ? `${baseURL}/${instituteData.brochure}` : null);
+        setPreviewThumbnailUrl(instituteData.thumbnailImage && instituteData.thumbnailImage !== "null" 
+          ? `${baseURL}/${instituteData.thumbnailImage}` : null);
+        setPreviewCoverUrl(instituteData.coverImage && instituteData.coverImage !== "null" 
+          ? `${baseURL}/${instituteData.coverImage}` : null);
+        setPreviewLogoUrl(instituteData.instituteLogo && instituteData.instituteLogo !== "null" 
+          ? `${baseURL}/${instituteData.instituteLogo}` : null);
+        setPreviewbrochure(instituteData.brochure && instituteData.brochure !== "null" 
+          ? `${baseURL}/${instituteData.brochure}` : null);
       };
 
       fetchData();

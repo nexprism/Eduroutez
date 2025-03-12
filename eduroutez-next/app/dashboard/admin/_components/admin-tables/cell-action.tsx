@@ -101,8 +101,36 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     },
   });
 
+  const { mutate: holdMutate } = useMutation({
+    mutationFn: async (jsonData: { id: string }) => {
+      const endpoint = `${apiUrl}/hold`;
+      const response = await axiosInstance({
+        url: endpoint,
+        method: 'POST',
+        data: jsonData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      const message = 'User Put On Hold Successfully';
+      toast.success(message);
+      window.location.reload();
+      router.push('/dashboard/institute');
+    },
+    onError: (error) => {
+      toast.error('Something went wrong');
+    },
+  });
+
   const handleDeny = async () => {
     denyMutate({ id: data?._id });
+  };
+
+  const handleHold = async () => {
+    holdMutate({ id: data?._id });
   };
 
   const onConfirm = async () => {
@@ -133,6 +161,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           <DropdownMenuItem onClick={handleDeny}>
             <Trash className="mr-2 h-4 w-4" /> Deny
           </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleHold}>
+              
+              <span className="mr-2 h-4 w-4">⏸️</span> On Hold
+            </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </>

@@ -18,8 +18,9 @@ const BulkInstituteUpload = () => {
     if (event.target.files) {
       const selectedFile = event.target.files[0];
       if (selectedFile.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' &&
-          selectedFile.type !== 'text/csv') {
-        setMessage('Please upload only Excel or CSV files.');
+          selectedFile.type !== 'text/csv' &&
+          selectedFile.type !== 'application/vnd.oasis.opendocument.spreadsheet') {
+        setMessage('Please upload only Excel, CSV, or ODS files.');
         setStatus('error');
         return;
       }
@@ -85,7 +86,6 @@ const BulkInstituteUpload = () => {
                 onChange={handleFileChange}
                 className="hidden"
                 id="file-upload"
-                accept=".xlsx,.csv"
               />
               <label
                 htmlFor="file-upload"

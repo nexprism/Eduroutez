@@ -28,9 +28,9 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { m } from 'framer-motion';
+// import { m } from 'framer-motion';
 import { AlertTriangleIcon, Trash, Trash2Icon } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
@@ -107,6 +107,7 @@ export const profileSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
+    about: z.string().optional(),
   experiences: z.array(
     z.object({
       title: z.string().min(1, { message: 'Please enter title' }),
@@ -179,7 +180,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const [states, setStates] = React.useState<State[]>([]);
   const [cities, setCities] = React.useState<City[]>([]);
   const [countries, setCountries] = React.useState<any[]>([]);
-  const [statesLoaded, setStatesLoaded] = useState(false);
+const [statesLoaded, setStatesLoaded] = useState(false);
   const [citiesLoaded, setCitiesLoaded] = useState(false);
    const [initialCountryName, setInitialCountryName] = useState("");
    const [initialStateName, setInitialStateName] = useState("");
@@ -188,7 +189,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const IMAGE_URL = process.env.NEXT_PUBLIC_NEW_IMAGES;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const delta = currentStep - previousStep;
+   const delta = currentStep - previousStep;
 
   const defaultValues = {
     email: localStorage.getItem('email') || '',
@@ -259,7 +260,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       
       // Format experiences dates
       const formattedExperiences = counselor.experiences.length > 0
-        ? counselor.experiences.map(exp => ({
+        ? counselor.experiences.map((exp: any) => ({
             ...exp,
             startDate: formatDate(exp.startDate),
             endDate: formatDate(exp.endDate)
@@ -355,7 +356,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         'gender',
         'dateOfBirth',
         'language',
-        'ExperienceYear'
+        'ExperienceYear',
+        'about'
       ]
     },
     {
@@ -469,7 +471,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       Object.entries(submissionData).forEach(([key, value]) => {
         if (key === 'experiences') {
           // Handle experiences array
-          submissionData.experiences.forEach((exp, index) => {
+          submissionData.experiences.forEach((exp: any, index: number) => {
             Object.entries(exp).forEach(([expKey, expValue]) => {
               formData.append(`experiences[${index}][${expKey}]`, expValue as string);
             });
@@ -509,7 +511,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
 
   const router = useRouter();
 
-  const { mutate, isPending } = useMutation({
+  const { mutate } = useMutation({
     mutationFn: async (formData: any) => {
       const Institute = localStorage.getItem('instituteId') || '';
       const endpoint = `${apiUrl}/counselor/${Institute}`; 
@@ -981,6 +983,24 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                     </FormItem>
                   )}
                 />
+
+<FormField
+                            control={form.control}
+                            name="about"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>About</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="text"
+                                    disabled={loading}
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
 
 
