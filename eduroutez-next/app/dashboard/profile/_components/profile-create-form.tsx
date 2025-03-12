@@ -268,13 +268,28 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       
       // Set image previews if available
       if (counselor.panCard) {
-        setPreviewPanCardUrl(`${IMAGE_URL}/${counselor.panCard}`);
+        console.log('panCard', counselor.panCard);
+        const panCardFilename = counselor.panCard.replace(/^.*[\\\/]/, ''); // Extract filename
+        const panCardUrl = `${IMAGE_URL}/${panCardFilename}`;
+        console.log('panCard filename', panCardFilename);
+
+        setPreviewPanCardUrl(panCardUrl);
       }
       if (counselor.adharCard) {
-        setPreviewAdharCardUrl(`${IMAGE_URL}/${counselor.adharCard}`);
+        console.log('adharCard', counselor.adharCard);
+        const adharCardFilename = counselor.adharCard.replace(/^.*[\\\/]/, ''); // Extract filename
+        const adharCardUrl = `${IMAGE_URL}/${adharCardFilename}`;
+        console.log('adharCard filename', adharCardFilename);
+
+        setPreviewAdharCardUrl(adharCardUrl);
       }
       if (counselor.profilePhoto) {
-        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.profilePhoto}`);
+        console.log('profilePhoto', counselor.profilePhoto);
+        const profilePhotoFilename = counselor.profilePhoto.replace(/^.*[\\\/]/, ''); // Extract filename
+        const profilePhotoUrl = `${IMAGE_URL}/${profilePhotoFilename}`;
+        console.log('profilePhoto filename', profilePhotoFilename);
+
+        setPreviewProfilePhotoUrl(profilePhotoUrl);
       }
       
       // Reset form with counselor data
@@ -468,15 +483,21 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         }
       });
       
-      // Append files - only append if new files are selected
+      // Append files - only append if new files are selected or if existing files are removed
       if (values.panCard instanceof File) {
         formData.append('panCard', values.panCard);
+      } else if (values.panCard == null || values.panCard == undefined) {
+        formData.append('panCard', '');
       }
       if (values.adharCard instanceof File) {
         formData.append('adharCard', values.adharCard);
+      } else if (values.adharCard == null || values.adharCard == undefined) {
+        formData.append('adharCard', '');
       }
       if (values.profilePhoto instanceof File) {
         formData.append('profilePhoto', values.profilePhoto);
+      } else if (values.profilePhoto == null || values.profilePhoto === undefined) {
+        formData.append('profilePhoto', '');
       }
   
       console.log('Submitting form with location objects:', submissionData);
