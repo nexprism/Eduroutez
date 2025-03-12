@@ -77,7 +77,7 @@ async getCareerByinstituteId(instituteId) {
     const career = await this.careerRepository.getByField(id, field);
 
     const views = career.views || 0;
-    await this.careerRepository.update(id, { views: views + 1 });
+    await this.careerRepository.update(career?.id, { views: views + 1 });
 
     // console.log("Career object type:", typeof career);
     // console.log("Reviews property exists:", career.hasOwnProperty('reviews'));
