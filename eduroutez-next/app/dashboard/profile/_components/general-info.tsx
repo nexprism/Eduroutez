@@ -91,7 +91,8 @@ const formSchema = z.object({
     required_error: 'Please select an organization type.'
   }),
   brochure: z.any().optional(),
-  country: z.any().optional()
+  country: z.any().optional(),
+    rank: z.string().optional()
 });
 
 
@@ -233,7 +234,8 @@ const [initialCityName, setInitialCityName] = useState("");
           thumbnail: instituteData.thumbnailImage,
           cover: instituteData.coverImage,
           logo: instituteData.instituteLogo,
-          brochure: instituteData.brochure
+          brochure: instituteData.brochure,
+            rank: instituteData.rank || ''
         });
 
         setPreviewThumbnailUrl(instituteData.thumbnailImage && instituteData.thumbnailImage !== "null" 
@@ -286,6 +288,9 @@ const [initialCityName, setInitialCityName] = useState("");
     formData.append('establishedYear', values.establishedYear);
     formData.append('organisationType', values.organisationType);
     formData.append('website', values.website);
+    if (values.rank) {
+      formData.append('rank', values.rank);
+    }
     
     // Location data with proper objects
     
@@ -941,6 +946,20 @@ const [initialCityName, setInitialCityName] = useState("");
                 </FormItem>
               )}
             />
+
+            <FormField
+                            control={form.control}
+                            name="rank"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Rank</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Enter Rank" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
             <FormField
               control={form.control}

@@ -86,7 +86,8 @@ const formSchema = z.object({
   }),
   brochure: z.any().optional(),
   examAccepted: z.string().optional(),
-  country: z.any()
+  country: z.any(),
+  rank: z.string().optional()
 });
 
 const GeneralInfo = () => {
@@ -216,7 +217,8 @@ const [initialCityName, setInitialCityName] = useState("");
         cover: instituteData.coverImage,
         logo: instituteData.instituteLogo,
         brochure: instituteData.brochure,
-        examAccepted: instituteData.examAccepted || ''
+        examAccepted: instituteData.examAccepted || '',
+        rank: instituteData.rank || ''
       });
 
       // Update preview URLs with proper null handling
@@ -281,6 +283,9 @@ const [initialCityName, setInitialCityName] = useState("");
     const formData = new FormData();
     formData.append('instituteName', values.instituteName);
     formData.append('institutePhone', values.institutePhone);
+    if (values.rank) {
+      formData.append('rank', values.rank);
+    }
     formData.append('email', values.email);
     if (values.establishedYear) {
       formData.append('establishedYear', values.establishedYear);
@@ -690,7 +695,6 @@ const [initialCityName, setInitialCityName] = useState("");
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select Country">
-                        {console.log('fghjk',field.value)}
                         {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
                       </SelectValue>
                     </SelectTrigger>
@@ -927,6 +931,22 @@ const [initialCityName, setInitialCityName] = useState("");
                     </FormItem>
                   )}
                 />
+
+
+<FormField
+                control={form.control}
+                name="rank"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rank</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter Rank" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
 
             <FormField
               control={form.control}

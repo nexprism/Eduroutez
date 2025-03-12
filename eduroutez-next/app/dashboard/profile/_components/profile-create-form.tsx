@@ -313,6 +313,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
         state: counselor.state ? counselor.state.id : '',
         city: counselor.city ? counselor.city.id : '',
         experiences: formattedExperiences,
+        about: counselor.about || ''
       });
     }
   }, [counselorData]);
@@ -430,6 +431,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
         accountNumber: values.accountNumber,
         accountHolderName: values.accountHolderName,
         ifscCode: values.ifscCode,
+        about: values.about,
         experiences: values.experiences.map(exp => ({
           title: exp.title,
           employmentType: exp.employmentType,
