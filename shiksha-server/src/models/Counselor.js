@@ -18,6 +18,9 @@ const counselorSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    about: {
+      type: String,
+    },
     state: {
       type: {
         name: String,
