@@ -987,22 +987,30 @@ const [statesLoaded, setStatesLoaded] = useState(false);
                 />
 
 <FormField
-                            control={form.control}
-                            name="about"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>About</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="text"
-                                    disabled={loading}
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                      control={form.control}
+                      name="about"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>About</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              disabled={loading}
+                              placeholder="Tell us about yourself (max 50 words)"
+                              {...field}
+                              onChange={(e) => {
+                                if (e.target.value.split(' ').length <= 50) {
+                                  field.onChange(e);
+                                } else {
+                                  toast.error('About section cannot exceed 50 words.');
+                                }
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
 
 
