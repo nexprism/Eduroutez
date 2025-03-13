@@ -91,9 +91,10 @@ console.log('updatesInstitute',updatesInstitute);
 
       // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
-      if (user && user.role != 'SUPER_ADMIN'){
+      if (!user || user.role != 'SUPER_ADMIN'){
         filterConditions.onhold = false;
       }
+
       var ratingFilter = 0;
       var trendingFilter = 0;
       for (var [key, value] of Object.entries(parsedFilters)) {
