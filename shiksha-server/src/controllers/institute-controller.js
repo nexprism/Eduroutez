@@ -167,8 +167,9 @@ export const makeInstitute = async (req, res) => {
 
 export async function getInstitutes(req, res) {
   try {
-    const user = req.user;
-    const response = await instituteService.getAll(req.query,user);
+    const browserUrl = req.get('Referer') || req.get('Origin');
+    // console.log('browserUrl',browserUrl);
+    const response = await instituteService.getAll(req.query, browserUrl);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched institutes";
     return res.status(StatusCodes.OK).json(SuccessResponse);

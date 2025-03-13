@@ -76,7 +76,7 @@ console.log('updatesInstitute',updatesInstitute);
     }
   }
   
-  async getAll(query,user) {
+  async getAll(query, browserUrl) {
     try {
       const { page = 1, limit = 100000000000000, filters = "{}", searchFields = "{}", sort = "{}",select = "{}" } = query;
       const pageNum = parseInt(page);
@@ -91,9 +91,13 @@ console.log('updatesInstitute',updatesInstitute);
 
       // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
-      if (!user || user.role != 'SUPER_ADMIN'){
+      //get browser url for check it admin r not
+      console.log('browserUrl',browserUrl);
+      if (!browserUrl.includes('admin')) {
         filterConditions.onhold = false;
-      }
+      } 
+
+      // console.log('fullUrl',currentUrl);
 
       var ratingFilter = 0;
       var trendingFilter = 0;
