@@ -39,8 +39,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['institutes'] });
-      router.push('/dashboard/institute');
-    },
+window.location.reload();    },
     onSettled: () => {
       setOpen(false);
       setLoading(false);
