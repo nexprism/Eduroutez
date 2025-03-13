@@ -76,7 +76,7 @@ console.log('updatesInstitute',updatesInstitute);
     }
   }
   
-  async getAll(query) {
+  async getAll(query,user) {
     try {
       const { page = 1, limit = 100000000000000, filters = "{}", searchFields = "{}", sort = "{}",select = "{}" } = query;
       const pageNum = parseInt(page);
@@ -90,7 +90,10 @@ console.log('updatesInstitute',updatesInstitute);
       const parsedSort = JSON.parse(sort);
 
       // Build filter conditions for multiple fields
-      const filterConditions = { deletedAt: null, onhold: false };
+      const filterConditions = { deletedAt: null };
+      if (user && user.role != 'SUPER_ADMIN'){
+        filterConditions.onhold = false;
+      }
       var ratingFilter = 0;
       var trendingFilter = 0;
       for (var [key, value] of Object.entries(parsedFilters)) {
