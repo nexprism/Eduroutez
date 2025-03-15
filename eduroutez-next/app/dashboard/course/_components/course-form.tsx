@@ -162,6 +162,7 @@ export default function CreateCourse() {
   const fileInputMetaImageRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
   const [isInstituteRole, setIsInstituteRole] = useState(false);
+  const [loadedInstituteName, setLoadedInstituteName] = useState<string>('');
 
   const pathname = usePathname();
   const segments = pathname.split('/');
@@ -198,6 +199,8 @@ export default function CreateCourse() {
       form.setValue('instituteCategory', instituteId);
     }
   }, []);
+
+  
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -317,6 +320,10 @@ export default function CreateCourse() {
   });
 
   // console.log(instituteCategories);
+
+
+  // Add this after your existing useQuery for instituteCategories
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -549,8 +556,39 @@ export default function CreateCourse() {
       if (course.data.metaImage) {
         setPreviewMetaImageUrl(`${baseURL}/${course.data.metaImage}`);
       }
+
+      const instituteId = course.data.instituteCategory;
+      console.log('Institute ID:', instituteId);
+      
+      // If we have an institute ID but no institute name yet
+      if (instituteId && !loadedInstituteName) {
+        // Check if we have the data in our current query results
+        const matchingInstitute = instituteCategories?.data?.result?.find(
+          (category: Institute) => category._id == instituteId
+        );
+        
+        console.log("Matching institute:", matchingInstitute);
+        if (matchingInstitute) {
+          setLoadedInstituteName(matchingInstitute.instituteName);
+        } else {
+          // If not, fetch it directly
+          const fetchInstitute = async () => {
+            try {
+              const response = await axiosInstance.get(`${apiUrl}/institute/${instituteId}`);
+              console.log("Institute data here:", response.data);
+              if (response.data?.data?.instituteName) {
+                setLoadedInstituteName(response.data.data.instituteName);
+              }
+            } catch (error) {
+              console.error("Error fetching institute:", error);
+            }
+          };
+          
+          fetchInstitute();
+        }
+      }
     }
-  }, [course, form]);
+  }, [course, form, instituteCategories?.data?.result, loadedInstituteName]);
 
 
   
@@ -702,49 +740,68 @@ export default function CreateCourse() {
                       )}
                     />
                     {/* a */}
+                    
                     <FormField
-            control={form.control}
-            name="instituteCategory"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Institute Category</FormLabel>
-                {isInstituteRole ? (
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      value={instituteCategories?.data?.result?.find((category: Institute) => category._id === field.value)?.instituteName || ''}
-                      readOnly
-                    />
-                  </div>
-                ) : (
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Institute" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent  className="max-h-60 overflow-y-auto">
-                      {instituteCategories?.data?.result?.length > 0
-                        ? instituteCategories.data.result.map(
-                            (category: Institute) => (
-                              <SelectItem
-                                key={category._id}
-                                value={category._id}
-                              >
-                                {category.instituteName}
-                              </SelectItem>
-                            )
-                          )
-                        : <SelectItem value="">No Institutes Available</SelectItem>}
-                    </SelectContent>
-                  </Select>
-                )}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+  control={form.control}
+  name="instituteCategory"
+  render={({ field }) => {
+    // Get the current value from the form
+    const currentValue = field.value;
+    
+    // Find the matching institute if data is available
+    const selectedInstitute = instituteCategories?.data?.result?.find(
+      (category: Institute) => category._id === currentValue
+    );
+    
+    // Store the institute name for display
+    const instituteName = selectedInstitute?.instituteName || '';
+    
+    // Check if we're still loading data and have a value
+    const isLoading = !instituteCategories?.data?.result && currentValue;
+    
+    return (
+      <FormItem>
+        <FormLabel>Institute Category</FormLabel>
+        {isInstituteRole ? (
+          <div className="flex items-center space-x-2">
+            <Input
+              value={instituteName || (isLoading ? 'Loading...' : '')}
+              readOnly
+            />
+          </div>
+        ) : (
+          <Select
+            onValueChange={field.onChange}
+            value={field.value}
+          >
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Institute">
+                  {isLoading ? 'Loading...' : instituteName}
+                </SelectValue>
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent className="max-h-60 overflow-y-auto">
+              {instituteCategories?.data?.result?.length > 0
+                ? instituteCategories.data.result.map(
+                    (category: Institute) => (
+                      <SelectItem
+                        key={category._id}
+                        value={category._id}
+                      >
+                        {category.instituteName}
+                      </SelectItem>
+                    )
+                  )
+                : <SelectItem value="">No Institutes Available</SelectItem>}
+            </SelectContent>
+          </Select>
+        )}
+        <FormMessage />
+      </FormItem>
+    );
+  }}
+/>
 
                     <FormField
                       control={form.control}
