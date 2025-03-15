@@ -491,12 +491,12 @@ export default function CreateCourse() {
   const { data: course } = useQuery({
     queryKey: ['category', segments[4]],
     queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/course/${segments[4]}`
-      );
+      const response = await axiosInstance.get(`${apiUrl}/course/${segments[4]}`);
       return response.data;
     },
-    enabled: isEdit // Only fetch when in edit mode
+    enabled: isEdit,
+     // Prevent automatic refetching
+      gcTime: 1000 * 60 * 60 // Cache for 1 hour
   });
   React.useEffect(() => {
     if (course?.data) {
