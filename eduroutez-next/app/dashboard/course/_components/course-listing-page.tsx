@@ -62,7 +62,7 @@ export default function CourseListingPage({}: TCourseListingPage) {
   }, [role, email]);
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['courses', searchQuery],
+    queryKey: ['courses', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/courses`, {
         params: {
@@ -84,7 +84,7 @@ export default function CourseListingPage({}: TCourseListingPage) {
   }, [isSuccess, data]);
 
   const data1 = useQuery({
-    queryKey: ['institute', searchQuery],
+    queryKey: ['institute', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/institutes/${email}`, {
         params: {

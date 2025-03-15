@@ -165,13 +165,13 @@ const fetchCounselorData = async () => {
             <h1 className="text-2xl font-bold">Institute Dashboard Overview 👋</h1>
             <p className="text-muted-foreground">Monitor your institute's performance and metrics.</p>
           </div>
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <CalendarDateRangePicker />
             <Button className="bg-primary">
               <DollarSign className="mr-2 h-4 w-4" />
               Download Report
             </Button>
-          </div>
+          </div> */}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -235,13 +235,13 @@ const fetchCounselorData = async () => {
             <h1 className="text-2xl font-bold">Counselor Dashboard Overview 👋</h1>
             <p className="text-muted-foreground">Monitor your performance and metrics.</p>
           </div>
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <CalendarDateRangePicker />
             <Button className="bg-primary">
               <DollarSign className="mr-2 h-4 w-4" />
               Download Report
             </Button>
-          </div>
+          </div> */}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -318,13 +318,13 @@ const fetchCounselorData = async () => {
           <h1 className="text-2xl font-bold">Admin Dashboard Overview 👋</h1>
           <p className="text-muted-foreground">Monitor your platform metrics and performance.</p>
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <CalendarDateRangePicker />
           <Button className="bg-primary">
             <DollarSign className="mr-2 h-4 w-4" />
             Download Report
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">

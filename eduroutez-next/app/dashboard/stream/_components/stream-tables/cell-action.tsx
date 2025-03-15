@@ -39,7 +39,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['streams'] });
-      router.push('/dashboard/stream');
+      window.location.reload();
     },
     onSettled: () => {
       setOpen(false);

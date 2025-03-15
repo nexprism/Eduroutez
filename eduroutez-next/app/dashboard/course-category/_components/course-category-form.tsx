@@ -217,7 +217,7 @@ export default function CourseCategoryForm() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category Title</FormLabel>
+                    <FormLabel>Category Title  <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input placeholder="Enter Title" {...field} />
                     </FormControl>
@@ -268,7 +268,7 @@ export default function CourseCategoryForm() {
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Status</FormLabel>
+                      <FormLabel>Status <span className="text-red-500">*</span></FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -295,7 +295,9 @@ export default function CourseCategoryForm() {
                   name="image"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category Icon</FormLabel>
+                        <FormLabel>
+                        Category Icon <span className="text-red-500">*</span>
+                        </FormLabel>
                       <FormControl>
                         <div className="space-y-4">
                           <Input

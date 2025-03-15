@@ -356,7 +356,7 @@ export async function getInstitute(req, res) {
     SuccessResponse.message = "Successfully fetched the institute";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
-    console.error("Get institute error:", error.message); 
+    console.error("Get institute errorcvb:", error.message); 
     ErrorResponse.error = error;
     return res.status(error.statusCode||500).json(ErrorResponse);
   }
