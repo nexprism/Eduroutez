@@ -39,8 +39,7 @@ console.log("Response from deleteCourseMutation:", response);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
-      router.push('/dashboard/course');
-    },
+window.location.reload();    },
     onSettled: () => {
       setOpen(false);
       setLoading(false);
