@@ -496,8 +496,7 @@ export default function CreateCourse() {
     },
     enabled: isEdit,
      // Prevent automatic refetching
-      gcTime: 1000 * 60 * 60 // Cache for 1 hour
-  });
+     staleTime: 1000 * 60 * 60   });
   React.useEffect(() => {
     if (course?.data) {
       form.reset({
