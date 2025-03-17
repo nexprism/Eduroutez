@@ -432,10 +432,8 @@ class UserRepository extends CrudRepository {
   async findBy(data) {
     try {
       //get user with popuplate plan
-      var response = await User.findOne(data);
-      if(response.plan) {
-        response = await User.findOne(data).populate("plan");
-      }
+      var response = await User.findOne(data).populate("plan")
+      
       return response;
     } catch (error) {
       throw error;
