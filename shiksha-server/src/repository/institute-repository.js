@@ -214,7 +214,7 @@ class InstituteRepository extends CrudRepository {
   //bestRatedInstitute
   async bestRatedInstitute() {
     try {
-      const result = await this.model.find().sort({ rating: -1 }).limit(5);
+      const result = await this.model.find({ onhold: false, deletedAt: null }).sort({ rating: -1 }).limit(5);
       return result;
     } catch (error) {
       throw error;
