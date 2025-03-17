@@ -3,6 +3,7 @@ import { courseSchema } from "../models/Course.js";
 import { CounselorRepository } from "../repository/index.js";
 import { UserRepository } from "../repository/index.js";
 import  ScheduleSlot  from "../models/ScheduleSlots.js";
+import  User  from "../models/User.js";
 import  { CounselorSlotRepository }  from "../repository/counselorSlot-repository.js";
 import bcrypt from "bcrypt";
 
@@ -77,6 +78,14 @@ class CounselorService {
           counselors.result[i] = JSON.parse(JSON.stringify(counselors.result[i]));
         }
 
+        //find in user by counselors.result[i]._id
+        console.log('counselors.result[i]._id',counselors.result[i]._id);
+        const user = await User.findOne({ _id: counselors.result[i]._id });
+        if(user) {
+          counselors.result[i].level = user.level;
+          counselors.result[i].points = user.points;
+          counselors.result[i].balance = user.balance;
+        }
        
         
 

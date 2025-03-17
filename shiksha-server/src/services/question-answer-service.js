@@ -121,6 +121,8 @@ class questionAnswerService {
       userPayload.level = level;
       userPayload.commission = commission;
       const userResponse = await this.userRepository.update(existingUser.id, userPayload);
+
+      
       // console.log('userResponse',userResponse);
 
       return questionAnswer;

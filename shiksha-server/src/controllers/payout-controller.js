@@ -3,7 +3,9 @@ import PayoutService from "../services/payout-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 const payoutService = new PayoutService();
 import UserService from "../services/users-service.js";
+import CounselorService from "../services/counselor-service.js";
 const userService=new UserService();
+const counselorService=new CounselorService();
 /**
  * POST : /payout
  * req.body {}
@@ -131,6 +133,16 @@ export async function updatePayout(req, res) {
       const user = await userService.getUserById(payout.user);
       console.log("user", user);
       const newBalance = user.balance - payout.requestedAmount;
+
+      if(user.role === "counsellor"){
+        const counsellor = await counselorService.get(user.email);
+        const counsellorPayload = {
+          balance: counsellor.balance + payout.requestedAmount
+        };
+        console.log("counsellorPayload", counsellorPayload);
+        await counselorService.update(counsellor._id, counsellorPayload);
+      }
+
       console.log("newBalance", newBalance);
       await userService.update(user._id, {balance: newBalance});
     }

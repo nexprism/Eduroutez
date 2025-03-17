@@ -365,9 +365,11 @@ class UserRepository extends CrudRepository {
       //get all schedule slots by counselor
       const scheduleSlots = await ScheduleSlot.find({ counselorId: counselorId });
 
-      const earning = scheduleSlots.length * 500 * 0.30; 
-
       const counsellor_user = await User.findById(counselorId);
+      var commissionrate = 30;
+      commissionrate = counsellor_user.commission / 100;
+      const earning = counsellor_user.balance; 
+
       console.log('counsellor_user', counsellor_user);
       var level = counsellor_user.level;
       var points = counsellor_user.points;
