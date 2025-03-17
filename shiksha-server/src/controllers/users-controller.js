@@ -176,13 +176,14 @@ export async function allowUser(req, res) {
     payload.onhold = false;
     const response = await userService.update(id, payload);
 
-
+    if (payload.role == 'institute') {
     const institute = await instituteService.get(id);
     if (institute) {
       institute.status = true;
       institute.onhold = false;
-      const instituteresponse = await instituteService.update(id, institute);
+      await instituteService.update(id, institute);
     }
+  }
 
     return res.status(200).json({ message: 'User verified successfully', data: response });
   } catch (error) {
@@ -194,11 +195,12 @@ export async function allowUser(req, res) {
 //holdUser
 export async function holdUser(req, res) {
   try {
+    
     const { id } = req.body;
     if (!id) {
       return res.status(400).json({ message: 'User ID is required' });
     }
-    const payload = await userService.getUserById(id);
+    var payload = await userService.getUserById(id);
 
     if (!payload) {
       return res.status(404).json({ message: 'User not found' });
@@ -207,18 +209,17 @@ export async function holdUser(req, res) {
     payload.is_verified = true;
     payload.onhold = true;
 
-    const response = await userService.update(id, payload);
-
+    var response = await userService.update(id, payload);
     payload.status = true;
+    console.log('payload:', payload.role);
+    if (payload.role == 'institute') {
+      var institute = await instituteService.get(id);
 
-    const institute = await instituteService.get(id);
-
-
-
-    if (institute) {
-      institute.onhold = true;
-      payload.status = true;
-      const instituteresponse = await instituteService.update(id, institute);
+      if (institute) {
+        institute.onhold = true;
+        payload.status = true;
+        await instituteService.update(id, institute);
+      }
     }
 
     return res.status(200).json({ message: 'User hold successfully', data: response });
@@ -246,12 +247,13 @@ export async function denyUser(req, res) {
     const response = await userService.update(id, payload);
     payload.status = false;
 
-    //get institute
+    if (payload.role == 'institute') {
     const institute = await instituteService.get(id);
     if(institute){
       institute.status = false; 
       const instituteresponse = await instituteService.update(id, institute);
     }
+  }
     return res.status(200).json({ message: 'User block successfully', data: response });
   } catch (error) {
     console.error('Error in allowUser:', error.message);
