@@ -56,12 +56,16 @@ class QueryRepository extends CrudRepository {
         },
       ]);
 
+      const totalDocuments = await this.model.countDocuments(filterCon);
+
+      
+
       // Return the response
       return {
         result: trendingStreams,
         currentPage: page,
-        totalPages: Math.ceil(trendingStreams.length / limit), // Approximate since aggregation doesn't provide total count directly
-        totalDocuments: trendingStreams.length, // Total results after aggregation
+        totalPages: Math.ceil(totalDocuments / limit), // Total pages based on total results and limit
+        totalDocuments: totalDocuments,
       };
     } catch (error) {
       console.error("Error in getTrendingStreams:", error.message);
