@@ -155,16 +155,20 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={handlePermission}>
-            <Edit className="mr-2 h-4 w-4" /> Allow
+        
+            <>
+              <DropdownMenuItem onClick={handlePermission}>
+                <Edit className="mr-2 h-4 w-4" /> Allow
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDeny}>
+                <Trash className="mr-2 h-4 w-4" /> Deny
+              </DropdownMenuItem>
+            </>
+    
+            {data.role == 'institute' && (<DropdownMenuItem onClick={handleHold}>
+            <span className="mr-2 h-4 w-4">⏸️</span> On Hold
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDeny}>
-            <Trash className="mr-2 h-4 w-4" /> Deny
-          </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleHold}>
-              
-              <span className="mr-2 h-4 w-4">⏸️</span> On Hold
-            </DropdownMenuItem>
+                )}
         </DropdownMenuContent>
       </DropdownMenu>
     </>
