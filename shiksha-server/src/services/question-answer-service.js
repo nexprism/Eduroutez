@@ -98,8 +98,30 @@ class questionAnswerService {
       //increment points of user
       const userPayload = { points: existingUser.points + 50 };
       console.log('userPayload',userPayload);
+      let level;
+      let commission;
+
+      if (userPayload.points <= 500) {
+        level = "Career Advisor";
+        commission = "30";
+      } else if (userPayload.points <= 2000) {
+        level = "Senior Career Advisor";
+        commission = "35";
+      } else if (userPayload.points <= 5000) {
+        level = "Career Consultant";
+        commission = "40";
+      } else if (userPayload.points <= 10000) {
+        level = "Career Consultant Specialist";
+        commission = "45";
+      } else if (userPayload.points <= 50000) {
+        level = "Lead Career Consultant";
+        commission = "50";
+      }
+
+      userPayload.level = level;
+      userPayload.commission = commission;
       const userResponse = await this.userRepository.update(existingUser.id, userPayload);
-      console.log('userResponse',userResponse);
+      // console.log('userResponse',userResponse);
 
       return questionAnswer;
     } catch (error) {

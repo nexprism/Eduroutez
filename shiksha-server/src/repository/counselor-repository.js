@@ -100,11 +100,16 @@ class CounselorRepository extends CrudRepository {
 
       var totalamount = 500;
 
-      //30% of 500
-      var commission = totalamount * 0.3;
-      
+      var commissionrate = 30;
+
 
       const user = await User.findOne({ _id: counselor._id });
+
+      commissionrate = user.commission / 100;
+
+      var commission = totalamount * commissionrate;
+      
+
       if (user) {
         // If user exists, update the existing entry
         user.balance = user.balance + commission;

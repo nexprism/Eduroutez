@@ -117,6 +117,10 @@ const userSchema = new mongoose.Schema(
       }
       
     },
+    commission: {
+      type: Number,
+      default: 30,
+    },
     balance: {
       type: Number,
       default: 0,
