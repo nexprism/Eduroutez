@@ -27,6 +27,23 @@ interface Inquiry {
     // Add other fields as needed
 }
 
+interface IssueDetail {
+    _id: string;
+    title: string;
+    image: string;
+    description: string;
+    category: string;
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    institute: {
+        instituteName: string;
+        email: string;
+        institutePhone: string;
+    };
+    // Add other fields that might be in the issue detail response
+}
+
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const ImageUrl = process.env.NEXT_PUBLIC_NEW_IMAGES;
 
@@ -47,6 +64,8 @@ const HelpSupportPage: React.FC = () => {
     const [displayCount, setDisplayCount] = useState(10);
     const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
     const [inquiryData, setInquiryData] = useState<Inquiry | null>(null);
+    const [issueDetail, setIssueDetail] = useState<IssueDetail | null>(null);
+    const [detailLoading, setDetailLoading] = useState(false);
 
     useEffect(() => {
         const fetchIssues = async () => {
@@ -99,17 +118,27 @@ const HelpSupportPage: React.FC = () => {
 
     const handleOpenModal = async (issueId: string) => {
         setSelectedIssueId(issueId);
+        setDetailLoading(true);
+        
         try {
-            const response = await axiosInstance.get(`${apiUrl}/institute-inquiry/${issueId}`);
-            setInquiryData(response.data);
+            // Fetch institute inquiry data
+            const inquiryResponse = await axiosInstance.get(`${apiUrl}/issue/${issueId}`);
+            setInquiryData(inquiryResponse.data);
+            
+            // Fetch issue detail data
+            const issueDetailResponse = await axiosInstance.get(`${apiUrl}/issue/${issueId}`);
+            setIssueDetail(issueDetailResponse.data.data);
         } catch (error) {
-            console.error('Error fetching inquiry data:', error);
+            console.error('Error fetching data:', error);
+        } finally {
+            setDetailLoading(false);
         }
     };
 
     const handleCloseModal = () => {
         setSelectedIssueId(null);
         setInquiryData(null);
+        setIssueDetail(null);
     };
 
     const displayedIssues = issues.slice(0, displayCount);
@@ -223,34 +252,101 @@ const HelpSupportPage: React.FC = () => {
                 )}
             </div>
 
-            {selectedIssueId && inquiryData && (
+            {selectedIssueId && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-80 transform transition-all duration-300">
-                        <h2 className="text-xl font-bold mb-4 text-gray-800">Institute Inquiry</h2>
-                        <div className="space-y-3">
-                            <div className="bg-indigo-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-gray-700">Institute:</p>
-                                <p className="text-md text-gray-900">{inquiryData.instituteName}</p>
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md transform transition-all duration-300">
+                        {detailLoading ? (
+                            <div className="flex justify-center items-center h-40">
+                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
                             </div>
-                            <div className="bg-indigo-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-gray-700">Email:</p>
-                                <p className="text-md text-gray-900">{inquiryData.email}</p>
-                            </div>
-                            <div className="bg-indigo-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-gray-700">Phone:</p>
-                                <p className="text-md text-gray-900">{inquiryData.institutePhone}</p>
-                            </div>
-                        </div>
-                        <div className="mt-6 flex justify-end">
-                            <button 
-                                onClick={handleCloseModal}
-                                className="relative overflow-hidden px-4 py-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-md text-sm font-medium group"
-                            >
-                                <span className="relative z-10">Close</span>
-                                <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></span>
-                                <span className="absolute top-0 left-0 w-full h-0 bg-black bg-opacity-10 group-hover:h-full transition-all duration-300"></span>
-                            </button>
-                        </div>
+                        ) : (
+                            <>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-xl font-bold text-gray-800">Issue Details</h2>
+                                    <button 
+                                        onClick={handleCloseModal}
+                                        className="text-gray-500 hover:text-gray-700"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                {issueDetail && (
+                                    <div className="space-y-4 max-h-[700px] overflow-y-auto max-w-md">
+                                        <div className="bg-indigo-50 p-4 rounded-lg">
+                                            <h3 className="font-bold text-lg text-indigo-800">{issueDetail.title}</h3>
+                                            <span className={`mt-2 inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(issueDetail.status)}`}>
+                                                {issueDetail.status}
+                                            </span>
+                                            <span className="ml-2 inline-block px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                                {issueDetail.category}
+                                            </span>
+                                        </div>
+                                        
+                                        {issueDetail.image && (
+                                            <div className="mt-3">
+                                                <img 
+                                                    src={`${ImageUrl}/${issueDetail.image}`} 
+                                                    alt={issueDetail.title} 
+                                                    className="w-full h-auto rounded-lg"
+                                                />
+                                            </div>
+                                        )}
+                                        
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <h4 className="font-medium text-gray-700 mb-2">Description</h4>
+                                            <p className="text-gray-800 whitespace-pre-line">{issueDetail.description}</p>
+                                        </div>
+                                        
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <h4 className="font-medium text-gray-700 mb-2">Timeline</h4>
+                                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                                <div>
+                                                    <p className="text-gray-500">Created</p>
+                                                    <p className="font-medium">{new Date(issueDetail.createdAt).toLocaleString()}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500">Last Updated</p>
+                                                    <p className="font-medium">{new Date(issueDetail.updatedAt).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-gray-50 p-4 rounded-lg">
+                                            <h4 className="font-medium text-gray-700 mb-2">Institute Information</h4>
+                                            {issueDetail.institute && (
+                                                <div className="space-y-2 text-sm">
+                                                    <div>
+                                                        <p className="text-gray-500">Name</p>
+                                                        <p className="font-medium">{issueDetail.institute.instituteName}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500">Email</p>
+                                                        <p className="font-medium">{issueDetail.institute.email}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-gray-500">Phone</p>
+                                                        <p className="font-medium">{issueDetail.institute.institutePhone}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <div className="mt-6 flex justify-end space-x-3">
+                                    <button 
+                                        onClick={handleCloseModal}
+                                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors"
+                                    >
+                                        Close
+                                    </button>
+                              
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

@@ -1,18 +1,53 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
-import { Plus, Check, X, Loader2 } from 'lucide-react';
+import { Plus, Check, X, Loader2, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import Link from 'next/link';
 import PageContainer from '@/components/layout/page-container';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
 import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
 
 const SubscriptionListingPage = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const queryClient = useQueryClient();
+  // const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  // const [planToDelete, setPlanToDelete] = useState<{ _id: string; name: string } | null>(null);
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+
+  // Hide notification after 3 seconds
+  useEffect(() => {
+    if (notification.show) {
+      const timer = setTimeout(() => {
+        setNotification({ ...notification, show: false });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  // Show notification function
+  const showNotification = (message:any, type = 'success') => {
+    setNotification({ show: true, message, type });
+  };
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['subscriptions'],
@@ -28,6 +63,31 @@ const SubscriptionListingPage = () => {
       return response.data;
     }
   });
+
+  // const deleteMutation = useMutation({
+  //   mutationFn: async (id: string) => {
+  //     return await axiosInstance.delete(`${apiUrl}/subscription/${id}`);
+  //   },
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
+  //     showNotification("Subscription plan deleted successfully");
+  //     setDeleteDialogOpen(false);
+  //   },
+  //   onError: (error) => {
+  //     showNotification((error as any).response?.data?.message || "Failed to delete subscription plan", "error");
+  //   }
+  // });
+
+  // const handleDeleteClick = (plan:any) => {
+  //   setPlanToDelete(plan);
+  //   setDeleteDialogOpen(true);
+  // };
+
+  // const confirmDelete = () => {
+  //   if (planToDelete) {
+  //     deleteMutation.mutate(planToDelete._id);
+  //   }
+  // };
 
   if (isLoading) {
     return (
@@ -59,6 +119,24 @@ const SubscriptionListingPage = () => {
 
   return (
     <PageContainer scrollable>
+      {/* Notification */}
+      {notification.show && (
+        <div className={`fixed right-4 top-4 z-50 rounded-md p-4 shadow-md ${
+          notification.type === 'error' 
+            ? 'bg-red-100 text-red-800 border border-red-200' 
+            : 'bg-green-100 text-green-800 border border-green-200'
+        }`}>
+          <div className="flex items-center">
+            {notification.type === 'error' ? (
+              <X className="mr-2 h-4 w-4" />
+            ) : (
+              <Check className="mr-2 h-4 w-4" />
+            )}
+            <p>{notification.message}</p>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
         <div className="flex items-start justify-between">
           <Heading
@@ -80,6 +158,7 @@ const SubscriptionListingPage = () => {
               <TableCell>Price</TableCell>
               <TableCell>Duration</TableCell>
               <TableCell>Features</TableCell>
+              <TableCell className="w-10">Actions</TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -115,6 +194,31 @@ const SubscriptionListingPage = () => {
                     })}
                   </ul>
                 </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href={`/dashboard/subscriptions/${plan._id}/edit`}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Update
+                        </Link>
+                      </DropdownMenuItem>
+                      {/* <DropdownMenuItem 
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => handleDeleteClick(plan)}
+                      >
+                        <Trash className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem> */}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -125,6 +229,35 @@ const SubscriptionListingPage = () => {
           </div>
         )}
       </div>
+
+      {/* <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the subscription plan
+              {planToDelete && <strong> "{planToDelete.name}"</strong>}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              disabled={deleteMutation.status === 'pending'}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {deleteMutation.status === 'pending' ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog> */}
     </PageContainer>
   );
 };
