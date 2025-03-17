@@ -87,7 +87,7 @@ const formSchema = z.object({
   brochure: z.any().optional(),
   examAccepted: z.string().optional(),
   country: z.any(),
-  rank: z.string().optional()
+  rank: z.any().optional()
 });
 
 const GeneralInfo = () => {
