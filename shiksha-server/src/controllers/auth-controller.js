@@ -306,7 +306,7 @@ export const signup = async (req, res) => {
     
     
     if (req.body.role === 'institute'){
-      is_verified = false;
+      is_verified = true;
       status = true;
     }
 
