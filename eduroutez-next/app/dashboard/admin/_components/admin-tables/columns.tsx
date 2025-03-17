@@ -27,7 +27,7 @@ export const columns: ColumnDef<User>[] = [
   // },
   {
     header: 'ID',
-    cell: ({ row }) => <div>{`${row.index+1}`}</div>
+    cell: ({ row }) => <div>{`${row.index + 1}`}</div>
   },
   {
     header: 'NAME',
@@ -44,10 +44,10 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => (
       <div className="flex w-32 space-x-1">
         <Badge
-          variant={!row.original.is_verified? 'secondary' : 'default'}
+          variant={!row.original.is_verified ? 'secondary' : 'default'}
           className="text-xs "
         >
-          {row.original.is_verified ? 'Allowed' : 'NotAllowed'}
+          {row.original.onhold ? 'On Hold' : row.original.is_verified ? 'Allowed' : 'Not Allowed'}
         </Badge>
       </div>
     )
