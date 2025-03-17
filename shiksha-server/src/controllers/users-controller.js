@@ -173,6 +173,7 @@ export async function allowUser(req, res) {
       return res.status(404).json({ message: 'User not found' });
     }
     payload.is_verified = true;
+    payload.onhold = false;
     const response = await userService.update(id, payload);
 
 
@@ -204,6 +205,7 @@ export async function holdUser(req, res) {
     }
 
     payload.is_verified = true;
+    payload.onhold = true;
 
     const response = await userService.update(id, payload);
 
