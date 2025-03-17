@@ -92,7 +92,7 @@ const formSchema = z.object({
   }),
   brochure: z.any().optional(),
   country: z.any().optional(),
-    rank: z.string().optional()
+    rank: z.any().optional()
 });
 
 
