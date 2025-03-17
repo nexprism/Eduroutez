@@ -422,14 +422,20 @@ class UserRepository extends CrudRepository {
   
 
   async getById(id) {
-    const student  = await User.findById(id).populate("plan");
+    var student  = await User.findById(id);
+    if(student.plan) {
+      student = await User.findById(id).populate("plan");
+    }
     return student;
   }
 
   async findBy(data) {
     try {
       //get user with popuplate plan
-      const response = await User.findOne(data).populate("plan");
+      var response = await User.findOne(data);
+      if(response.plan) {
+        response = await User.findOne(data).populate("plan");
+      }
       return response;
     } catch (error) {
       throw error;
