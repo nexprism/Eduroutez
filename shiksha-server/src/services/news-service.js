@@ -1,14 +1,13 @@
 import { NewsRepository } from "../repository/index.js";
-import { InstituteRepository } from "../repository/index.js";
+import Institute from "../models/Institute.js";
 
 
 import News from "../models/news.js";
 
 class NewsService {
   constructor() {
-    this.newsRepository = new NewsRepository();
-    this.instituteService = new InstituteRepository
-  }
+    this.newsRepository = new NewsRepository();    
+}
 
   async create(payload) {
     try {
@@ -68,8 +67,8 @@ class NewsService {
         }
 
         if (blogs.result[i].institute) {
-          const instutiteDetails = await this.instituteService.get(blogs.result[i].institute);
-          blogs.result[i].instituteName = instutiteDetails?.instituteName;
+          const instutiteDetails = await Institute.findOne({ _id: blogs.result[i].institute });
+          blogs.result[i].instituteName = instutiteDetails?.instituteName || 'Super Admin';
         }else{
           blogs.result[i].instituteName = 'Super Admin';
         }
