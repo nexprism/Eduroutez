@@ -70,7 +70,16 @@ export async function getWebinarsByInstitute(req, res) {
     }else{
 
     
-    const response = await webinarService.getAllByUser(instituteId);
+      const query = req.query;
+      if (!query.filters) {
+        query.filters = JSON.stringify({ webinarCreatedBy: instituteId });
+      } else {
+        const filters = JSON.parse(query.filters);
+        filters.webinarCreatedBy = instituteId;
+        query.filters = JSON.stringify(filters);
+      }
+      const response = await webinarService.getAll(query);
+      
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched webinars";
     return res.status(StatusCodes.OK).json(SuccessResponse);
