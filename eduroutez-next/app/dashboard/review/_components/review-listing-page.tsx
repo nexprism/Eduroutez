@@ -15,16 +15,14 @@ type TReviewListingPage = {};
 export default function ReviewListingPage({}: TReviewListingPage) {
   const { searchQuery, page, limit } = useReviewTableFilters();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  
+
   // Get user role and email from localStorage
   const role = localStorage.getItem('role');
   const email = localStorage.getItem('email');
   const id = localStorage.getItem('instituteId');
 
-
-  
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['reviews', searchQuery, role, email],
+    queryKey: ['reviews', searchQuery, role, email, page, limit], // Include page and limit in the query key
     queryFn: async () => {
       if (role === 'institute') {
         // Fetch counselor-specific reviews
@@ -51,14 +49,15 @@ export default function ReviewListingPage({}: TReviewListingPage) {
         });
         return response.data;
       }
-    }
+    },
+    staleTime: 5000 // Avoid unnecessary API calls when transitioning between pages by keeping data fresh for 5 seconds
   });
 
   const getTitle = () => {
     if (role === 'counselor') {
-      return `My Reviews (${data?.data?.length || 0})`;
+      return `My Reviews (${data?.data?.totalDocuments || 0})`;
     }
-    return `Reviews (${data?.data?.length || 0})`;
+    return `Reviews (${data?.data?.totalDocuments || 0})`;
   };
 
   const getDescription = () => {
@@ -84,7 +83,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
             <Separator />
             <ReviewTable
               data={data?.data || []}
-              totalData={data?.totalDocuments || 0}
+              totalData={data?.data?.totalDocuments || 0}
             />
           </div>
         )
