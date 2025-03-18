@@ -1,8 +1,13 @@
 import { WebinarRepository } from "../repository/index.js";
+import { InstituteRepository } from "../repository/index.js";
+import User from "../models/User.js";
+import Institute from "../models/Institute.js";
 
 class WebinarService {
   constructor() {
     this.webinarRepository = new WebinarRepository();
+    this.instituteService = new InstituteRepository();
+    
   }
 
   async create(data) {
@@ -94,6 +99,29 @@ class WebinarService {
       // Execute query with dynamic filters, sorting, and pagination
       // const populateFields = ["createdBy"];
       const webinars = await this.webinarRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
+
+      for (let i = 0; i < webinars.length; i++) {
+        // Convert the model to a plain JavaScript object
+        if (typeof webinars[i].toObject === 'function') {
+          webinars[i] = webinars[i].toObject();
+        } else if (typeof webinars[i].toJSON === 'function') {
+          webinars[i] = webinars[i].toJSON();
+        } else {
+          webinars[i] = JSON.parse(JSON.stringify(webinars[i]));
+        }
+
+        if (webinars[i].webinarCreatedBy) {
+          const userDetails = await User.find({ _id: webinars[i].webinarCreatedBy });
+          if(userDetails.length >  0 && userDetails[0]?.role == 'institute'){
+          const instutiteDetails = await Institute.findOne({ _id: webinars[i].webinarCreatedBy });
+          webinars[i].instituteName = instutiteDetails?.instituteName || 'Super Admin';
+          }else{
+            webinars[i].instituteName = 'Super Admin';
+          }
+        } else {
+          webinars[i].instituteName = 'Super Admin';
+        }
+      }
 
       return webinars;
     } catch (error) {
