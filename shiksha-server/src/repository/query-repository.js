@@ -56,7 +56,22 @@ class QueryRepository extends CrudRepository {
         },
       ]);
 
-      const totalDocuments = await this.model.countDocuments(filterCon);
+      const totalDocuments = await Query.aggregate([
+        {
+          $match: { ...filterCon, stream: { $exists: true, $ne: null }, level: { $exists: true, $ne: null } }, // Apply filters and ensure stream and level are set
+        },
+        {
+          $group: {
+            _id: { stream: "$stream", level: "$level" }, // Group by stream & level
+            count: { $sum: 1 }, // Count occurrences
+          },
+        },
+        {
+          $count: "total", // Count total documents
+        },
+      ]);
+
+
 
       
 
@@ -64,7 +79,7 @@ class QueryRepository extends CrudRepository {
       return {
         result: trendingStreams,
         currentPage: page,
-        totalPages: Math.ceil(totalDocuments / limit), // Total pages based on total results and limit
+        totalPages: Math.ceil(totalDocuments.length > 0 ? totalDocuments[0].total / limit : 0),
         totalDocuments: totalDocuments,
       };
     } catch (error) {
