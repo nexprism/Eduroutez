@@ -199,10 +199,10 @@ export default function EarningsReportPage() {
 
       <div className="grid grid-cols-4 gap-4">
         <Card className="bg-white shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-            <DollarSign className="h-4 w-4 text-blue-500" />
-          </CardHeader>
+            <span className="text-blue-500 text-lg font-bold">₹</span>
+            </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{formatCurrency(totalEarnings)}</div>
           </CardContent>

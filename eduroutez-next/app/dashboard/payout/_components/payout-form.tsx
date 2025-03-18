@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 const PayoutForm = () => {
   const [paymentMethod, setPaymentMethod] = useState('Bank Transfer');
-  const [requestedAmount, setRequestedAmount] = useState(1000);
+  const [requestedAmount, setRequestedAmount] = useState(100);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -16,9 +16,7 @@ const PayoutForm = () => {
 
 
   const paymentMethods = [
-    { id: 'bank', name: 'Bank Transfer', icon: Wallet },
-    { id: 'card', name: 'Credit Card', icon: CreditCard },
-    { id: 'wallet', name: 'E-Wallet', icon: Wallet },
+    { id: 'bank', name: 'Bank Transfer', icon: Wallet }
   ];
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -94,7 +92,7 @@ toast.success('Payout request submitted successfully!');
               </label>
               <div className="relative mt-1 rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <DollarSign className="h-5 w-5 text-gray-400" />
+                  <span className="text-gray-400 text-lg">₹</span>
                 </div>
                 <input
                   type="number"
