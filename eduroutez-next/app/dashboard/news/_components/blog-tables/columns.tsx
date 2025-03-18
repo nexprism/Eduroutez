@@ -44,6 +44,14 @@ export const columns: ColumnDef<News>[] = [
   //   cell: ({ row }) => <div>{`${row.original.category}`}</div>
   // },
 
+  {
+    header: 'Created By',
+    cell: ({ row }) => {
+      const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+      return <div>{role === 'SUPER_ADMIN' ? row.original?.instituteName || 'Admin created' : 'Me'}</div>;
+    }
+  },
+
  {
     header: 'CREATED AT',
     cell: ({ row }) => {

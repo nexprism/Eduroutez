@@ -1,4 +1,5 @@
 export type News = {
+  instituteName: string;
   title: string;
   image: string;
   createdAt: string;
