@@ -70,7 +70,7 @@ export const createReview = async (req, res) => {
 export async function getReviews(req, res) {
   try {
     // console.log('hi2');
-    const response = await reviewService.getall();
+    const response = await reviewService.getAll(req.query);
     // console.log(response);y
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched reviews";
