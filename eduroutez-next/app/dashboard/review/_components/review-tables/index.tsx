@@ -16,7 +16,7 @@ export default function ReviewTable({
   const { setPage } = useReviewTableFilters();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredData = data.filter((review) =>
+  const filteredData = data?.result?.filter((review:any) =>
     new RegExp(searchQuery, 'i').test(review.fullName)
   );
 

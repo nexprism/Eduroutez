@@ -189,7 +189,7 @@ const SupportPage = () => {
               <Phone className="h-8 w-8 text-purple-600 mb-4" />
               <h3 className="text-lg font-semibold mb-2">Contact Support</h3>
               <p className="text-gray-600">Available 24/7</p>
-              <p className="text-purple-600 font-semibold">+1 (555) 123-4567</p>
+              <p className="text-purple-600 font-semibold">9867877121</p>
             </div>
             
             {/* Email Support */}
@@ -197,16 +197,16 @@ const SupportPage = () => {
               <Mail className="h-8 w-8 text-purple-600 mb-4" />
               <h3 className="text-lg font-semibold mb-2">Email Support</h3>
               <p className="text-gray-600">Response within 24 hours</p>
-              <p className="text-purple-600 font-semibold">support@example.com</p>
+              <p className="text-purple-600 font-semibold">contact@eduroutez.com</p>
             </div>
             
-            {/* FAQs */}
+            {/* FAQs
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <FileQuestion className="h-8 w-8 text-purple-600 mb-4" />
               <h3 className="text-lg font-semibold mb-2">FAQs</h3>
               <p className="text-gray-600">Quick answers to common questions</p>
               <button className="text-purple-600 font-semibold">View FAQs →</button>
-            </div>
+            </div> */}
 
           </div>
         </div>

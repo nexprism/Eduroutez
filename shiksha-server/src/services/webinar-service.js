@@ -1,8 +1,13 @@
 import { WebinarRepository } from "../repository/index.js";
+import { InstituteRepository } from "../repository/index.js";
+import User from "../models/User.js";
+import Institute from "../models/Institute.js";
 
 class WebinarService {
   constructor() {
     this.webinarRepository = new WebinarRepository();
+    this.instituteService = new InstituteRepository();
+    
   }
 
   async create(data) {
@@ -60,6 +65,7 @@ class WebinarService {
 
   async getAll(query) {
     try {
+      console.log("query", query);
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
@@ -94,6 +100,30 @@ class WebinarService {
       // Execute query with dynamic filters, sorting, and pagination
       // const populateFields = ["createdBy"];
       const webinars = await this.webinarRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
+
+      for (let i = 0; i < webinars.result.length; i++) {
+        // Convert the model to a plain JavaScript object
+        if (typeof webinars.result[i].toObject === 'function') {
+          webinars.result[i] = webinars.result[i].toObject();
+        } else if (typeof webinars.result[i].toJSON === 'function') {
+          webinars.result[i] = webinars.result[i].toJSON();
+        } else {
+          webinars.result[i] = JSON.parse(JSON.stringify(webinars.result[i]));
+        }
+
+        if (webinars.result[i].webinarCreatedBy) {
+          const userDetails = await User.find({ _id: webinars.result[i].webinarCreatedBy });
+          if(userDetails.length >  0 && userDetails[0]?.role == 'institute'){
+          const instutiteDetails = await Institute.findOne({ _id: webinars.result[i].webinarCreatedBy });
+          console.log("instutiteDetails", instutiteDetails);
+          webinars.result[i].instituteName = instutiteDetails?.instituteName || 'Super Admin';
+          }else{
+            webinars.result[i].instituteName = 'Super Admin';
+          }
+        } else {
+          webinars.result[i].instituteName = 'Super Admin';
+        }
+      }
 
       return webinars;
     } catch (error) {

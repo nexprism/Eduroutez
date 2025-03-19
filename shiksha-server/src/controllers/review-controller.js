@@ -70,7 +70,7 @@ export const createReview = async (req, res) => {
 export async function getReviews(req, res) {
   try {
     // console.log('hi2');
-    const response = await reviewService.getall();
+    const response = await reviewService.getAll(req.query);
     // console.log(response);y
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched reviews";
@@ -151,7 +151,19 @@ export async function deleteReview(req, res) {
 //getReviewByInstitute
 export async function getReviewByInstitute(req, res) {
   try {
-    const response = await reviewService.getReviewsByInstitute(req.params.id);
+
+    const instituteId = req.params.id;
+    const query = req.query;
+    if (!query.filters) {
+      query.filters = JSON.stringify({ institute: instituteId });
+    } else {
+      const filters = JSON.parse(query.filters);
+      filters.institute = instituteId;
+      query.filters = JSON.stringify(filters);
+    }
+    const response = await reviewService.getAll(query);
+
+    // const response = await reviewService.getReviewsByInstitute(req.params.id);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched reviews";
     return res.status(200).json(SuccessResponse);

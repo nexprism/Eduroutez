@@ -8,7 +8,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
 import Image from 'next/image';
-import { X, ImageIcon, Calculator } from 'lucide-react';
+import { X, ImageIcon, Calculator, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -17,6 +17,7 @@ const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
 // Pricing configuration
 const LOCATION_PRICING = {
+  HOME_MAIN_PAGE: 3000,
   BLOG_PAGE: 1000,
   INSTITUTE_PAGE: 2000,
   INSTITUTE_PAGE_RECTANGLE:2000,
@@ -32,6 +33,15 @@ const LOCATION_PRICING = {
 
 // Define all promotion locations with their requirements
 const PROMOTION_LOCATIONS = {
+
+  HOME_MAIN_PAGE:{
+    id: 'HOME_MAIN_PAGE',
+    label: 'Home Main Page',
+    width: 1440,
+    height: 335,
+    category: 'Home',
+    description: 'Main banner on home page'
+  },
   // Blog Page
   BLOG_PAGE: {
     id: 'BLOG_PAGE',
@@ -166,6 +176,11 @@ const formSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
+  link: z
+    .string()
+    .url({ message: 'Please enter a valid URL' })
+    .optional()
+    .or(z.literal('')),
   startDate: z.date({
     required_error: 'Start date is required.'
   }),
@@ -198,6 +213,7 @@ export default function PromotionForm() {
     defaultValues: {
       title: '',
       location: undefined,
+      link: '',
       startDate: new Date(),
       endDate: new Date(),
       image: undefined
@@ -305,6 +321,9 @@ export default function PromotionForm() {
       const formData = new FormData();
       formData.append('title', values.title);
       formData.append('location', values.location);
+      if (values.link) {
+        formData.append('link', values.link);
+      }
       const startDate = new Date(values.startDate);
       const endDate = new Date(values.endDate);
   
@@ -375,11 +394,6 @@ export default function PromotionForm() {
     }
   };
   
-  
-  
-  
-  
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -418,6 +432,9 @@ export default function PromotionForm() {
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('location', values.location);
+    if (values.link) {
+      formData.append('link', values.link);
+    }
     formData.append('startDate', values.startDate.toISOString());
     formData.append('endDate', values.endDate.toISOString());
     console.log('values',values)
@@ -491,6 +508,31 @@ export default function PromotionForm() {
                     {form.formState.errors.title.message}
                   </p>
                 )}
+              </div>
+
+              {/* Link Input (New Field) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Destination URL <span className="text-gray-500 text-xs">(Optional)</span>
+                </label>
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 mr-2">
+                    <LinkIcon className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    {...form.register('link')}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    placeholder="https://your-landing-page.com"
+                  />
+                </div>
+                {form.formState.errors.link && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {form.formState.errors.link.message}
+                  </p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Enter the URL where users will be directed when they click on your promotion
+                </p>
               </div>
 
               {/* Location Select */}
@@ -598,7 +640,7 @@ export default function PromotionForm() {
                 </div>
               </div>
 
-              {/* Submit Button (continued) */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isPending || paymentProcessing}
@@ -632,4 +674,3 @@ export default function PromotionForm() {
     </div>
   );
 }
-

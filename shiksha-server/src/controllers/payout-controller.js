@@ -133,14 +133,20 @@ export async function updatePayout(req, res) {
       const user = await userService.getUserById(payout.user);
       console.log("user", user);
       const newBalance = user.balance - payout.requestedAmount;
-
+      console.log("role", user.role);
       if(user.role === "counsellor"){
-        const counsellor = await counselorService.get(user.email);
+        const counsellor = await counselorService.getById(user._id);
+        console.log("counsellor", counsellor);
         const counsellorPayload = {
-          balance: counsellor.balance + payout.requestedAmount
+          balance: counsellor.balance - payout.requestedAmount
         };
         console.log("counsellorPayload", counsellorPayload);
-        await counselorService.update(counsellor._id, counsellorPayload);
+        console.log("counsellorId", counsellor._id);
+        // In JavaScript/Node.js
+        
+        const stringId = counsellor._id.toString();
+        console.log(stringId); // "507f1f77bcf86cd799439011"
+        const counsrespo = await counselorService.updateBalance(stringId, counsellorPayload);
       }
 
       console.log("newBalance", newBalance);

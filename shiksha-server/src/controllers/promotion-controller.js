@@ -111,6 +111,11 @@ export async function updatePromotion(req, res) {
         payload.description = req.body.description;
       }
 
+      //link
+      if (req.body.link) {
+        payload.link = req.body.link;
+      }
+
       // Check if a new image is uploaded
       if (req.file) {
         const promotion = await promotionService.get(promotionId);

@@ -1,4 +1,5 @@
 import { ReviewRepository } from "../repository/index.js";
+import  Institute from "../models/Institute.js";
 
 class ReviewService {
   constructor() {
@@ -79,6 +80,28 @@ class ReviewService {
         }, {});
         return groupedResult;
       }
+
+      for (let i = 0; i < reviews.result.length; i++) {
+        // Convert the model to a plain JavaScript object
+        if (typeof reviews.result[i].toObject === 'function') {
+          reviews.result[i] = reviews.result[i].toObject();
+        } else if (typeof reviews.result[i].toJSON === 'function') {
+          reviews.result[i] = reviews.result[i].toJSON();
+        } else {
+          reviews.result[i] = JSON.parse(JSON.stringify(reviews.result[i]));
+        }
+
+        if (reviews.result[i].institute) {
+          console.log('institute', reviews.result[i].institute);
+          const instutiteDetails = await Institute.findOne({ _id: reviews.result[i].institute });
+          if (instutiteDetails){
+            reviews.result[i].instituteName = instutiteDetails?.instituteName || 'Super Admin';
+          }
+        } else {
+          reviews.result[i].instituteName = 'Super Admin';
+        }
+      }
+      
       return reviews;
     } catch (error) {
       console.log(error);

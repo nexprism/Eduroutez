@@ -1,4 +1,5 @@
 export type News = {
+  instituteName: string;
   title: string;
   image: string;
   createdAt: string;
@@ -34,3 +35,19 @@ export type CourseCategory = {
   status: boolean;
   _id: string;
 };
+
+export type Review = {
+  fullName: string;
+  email: string;
+  message: string;
+  createdAt: string;
+  status: boolean;
+  _id: string;
+};
+
+// If you are expecting a 'result' property, define it explicitly in a wrapper type
+export type ReviewResponse = {
+  result: Review[];
+};
+
+// Ensure data is typed as ReviewResponse where used
