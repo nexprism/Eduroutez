@@ -65,6 +65,7 @@ class WebinarService {
 
   async getAll(query) {
     try {
+      console.log("query", query);
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
@@ -100,26 +101,27 @@ class WebinarService {
       // const populateFields = ["createdBy"];
       const webinars = await this.webinarRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
 
-      for (let i = 0; i < webinars.length; i++) {
+      for (let i = 0; i < webinars.result.length; i++) {
         // Convert the model to a plain JavaScript object
-        if (typeof webinars[i].toObject === 'function') {
-          webinars[i] = webinars[i].toObject();
-        } else if (typeof webinars[i].toJSON === 'function') {
-          webinars[i] = webinars[i].toJSON();
+        if (typeof webinars.result[i].toObject === 'function') {
+          webinars.result[i] = webinars.result[i].toObject();
+        } else if (typeof webinars.result[i].toJSON === 'function') {
+          webinars.result[i] = webinars.result[i].toJSON();
         } else {
-          webinars[i] = JSON.parse(JSON.stringify(webinars[i]));
+          webinars.result[i] = JSON.parse(JSON.stringify(webinars.result[i]));
         }
 
-        if (webinars[i].webinarCreatedBy) {
-          const userDetails = await User.find({ _id: webinars[i].webinarCreatedBy });
+        if (webinars.result[i].webinarCreatedBy) {
+          const userDetails = await User.find({ _id: webinars.result[i].webinarCreatedBy });
           if(userDetails.length >  0 && userDetails[0]?.role == 'institute'){
-          const instutiteDetails = await Institute.findOne({ _id: webinars[i].webinarCreatedBy });
-          webinars[i].instituteName = instutiteDetails?.instituteName || 'Super Admin';
+          const instutiteDetails = await Institute.findOne({ _id: webinars.result[i].webinarCreatedBy });
+          console.log("instutiteDetails", instutiteDetails);
+          webinars.result[i].instituteName = instutiteDetails?.instituteName || 'Super Admin';
           }else{
-            webinars[i].instituteName = 'Super Admin';
+            webinars.result[i].instituteName = 'Super Admin';
           }
         } else {
-          webinars[i].instituteName = 'Super Admin';
+          webinars.result[i].instituteName = 'Super Admin';
         }
       }
 
