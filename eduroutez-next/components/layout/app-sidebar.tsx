@@ -36,6 +36,8 @@ import axiosInstance from '@/lib/axios';
 import { useQuery } from '@tanstack/react-query';
 import {Button} from '@/components/ui/button';
 import Image from 'next/image';
+import logo from "@/public/logo.png";
+
 
 export const company = {
   name: 'Eduroutez App Inc.',
@@ -133,12 +135,13 @@ export default function AppSidebar({
       <Sidebar collapsible="icon">
         <SidebarHeader>
           <div className="flex gap-2 py-2 text-sidebar-accent-foreground ">
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+            {/* <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
               <company.logo className="size-4" />
-            </div>
+            </div> */}
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{company.name}</span>
-              <span className="truncate text-xs">{company.plan}</span>
+            <Image src={logo} alt="Logo" width={150} height={100} />
+              {/* <span className="truncate font-semibold">{company.name}</span>
+              <span className="truncate text-xs">{company.plan}</span> */}
             </div>
           </div>
         </SidebarHeader>
