@@ -140,12 +140,13 @@ class CounselorRepository extends CrudRepository {
   }
 
   async updateCounsellor(id, data) {
+    console.log('id', id);
+    console.log('fdcounselor data', data);
     try {
-      console.log('id', id);
-      console.log('fdcounselor data', data);
 
       // First check if counselor exists in User table
       const user = await User.findOne({ _id: id });
+      console.log('user', user);
       if (user) {
         // If user exists, update the existing entry
         user.name = data.firstname + ' ' + data.lastname;

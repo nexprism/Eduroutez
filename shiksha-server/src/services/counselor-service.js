@@ -6,6 +6,7 @@ import  ScheduleSlot  from "../models/ScheduleSlots.js";
 import  User  from "../models/User.js";
 import  { CounselorSlotRepository }  from "../repository/counselorSlot-repository.js";
 import bcrypt from "bcrypt";
+import Counselor from "../models/Counselor.js";
 
 class CounselorService {
   constructor() {
@@ -265,6 +266,20 @@ class CounselorService {
     return questionAnswer;
   }
 
+  //updateBalance
+  async updateBalance(id, data) {
+    try {
+      const counselor = await Counselor.findById(id);
+      counselor.balance = data.balance;
+      const updatedCounselor = await counselor.save();
+      return updatedCounselor;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+
   async update(id, data) {
     try {
 
@@ -317,6 +332,9 @@ class CounselorService {
 
   async delete(id) {
     try {
+      const user = await this.userRepository.destroy(id);
+      
+
       const counselor = await this.counselorRepository.destroy(id);
       return counselor;
     } catch (error) {
