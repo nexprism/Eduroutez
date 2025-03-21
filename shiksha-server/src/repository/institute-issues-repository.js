@@ -22,7 +22,7 @@ class InstituteIssuesRepository extends CrudRepository {
           .populate({
             path: "institute",
             select: "instituteName email institutePhone"
-          });
+          }).sort({ createdAt: -1 });
         return issues;
       } catch (error) {
         throw error;
