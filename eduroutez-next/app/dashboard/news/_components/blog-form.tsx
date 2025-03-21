@@ -215,7 +215,7 @@ export default function NewsForm() {
                 <div className="space-y-4">
                   <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageChange} className="hidden" />
                   {previewImage ? (
-                    <div className="relative inline-block">
+                    <div className="relative ">
                       <Image src={typeof previewImage === 'string' ? previewImage : ''} alt="Preview" width={1200} height={400} className="rounded-md" />
                       <Button type="button" variant="destructive" className="absolute top-2 right-2" onClick={removeImage}>
                         <X className="h-4 w-4" />
