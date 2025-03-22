@@ -22,9 +22,11 @@ export const createPage = async (req, res) => {
           .json({ error: err });
       }
       const payload = { ...req.body };
-      if (req.files && req.files["image"]) {
-        payload.image = req.files["image"][0].filename;
+      console.log("req.body", req.file);
+      if (req.file) {
+        payload.image = req.file.filename;
       }
+      
       console.log("Create page request body:", payload);
       const response = await customPageService.create(payload);
 
