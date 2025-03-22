@@ -25,6 +25,7 @@ export const createPage = async (req, res) => {
       if (req.files && req.files["image"]) {
         payload.image = req.files["image"][0].filename;
       }
+      console.log("Create page request body:", payload);
       const response = await customPageService.create(payload);
 
       SuccessResponse.data = response;

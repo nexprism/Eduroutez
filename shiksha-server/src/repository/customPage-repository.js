@@ -9,7 +9,10 @@ class CustomPageRepository extends CrudRepository {
   //getByStreamLevel
   async getByStreamLevel(stream, level) {
     try {
-      const page = await Page.findOne({ stream: stream, level: level, deletedAt: null, status: "active" });
+      console.log('stream',stream);
+      console.log('level',level);
+      const page = await Page.findOne({ stream: stream, level: level,status: "active" });
+      console.log('page',page);
       return page;
     }
     catch (error) {

@@ -2,8 +2,11 @@ import { StatusCodes } from "http-status-codes";
 import StreamService from "../services/stream-service.js";
 import QuestionAnswerService from "../services/query-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
+import  CustomPageService  from "../services/customPage-service.js";
 const streamService = new StreamService();
 const questionAnswerService = new QuestionAnswerService();
+const customPageService = new CustomPageService();
+
 
 /**
  * POST : /stream
@@ -51,7 +54,33 @@ export async function trendingStreams(req, res) {
     query.select = JSON.stringify(["stream", "level"]);
     query.groupBy = JSON.stringify(["stream", "level"]);
     const response = await questionAnswerService.getAll(query);
-    console.log("Trending streams response:", response);
+    // console.log("Trending streams response:", response);
+    if (response.result.length > 0) {
+      for (let i = 0; i < response.result.length; i++) {
+        // Convert the model to a plain JavaScript object
+        if (typeof response.result[i].toObject === 'function') {
+          response.result[i] = response.result[i].toObject();
+        } else if (typeof response.result[i].toJSON === 'function') {
+          response.result[i] = response.result[i].toJSON();
+        } else {
+          response.result[i] = JSON.parse(JSON.stringify(response.result[i]));
+        }
+        console.log("Response result:", response.result[i]._id.stream);
+        if (response.result[i]._id && response.result[i]._id.stream) {
+        const stremId = response.result[i]._id.stream.toString();
+        const level = response.result[i]._id.level;
+        
+          console.log("Stream id:", response.result[i].streamDetails[0].name);
+        console.log("Level:", level);
+        const matchingPage = await customPageService.getByStreamLevel(stremId, level);
+        console.log("Matching page:", matchingPage);
+        if (matchingPage && matchingPage.image) {
+          response.result[i].image = matchingPage.image;
+        }
+      }
+      }
+      
+    }
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched streams";
     return res.status(StatusCodes.OK).json(SuccessResponse);
