@@ -195,7 +195,7 @@ console.log('updatesInstitute',updatesInstitute);
       
       // Add exam filters (if any)
       if (examFilters.length > 0) {
-        finalFilters.push({ $and: examFilters });
+        finalFilters.push({ $or: examFilters });
       }
       
       // Add other filters (if any)
@@ -205,7 +205,7 @@ console.log('updatesInstitute',updatesInstitute);
       
       // Apply combined filters to the main condition
       if (finalFilters.length > 0) {
-        filterConditions.$and = finalFilters;
+        filterConditions.$or = finalFilters;
       }
 
       console.log("filterConditions", filterConditions);
