@@ -27,14 +27,36 @@ import { toast } from 'sonner';
 import { usePathname, useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 import CustomEditor from '@/components/custom-editor';
+import Image from 'next/image';
+import { Plus, X } from 'lucide-react';
 
+// Update form schema to include image
 const formSchema = z.object({
   title: z.string().nonempty('Title is required'),
   status: z.string().optional(),
   description: z.string().nonempty('Content is required'),
   stream: z.string().optional(),
-  level: z.string().optional()
+  level: z.string().optional(),
+  image: z.instanceof(File)
+    .optional()
+    .nullable()
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return file.size <= 1024 * 1024;
+    }, {
+      message: 'Image size must be less than 1 MB.'
+    })
+    .refine((file) => {
+      // Only validate if file is provided (for new uploads)
+      if (file === null || file === undefined) return true;
+      return ['image/png', 'image/jpeg', 'image/webp'].includes(file.type);
+    }, {
+      message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
+    })
 });
+
+const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 
 export default function CounselorForm() {
   const pathname = usePathname();
@@ -42,12 +64,15 @@ export default function CounselorForm() {
   const [isEdit, setIsEdit] = React.useState(false);
   const [streams, setStreams] = React.useState<{ _id: string; name: string }[]>([]);
   const [pageDataLoaded, setPageDataLoaded] = React.useState(false);
+  const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [rawData, setRawData] = React.useState<{
     title?: string;
     description?: string;
     status?: string;
     stream?: string;
     level?: string;
+    image?: string;
   } | null>(null);
 
   React.useEffect(() => {
@@ -63,7 +88,8 @@ export default function CounselorForm() {
       description: '',
       status: '',
       stream: '',
-      level: ''
+      level: '',
+      image: undefined
     }
   });
   
@@ -111,17 +137,29 @@ export default function CounselorForm() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log('Submitting form with values:', values);
-    mutate({
-      title: values.title,
-      description: values.description,
-      status: values.status,
-      stream: values.stream,
-      level: values.level
-    });
+    
+    // Create FormData to handle file upload
+    const formData = new FormData();
+    formData.append('title', values.title);
+    formData.append('description', values.description);
+    
+    if (values.status) formData.append('status', values.status);
+    if (values.stream) formData.append('stream', values.stream);
+    if (values.level) formData.append('level', values.level);
+    
+    // Handle the image field
+    if (values.image instanceof File) {
+      formData.append('image', values.image);
+    } else if (typeof imagePreview === 'string' && imagePreview && isEdit && rawData?.image) {
+      // If it's a string URL in edit mode, pass it as is
+      formData.append('image', rawData.image);
+    }
+    
+    mutate(formData);
   }
 
   const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: async (formData: z.infer<typeof formSchema>) => {
+    mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
         ? `${apiUrl}/page/${segments[4]}`
         : `${apiUrl}/page`;
@@ -130,7 +168,7 @@ export default function CounselorForm() {
         method: isEdit ? 'patch' : 'post',
         data: formData,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'multipart/form-data'
         }
       });
       return response.data;
@@ -142,6 +180,7 @@ export default function CounselorForm() {
         : 'Page created successfully';
       toast.success(message);
       form.reset();
+      setImagePreview(null);
       router.push('/dashboard/manage-page');
     },
     onError: (error) => {
@@ -185,6 +224,11 @@ export default function CounselorForm() {
       form.setValue('stream', rawData.stream || '');
       form.setValue('level', rawData.level || '');
       
+      // Set image preview if exists
+      if (rawData.image) {
+        setImagePreview(`${rawData.image}`);
+      }
+      
       // Then force a re-render
       setTimeout(() => {
         setPageDataLoaded(true);
@@ -192,24 +236,55 @@ export default function CounselorForm() {
     }
   }, [rawData, form, isEdit, pageDataLoaded]);
 
+  // Handle image file selection
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size <= 1024 * 1024 && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        form.setValue('image', file);
+        
+        // Create a preview URL
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        toast.error(`${file.name} is too large or has an invalid format`);
+      }
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    form.setValue('image', undefined);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const triggerImageFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   if (pageLoading) {
     return <div className="flex justify-center p-10">Loading form data...</div>;
   }
 
   // Helper functions to get labels for selected values
-  const getStatusLabel = (value:any) => {
+  const getStatusLabel = (value: any) => {
     if (!value) return "Select Status";
     const status = statuses.find(s => s.value === value);
     return status ? status.label : "Select Status";
   };
 
-  const getLevelLabel = (value:any) => {
+  const getLevelLabel = (value: any) => {
     if (!value) return "Select Level";
     const level = levels.find(l => l.value === value);
     return level ? level.label : "Select Level";
   };
 
-  const getStreamName = (id:any) => {
+  const getStreamName = (id: any) => {
     if (!id || streams.length === 0) return "Select Stream";
     const stream = streams.find(s => s._id === id);
     return stream ? stream.name : "Select Stream";
@@ -335,6 +410,70 @@ export default function CounselorForm() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Image upload field with improved preview */}
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Featured Image</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <Input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={handleImageChange}
+                          ref={fileInputRef}
+                          className="hidden"
+                        />
+
+                        {imagePreview ? (
+                          <div className="relative inline-block w-full">
+                            {imagePreview.includes('data:') ? (
+                              <img
+                                src={imagePreview}
+                                alt="Preview"
+                                className="max-h-[400px] max-w-full rounded-md object-cover"
+                              />
+                            ) : (
+                              <Image
+                              // Ensure proper URL construction with path joining
+                              src={`${IMAGE_URL}/${imagePreview.replace(/^\//, '')}`}
+                              alt="Preview"
+                              className="max-h-[400px] max-w-full rounded-md object-cover"
+                              width={1200}
+                              height={400}
+                            />
+                            )}
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removeImage}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove image</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={triggerImageFileInput}
+                            className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                          >
+                            <Plus className="text-grey-400 h-10 w-10" />
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-500">
+                          Maximum file size: 1MB. Accepted formats: PNG, JPEG, WEBP
+                        </p>
+                      </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

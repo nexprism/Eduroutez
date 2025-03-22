@@ -7,24 +7,25 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import QuestionAnswerTable from './question-answer-tables';
 import { useQuery } from '@tanstack/react-query';
-
 import { useQuestionAnswerTableFilters } from './question-answer-tables/use-question-answer-table-filters';
 import axiosInstance from '@/lib/axios';
 
 type TQuestionAnswerListingPage = {};
 
 export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage) {
-  // const queryClient = useQueryClient()
   const { searchQuery, page, limit } = useQuestionAnswerTableFilters();
-
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['question-answers', searchQuery],
+    queryKey: ['question-answers', searchQuery, page, limit],
     queryFn: async () => {
-      // const institutionId = localStorage.getItem('instituteId');
-      // console.log('institutionId', institutionId);
-      const response = await axiosInstance.get(`${apiUrl}/page`);
+      const response = await axiosInstance.get(`${apiUrl}/page`, {
+        params: {
+          page,
+          limit,
+          search: searchQuery || undefined
+        }
+      });
       console.log('response', response);
       return response.data.data;
     }
@@ -53,7 +54,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             {data?.result && data?.result?.length > 0 ? (
               <QuestionAnswerTable
                 data={data?.result}
-                totalData={data?.result?.totalDocuments}
+                totalData={data?.totalDocuments}
               />
             ) : (
               <div>No Frequently asked Question Found found.</div>

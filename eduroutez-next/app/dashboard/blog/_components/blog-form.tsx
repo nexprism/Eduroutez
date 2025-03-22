@@ -168,10 +168,18 @@ export default function BlogForm() {
         ? 'Blog updated successfully'
         : 'Blog created successfully';
       toast.success(message);
+      
       form.reset();
       setPreviewImageUrl(null);
       setThumbnail(null);
-      router.push('/dashboard/blog');
+      
+      if (message === "Blog updated successfully") {
+        // Get the page number from localStorage that was set when navigating to the update page
+        const lastPage = localStorage.getItem('lastBlogPage') || '1';
+        router.push(`/dashboard/blog?page=${lastPage}`);
+      } else {
+        router.push('/dashboard/blog');
+      }
     },
     onError: (error) => {
       toast.error('Something went wrong');
