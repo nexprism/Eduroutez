@@ -49,7 +49,8 @@ export default function BlogListingPage({}: TBlogListingPage) {
 
         if (userRole === 'SUPER_ADMIN') {
           response = await axiosInstance.get(`${apiUrl}/blogs`, {
-            params: { search: searchQuery, page, limit }
+            params: { search: searchQuery, page, limit ,          sort: JSON.stringify({ createdAt: 'desc' }),
+          }
           });
         } else {
           if (!instituteId) {
