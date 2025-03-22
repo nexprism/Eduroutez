@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CustomPageService from "../services/customPage-service.js";
+import AppError from "../utils/errors/app-error.js";
 const singleUploader = FileUpload.upload.single("image");
 
 const customPageService = new CustomPageService();
@@ -25,6 +26,17 @@ export const createPage = async (req, res) => {
       console.log("req.body", req.file);
       if (req.file) {
         payload.image = req.file.filename;
+      }
+
+      const pageExist = await customPageService.getByStreamLevel(
+        payload.stream,
+        payload.level
+      );
+
+      if(pageExist){
+        ErrorResponse.error = "Page already exist for this stream and level";
+        ErrorResponse.message = "Page already exist for this stream and level";
+        return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
       }
       
       console.log("Create page request body:", payload);

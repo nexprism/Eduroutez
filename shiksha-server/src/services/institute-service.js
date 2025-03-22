@@ -91,8 +91,10 @@ console.log('updatesInstitute',updatesInstitute);
       const filterConditions = { deletedAt: null };
       //get browser url for check it admin r not
       console.log('browserUrl',browserUrl);
-      if (!browserUrl.includes('admin')) {
-        filterConditions.onhold = false;
+      if(browserUrl !== undefined){
+        if (!browserUrl.includes('admin')) {
+          filterConditions.onhold = false;
+        } 
       } 
 
       var ratingFilter = 0;
@@ -192,6 +194,13 @@ console.log('updatesInstitute',updatesInstitute);
       if (locationFilters.length > 0) {
         finalFilters.push({ $or: locationFilters });
       }
+
+      if(streamSpecFilters.length > 0 && locationFilters.length > 0){
+        // console.log("locationFilters", locationFilters);
+        // console.log("streamSpecFilters", streamSpecFilters);
+        finalFilters.push({ $and: locationFilters });
+        finalFilters.push({ $and: streamSpecFilters });
+      }
       
       // Add exam filters (if any)
       if (examFilters.length > 0) {
@@ -205,7 +214,12 @@ console.log('updatesInstitute',updatesInstitute);
       
       // Apply combined filters to the main condition
       if (finalFilters.length > 0) {
-        filterConditions.$or = finalFilters;
+        if (streamSpecFilters.length > 0 && locationFilters.length > 0) {
+          console.log("finalFilters", finalFilters);
+          filterConditions.$and = finalFilters;
+        }else{
+           filterConditions.$or = finalFilters;
+        }
       }
 
       console.log("filterConditions", filterConditions);

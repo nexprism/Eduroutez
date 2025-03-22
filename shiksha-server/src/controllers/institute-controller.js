@@ -168,7 +168,7 @@ export const makeInstitute = async (req, res) => {
 export async function getInstitutes(req, res) {
   try {
     const browserUrl = req.get('Referer') || req.get('Origin');
-    // console.log('browserUrl',browserUrl);
+    console.log('browserUrl',browserUrl);
     const response = await instituteService.getAll(req.query, browserUrl);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched institutes";
