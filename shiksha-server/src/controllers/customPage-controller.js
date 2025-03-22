@@ -81,6 +81,7 @@ export async function getPagesByInstitute(req, res) {
 export async function getPage(req, res) {
   try {
     const response = await customPageService.get(req.params.id);
+    console.log("response", response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the page";
     return res.status(StatusCodes.OK).json(SuccessResponse);
