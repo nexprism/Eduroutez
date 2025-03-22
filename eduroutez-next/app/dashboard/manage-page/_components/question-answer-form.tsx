@@ -183,9 +183,10 @@ export default function CounselorForm() {
       setImagePreview(null);
       router.push('/dashboard/manage-page');
     },
-    onError: (error) => {
+    onError: (error:any) => {
       console.error('Form submission error:', error);
-      toast.error('Something went wrong');
+      const errorMessage = error?.response?.data?.message || 'An error occurred';
+      toast.error(errorMessage);
     }
   });
 

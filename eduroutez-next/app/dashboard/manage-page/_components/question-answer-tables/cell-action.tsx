@@ -42,8 +42,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['question-answers'] });
       toast.success('Page deleted successfully');
-      router.push('/dashboard/manage-page');
-    },
+window.location.reload();    },
     onSettled: () => {
       setOpen(false);
       setLoading(false);
