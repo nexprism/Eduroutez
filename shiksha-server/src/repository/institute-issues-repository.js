@@ -31,7 +31,7 @@ class InstituteIssuesRepository extends CrudRepository {
                 } else {
                     issues[i] = JSON.parse(JSON.stringify(issues[i]));
                 }
-                
+
             if (issues[i].institute) {
                 const user_id = issues[i].institute.toString();
                 const user = await User.findOne({ _id: user_id }).select("email contact_number as institutePhone name as instituteName role");
@@ -51,10 +51,27 @@ class InstituteIssuesRepository extends CrudRepository {
     //getIssueById
     async getIssueById(id) {
       try {
-        const issue = await InstituteIssues.findById(id).populate({
-          path: "institute",
-          select: "instituteName email institutePhone"
-        });
+        const issue = await InstituteIssues.findById(id);
+
+        //fetch istitute details from user
+        if (issue) {
+          if (typeof issue.toObject === 'function') {
+            issue = issue.toObject();
+          } else if (typeof issue.toJSON === 'function') {
+            issue = issue.toJSON();
+          } else {
+            issue = JSON.parse(JSON.stringify(issue));
+          }
+
+          if (issue.institute) {
+            const user_id = issue.institute.toString();
+            const user = await User.findOne({ _id: user_id }).select("email contact_number as institutePhone name as instituteName role");
+            if (user) {
+              issue.institute = user;
+            }
+          }
+        }
+
         return issue;
       } catch (error) {
         throw error;
