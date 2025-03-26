@@ -50,76 +50,55 @@ class ReviewRepository extends CrudRepository {
       } else if (type === "counselor") {
         const blogs = await model.find({ "reviews.studentEmail": userId });
         reviews = blogs.map(blog => {
-          return blog.reviews.map(review => {
-            // if(!review.reviewedAt){
-            //   review.reviewedAt = Date.now();
-            //   //update review
-            //   blog.save();
-            // }
-            return {
-              _id: review._id,
-              ObjectId: blog._id,
-              objectName: (type === "counselor") ? blog.firstname + " " + blog.lastname : blog.title,
-              slug: '',
-              rating: review.rating,
-              comment: review.comment,
-              studentId: review.studentId,
-              studentName: user.name,
-              studentEmail: user.email,
-              reviewedAt: review.reviewedAt
-            };
-          });
+          return blog.reviews
+            .filter(review => review.studentEmail === userId) // Filter reviews matching studentEmail with userId
+            .map(review => {
+              return {
+          _id: review._id,
+          ObjectId: blog._id,
+          objectName: (type === "counselor") ? blog.firstname + " " + blog.lastname : blog.title,
+          slug: '',
+          rating: review.rating,
+          comment: review.comment,
+          studentId: review.studentId,
+          studentName: user.name,
+          studentEmail: user.email,
+          reviewedAt: review.reviewedAt
+              };
+            });
         }).flat();
 
-        console.log('Raw reviews before sorting:', reviews.map(r => ({
-          objectName: r.objectName,
-          comment: r.comment,
-          reviewedAt: r.reviewedAt,
-          type: typeof r.reviewedAt
-        })));
-
-        //descending by reviewedAt
+        // Sort reviews in descending order by reviewedAt
         reviews.sort((a, b) => {
-          // Convert to timestamps, treating null/undefined as 0
           const dateA = a.reviewedAt ? new Date(a.reviewedAt).getTime() : 0;
           const dateB = b.reviewedAt ? new Date(b.reviewedAt).getTime() : 0;
-
-          // Sort in descending order
           return dateB - dateA;
         });
 
-        console.log('Raw reviews after sorting:', reviews.map(r => ({
-          objectName: r.objectName,
-          comment: r.comment,
-          reviewedAt: r.reviewedAt,
-          type: typeof r.reviewedAt
-        })));
-
-        
-        // console.log('reviews', reviews);
         return reviews;
       } else {
-         const blogs = await model.find({ "reviews.studentId": userId });
-         
+        const blogs = await model.find({ "reviews.studentId": userId });
         reviews = blogs.map(blog => {
-          return blog.reviews.map(review => {
-            
-            return {
-              _id: review._id,
-              ObjectId: blog._id,
-              objectName: (type === "course") ? blog.courseTitle : blog.title,
-              slug: blog.slug,
-              rating: review.rating,
-              comment: review.comment,
-              studentId: review.studentId,
-              studentName: user.name,
-              studentEmail: user.email,
-              reviewedAt: review.reviewedAt
-            };
-          });
+          console.log('user', userId);
+          console.log('blog', blog.reviews[0].studentId);
+          return blog.reviews
+            .filter(review => review.studentId.toString() === userId.toString()) // Filter reviews matching studentId with userId
+            .map(review => {
+              return {
+          _id: review._id,
+          ObjectId: blog._id,
+          objectName: (type === "course") ? blog.courseTitle : blog.title,
+          slug: blog.slug,
+          rating: review.rating,
+          comment: review.comment,
+          studentId: review.studentId,
+          studentName: user.name,
+          studentEmail: user.email,
+          reviewedAt: review.reviewedAt
+              };
+            });
         }).flat();
-
-        reviews.sort((a, b) => new Date(b.reviewedAt) - new Date(a.reviewedAt));
+        console.log('reviews',reviews.length);
         return reviews;
 
       }
