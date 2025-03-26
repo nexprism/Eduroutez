@@ -20,7 +20,7 @@ const LOCATION_PRICING = {
   HOME_MAIN_PAGE: 3000,
   BLOG_PAGE: 1000,
   INSTITUTE_PAGE: 2000,
-  INSTITUTE_PAGE_RECTANGLE:2000,
+  INSTITUTE_PAGE_RECTANGLE: 2000,
   HOME_PAGE: 2000,
   REVIEW_PAGE: 1500,
   CAREER_PAGE: 1000,
@@ -28,13 +28,12 @@ const LOCATION_PRICING = {
   COUNSELING_PAGE_MAIN: 2500,
   COUNSELING_PAGE_SIDEBAR: 2000,
   QA_PAGE: 1000,
-  SEARCH_PAGE:2000,
+  SEARCH_PAGE: 2000,
 };
 
 // Define all promotion locations with their requirements
 const PROMOTION_LOCATIONS = {
-
-  HOME_MAIN_PAGE:{
+  HOME_MAIN_PAGE: {
     id: 'HOME_MAIN_PAGE',
     label: 'Home Main Page',
     width: 1440,
@@ -541,20 +540,20 @@ export default function PromotionForm() {
                   Placement Location
                 </label>
                 <select
-                  {...form.register('location')}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                >
-                  <option value="">Select placement location</option>
-                  {Object.entries(LOCATION_CATEGORIES).map(([category, locations]) => (
-                    <optgroup key={category} label={category}>
-                      {locations.map((location) => (
-                        <option key={location.id} value={location.id}>
-                          {location.label} - ₹{LOCATION_PRICING[location.id]}/day
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
+  {...form.register('location')}
+  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+>
+  <option value="">Select placement location</option>
+  {Object.entries(LOCATION_CATEGORIES).map(([category, locations]) => (
+    <optgroup key={category} label={category}>
+      {locations.map((location) => (
+        <option key={location.id} value={location.id}>
+          {location.label} - {location.width}X{location.height}px  -  ₹{LOCATION_PRICING[location.id]}/day
+        </option>
+      ))}
+    </optgroup>
+  ))}
+</select>
                 {form.formState.errors.location && (
                   <p className="mt-1 text-sm text-red-600">
                     {form.formState.errors.location.message}
