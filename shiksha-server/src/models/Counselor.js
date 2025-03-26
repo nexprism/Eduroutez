@@ -129,6 +129,11 @@ const counselorSchema = new mongoose.Schema(
           type: String,
           // required: true,
         },
+        reviewedAt: {
+          type: Date,
+          default: Date.now,
+        },
+
       },
     ],
     educations: [

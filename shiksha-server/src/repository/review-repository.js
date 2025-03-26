@@ -51,7 +51,11 @@ class ReviewRepository extends CrudRepository {
         const blogs = await model.find({ "reviews.studentEmail": userId });
         reviews = blogs.map(blog => {
           return blog.reviews.map(review => {
-
+            // if(!review.reviewedAt){
+            //   review.reviewedAt = Date.now();
+            //   //update review
+            //   blog.save();
+            // }
             return {
               _id: review._id,
               ObjectId: blog._id,
@@ -67,7 +71,32 @@ class ReviewRepository extends CrudRepository {
           });
         }).flat();
 
-        reviews.sort((a, b) => new Date(b.reviewedAt) - new Date(a.reviewedAt));
+        console.log('Raw reviews before sorting:', reviews.map(r => ({
+          objectName: r.objectName,
+          comment: r.comment,
+          reviewedAt: r.reviewedAt,
+          type: typeof r.reviewedAt
+        })));
+
+        //descending by reviewedAt
+        reviews.sort((a, b) => {
+          // Convert to timestamps, treating null/undefined as 0
+          const dateA = a.reviewedAt ? new Date(a.reviewedAt).getTime() : 0;
+          const dateB = b.reviewedAt ? new Date(b.reviewedAt).getTime() : 0;
+
+          // Sort in descending order
+          return dateB - dateA;
+        });
+
+        console.log('Raw reviews after sorting:', reviews.map(r => ({
+          objectName: r.objectName,
+          comment: r.comment,
+          reviewedAt: r.reviewedAt,
+          type: typeof r.reviewedAt
+        })));
+
+        
+        // console.log('reviews', reviews);
         return reviews;
       } else {
          const blogs = await model.find({ "reviews.studentId": userId });
