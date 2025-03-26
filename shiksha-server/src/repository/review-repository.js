@@ -45,7 +45,7 @@ class ReviewRepository extends CrudRepository {
       let reviews;
 
       if (type === "institute") {
-        reviews = await Review.find({ email: userId }).populate('institute');
+        reviews = await Review.find({ email: userId }).sort({ createdAt: -1 }).populate('institute');
         return reviews
       } else if (type === "counselor") {
         const blogs = await model.find({ "reviews.studentEmail": userId });
@@ -55,16 +55,19 @@ class ReviewRepository extends CrudRepository {
             return {
               _id: review._id,
               ObjectId: blog._id,
-              objectName: (type === "counselor") ? blog.firstname + " " + blog.lastname: blog.title,
+              objectName: (type === "counselor") ? blog.firstname + " " + blog.lastname : blog.title,
               slug: '',
               rating: review.rating,
               comment: review.comment,
               studentId: review.studentId,
               studentName: user.name,
-              studentEmail: user.email
+              studentEmail: user.email,
+              reviewedAt: review.reviewedAt
             };
           });
         }).flat();
+
+        reviews.sort((a, b) => new Date(b.reviewedAt) - new Date(a.reviewedAt));
         return reviews;
       } else {
          const blogs = await model.find({ "reviews.studentId": userId });
@@ -81,10 +84,13 @@ class ReviewRepository extends CrudRepository {
               comment: review.comment,
               studentId: review.studentId,
               studentName: user.name,
-              studentEmail: user.email
+              studentEmail: user.email,
+              reviewedAt: review.reviewedAt
             };
           });
         }).flat();
+
+        reviews.sort((a, b) => new Date(b.reviewedAt) - new Date(a.reviewedAt));
         return reviews;
 
       }
