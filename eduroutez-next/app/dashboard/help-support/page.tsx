@@ -8,6 +8,9 @@ interface Issue {
     image: string;
     description: string;
     institute: {
+        name: string;
+        contact_number: string;
+        role: string;
         instituteName: string;
         email: string;
         institutePhone: string;
@@ -37,6 +40,9 @@ interface IssueDetail {
     createdAt: string;
     updatedAt: string;
     institute: {
+        name: any;
+        contact_number: any;
+        role: any;
         instituteName: string;
         email: string;
         institutePhone: string;
@@ -103,16 +109,19 @@ const HelpSupportPage: React.FC = () => {
 
     const getInstituteDetails = (institute: Issue['institute']) => {
         if (typeof institute === 'object' && institute !== null) {
+            console.log('Institute:', institute);
             return {
-                name: institute.instituteName || 'N/A',
+                name: institute.name || 'N/A',
                 email: institute.email || 'N/A',
-                phone: institute.institutePhone || 'N/A'
+                phone: institute.contact_number || 'N/A',
+                role: institute.role || 'N/A'   
             };
         }
         return {
             name: 'N/A',
             email: 'N/A',
-            phone: 'N/A'
+            phone: 'N/A',
+            role: 'N/A'
         };
     };
 
@@ -168,7 +177,7 @@ const HelpSupportPage: React.FC = () => {
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Institute Details</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
                                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
@@ -196,6 +205,7 @@ const HelpSupportPage: React.FC = () => {
                                                     <div>{instituteDetails.name}</div>
                                                     <div className="text-gray-500">{instituteDetails.email}</div>
                                                     <div className="text-gray-500">{instituteDetails.phone}</div>
+                                                    <div className='text-gray-500'>{instituteDetails.role}</div>
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-500">
                                                     <div>Created: {new Date(issue.createdAt).toLocaleDateString()}</div>
@@ -315,12 +325,12 @@ const HelpSupportPage: React.FC = () => {
                                         </div>
                                         
                                         <div className="bg-gray-50 p-4 rounded-lg">
-                                            <h4 className="font-medium text-gray-700 mb-2">Institute Information</h4>
+                                            <h4 className="font-medium text-gray-700 mb-2">Information</h4>
                                             {issueDetail.institute && (
                                                 <div className="space-y-2 text-sm">
                                                     <div>
                                                         <p className="text-gray-500">Name</p>
-                                                        <p className="font-medium">{issueDetail.institute.instituteName}</p>
+                                                        <p className="font-medium">{issueDetail.institute?.name}</p>
                                                     </div>
                                                     <div>
                                                         <p className="text-gray-500">Email</p>
@@ -328,8 +338,10 @@ const HelpSupportPage: React.FC = () => {
                                                     </div>
                                                     <div>
                                                         <p className="text-gray-500">Phone</p>
-                                                        <p className="font-medium">{issueDetail.institute.institutePhone}</p>
+                                                        <p className="font-medium">{issueDetail.institute?.contact_number}</p>
                                                     </div>
+                                                    <p className='text-gray-500'>Role</p>
+                                                    <p className='font-medium'>{issueDetail.institute?.role}</p>
                                                 </div>
                                             )}
                                         </div>
