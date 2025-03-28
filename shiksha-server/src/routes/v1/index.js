@@ -361,7 +361,7 @@ router.delete("/feedback/:id", accessTokenAutoRefresh, passport.authenticate("jw
  */
 router.post("/question-answer",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createQuestionAnswer);
 router.get("/question-answers", getQuestionAnswers);
-router.get("/question-answer/:email",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswerByEmail);
+router.get("/question-answer/:email", getQuestionAnswerByEmail);
 router.get("/question-answer-detail/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswer);
 router.patch("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  updateQuestionAnswer);
 router.delete("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  deleteQuestionAnswer);
