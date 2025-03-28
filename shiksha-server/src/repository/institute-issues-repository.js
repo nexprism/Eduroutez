@@ -51,29 +51,32 @@ class InstituteIssuesRepository extends CrudRepository {
     //getIssueById
     async getIssueById(id) {
       try {
-        const issue = await InstituteIssues.findById(id);
-
+        var issue = await InstituteIssues.findById(id);
+        console.log('issue',issue);
         //fetch istitute details from user
         if (issue) {
-          if (typeof issue.toObject === 'function') {
-            issue = issue.toObject();
-          } else if (typeof issue.toJSON === 'function') {
-            issue = issue.toJSON();
-          } else {
-            issue = JSON.parse(JSON.stringify(issue));
-          }
+          //here is single object
 
+          // if (typeof issue.toObject === 'function') {
+          //   issue = issue.toObject();
+          // }
+
+          // console.log('issue', issue);
           if (issue.institute) {
-            const user_id = issue.institute.toString();
-            const user = await User.findOne({ _id: user_id }).select("email contact_number as institutePhone name as instituteName role");
+            var user_id = issue.institute.toString();
+            var user = await User.findOne({ _id: user_id }).select("email contact_number as institutePhone name as instituteName role");
+            console.log('user', user);
             if (user) {
+              issue = issue.toObject ? issue.toObject() : JSON.parse(JSON.stringify(issue));
               issue.institute = user;
             }
           }
         }
+        console.log('issue', issue);
 
         return issue;
       } catch (error) {
+        console.log('error', error.message);
         throw error;
       }
     }
