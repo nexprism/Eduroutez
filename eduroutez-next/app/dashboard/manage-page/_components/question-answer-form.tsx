@@ -112,7 +112,7 @@ export default function CounselorForm() {
   const { data: streamsData } = useQuery({
     queryKey: ['streams'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/streams?limit=50`);
+      const response = await axiosInstance.get(`${apiUrl}/streams?page=0&limit=100000`);
       console.log('Streams API response:', response.data);
       return response.data;
     }

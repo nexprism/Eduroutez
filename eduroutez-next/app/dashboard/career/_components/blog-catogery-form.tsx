@@ -90,7 +90,7 @@ export default function CareerCategoryForm() {
   const { data: categories, isLoading, isSuccess } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/career-category`);
+      const response = await axiosInstance.get(`${apiUrl}/career-category?page=0`);
       return response.data;
 
     }

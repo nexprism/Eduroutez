@@ -262,7 +262,7 @@ export default function BlogForm() {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/blog-category`);
+      const response = await axiosInstance.get(`${apiUrl}/blog-category?page=0`);
       return response.data.data.result;
       
     }

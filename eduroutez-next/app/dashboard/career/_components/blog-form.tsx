@@ -85,44 +85,203 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export default function CounselorForm() {
   const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
-  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
-  const [thumbnail, setThumbnail] = React.useState<{ file: File; preview: string } | null>(null);
   const thumbnailInputRef = React.useRef<HTMLInputElement | null>(null);
   const pathname = usePathname();
-  const segments = pathname.split('/');
-  const [isEdit, setIsEdit] = React.useState(false);
+  const router = useRouter();
 
-  // Check if in edit mode
+  // Memoize default form values
+  const defaultFormValues = React.useMemo(() => ({
+    title: '',
+    category: '',
+    description: '',
+    eligibility: '',
+    jobRoles: '',
+    opportunity: '',
+    topColleges: '',
+    counselorType: '',
+    thumbnail: undefined
+  }), []);
+
+  // Create form with stable configuration
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: defaultFormValues
+  });
+
+  // State for edit mode and form images
+  const [formState, setFormState] = React.useState({
+    isEdit: false,
+    previewImageUrl: null as string | null,
+    thumbnail: null as { file: File; preview: string } | null
+  });
+
+  // Determine edit mode based on pathname
   React.useEffect(() => {
+    const segments = pathname.split('/');
     const shouldEdit = segments.length === 5 && segments[3] === 'update';
-    setIsEdit(shouldEdit);
+    
+    setFormState(prev => {
+      if (prev.isEdit !== shouldEdit) {
+        return {
+          ...prev,
+          isEdit: shouldEdit,
+          previewImageUrl: null,
+          thumbnail: null
+        };
+      }
+      return prev;
+    });
 
     // Reset form when not in edit mode
     if (!shouldEdit) {
-      form.reset();
-      setPreviewImageUrl(null);
-      setThumbnail(null);
+      form.reset(defaultFormValues);
     }
-  }, [pathname, segments]);
+  }, [pathname, form, defaultFormValues]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: '',
-      category: '',
-      description: '',
-      eligibility: '',
-      jobRoles: '',
-      opportunity: '',
-      topColleges: '',
-      counselorType: '',
-      thumbnail: undefined
+  // Fetch career details
+  const { data: counselor } = useQuery({
+    queryKey: ['career', pathname.split('/')[4]],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        `${apiUrl}/career/${pathname.split('/')[4]}`
+      );
+      return response.data;
+    },
+    enabled: formState.isEdit,
+    refetchOnWindowFocus: false,
+    refetchInterval: false
+  });
+
+  // Fetch categories
+  const { data: categories } = useQuery({
+    queryKey: ['career-categories'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/career-category?page=0`);
+      return response.data;
+    },
+    refetchOnWindowFocus: false,
+    refetchInterval: false
+  });
+
+  // Populate form when counselor data is loaded
+  React.useEffect(() => {
+    if (counselor?.data) {
+      // Reset form with fetched data
+      form.reset({
+        title: counselor.data.title,
+        category: counselor.data.category,
+        description: counselor.data.description,
+        image: undefined,
+        eligibility: counselor.data.eligibility,
+        jobRoles: counselor.data.jobRoles,
+        opportunity: counselor.data.opportunity,
+        topColleges: counselor.data.topColleges,
+        counselorType: counselor.data.counselorType
+      });
+
+      // Update image previews
+      setFormState(prev => ({
+        ...prev,
+        previewImageUrl: counselor.data.image 
+          ? `${IMAGE_URL}/${counselor.data.image}` 
+          : null,
+        thumbnail: counselor.data.thumbnail
+          ? {
+              file: new File([], 'existing-thumbnail'),
+              preview: `${IMAGE_URL}/${counselor.data.thumbnail}`
+            }
+          : null
+      }));
+    }
+  }, [counselor, form]);
+
+  // Image change handlers
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormState(prev => ({
+          ...prev,
+          previewImageUrl: reader.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
+      form.setValue('image', file);
+    } else {
+      setFormState(prev => ({
+        ...prev,
+        previewImageUrl: null
+      }));
+      form.setValue('image', undefined);
+    }
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size <= 1024 * 1024 && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFormState(prev => ({
+            ...prev,
+            thumbnail: {
+              file,
+              preview: reader.result as string
+            }
+          }));
+        };
+        reader.readAsDataURL(file);
+        form.setValue('thumbnail', file);
+      } else {
+        toast.error(`${file.name} is too large or has an invalid format`);
+      }
+    } else {
+      setFormState(prev => ({
+        ...prev,
+        thumbnail: null
+      }));
+      form.setValue('thumbnail', undefined);
+    }
+  };
+
+  // Submission handler
+  const { mutate, isPending: isSubmitting } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const segments = pathname.split('/');
+      const endpoint = formState.isEdit
+        ? `${apiUrl}/career/${segments[4]}`
+        : `${apiUrl}/career`;
+      const response = await axiosInstance({
+        url: endpoint,
+        method: formState.isEdit ? 'patch' : 'post',
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      const message = formState.isEdit
+        ? 'Career updated successfully'
+        : 'Career created successfully';
+      toast.success(message);
+      form.reset(defaultFormValues);
+      setFormState(prev => ({
+        ...prev,
+        previewImageUrl: null,
+        thumbnail: null
+      }));
+      router.push('/dashboard/career');
+    },
+    onError: () => {
+      toast.error('Something went wrong');
     }
   });
 
-  const router = useRouter();
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  // Form submission
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     const formData = new FormData();
     const instituteId = localStorage.getItem('instituteId');
     
@@ -144,161 +303,35 @@ export default function CounselorForm() {
       formData.append('images', values.image);
     }
     
-    if (thumbnail) {
-      formData.append('thumbnail', thumbnail.file);
+    if (formState.thumbnail) {
+      formData.append('thumbnail', formState.thumbnail.file);
     }
 
     mutate(formData);
-  }
-
-  const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const endpoint = isEdit
-        ? `${apiUrl}/career/${segments[4]}`
-        : `${apiUrl}/career`;
-      const response = await axiosInstance({
-        url: `${endpoint}`,
-        method: isEdit ? 'patch' : 'post',
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      const message = isEdit
-        ? 'Career updated successfully'
-        : 'Career created successfully';
-      toast.success(message);
-      form.reset();
-      setPreviewImageUrl(null);
-      setThumbnail(null);
-
-      router.push('/dashboard/career');
-    },
-    onError: (error) => {
-      toast.error('Something went wrong');
-    }
-  });
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImageUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      form.setValue('image', file);
-    } else {
-      setPreviewImageUrl(null);
-      form.setValue('image', undefined);
-    }
   };
 
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size <= 1024 * 1024 && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setThumbnail({
-            file,
-            preview: reader.result as string
-          });
-        };
-        reader.readAsDataURL(file);
-        form.setValue('thumbnail', file);
-      } else {
-        toast.error(`${file.name} is too large or has an invalid format`);
-      }
-    } else {
-      setThumbnail(null);
-      form.setValue('thumbnail', undefined);
-    }
-  };
-
-  const triggerImageFileInput = () => {
-    fileInputImageRef.current?.click();
-  };
-
+  // Render methods
   const removeImage = () => {
-    setPreviewImageUrl(null);
+    setFormState(prev => ({
+      ...prev,
+      previewImageUrl: null
+    }));
     form.setValue('image', undefined);
     if (fileInputImageRef.current) {
       fileInputImageRef.current.value = '';
     }
   };
 
-  const triggerThumbnailInput = () => {
-    thumbnailInputRef.current?.click();
-  };
-
   const removeThumbnail = () => {
-    setThumbnail(null);
+    setFormState(prev => ({
+      ...prev,
+      thumbnail: null
+    }));
     form.setValue('thumbnail', undefined);
     if (thumbnailInputRef.current) {
       thumbnailInputRef.current.value = '';
     }
   };
-
-  // Fetch career details only when in edit mode
-  const { data: counselor } = useQuery({
-    queryKey: ['career', segments[4]],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/career/${segments[4]}`
-      );
-      return response.data;
-    },
-    enabled: isEdit,
-    refetchOnWindowFocus: false,
-    refetchInterval: false
-  });
-
-  // Fetch categories with refetching disabled
-  const { data: categories } = useQuery({
-    queryKey: ['career-categories'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/career-category`
-      );
-      return response.data;
-    },
-    refetchOnWindowFocus: false,
-    refetchInterval: false
-  });
-
-  // Populate form when counselor data is loaded
-  React.useEffect(() => {
-    if (counselor?.data) {
-      form.reset({
-        title: counselor.data.title,
-        category: counselor.data.category,
-        description: counselor.data.description,
-        image: undefined,
-        eligibility: counselor.data.eligibility,
-        jobRoles: counselor.data.jobRoles,
-        opportunity: counselor.data.opportunity,
-        topColleges: counselor.data.topColleges,
-        counselorType: counselor?.data?.counselorType
-      });
-
-      // Set main image preview
-      if (counselor.data.image) {
-        setPreviewImageUrl(`${IMAGE_URL}/${counselor.data.image}`);
-      }
-
-      // Set thumbnail preview
-      if (counselor.data.thumbnail) {
-        setThumbnail({
-          file: new File([], 'existing-thumbnail'), // Placeholder file
-          preview: `${IMAGE_URL}/${counselor.data.thumbnail}`
-        });
-      }
-    }
-  }, [counselor, form]);
 
   return (
     <Card className="mx-auto w-full">
@@ -310,6 +343,7 @@ export default function CounselorForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Rest of the form remains the same as in the original component */}
             <FormField
               control={form.control}
               name="title"
@@ -349,11 +383,12 @@ export default function CounselorForm() {
                 )}
               />
             </div>
+            {/* Image and Thumbnail Fields */}
             <div className="grid grid-cols-1">
               <FormField
                 control={form.control}
                 name="image"
-                render={({ field }) => (
+                render={() => (
                   <FormItem>
                     <FormLabel>Image</FormLabel>
                     <FormControl>
@@ -366,62 +401,10 @@ export default function CounselorForm() {
                           className="hidden"
                         />
 
-<FormField
-              control={form.control}
-              name="thumbnail"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Thumbnail</FormLabel>
-                  <FormControl>
-                    <div className="space-y-4">
-                      <Input
-                        type="file"
-                        accept="image/png, image/jpeg, image/webp"
-                        onChange={handleThumbnailChange}
-                        ref={thumbnailInputRef}
-                        className="hidden"
-                      />
-
-                      {thumbnail ? (
-                        <div className="relative inline-block">
-                          <Image
-                            src={thumbnail.preview}
-                            alt="Thumbnail"
-                            className="h-40 w-full rounded-md object-cover"
-                            width={200}
-                            height={160}
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute right-0 top-0 -mr-2 -mt-2"
-                            onClick={removeThumbnail}
-                          >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove thumbnail</span>
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={triggerThumbnailInput}
-                          className="border-grey-300 flex h-40 w-full cursor-pointer items-center justify-center rounded-md border"
-                        >
-                          <Plus className="text-grey-400 h-10 w-10" />
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-
-                        {previewImageUrl ? (
+                        {formState.previewImageUrl ? (
                           <div className="relative inline-block">
                             <Image
-                              src={previewImageUrl}
+                              src={formState.previewImageUrl}
                               alt="Preview"
                               className="max-h-[400px] max-w-full rounded-md object-cover"
                               width={1200}
@@ -440,7 +423,7 @@ export default function CounselorForm() {
                           </div>
                         ) : (
                           <div
-                            onClick={triggerImageFileInput}
+                            onClick={() => fileInputImageRef.current?.click()}
                             className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
                           >
                             <Plus className="text-grey-400 h-10 w-10" />
@@ -448,11 +431,59 @@ export default function CounselorForm() {
                         )}
                       </div>
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="thumbnail"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Thumbnail</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <Input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={handleThumbnailChange}
+                          ref={thumbnailInputRef}
+                          className="hidden"
+                        />
+
+                        {formState.thumbnail ? (
+                          <div className="relative inline-block">
+                            <Image
+                              src={formState.thumbnail.preview}
+                              alt="Thumbnail"
+                              className="h-40 w-full rounded-md object-cover"
+                              width={200}
+                              height={160}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removeThumbnail}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove thumbnail</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={() => thumbnailInputRef.current?.click()}
+                            className="border-grey-300 flex h-40 w-full cursor-pointer items-center justify-center rounded-md border"
+                          >
+                            <Plus className="text-grey-400 h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="description"
