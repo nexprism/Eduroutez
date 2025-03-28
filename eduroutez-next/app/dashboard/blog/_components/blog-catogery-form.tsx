@@ -66,7 +66,8 @@ export default function BlogCategoryForm() {
       form.reset();
       setSelectedCategory(null);
       setIsEdit(false);
-      router.push('/dashboard/blog');
+      router.push('/dashboard/blog/blog-category');
+      window.location.reload();
     },
     onError: () => toast.error('Something went wrong')
   });
@@ -80,7 +81,8 @@ export default function BlogCategoryForm() {
       toast.success('Category deleted successfully');
       setSelectedCategory(null);
       setIsEdit(false);
-      router.push('/dashboard/blog');
+      router.push('/dashboard/blog/blog-category');
+      window.location.reload();
     },
     onError: () => toast.error('Something went wrong')
   });
