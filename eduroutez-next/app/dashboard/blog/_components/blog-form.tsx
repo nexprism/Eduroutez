@@ -254,7 +254,9 @@ export default function BlogForm() {
       const response = await axiosInstance.get(`${apiUrl}/blog/${segments[4]}`);
       return response.data;
     },
-    enabled: isEdit
+    enabled: isEdit,
+    refetchOnWindowFocus: false,
+    refetchInterval: false
   });
 
   const { data: categories } = useQuery({
@@ -262,6 +264,7 @@ export default function BlogForm() {
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/blog-category`);
       return response.data.data.result;
+      
     }
   });
 

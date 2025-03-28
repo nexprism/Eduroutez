@@ -203,7 +203,9 @@ export default function CounselorForm() {
       }
     },
     enabled: isEdit, // Only fetch when in edit mode
-    retry: 1
+    retry: 1,
+    refetchOnWindowFocus: false,
+    refetchInterval: false
   });
 
   // Directly set the raw data when we get it

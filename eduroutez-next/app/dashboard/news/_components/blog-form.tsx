@@ -69,6 +69,8 @@ export default function NewsForm() {
       return response.data;
     },
     enabled: isEdit,
+    refetchOnWindowFocus: false,
+    refetchInterval: false
   });
 
   useEffect(() => {

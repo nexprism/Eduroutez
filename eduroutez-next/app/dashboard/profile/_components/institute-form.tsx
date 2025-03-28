@@ -183,6 +183,7 @@ export default function CreateInstitute() {
       console.log("Fetching institute data...");
       const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
       const instituteData = response.data.data;
+      
       console.log("Institute data here:", instituteData);
   
       // Convert filenames to URLs for rendering in the frontend
