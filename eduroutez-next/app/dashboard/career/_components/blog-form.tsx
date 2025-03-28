@@ -60,19 +60,19 @@ const formSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
-    thumbnail: z
-        .instanceof(File)
-        .optional()
-        .refine((file) => !file || file.size <= 1024 * 1024, {
-          message: 'Thumbnail size must be less than 1 MB.'
-        })
-        .refine(
-          (file) =>
-            !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
-          {
-            message: 'Invalid thumbnail format. Only PNG, JPEG, and WEBP are allowed.'
-          }
-        ),  
+  thumbnail: z
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= 1024 * 1024, {
+      message: 'Thumbnail size must be less than 1 MB.'
+    })
+    .refine(
+      (file) =>
+        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      {
+        message: 'Invalid thumbnail format. Only PNG, JPEG, and WEBP are allowed.'
+      }
+    ),  
   eligibility: z.string(),
   jobRoles: z.string(),
   opportunity: z.string(),
@@ -86,17 +86,24 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 export default function CounselorForm() {
   const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
-    const [thumbnail, setThumbnail] = React.useState<{ file: File; preview: string } | null>(null);
-    const thumbnailInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [thumbnail, setThumbnail] = React.useState<{ file: File; preview: string } | null>(null);
+  const thumbnailInputRef = React.useRef<HTMLInputElement | null>(null);
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
 
+  // Check if in edit mode
   React.useEffect(() => {
-    if (segments.length === 5 && segments[3] === 'update') {
-      setIsEdit(true);
+    const shouldEdit = segments.length === 5 && segments[3] === 'update';
+    setIsEdit(shouldEdit);
+
+    // Reset form when not in edit mode
+    if (!shouldEdit) {
+      form.reset();
+      setPreviewImageUrl(null);
+      setThumbnail(null);
     }
-  }, [segments]);
+  }, [pathname, segments]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -110,7 +117,6 @@ export default function CounselorForm() {
       topColleges: '',
       counselorType: '',
       thumbnail: undefined
-
     }
   });
 
@@ -118,7 +124,6 @@ export default function CounselorForm() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
-    // Get instituteId from localStorage
     const instituteId = localStorage.getItem('instituteId');
     
     if (!instituteId) {
@@ -126,10 +131,7 @@ export default function CounselorForm() {
       return;
     }
 
-    // Append instituteId to formData
-    if(instituteId){
     formData.append('instituteId', instituteId);
-    }
     formData.append('title', values.title);
     formData.append('category', values.category);
     formData.append('description', values.description);
@@ -137,10 +139,11 @@ export default function CounselorForm() {
     formData.append('jobRoles', values.jobRoles);
     formData.append('opportunity', values.opportunity);
     formData.append('topColleges', values.topColleges);
+    
     if (values.image) {
       formData.append('images', values.image);
     }
-    // Append thumbnail
+    
     if (thumbnail) {
       formData.append('thumbnail', thumbnail.file);
     }
@@ -194,19 +197,6 @@ export default function CounselorForm() {
     }
   };
 
-  const triggerImageFileInput = () => {
-    fileInputImageRef.current?.click();
-  };
-
-  const removeImage = () => {
-    setPreviewImageUrl(null);
-    form.setValue('image', undefined);
-    if (fileInputImageRef.current) {
-      fileInputImageRef.current.value = '';
-    }
-  };
-
-
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -229,6 +219,22 @@ export default function CounselorForm() {
     }
   };
 
+  const triggerImageFileInput = () => {
+    fileInputImageRef.current?.click();
+  };
+
+  const removeImage = () => {
+    setPreviewImageUrl(null);
+    form.setValue('image', undefined);
+    if (fileInputImageRef.current) {
+      fileInputImageRef.current.value = '';
+    }
+  };
+
+  const triggerThumbnailInput = () => {
+    thumbnailInputRef.current?.click();
+  };
+
   const removeThumbnail = () => {
     setThumbnail(null);
     form.setValue('thumbnail', undefined);
@@ -237,10 +243,7 @@ export default function CounselorForm() {
     }
   };
 
-  const triggerThumbnailInput = () => {
-    thumbnailInputRef.current?.click();
-  };
-
+  // Fetch career details only when in edit mode
   const { data: counselor } = useQuery({
     queryKey: ['career', segments[4]],
     queryFn: async () => {
@@ -249,9 +252,12 @@ export default function CounselorForm() {
       );
       return response.data;
     },
-    enabled: isEdit
+    enabled: isEdit,
+    refetchOnWindowFocus: false,
+    refetchInterval: false
   });
 
+  // Fetch categories with refetching disabled
   const { data: categories } = useQuery({
     queryKey: ['career-categories'],
     queryFn: async () => {
@@ -259,9 +265,12 @@ export default function CounselorForm() {
         `${apiUrl}/career-category`
       );
       return response.data;
-    }
+    },
+    refetchOnWindowFocus: false,
+    refetchInterval: false
   });
 
+  // Populate form when counselor data is loaded
   React.useEffect(() => {
     if (counselor?.data) {
       form.reset({
@@ -276,8 +285,17 @@ export default function CounselorForm() {
         counselorType: counselor?.data?.counselorType
       });
 
+      // Set main image preview
       if (counselor.data.image) {
         setPreviewImageUrl(`${IMAGE_URL}/${counselor.data.image}`);
+      }
+
+      // Set thumbnail preview
+      if (counselor.data.thumbnail) {
+        setThumbnail({
+          file: new File([], 'existing-thumbnail'), // Placeholder file
+          preview: `${IMAGE_URL}/${counselor.data.thumbnail}`
+        });
       }
     }
   }, [counselor, form]);
@@ -348,7 +366,7 @@ export default function CounselorForm() {
                           className="hidden"
                         />
 
-            <FormField
+<FormField
               control={form.control}
               name="thumbnail"
               render={({ field }) => (

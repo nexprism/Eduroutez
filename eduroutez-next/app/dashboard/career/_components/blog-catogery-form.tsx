@@ -66,7 +66,8 @@ export default function CareerCategoryForm() {
       form.reset();
       setSelectedCategory(null);
       setIsEdit(false);
-      router.push('/dashboard/career');
+      router.push('/dashboard/career/category');
+      window.location.reload();
     },
     onError: () => toast.error('Something went wrong')
   });
@@ -80,7 +81,8 @@ export default function CareerCategoryForm() {
       toast.success('Category deleted successfully');
       setSelectedCategory(null);
       setIsEdit(false);
-      router.push('/dashboard/career');
+      router.push('/dashboard/career/category');
+      window.location.reload();
     },
     onError: () => toast.error('Something went wrong')
   });
@@ -90,6 +92,7 @@ export default function CareerCategoryForm() {
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/career-category`);
       return response.data;
+
     }
   });
 
