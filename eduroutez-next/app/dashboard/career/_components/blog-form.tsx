@@ -303,8 +303,8 @@ export default function CounselorForm() {
       formData.append('images', values.image);
     }
     
-    if (formState.thumbnail) {
-      formData.append('thumbnail', formState.thumbnail.file);
+    if (values.thumbnail) {
+      formData.append('thumbnail', values.thumbnail);
     }
 
     mutate(formData);
