@@ -22,7 +22,7 @@ jobs:
             echo "✅ Connected to the server"
 
             # Navigate to project directory
-            cd /root/backend/backend/shiksha-server/
+            cd /root/backend/backend/
             # Pull latest code
             git pull origin main
 
@@ -30,7 +30,7 @@ jobs:
             npm install
 
             # Restart the application (adjust based on your stack)
-            pm2 restart app  # For Node.js apps
+            pm2 restart 1
 
             echo "🚀 Deployment Successful!"
           EOF
