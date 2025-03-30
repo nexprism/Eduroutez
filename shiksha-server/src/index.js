@@ -24,7 +24,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Swagger configuration
-// Swagger configuration
 
 const swaggerOptions = {
   definition: {
