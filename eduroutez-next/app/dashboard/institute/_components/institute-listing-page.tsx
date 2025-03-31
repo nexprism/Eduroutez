@@ -15,6 +15,8 @@ type TInstituteListingPage = {};
 
 export default function InstituteListingPage({}: TInstituteListingPage) {
   // const queryClient = useQueryClient()
+
+  //checking automation
   const { searchQuery, page, limit } = useInstituteTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
