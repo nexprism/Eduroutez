@@ -1,0 +1,36 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # Change to your deployment branch if needed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy Application
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p 23311 root@103.73.191.198 << 'EOF'
+            echo "✅ Connected to the server"
+
+            # Navigate to project directory
+            cd /root/backend/backend/
+            # Pull latest code
+            git pull origin main
+
+            # Install dependencies (adjust based on your stack)
+            npm install
+
+            # Restart the application (adjust based on your stack)
+            pm2 restart 1
+
+            echo "🚀 Deployment Successful!"
+          EOF

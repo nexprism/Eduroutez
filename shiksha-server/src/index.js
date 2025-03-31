@@ -24,6 +24,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Swagger configuration
+
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",
