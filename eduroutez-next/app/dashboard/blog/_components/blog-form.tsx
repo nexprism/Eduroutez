@@ -142,7 +142,7 @@ export default function BlogForm() {
     }
 
     if (values.thumbnail) {
-      formData.append('thumbnail', thumbnail.file);
+      formData.append('thumbnail', values.thumbnail);
     }
 
     mutate(formData);
