@@ -141,7 +141,7 @@ export default function BlogForm() {
       formData.append('images', values.image);
     }
 
-    if (thumbnail) {
+    if (values.thumbnail) {
       formData.append('thumbnail', thumbnail.file);
     }
 
