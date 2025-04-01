@@ -94,7 +94,7 @@ export default function ScheduledSlotsPage() {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <Heading
-            title="Scheduled Slots"
+            title={`Scheduled Slots (${data?.data?.totalDocuments || 0})`}
             description="View and manage all counseling sessions"
           />
           
@@ -102,10 +102,10 @@ export default function ScheduledSlotsPage() {
             <div className="relative flex-1 md:w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
-                placeholder="Search slots..."
-                className="pl-9 w-full"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search slots..."
+          className="pl-9 w-full"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Button type="submit" className="ml-2">
