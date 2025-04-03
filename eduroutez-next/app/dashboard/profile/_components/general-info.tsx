@@ -84,9 +84,9 @@ const formSchema = z.object({
   address: z.string({
     required_error: 'Please enter an address.'
   }),
-  about: z.string({
-    required_error: 'Please enter about.'
-  }),
+  // about: z.string({
+  //   required_error: 'Please enter about.'
+  // }),
   organisationType: z.string({
     required_error: 'Please select an organization type.'
   }),
@@ -223,7 +223,7 @@ const [initialCityName, setInitialCityName] = useState("");
           city: instituteData?.city?.id,
           state: instituteData?.state?.id,
           address: instituteData.address,
-          about: instituteData.about,
+          // about: instituteData.about,
           minFees: instituteData.minFees,
           maxFees: instituteData.maxFees,
           affiliation: instituteData.affiliation,
@@ -266,7 +266,7 @@ const [initialCityName, setInitialCityName] = useState("");
       country:'',
       thumbnail: null,
       address:'',
-      about:'',
+      // about:'',
       minFees:'',
       maxFees:'',
       affiliation:'',
@@ -322,7 +322,7 @@ const [initialCityName, setInitialCityName] = useState("");
     formData.append('address', values.address);
     
     // Other institute details
-    formData.append('about', values.about);
+    // formData.append('about', values.about);
     formData.append('minFees', values.minFees);
     formData.append('maxFees', values.maxFees);
     formData.append('affiliation', values.affiliation);
@@ -961,7 +961,7 @@ const [initialCityName, setInitialCityName] = useState("");
                             )}
                           />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="about"
               render={({ field }) => (
@@ -982,7 +982,7 @@ const [initialCityName, setInitialCityName] = useState("");
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
               <FormField
