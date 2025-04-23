@@ -198,8 +198,8 @@ console.log('updatesInstitute',updatesInstitute);
       if(streamSpecFilters.length > 0 && locationFilters.length > 0){
         // console.log("locationFilters", locationFilters);
         // console.log("streamSpecFilters", streamSpecFilters);
-        finalFilters.push({ $and: locationFilters });
-        finalFilters.push({ $and: streamSpecFilters });
+        finalFilters.push({ $or: locationFilters });
+        finalFilters.push({ $or: streamSpecFilters });
       }
       
       // Add exam filters (if any)
