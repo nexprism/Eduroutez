@@ -5,6 +5,7 @@ import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import BlogService from "../services/blog-service.js";
 import UserService from "../services/user-service.js";
+import randomstring from "randomstring";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "images",
@@ -40,7 +41,7 @@ export const createBlog = async (req, res) => {
       }
 
       if(payload.title){
-        payload.slug = payload.title.toLowerCase().replace(/ /g, "-");
+        payload.slug = payload.title.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
 
       const response = await blogService.create(payload);
@@ -152,7 +153,7 @@ export async function updateBlog(req, res) {
       // Check if a new title is provided
       if (req.body.title) {
         payload.title = req.body.title;
-        payload.slug = req.body.title.toLowerCase().replace(/ /g, "-");
+        payload.slug = req.body.title.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
       if (req.body.description) {
         payload.description = req.body.description;

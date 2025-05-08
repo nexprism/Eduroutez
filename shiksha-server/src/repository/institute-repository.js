@@ -33,8 +33,6 @@ class InstituteRepository extends CrudRepository {
 
   }
 
-
-  //updateCourse
   async updateCourse(instituteId, courseId, data) {
     try {
       // First, find the institute and get the current courses
@@ -81,6 +79,76 @@ class InstituteRepository extends CrudRepository {
       throw error;
     }
   }
+
+
+  //updateCourse for slug update
+  // async updateCourse(instituteId, courseId, data) {
+  //   try {
+  //     // First, find the institute and get the current courses
+  //     const institute = await this.model.findById(instituteId);
+
+  //     if (!institute) {
+  //       console.log(`Institute not found with ID: ${instituteId}. Skipping this record.`);
+  //       return {
+  //         success: false,
+  //         skipped: true,
+  //         reason: "Institute not found",
+  //         instituteId
+  //       };
+  //     }
+
+  //     // Find the index of the course we want to update
+  //     const courseIndex = institute.courses.findIndex(
+  //       course => course._id.toString() === courseId.toString()
+  //     );
+
+  //     if (courseIndex === -1) {
+  //       console.log(`Course not found with ID: ${courseId} in institute: ${instituteId}. Skipping this record.`);
+  //       return {
+  //         success: false,
+  //         skipped: true,
+  //         reason: "Course not found in institute",
+  //         instituteId,
+  //         courseId
+  //       };
+  //     }
+
+  //     // Create a courses array copy and update the specific course
+  //     const updatedCourses = [...institute.courses];
+  //     updatedCourses[courseIndex] = {
+  //       ...institute.courses[courseIndex].toObject(), // Convert to plain object
+  //       ...data,
+  //       _id: courseId, // Preserve the original ID
+  //       updatedAt: new Date()
+  //     };
+
+  //     // Update the entire courses array
+  //     const result = await this.model.findByIdAndUpdate(
+  //       instituteId,
+  //       {
+  //         $set: { courses: updatedCourses }
+  //       },
+  //       {
+  //         new: true,
+  //         runValidators: true
+  //       }
+  //     );
+
+  //     console.log('Successfully updated course in institute:', instituteId);
+  //     return {
+  //       success: true,
+  //       result
+  //     };
+  //   } catch (error) {
+  //     console.error(`Error updating course: ${error.message}`);
+  //     return {
+  //       success: false,
+  //       error: error.message,
+  //       instituteId,
+  //       courseId
+  //     };
+  //   }
+  // }
 
   
 

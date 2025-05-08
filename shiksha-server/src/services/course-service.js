@@ -91,9 +91,10 @@ class CourseService {
   async get(id,field = '_id') {
     const populateFields = ["category"];
     const course = await this.courseRepository.getByField(id, populateFields,field);
+    // console.log(course);
     //update views by 1
-    const views = course.views + 1;
-    await this.courseRepository.update(course.id, { views });
+    // const views = course.views + 1;
+    // await this.courseRepository.update(course.id, { views });
 
     if (!course) {
       return null;

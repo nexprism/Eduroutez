@@ -13,10 +13,18 @@ import Course from "../models/Course.js";
 import Counselor from "../models/Counselor.js";
 import Blog from "../models/Blog.js";
 import Career from "../models/Career.js";
+import { response } from "express";
+import randomstring from "randomstring";
+import { InstituteRepository } from "./index.js";
+import { CourseRepository } from "./index.js";
+
+
 
 class UserRepository extends CrudRepository {
   constructor() {
     super(User);
+    this.instituteRepository = new InstituteRepository();
+    this.courseRepository = new CourseRepository();
   }
 
   //getStates
@@ -458,6 +466,87 @@ class UserRepository extends CrudRepository {
       throw error;
     }
   }
+
+  //updateAllSlugs
+  async updateAllSlugs(type) {
+    try {
+      let model;
+      if (type === 'course') {
+        model = Course;
+      } else if (type === 'blog') {
+        model = Blog;
+      } else {
+        model = Career;
+      }
+
+      const items = await model.find({});
+      console.log('items length', items.length);
+
+      const results = {
+        totalItems: items.length,
+        successfulUpdates: 0,
+        failedUpdates: [],
+        instituteUpdateResults: {
+          successful: 0,
+          skipped: 0,
+          failed: 0
+        }
+      };
+
+      for (const item of items) {
+        try {
+          // Generate new slug
+          item.slug = item.courseTitle.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
+          const payload = {
+            slug: item.slug
+          };
+
+          // Update in original model
+          const updatedItem = await this.courseRepository.update(item._id, payload);
+          results.successfulUpdates++;
+
+          // Try to update in institute, but don't stop if it fails
+          if (item.instituteCategory) {
+            try {
+              const instituteUpdateResult = await this.instituteRepository.updateCourse(item.instituteCategory, item._id, updatedItem);
+
+              // Check the result from the improved updateCourse function
+              if (instituteUpdateResult.success) {
+                results.instituteUpdateResults.successful++;
+              } else if (instituteUpdateResult.skipped) {
+                results.instituteUpdateResults.skipped++;
+                console.log(`Skipped institute update for course ${item._id}: ${instituteUpdateResult.reason}`);
+              } else {
+                results.instituteUpdateResults.failed++;
+                console.log(`Failed institute update for course ${item._id}: ${instituteUpdateResult.error}`);
+              }
+            } catch (instituteError) {
+              results.instituteUpdateResults.failed++;
+              console.error(`Error updating course in institute: ${instituteError.message}`);
+            }
+          }
+        } catch (itemError) {
+          results.failedUpdates.push({
+            itemId: item._id,
+            error: itemError.message
+          });
+          console.error(`Failed to update slug for item ${item._id}: ${itemError.message}`);
+        }
+      }
+
+      return {
+        totalItems: results.totalItems,
+        message: 'Slug update process completed',
+        successfulItemUpdates: results.successfulUpdates,
+        failedItemUpdates: results.failedUpdates.length,
+        instituteUpdates: results.instituteUpdateResults
+      };
+    } catch (error) {
+      console.error(`Error in updateAllSlugs: ${error.message}`);
+      throw error;
+    }
+  }
 }
+
 
 export { UserRepository };

@@ -378,6 +378,22 @@ export async function instituteDashboard(req, res) {
   }
 }
 
+//updateAllSlugs
+export async function updateAllSlugs(req, res) {
+  try {
+    const model = req.params.model;
+    console.log('model:', model);
+    const response = await userService.updateAllSlugs(model);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully updated all slugs";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.error('Error in updateAllSlugs:', error.message);
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
 //counselorDashboard
 export async function counselorDashboard(req, res) {
   try {

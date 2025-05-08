@@ -198,6 +198,17 @@ async earningReports(userId = '') {
   }
 }
 
+  //updateAllSlugs(model)
+  async updateAllSlugs(model) {
+  try {
+    const user = await this.userRepository.updateAllSlugs(model);
+    return user;
+  } catch (error) {
+    throw error;
+  }
+  } 
+
+
   //counselorDashboard
   async counselorDashboard(userId) {
   try {

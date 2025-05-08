@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CareerService from "../services/career-service.js";
+import randomstring from "randomstring";
 const singleUploader = FileUpload.upload.single("images");
 
 
@@ -41,7 +42,7 @@ export const createCareer = async (req, res) => {
       }
 
       if(payload.title){
-        payload.slug = payload.title.toLowerCase().replace(/ /g, "-");
+        payload.slug = payload.title.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
 
       const response = await careerService.create(payload);
@@ -134,7 +135,7 @@ export async function updateCareer(req, res) {
       // Check if a new title is provided
       if (req.body.title) {
         payload.title = req.body.title;
-        payload.slug = req.body.title.toLowerCase().replace(/ /g, "-");
+        payload.slug = req.body.title.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
 
       console.log("files:", req.files);

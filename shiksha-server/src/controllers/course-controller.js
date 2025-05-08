@@ -6,6 +6,7 @@ import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CourseService from "../services/course-service.js";
 import InstituteService from "../services/institute-service.js";
 import UserService from "../services/user-service.js";
+import randomstring from "randomstring";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "coursePreviewThumbnail",
@@ -52,7 +53,7 @@ export const createCourse = async (req, res) => {
       }
 
       if(payload.courseTitle){
-        payload.slug = payload.courseTitle.toLowerCase().replace(/ /g, "-");
+        payload.slug = payload.courseTitle.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
 
 
@@ -224,11 +225,11 @@ export async function updateCourse(req, res) {
       }
 
       if(payload.courseTitle){
-        payload.slug = payload.courseTitle.toLowerCase().replace(/ /g, "-");
+        payload.slug = payload.courseTitle.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
 
       const response = await courseService.update(courseId, payload);
-      const resp = await instituteService.updateCourses(payload.instituteCategory, courseId, response);
+      const resp = await instituteService.updateCourse(payload.instituteCategory, courseId, response);
 
       //update courses in institute
       

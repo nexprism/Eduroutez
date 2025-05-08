@@ -11,6 +11,7 @@ import xlsx from "xlsx";
 import mongoose from "mongoose";
 import Institute from "../models/Institute.js";
 import User from "../models/User.js";
+import randomstring from "randomstring";
 import { cp } from "fs";
 import multer from "multer";
 import bcrypt from "bcrypt";
@@ -71,7 +72,7 @@ export const createInstitute = async (req, res) => {
     const userResponse = await userService.signup(userPayload, res);
     console.log('userResponse',userResponse);
     const userId = userResponse.user._id;
- const slug = req.body.instituteName.toLowerCase().replace(/ /g, "-");
+ const slug = req.body.instituteName.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
     const institutePayload = {
       ...req.body,
       _id: userId,
@@ -428,7 +429,7 @@ export async function updateInstitute(req, res) {
       }
 
       if (payload.instituteName) {
-        payload.slug = payload.instituteName.toLowerCase().replace(/ /g, "-");
+        payload.slug = payload.instituteName.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
       
       // if (req.files["gallery"]) {
