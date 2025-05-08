@@ -229,7 +229,7 @@ export async function updateCourse(req, res) {
       }
 
       const response = await courseService.update(courseId, payload);
-      const resp = await instituteService.updateCourse(payload.instituteCategory, courseId, response);
+      const resp = await instituteService.updateCourses(payload.instituteCategory, courseId, response);
 
       //update courses in institute
       
