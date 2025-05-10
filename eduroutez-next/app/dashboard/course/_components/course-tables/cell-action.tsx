@@ -1,4 +1,5 @@
 'use client';
+
 import { AlertModal } from '@/components/modal/alert-modal';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +26,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   const deleteCourseMutation = useMutation({
     mutationFn: async (courseId: string) => {
       const response = await axiosInstance({
@@ -33,13 +35,14 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         headers: {
           'Content-Type': 'application/json'
         }
-      });
-console.log("Response from deleteCourseMutation:", response);
+      }); 
+      console.log("Response from deleteCourseMutation:", response);
       return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] });
-window.location.reload();    },
+      router.refresh(); // Use router.refresh() instead of window.location.reload()
+    },
     onSettled: () => {
       setOpen(false);
       setLoading(false);
@@ -51,6 +54,11 @@ window.location.reload();    },
     deleteCourseMutation.mutate(data._id);
   };
 
+  const handleUpdateClick = () => {
+    // Use window.location for a full page navigation to force refresh
+    window.location.href = `/dashboard/course/update/${data._id}/`;
+  };
+
   return (
     <>
       <AlertModal
@@ -59,7 +67,7 @@ window.location.reload();    },
         onConfirm={onConfirm}
         loading={loading}
       />
-      <DropdownMenu modal={false}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>
@@ -68,14 +76,13 @@ window.location.reload();    },
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-          <DropdownMenuItem
-            onClick={() => router.push(`/dashboard/course/update/${data._id}/`)}
-          >
-            <Edit className="mr-2 h-4 w-4" /> Update
+          <DropdownMenuItem onClick={handleUpdateClick}>
+            <Edit className="mr-2 h-4 w-4" />
+            Update
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className="mr-2 h-4 w-4" /> Delete
+            <Trash className="mr-2 h-4 w-4" />
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
