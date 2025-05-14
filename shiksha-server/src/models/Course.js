@@ -55,11 +55,20 @@ const courseSchema = new mongoose.Schema(
     },
     courseDurationYears: {
       type: Number,
+      set: function(val) {
+        // Handle the string "null" case
+        if (val === "null") return null;
+        return val;
+      }
     },
     courseDurationMonths: {
       type: Number,
+      set: function(val) {
+        // Also handle the "null" case for consistency
+        if (val === "null") return null;
+        return val;
+      }
     },
-
     courseOverview: {
       type: String,
     },
