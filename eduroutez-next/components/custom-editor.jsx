@@ -51,11 +51,52 @@ export default function CustomEditor({ value, onChange }) {
   const editorContainerRef = useRef(null);
   const editorRef = useRef(null);
   const [isLayoutReady, setIsLayoutReady] = useState(false);
+  const initialValue = useRef(value || '');
+  const [editorContent, setEditorContent] = useState(value || '');
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isFirstRender, setIsFirstRender] = useState(true);
+  const lastContentRef = useRef(value || '');
+  const isUserEditingRef = useRef(false);
+  
+  // Preserve the original value on first render
+  useEffect(() => {
+    if (isFirstRender) {
+      initialValue.current = value || '';
+      lastContentRef.current = value || '';
+      setIsFirstRender(false);
+    }
+  }, [value, isFirstRender]);
+
+  // Handle external value changes
+  useEffect(() => {
+    // Don't update if user is currently typing/editing
+    if (isUserEditingRef.current) {
+      return;
+    }
+    
+    // Only update if the editor is initialized and value changed
+    if (isInitialized && editorRef.current && value !== lastContentRef.current) {
+      lastContentRef.current = value || '';
+      setEditorContent(value || '');
+      
+      // Update editor content - carefully check if editor exists and has methods
+      if (editorRef.current && typeof editorRef.current.setData === 'function') {
+        try {
+          editorRef.current.setData(value || '');
+        } catch (error) {
+          console.error("Error setting editor data:", error);
+        }
+      }
+    }
+  }, [value, isInitialized]);
 
   useEffect(() => {
     setIsLayoutReady(true);
-
-    return () => setIsLayoutReady(false);
+    
+    return () => {
+      setIsLayoutReady(false);
+      isUserEditingRef.current = false;
+    };
   }, []);
 
   const { editorConfig } = useMemo(() => {
@@ -181,7 +222,8 @@ export default function CustomEditor({ value, onChange }) {
             'resizeImage'
           ]
         },
-        initialData: value,
+        // Explicitly use the stored initialValue to prevent re-renders disrupting content
+        initialData: initialValue.current,
         licenseKey: LICENSE_KEY,
         link: {
           addTargetToExternalLinks: true,
@@ -215,7 +257,52 @@ export default function CustomEditor({ value, onChange }) {
         }
       }
     };
-  }, [isLayoutReady, value]);
+  }, [isLayoutReady]);
+
+  const handleEditorChange = (event, editor) => {
+    try {
+      isUserEditingRef.current = true;
+      const data = editor.getData();
+      setEditorContent(data);
+      lastContentRef.current = data;
+      onChange(data);
+      
+      // Reset the flag after a short delay to allow batched updates
+      setTimeout(() => {
+        isUserEditingRef.current = false;
+      }, 100);
+    } catch (error) {
+      console.error("Error handling editor change:", error);
+      isUserEditingRef.current = false;
+    }
+  };
+
+  const handleEditorReady = (editor) => {
+    editorRef.current = editor;
+    
+    // Add focus/blur handlers to track user editing state
+    editor.editing.view.document.on('focus', () => {
+      isUserEditingRef.current = true;
+    });
+    
+    editor.editing.view.document.on('blur', () => {
+      // Small delay to ensure data is processed before setting editing to false
+      setTimeout(() => {
+        isUserEditingRef.current = false;
+      }, 100);
+    });
+    
+    // Set initial content again to be safe
+    if (initialValue.current) {
+      try {
+        editor.setData(initialValue.current);
+      } catch (error) {
+        console.error("Error setting initial editor data:", error);
+      }
+    }
+    
+    setIsInitialized(true);
+  };
 
   return (
     <div className="main-container">
@@ -229,11 +316,9 @@ export default function CustomEditor({ value, onChange }) {
               <CKEditor
                 editor={ClassicEditor}
                 config={editorConfig}
-                onReady={(editor) => {
-                  editorRef.current = editor;
-                }}
-                data={value}
-                onChange={(event, editor) => onChange(editor.getData())}
+                onReady={handleEditorReady}
+                data={initialValue.current} // Use the preserved initial value
+                onChange={handleEditorChange}
               />
             )}
           </div>
