@@ -503,9 +503,12 @@ export default function CreateCourse() {
     },
     enabled: isEdit,
      // Prevent automatic refetching
-     staleTime: 1000 * 60 * 60   });
+        staleTime: 1000 * 60 * 60,
+    // Add this to prevent refetching when the component re-renders
+    refetchOnWindowFocus: false,
+    refetchOnMount: false   });
   React.useEffect(() => {
-    if (course?.data) {
+    if (course?.data && !form.formState.isDirty) {
       form.reset({
         courseTitle: course.data.courseTitle,
         shortDescription: course.data.shortDescription,
@@ -596,7 +599,7 @@ export default function CreateCourse() {
   
   return (
     <div className="container mx-auto space-y-6 py-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs key={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
         <ResponsiveTabsList className="flex w-full justify-evenly">
           <ResponsiveTabsTrigger value="general">General</ResponsiveTabsTrigger>
           <ResponsiveTabsTrigger value="requirements">
