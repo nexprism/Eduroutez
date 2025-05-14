@@ -557,6 +557,8 @@ export default function CreateCourse() {
         setPreviewMetaImageUrl(`${baseURL}/${course.data.metaImage}`);
       }
 
+      console.log('Course data:', course.data);
+
       const instituteId = course.data.instituteCategory;
       console.log('Institute ID:', instituteId);
       
@@ -750,7 +752,7 @@ export default function CreateCourse() {
     
     // Find the matching institute if data is available
     const selectedInstitute = instituteCategories?.data?.result?.find(
-      (category: Institute) => category._id === currentValue
+      (category: Institute) => category._id == currentValue
     );
     
     // Store the institute name for display
@@ -1549,7 +1551,7 @@ export default function CreateCourse() {
                               />
 
                               {previewThumbnailUrl ? (
-                                <div className="relative inline-block">
+                                <div className="relative">
                                   <Image
                                     src={previewThumbnailUrl}
                                     alt="Preview"
@@ -1604,7 +1606,7 @@ export default function CreateCourse() {
                               />
 
                               {previewCoverUrl ? (
-                                <div className="relative inline-block">
+                                <div className="relative ">
                                   <Image
                                     src={previewCoverUrl}
                                     alt="Preview"
