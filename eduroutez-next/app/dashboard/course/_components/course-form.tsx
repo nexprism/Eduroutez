@@ -49,6 +49,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
 import { CourseCategory,Institute } from '@/types';
 import { toast } from 'sonner';
+import { Short_Stack } from 'next/font/google';
 
 const coursePreviewType = [
   { value: 'vimeo', label: 'Vimeo' },
@@ -1674,6 +1675,7 @@ export default function CreateCourse() {
                     category: 'Please select a category.',
                     instituteCategory: 'Please select an institute category.',
                     status: 'Please select a status.',
+                    shortDescription: 'Short description must be at least 10 characters.',
                     // visibility: 'Please select a visibility option.',
                     isCourseFree: 'You need to select one option.',
                     };
