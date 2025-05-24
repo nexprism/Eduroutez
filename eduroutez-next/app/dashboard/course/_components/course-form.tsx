@@ -199,6 +199,12 @@ export default function CreateCourse() {
       // Set the institute ID in the form
       form.setValue('instituteCategory', instituteId);
     }
+
+    if (userRole == 'SUPER_ADMIN') {
+      setIsInstituteRole(true);
+      // Reset the institute category if the user is an admin
+     
+    }
   }, []);
 
   
@@ -768,7 +774,7 @@ export default function CreateCourse() {
     return (
       <FormItem>
         <FormLabel>Institute Category</FormLabel>
-        {isInstituteRole ? (
+        {isInstituteRole  ? (
           <div className="flex items-center space-x-2">
             <Input
               value={instituteName || (isLoading ? 'Loading...' : '')}
