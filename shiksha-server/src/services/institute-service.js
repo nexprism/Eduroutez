@@ -75,231 +75,204 @@ console.log('updatesInstitute',updatesInstitute);
       throw error;
     }
   }
-  
- async getAll(query, browserUrl) {
-    try {
-      const { page = 1, limit = 100000000000000, filters = "{}", searchFields = "{}", sort = "{}",select = "{}" } = query;
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
 
-      // Parse JSON strings from query parameters to objects
-      const parsedFilters = JSON.parse(filters);
-      const parsedSearchFields = JSON.parse(searchFields);
-      const parsedSort = JSON.parse(sort);
+escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex special characters
+}
 
-      // Build filter conditions for multiple fields
-      const filterConditions = { deletedAt: null };
-      //get browser url for check it admin r not
-      console.log('browserUrl',browserUrl);
-      if(browserUrl !== undefined){
-        if (!browserUrl.includes('admin')) {
-          filterConditions.onhold = false;
-        } 
-      } 
+  async getAll(query, browserUrl) {
+  try {
+    const {
+      page = 1,
+      limit = 100000000000000,
+      filters = "{}",
+      searchFields = "{}",
+      sort = "{}",
+      select = "{}"
+    } = query;
 
-      var ratingFilter = 0;
-      var trendingFilter = 0;
-      
-      // Create separate containers for different filter types
-      const streamSpecFilters = [];
-      const locationFilters = [];
-      const examFilters = [];
-      const otherFilters = [];
-      
-      for (var [key, value] of Object.entries(parsedFilters)) {
-        if (key === 'Exam') {
-          key = "examAccepted";
-        }
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
 
-        if (value === "true") {
-          filterConditions[key] = true;
-        } else if (value === "false") {
-          filterConditions[key] = false;
-        } else {
-          if (key === 'streams' || key === 'specialization') {
-            if (Array.isArray(value)) {
-              const regexPattern = value.join('|');
-              streamSpecFilters.push({ [key]: { $regex: regexPattern, $options: 'i' } });
-            } else {
-              streamSpecFilters.push({ [key]: { $regex: value, $options: 'i' } });
-            }
-          } else if (key === 'state' || key === 'city') {
-            if (Array.isArray(value)) {
-              const regexPattern = value.join('|');
-              locationFilters.push({ [`${key}.name`]: { $regex: regexPattern, $options: 'i' } });
-            } else {
-              locationFilters.push({ [`${key}.name`]: { $regex: value, $options: 'i' } });
-            }
-          } else if (key === 'organisationType') {
-            if (Array.isArray(value)) {
-              const regexPattern = value.join('|');
-              otherFilters.push({ [key]: { $regex: regexPattern, $options: 'i' } });
-            } else {
-              otherFilters.push({ [key]: { $regex: value, $options: 'i' } });
-            }
-          } else if (key === 'Fees') {
-            // Handling multiple min and max fee filters
-            console.log("fees value", value);
+    const parsedFilters = JSON.parse(filters);
+    const parsedSearchFields = JSON.parse(searchFields);
+    const parsedSort = JSON.parse(sort);
 
-            if (Array.isArray(value)) {
-              const feesConditions = [];
+    const filterConditions = { deletedAt: null };
 
-              value.forEach(range => {
-                let condition = {};
+    if (browserUrl !== undefined && !browserUrl.includes('admin')) {
+      filterConditions.onhold = false;
+    }
 
-                if (range === "> 5 Lakh") {
-                  condition = { minFees: { $gt: 500000 } };
-                } else if (range === "3 - 5 Lakh") {
-                  condition = { minFees: { $gt: 300000 }, maxFees: { $lte: 500000 } };
-                } else if (range === "1 - 3 Lakh") {
-                  condition = { minFees: { $gt: 100000 }, maxFees: { $lte: 300000 } };
-                } else if (range === "< 1 Lakh") {
-                  condition = { maxFees: { $lte: 100000 } };
-                }
+    let ratingFilter = 0;
+    let trendingFilter = 0;
 
-                feesConditions.push(condition);
-              });
-              
-              if (feesConditions.length > 0) {
-                otherFilters.push({ $or: feesConditions });
-              }
-            }
-          } else if (key === 'examAccepted') {
-            if (Array.isArray(value)) {
-              value.forEach(exam => {
-                examFilters.push({ [key]: { $regex: `(^|,)${exam}(,|$)`, $options: 'i' } });
-              });
-            } else {
-              examFilters.push({ [key]: { $regex: `(^|,)${value}(,|$)`, $options: 'i' } });
-            }
-          } else if (key === 'Ratings') {
-            ratingFilter = 1;
-          } else if (key === 'isTrending') {
-            trendingFilter = 1;
+    const streamSpecFilters = [];
+    const locationFilters = [];
+    const examFilters = [];
+    const otherFilters = [];
+
+    for (let [key, value] of Object.entries(parsedFilters)) {
+      if (key === 'Exam') key = "examAccepted";
+
+      if (value === "true") {
+        filterConditions[key] = true;
+      } else if (value === "false") {
+        filterConditions[key] = false;
+      } else {
+        const createRegex = val => ({ $regex: this.escapeRegex(val), $options: 'i' });
+
+        if (key === 'streams' || key === 'specialization') {
+          if (Array.isArray(value)) {
+            const regexPattern = value.map(this.escapeRegex).join('|');
+            streamSpecFilters.push({ [key]: { $regex: regexPattern, $options: 'i' } });
           } else {
-            filterConditions[key] = value;
+            streamSpecFilters.push({ [key]: createRegex(value) });
           }
-        }
-      }
-
-      // Combine all filter types using $and when multiple types are present
-      const finalFilters = [];
-      
-      // Add stream/specialization filters (if any)
-      if (streamSpecFilters.length > 0) {
-        finalFilters.push({ $or: streamSpecFilters });
-      }
-      
-      // Add location filters (if any)
-      if (locationFilters.length > 0) {
-        finalFilters.push({ $or: locationFilters });
-      }
-
-      if(streamSpecFilters.length > 0 && locationFilters.length > 0){
-        // console.log("locationFilters", locationFilters);
-        // console.log("streamSpecFilters", streamSpecFilters);
-        finalFilters.push({ $or: locationFilters });
-        finalFilters.push({ $or: streamSpecFilters });
-      }
-      
-      // Add exam filters (if any)
-      if (examFilters.length > 0) {
-        finalFilters.push({ $or: examFilters });
-      }
-      
-      // Add other filters (if any)
-      if (otherFilters.length > 0) {
-        otherFilters.forEach(filter => finalFilters.push(filter));
-      }
-      
-      // Apply combined filters to the main condition
-      if (finalFilters.length > 0) {
-        if (streamSpecFilters.length > 0 && locationFilters.length > 0) {
-          console.log("finalFilters", finalFilters);
-          filterConditions.$and = finalFilters;
-        }else{
-           filterConditions.$or = finalFilters;
-        }
-      }
-
-      console.log("filterConditions", filterConditions);
-
-      // Build search conditions for multiple fields with partial matching
-      const searchConditions = [];
-      for (const [field, term] of Object.entries(parsedSearchFields)) {
-        if (field === 'courseTitle') {
-          searchConditions.push({ 'courses.courseTitle': { $regex: term, $options: "i" } });
-        } else if (field === 'state') {
-          searchConditions.push({ 'state.name': { $regex: term, $options: "i" } });
-        } else if (field === 'city') {
-          searchConditions.push({ 'city.name': { $regex: term, $options: "i" } });
+        } else if (key === 'state' || key === 'city') {
+          const path = `${key}.name`;
+          if (Array.isArray(value)) {
+            const regexPattern = value.map(this.escapeRegex).join('|');
+            locationFilters.push({ [path]: { $regex: regexPattern, $options: 'i' } });
+          } else {
+            locationFilters.push({ [path]: createRegex(value) });
+          }
+        } else if (key === 'organisationType') {
+          if (Array.isArray(value)) {
+            const regexPattern = value.map(this.escapeRegex).join('|');
+            otherFilters.push({ [key]: { $regex: regexPattern, $options: 'i' } });
+          } else {
+            otherFilters.push({ [key]: createRegex(value) });
+          }
+        } else if (key === 'Fees') {
+          const feesConditions = [];
+          if (Array.isArray(value)) {
+            value.forEach(range => {
+              let condition = {};
+              if (range === "> 5 Lakh") {
+                condition = { minFees: { $gt: 500000 } };
+              } else if (range === "3 - 5 Lakh") {
+                condition = { minFees: { $gt: 300000 }, maxFees: { $lte: 500000 } };
+              } else if (range === "1 - 3 Lakh") {
+                condition = { minFees: { $gt: 100000 }, maxFees: { $lte: 300000 } };
+              } else if (range === "< 1 Lakh") {
+                condition = { maxFees: { $lte: 100000 } };
+              }
+              feesConditions.push(condition);
+            });
+            if (feesConditions.length > 0) {
+              otherFilters.push({ $or: feesConditions });
+            }
+          }
+        } else if (key === 'examAccepted') {
+          if (Array.isArray(value)) {
+            value.forEach(exam => {
+              examFilters.push({ [key]: { $regex: `(^|,)${this.escapeRegex(exam)}(,|$)`, $options: 'i' } });
+            });
+          } else {
+            examFilters.push({ [key]: { $regex: `(^|,)${this.escapeRegex(value)}(,|$)`, $options: 'i' } });
+          }
+        } else if (key === 'Ratings') {
+          ratingFilter = 1;
+        } else if (key === 'isTrending') {
+          trendingFilter = 1;
         } else {
-          searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+          filterConditions[key] = value;
         }
       }
-      if (searchConditions.length > 0) {
-        filterConditions.$or = searchConditions;
+    }
+
+    const finalFilters = [];
+
+    if (streamSpecFilters.length > 0) finalFilters.push({ $or: streamSpecFilters });
+    if (locationFilters.length > 0) finalFilters.push({ $or: locationFilters });
+    if (examFilters.length > 0) finalFilters.push({ $or: examFilters });
+    if (otherFilters.length > 0) otherFilters.forEach(filter => finalFilters.push(filter));
+
+    if (finalFilters.length > 0) {
+      if (streamSpecFilters.length > 0 && locationFilters.length > 0) {
+        filterConditions.$and = finalFilters;
+      } else {
+        filterConditions.$or = finalFilters;
       }
+    }
 
-      console.log("searchConditions", searchConditions);
-
-      // Build sort conditions
-      const sortConditions = {};
-      for (const [field, direction] of Object.entries(parsedSort)) {
-        sortConditions[field] = direction === "asc" ? 1 : -1;
+    // 🔧 Escape regex in search conditions
+    const searchConditions = [];
+    for (const [field, term] of Object.entries(parsedSearchFields)) {
+      const escapedTerm = this.escapeRegex(term);
+      if (field === 'courseTitle') {
+        searchConditions.push({ 'courses.courseTitle': { $regex: escapedTerm, $options: "i" } });
+      } else if (field === 'state') {
+        searchConditions.push({ 'state.name': { $regex: escapedTerm, $options: "i" } });
+      } else if (field === 'city') {
+        searchConditions.push({ 'city.name': { $regex: escapedTerm, $options: "i" } });
+      } else {
+        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
       }
+    }
 
-      // Execute query with dynamic filters, sorting, and pagination
-      const populateFields = ["reviews", "plan"];
-      const selectFields = JSON.parse(select);
+    if (searchConditions.length > 0) {
+      filterConditions.$or = searchConditions;
+    }
 
-      const institutes = await this.instituteRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields, selectFields);
-      
-      institutes.result.forEach(institute => {
-        if (institute.reviews){
-          const overallRating = institute.reviews.length > 0
-            ? institute?.reviews.reduce((sum, review) => sum + (review.placementStars || 0) +
-              (review.campusLifeStars || 0) +
-              (review.facultyStars || 0) +
-              (review.suggestionsStars || 0), 0) / (institute?.reviews.length * 4 || 1)
-            : 0;
+    const sortConditions = {};
+    for (const [field, direction] of Object.entries(parsedSort)) {
+      sortConditions[field] = direction === "asc" ? 1 : -1;
+    }
 
-          institute.overallRating = Math.round(overallRating);
-        } else {
-          institute.overallRating = 0;
-        }
-      });
+    const populateFields = ["reviews", "plan"];
+    const selectFields = JSON.parse(select);
 
-      // Filter by rating if specified
-      if (parsedFilters.Ratings && Array.isArray(parsedFilters.Ratings) && ratingFilter === 1) {
-        institutes.result = institutes.result.filter(institute => {
-          const ratingStrings = parsedFilters.Ratings.map(rating => rating.split(' ')[0]); // Extract numeric part from "1 star", "5 star", etc.
-          return ratingStrings.includes(institute.overallRating.toString());
-        });
-        const totalDocuments = institutes.result.length;
-        const totalPages = Math.ceil(totalDocuments / limitNum);
-        institutes.totalPages = totalPages;
-        institutes.totalDocuments = totalDocuments;
+    const institutes = await this.instituteRepository.getAll(
+      filterConditions,
+      sortConditions,
+      pageNum,
+      limitNum,
+      populateFields,
+      selectFields
+    );
+
+    institutes.result.forEach(institute => {
+      if (institute.reviews) {
+        const overallRating = institute.reviews.length > 0
+          ? institute.reviews.reduce((sum, review) =>
+            sum + (review.placementStars || 0) +
+            (review.campusLifeStars || 0) +
+            (review.facultyStars || 0) +
+            (review.suggestionsStars || 0), 0) / (institute.reviews.length * 4 || 1)
+          : 0;
+        institute.overallRating = Math.round(overallRating);
+      } else {
+        institute.overallRating = 0;
       }
+    });
 
-      // Filter by trending if specified
-      if (parsedFilters.isTrending && trendingFilter === 1) {
-        institutes.result = institutes.result.filter(institute => {
-          return institute.plan?.features?.some(feature => feature.key === "Trending Institutes" && feature.value === "Yes");
-        });
-        const totalDocuments = institutes.result.length;
-        const totalPages = Math.ceil(totalDocuments / limitNum);
-        institutes.totalPages = totalPages;
-        institutes.totalDocuments = totalDocuments;
-      }
-      
-      return institutes;
+    if (parsedFilters.Ratings && Array.isArray(parsedFilters.Ratings) && ratingFilter === 1) {
+      const ratingStrings = parsedFilters.Ratings.map(r => r.split(' ')[0]);
+      institutes.result = institutes.result.filter(i =>
+        ratingStrings.includes(i.overallRating.toString()));
+      const totalDocuments = institutes.result.length;
+      institutes.totalPages = Math.ceil(totalDocuments / limitNum);
+      institutes.totalDocuments = totalDocuments;
+    }
 
-    } catch (error) {
-      console.log(error);
-      throw new AppError("Cannot fetch data of all the institutes", StatusCodes.INTERNAL_SERVER_ERROR);
-    }
-  }
+    if (parsedFilters.isTrending && trendingFilter === 1) {
+      institutes.result = institutes.result.filter(i =>
+        i.plan?.features?.some(f => f.key === "Trending Institutes" && f.value === "Yes"));
+      const totalDocuments = institutes.result.length;
+      institutes.totalPages = Math.ceil(totalDocuments / limitNum);
+      institutes.totalDocuments = totalDocuments;
+    }
+
+    return institutes;
+  } catch (error) {
+    console.log(error);
+    throw new AppError("Cannot fetch data of all the institutes", StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+  
+ 
 
   //megamenuCollages
   async megamenuCollages() {
