@@ -10,7 +10,7 @@ class QueryRepository extends CrudRepository {
 
   async getQueryByInstitute(instituteId) {
     try {
-      const query = await QueryAllocation.find({ institute : instituteId }).populate("query");
+      const query = await QueryAllocation.find({ institute: instituteId }).populate("query");
       return query;
 
     } catch (error) {
@@ -18,7 +18,7 @@ class QueryRepository extends CrudRepository {
     }
 
   }
-  
+
   //getTrendingStreams
   async getTrendingStreams(filterCon = {}, sortCon = {}, pageNum = 1, limitNum = 10, populateFields = [], selectFields = {}, groupBy = {}) {
     try {
@@ -54,7 +54,7 @@ class QueryRepository extends CrudRepository {
         {
           $limit: limit, // Limit results per page
         },
-      ]);
+      ]).allowDiskUse(true);
 
       const totalDocuments = await Query.aggregate([
         {
@@ -69,11 +69,11 @@ class QueryRepository extends CrudRepository {
         {
           $count: "total", // Count total documents
         },
-      ]);
+      ]).allowDiskUse(true);
 
 
 
-      
+
 
       // Return the response
       return {
@@ -167,7 +167,7 @@ class QueryRepository extends CrudRepository {
 
             //add instituteId to query
 
-            await Query.findByIdAndUpdate(query._id, { 
+            await Query.findByIdAndUpdate(query._id, {
               $push: { instituteIds: instituteId }
             });
 
@@ -207,7 +207,7 @@ class QueryRepository extends CrudRepository {
     }
   }
 
-        
+
 }
 
 export { QueryRepository };

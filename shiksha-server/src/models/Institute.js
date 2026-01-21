@@ -18,8 +18,8 @@ const instituteSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    slug:{
-      type:String,
+    slug: {
+      type: String,
     },
     address: {
       type: String,
@@ -31,7 +31,7 @@ const instituteSchema = new mongoose.Schema(
       }
     },
     state: {
-      type:{
+      type: {
         name: String,
         iso2: String,
       }
@@ -40,7 +40,7 @@ const instituteSchema = new mongoose.Schema(
       type: {
         name: String,
       }
-      
+
     },
     establishedYear: {
       type: Number,
@@ -77,9 +77,9 @@ const instituteSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subscription",
     },
-    courses:{
-      type:[courseSchema],
-    }, 
+    courses: {
+      type: [courseSchema],
+    },
     collegeInfo: {
       type: String,
     },
@@ -106,8 +106,8 @@ const instituteSchema = new mongoose.Schema(
     ranking: {
       type: String,
     },
-    rank:{
-      type:Number,
+    rank: {
+      type: Number,
     },
     cutoff: {
       type: String,
@@ -181,27 +181,27 @@ const instituteSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    plan:{
+    plan: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subscription",
-      default:"67934e383ab889ea870789c3"
+      default: "67934e383ab889ea870789c3"
     },
-    planName:{
-      type:String,
-      default:"Free Plan"
+    planName: {
+      type: String,
+      default: "Free Plan"
     },
     examAccepted: {
       type: String,
     },
-    expiryDate:{
-      type:Date,
+    expiryDate: {
+      type: Date,
       default: new Date(new Date().setMonth(new Date().getMonth() + 1)),
     },
-    wishlist:[
+    wishlist: [
       {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
     ],
     issues: [
       {
@@ -212,6 +212,13 @@ const instituteSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Index to optimize getAll queries and avoid hitting the 32MB sort limit
+instituteSchema.index({ deletedAt: 1, onhold: 1, createdAt: -1 });
+instituteSchema.index({ createdAt: -1 });
+instituteSchema.index({ isTrending: 1, deletedAt: 1 });
+instituteSchema.index({ rating: -1, deletedAt: 1 });
+
 applySoftDelete(instituteSchema);
 const Institute = mongoose.model("Institute", instituteSchema);
 export default Institute;

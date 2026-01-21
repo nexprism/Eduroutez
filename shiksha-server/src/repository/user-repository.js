@@ -30,7 +30,7 @@ class UserRepository extends CrudRepository {
   //getStates
   async getStates() {
     try {
-      const states = await State.find({country_id: 101});
+      const states = await State.find({ country_id: 101 });
       return states;
     } catch (error) {
       throw error;
@@ -41,9 +41,9 @@ class UserRepository extends CrudRepository {
   async getCityByState(stateId) {
     try {
 
-    const cities = await City.find({state_id:stateId });
+      const cities = await City.find({ state_id: stateId });
 
-    console.log('cities',cities);
+      console.log('cities', cities);
       return cities;
     }
     catch (error) {
@@ -63,7 +63,7 @@ class UserRepository extends CrudRepository {
             total: { $sum: "$amount" },
           },
         },
-      ]);
+      ]).allowDiskUse(true);
 
       // Get all approved promotions
       const approvedPromotions = await Promotion.find({ status: 'approved' });
@@ -77,11 +77,11 @@ class UserRepository extends CrudRepository {
         },
         {
           $group: {
-        _id: 'listed_ads_income',
-        total: { $sum: "$amount" },
+            _id: 'listed_ads_income',
+            total: { $sum: "$amount" },
           },
         },
-      ]);
+      ]).allowDiskUse(true);
 
       //unlisted ads income
       const pendingPromotions = await Promotion.find({ status: 'pending' });
@@ -99,7 +99,7 @@ class UserRepository extends CrudRepository {
             total: { $sum: "$amount" },
           },
         },
-      ]);
+      ]).allowDiskUse(true);
 
       // Get all completed schedule slots
       const completedScheduleSlots = await ScheduleSlot.find({ status: 'completed' });
@@ -134,7 +134,7 @@ class UserRepository extends CrudRepository {
       };
 
 
-      
+
 
 
 
@@ -142,12 +142,12 @@ class UserRepository extends CrudRepository {
 
 
       const response = {
-          totalSubscription,
-          promotionIncome,  
-          unlistedpromotionIncome,
-          counselorIcome,
-          counselorShares,
-          redeemInfo
+        totalSubscription,
+        promotionIncome,
+        unlistedpromotionIncome,
+        counselorIcome,
+        counselorShares,
+        redeemInfo
       };
 
 
@@ -155,10 +155,10 @@ class UserRepository extends CrudRepository {
       return response;
 
 
-      
+
     }
     catch (error) {
-      console.log('error',error.message); 
+      console.log('error', error.message);
       throw error;
     }
   }
@@ -168,7 +168,7 @@ class UserRepository extends CrudRepository {
     try {
       //get states and cities with search query if search is empty return all states and cities
 
-      console.log('search',search);
+      console.log('search', search);
 
       const states = await State.find({ country_id: 101, name: { $regex: search, $options: 'i' } });
       const cities = await City.find({ name: { $regex: search, $options: 'i' } });
@@ -184,10 +184,10 @@ class UserRepository extends CrudRepository {
   }
 
   //getStateCityById
-  async getStateCityById(id,type) {
+  async getStateCityById(id, type) {
     try {
       //get state or city by id
-      if(type === 'state') {
+      if (type === 'state') {
         const state = await State.find({ id: id });
         return state;
       } else {
@@ -236,9 +236,9 @@ class UserRepository extends CrudRepository {
       const newSubscriptions = await Transaction.find({ status: 'pending' }).sort({ createdAt: -1 });
 
       var totalEarning = 0;
-     const earning = await this.earningReports().then((response) => {
+      const earning = await this.earningReports().then((response) => {
         // console.log('earningReports response', response.totalSubscription[0].total);
-          return totalEarning = parseInt(response.totalSubscription[0].total) + parseInt(response.promotionIncome[0].total) + parseInt(response.unlistedpromotionIncome[0].total) ;
+        return totalEarning = parseInt(response.totalSubscription[0].total) + parseInt(response.promotionIncome[0].total) + parseInt(response.unlistedpromotionIncome[0].total);
       });
 
 
@@ -272,7 +272,7 @@ class UserRepository extends CrudRepository {
         saparteEarning,
         newLeads
       };
-      
+
       return response;
     }
     catch (error) {
@@ -283,7 +283,7 @@ class UserRepository extends CrudRepository {
   //instituteDashboard  
   async instituteDashboard(instituteId) {
     try {
-      
+
       //get course count by institute
       const courses = await Course.find({ instituteCategory: instituteId });
 
@@ -293,34 +293,34 @@ class UserRepository extends CrudRepository {
       const newQueries = await Query.find({ instituteId: instituteId, status: 'Pending' });
 
 
-    const response = {
-      totalCourses: courses.length,
-      totalLeads: queries.length,
-      newLeads: newQueries.length,
-    };
+      const response = {
+        totalCourses: courses.length,
+        totalLeads: queries.length,
+        newLeads: newQueries.length,
+      };
 
-    return response;
+      return response;
 
-    }catch (error) {
+    } catch (error) {
       throw error;
     }
   }
   //likeDislike
   async likeDislike(userId, courseId, like, type) {
     try {
-      if(type === 'course') {
+      if (type === 'course') {
         var model = Course;
-      }else if(type === 'blog') {
+      } else if (type === 'blog') {
         var model = Blog;
-      }else{
+      } else {
         var model = Career;
       }
 
       //get course by id
       const item = await model.findById(courseId);
-      if(like == 1) {
+      if (like == 1) {
         item.likes.push(userId);
-      }else{
+      } else {
         //pull user from likes array
         item.likes.pull(userId);
 
@@ -337,18 +337,18 @@ class UserRepository extends CrudRepository {
   //submitReview
   async submitReview(itemId, reviewpayload, type) {
     try {
-      if(type === 'course') {
+      if (type === 'course') {
         var model = Course;
-      }else if(type === 'blog') {
+      } else if (type === 'blog') {
         var model = Blog;
       }
-      else{
+      else {
         var model = Career;
       }
 
       //get course by id
-      console.log('itemId',itemId);
-      console.log('model',model);
+      console.log('itemId', itemId);
+      console.log('model', model);
       const item = await model.findById(itemId);
       if (!item) {
         throw new Error(`${type} not found`);
@@ -363,7 +363,7 @@ class UserRepository extends CrudRepository {
       throw error;
     }
   }
-  
+
 
 
   //counselorDashboard
@@ -376,7 +376,7 @@ class UserRepository extends CrudRepository {
       const counsellor_user = await User.findById(counselorId);
       var commissionrate = 30;
       commissionrate = counsellor_user.commission / 100;
-      const earning = counsellor_user.balance; 
+      const earning = counsellor_user.balance;
 
       console.log('counsellor_user', counsellor_user);
       var level = counsellor_user.level;
@@ -392,18 +392,18 @@ class UserRepository extends CrudRepository {
       //pending schedule slots
       const pendingScheduleSlots = await ScheduleSlot.find({ counselorId: counselorId, status: 'scheduled' });
 
-      
+
       const counselor = await Counselor.findById(counsellor_user._id);
       var averageRating = 0;
       if (counselor.reviews) {
-        
+
         const totalRating = counselor.reviews.reduce((acc, review) => acc + review.rating, 0);
         console.log('totalRating', totalRating);
-         averageRating = totalRating / counselor.reviews.length;
-         console.log('averageRating', averageRating);
+        averageRating = totalRating / counselor.reviews.length;
+        console.log('averageRating', averageRating);
 
       }
-    
+
       const response = {
         earning,
         completedSlots: completedScheduleSlots.length,
@@ -413,10 +413,10 @@ class UserRepository extends CrudRepository {
         level,
         points,
         balance
-    };
+      };
 
 
-    console.log('dash response', response);
+      console.log('dash response', response);
 
       return response;
     } catch (error) {
@@ -429,11 +429,11 @@ class UserRepository extends CrudRepository {
     const student = await User.findOne({ email }).populate("plan");
     return student;
   }
-  
+
 
   async getById(id) {
-    var student  = await User.findById(id);
-    if(student.plan) {
+    var student = await User.findById(id);
+    if (student.plan) {
       student = await User.findById(id).populate("plan");
     }
     return student;
@@ -443,7 +443,7 @@ class UserRepository extends CrudRepository {
     try {
       //get user with popuplate plan
       var response = await User.findOne(data).populate("plan")
-      
+
       return response;
     } catch (error) {
       throw error;
@@ -455,12 +455,12 @@ class UserRepository extends CrudRepository {
     try {
       const response = await User.find(query);
 
-      if(query.refer_by && query.plan) {
+      if (query.refer_by && query.plan) {
         response = await User.find(query).populate('refer_by').populate('plan');
       }
-      
 
-      
+
+
       return response;
     } catch (error) {
       throw error;

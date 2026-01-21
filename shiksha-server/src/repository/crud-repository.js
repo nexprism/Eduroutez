@@ -3,7 +3,7 @@ class CrudRepository {
     this.model = model;
   }
 
-  
+
   async create(data) {
     try {
       const result = await this.model.create(data);
@@ -19,28 +19,28 @@ class CrudRepository {
       // console.log('iddcfvghju',id);
       const result = await this.model.findByIdAndUpdate({ _id: id }, { deletedAt: new Date(), deleted: true });
       return result;
-      console.log('result',result);
+      console.log('result', result);
     } catch (error) {
       throw error;
     }
   }
-  
+
 
   async get(id, populateFields = []) {
     try {
-      console.log('hello',id);
-      
+      console.log('hello', id);
+
       let result = await this.model.findById(id);
-      
-      if (result.plan && result.reviews){
+
+      if (result.plan && result.reviews) {
         result = await this.model.findById(id).populate("plan").populate("reviews");
       }
 
       if (populateFields?.length > 0) {
         result = await this.model.findById(id).populate(populateFields);
       }
-      
-      console.log('result',result);
+
+      console.log('result', result);
       return result;
     } catch (error) {
       throw error;
@@ -56,34 +56,31 @@ class CrudRepository {
     }
   }
 
-  async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = [],selectFields = {}) {
-    console.log('dfgh',filterCon)
-    let query;
+  async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = [], selectFields = {}) {
+    console.log('dfgh', filterCon)
     sortCon = Object.keys(sortCon).length === 0 ? { createdAt: -1 } : sortCon;
-    if(pageNum > 0){
-    query = this.model
-      .find(filterCon)
-      .select(selectFields)
-      .sort(sortCon)
-      .skip((pageNum - 1) * limitNum)
-      .limit(limitNum)
-      .collation({ locale: 'en', strength: 2 });
-    }else{
-      query = this.model
-      .find(filterCon)
-      .select(selectFields)
-      .sort(sortCon)
-      .collation({ locale: 'en', strength: 2 });
-    }
-    
+    console.log('Final Sort:', sortCon);
+    console.log('Limit:', limitNum);
+    // Using find() with explicit options for allowDiskUse
+    let query = this.model.find(filterCon, null, { allowDiskUse: true }).sort(sortCon);
 
-    // Populate fields if any
-    if (populateFields?.length > 0 && Object.keys(selectFields).length === 0) {
-      populateFields?.forEach((field) => {
-      query = query.populate(field);
-      });
+    if (pageNum > 0 && limitNum) {
+      query = query.skip((pageNum - 1) * limitNum).limit(limitNum);
     }
-    const result = await query;
+
+    if (selectFields && Object.keys(selectFields).length > 0) {
+      query = query.select(selectFields);
+    }
+
+    if (populateFields?.length > 0) {
+      query = query.populate(populateFields);
+    }
+
+    // Enable allowDiskUse to handle large sorts that exceed 32MB RAM
+    query = query.allowDiskUse(true);
+
+    const result = await query.lean();
+
     // Get the total count of documents matching the filter
     const totalDocuments = await this.model.countDocuments(filterCon);
 
@@ -98,7 +95,7 @@ class CrudRepository {
   async update(id, data) {
     try {
       const result = await this.model.findByIdAndUpdate(id, data, { new: true });
-      console.log('result',result);
+      console.log('result', result);
       return result;
     } catch (error) {
       throw error;

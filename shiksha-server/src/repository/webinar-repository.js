@@ -7,11 +7,11 @@ class WebinarRepository extends CrudRepository {
     super(Webinar);
   }
 
-  
+
 
   getwebinarById(id) {
     try {
-      const webinar = Webinar.find({ _id: id , deletedAt: null });
+      const webinar = Webinar.find({ _id: id, deletedAt: null });
       return webinar;
     } catch (error) {
       console.error('Error in WebinarRepository.getwebinarById:', error.message);
@@ -22,7 +22,7 @@ class WebinarRepository extends CrudRepository {
   getwebinarByCreatedBy(id) {
     try {
       // console.log("webinar", webinar);
-      const webinar = Webinar.find({ webinarCreatedBy: id , deletedAt: null });
+      const webinar = Webinar.find({ webinarCreatedBy: id, deletedAt: null });
       return webinar;
     } catch (error) {
       console.error('Error in WebinarRepository.getwebinarById:', error.message);
@@ -38,7 +38,7 @@ class WebinarRepository extends CrudRepository {
       console.log("Received userId:", userId);
 
       // Handle case where userId is an object
-      
+
 
       // Query get current  month webinar count by webinarCreatedBy user._id
       const webinars = await Webinar.aggregate([
@@ -56,19 +56,19 @@ class WebinarRepository extends CrudRepository {
             count: { $sum: 1 },
           },
         },
-      ]);
+      ]).allowDiskUse(true);
 
 
 
-      
 
-      
+
+
       if (!webinars || webinars.length === 0) {
         const error = new Error("No webinars found for this user");
         error.statusCode = 404;
         throw error;
       }
-      
+
       return webinars;
     } catch (error) {
       // Preserve the status code if it exists, otherwise use 500
@@ -77,8 +77,8 @@ class WebinarRepository extends CrudRepository {
       throw error; // Throw the error with status code
     }
   }
-  
-  
+
+
   async get(userId) {
     try {
       // Log the received userId
@@ -96,16 +96,16 @@ class WebinarRepository extends CrudRepository {
 
       // Convert the userId to ObjectId
       const objectId = new mongoose.Types.ObjectId(userIdString);
-  
+
       // Query the database
       const webinars = await Webinar.find({ webinarCreatedBy: objectId });
-      
+
       if (!webinars || webinars.length === 0) {
         const error = new Error("No webinars found for this user");
         error.statusCode = 404;
         throw error;
       }
-      
+
       return webinars;
     } catch (error) {
       // Preserve the status code if it exists, otherwise use 500
