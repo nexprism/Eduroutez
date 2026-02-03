@@ -84,19 +84,49 @@ escapeRegex(str) {
   try {
     const {
       page = 1,
-      limit = 100000000000000,
+      limit = 100,
       filters = "{}",
       searchFields = "{}",
       sort = "{}",
       select = "{}"
     } = query;
 
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = parseInt(page) || 1;
+    const limitNum = Math.min(parseInt(limit) || 100, 1000); // Cap limit at 1000 to prevent memory issues
 
-    const parsedFilters = JSON.parse(filters);
-    const parsedSearchFields = JSON.parse(searchFields);
-    const parsedSort = JSON.parse(sort);
+    // Safely parse JSON strings with error handling
+    let parsedFilters = {};
+    let parsedSearchFields = {};
+    let parsedSort = {};
+    let parsedSelect = {};
+
+    try {
+      parsedFilters = typeof filters === 'string' ? JSON.parse(filters) : filters;
+    } catch (e) {
+      console.error('Error parsing filters:', e.message);
+      parsedFilters = {};
+    }
+
+    try {
+      parsedSearchFields = typeof searchFields === 'string' ? JSON.parse(searchFields) : searchFields;
+    } catch (e) {
+      console.error('Error parsing searchFields:', e.message);
+      parsedSearchFields = {};
+    }
+
+    try {
+      parsedSort = typeof sort === 'string' ? JSON.parse(sort) : sort;
+    } catch (e) {
+      console.error('Error parsing sort:', e.message);
+      parsedSort = {};
+    }
+
+    try {
+      parsedSelect = typeof select === 'string' ? JSON.parse(select) : select;
+    } catch (e) {
+      console.error('Error parsing select:', e.message);
+      parsedSelect = {};
+    }
 
     const filterConditions = { deletedAt: null };
 
@@ -222,7 +252,7 @@ escapeRegex(str) {
     }
 
     const populateFields = ["reviews", "plan"];
-    const selectFields = JSON.parse(select);
+    const selectFields = parsedSelect;
 
     const institutes = await this.instituteRepository.getAll(
       filterConditions,
@@ -234,16 +264,24 @@ escapeRegex(str) {
     );
 
     institutes.result.forEach(institute => {
-      if (institute.reviews) {
-        const overallRating = institute.reviews.length > 0
-          ? institute.reviews.reduce((sum, review) =>
-            sum + (review.placementStars || 0) +
-            (review.campusLifeStars || 0) +
-            (review.facultyStars || 0) +
-            (review.suggestionsStars || 0), 0) / (institute.reviews.length * 4 || 1)
-          : 0;
-        institute.overallRating = Math.round(overallRating);
-      } else {
+      if (!institute) return; // Skip null/undefined institutes
+      
+      try {
+        if (institute.reviews && Array.isArray(institute.reviews) && institute.reviews.length > 0) {
+          const totalStars = institute.reviews.reduce((sum, review) => {
+            if (!review) return sum;
+            return sum + (review.placementStars || 0) +
+              (review.campusLifeStars || 0) +
+              (review.facultyStars || 0) +
+              (review.suggestionsStars || 0);
+          }, 0);
+          const overallRating = totalStars / (institute.reviews.length * 4);
+          institute.overallRating = Math.round(overallRating);
+        } else {
+          institute.overallRating = 0;
+        }
+      } catch (ratingError) {
+        console.error('Error calculating rating for institute:', institute._id, ratingError.message);
         institute.overallRating = 0;
       }
     });
@@ -267,8 +305,17 @@ escapeRegex(str) {
 
     return institutes;
   } catch (error) {
-    console.log(error);
-    throw new AppError("Cannot fetch data of all the institutes", StatusCodes.INTERNAL_SERVER_ERROR);
+    console.error("Error in getAll institutes:", error.message);
+    console.error("Error stack:", error.stack);
+    
+    // Provide more specific error messages
+    if (error.message.includes("JSON")) {
+      throw new AppError("Invalid query parameters format", StatusCodes.BAD_REQUEST);
+    } else if (error.message.includes("populate")) {
+      throw new AppError("Error loading related data", StatusCodes.INTERNAL_SERVER_ERROR);
+    } else {
+      throw new AppError(`Cannot fetch data of all the institutes: ${error.message}`, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
   }
 }
   

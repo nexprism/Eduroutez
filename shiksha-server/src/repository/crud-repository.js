@@ -57,39 +57,50 @@ class CrudRepository {
   }
 
   async getAll(filterCon = {}, sortCon = {}, pageNum, limitNum, populateFields = [], selectFields = {}) {
-    console.log('dfgh', filterCon)
-    sortCon = Object.keys(sortCon).length === 0 ? { createdAt: -1 } : sortCon;
-    console.log('Final Sort:', sortCon);
-    console.log('Limit:', limitNum);
-    // Using find() with explicit options for allowDiskUse
-    let query = this.model.find(filterCon, null, { allowDiskUse: true }).sort(sortCon);
+    try {
+      console.log('Filter conditions:', filterCon);
+      sortCon = Object.keys(sortCon).length === 0 ? { createdAt: -1 } : sortCon;
+      console.log('Final Sort:', sortCon);
+      console.log('Limit:', limitNum);
+      
+      // Build the query properly
+      let query = this.model.find(filterCon).sort(sortCon);
 
-    if (pageNum > 0 && limitNum) {
-      query = query.skip((pageNum - 1) * limitNum).limit(limitNum);
+      if (pageNum > 0 && limitNum && limitNum < 10000) { // Cap limit to prevent memory issues
+        query = query.skip((pageNum - 1) * limitNum).limit(limitNum);
+      } else if (limitNum >= 10000) {
+        // If limit is too large, cap it to prevent memory issues
+        console.warn(`Limit ${limitNum} is too large, capping to 10000`);
+        query = query.skip((pageNum - 1) * 10000).limit(10000);
+      }
+
+      if (selectFields && Object.keys(selectFields).length > 0) {
+        query = query.select(selectFields);
+      }
+
+      if (populateFields?.length > 0) {
+        // Populate each field individually
+        populateFields.forEach(field => {
+          query = query.populate(field);
+        });
+      }
+
+      const result = await query.lean().exec();
+
+      // Get the total count of documents matching the filter
+      const totalDocuments = await this.model.countDocuments(filterCon);
+
+      return {
+        result,
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalDocuments / (limitNum < 10000 ? limitNum : 10000)),
+        totalDocuments,
+      };
+    } catch (error) {
+      console.error('Error in getAll:', error.message);
+      console.error('Stack:', error.stack);
+      throw error;
     }
-
-    if (selectFields && Object.keys(selectFields).length > 0) {
-      query = query.select(selectFields);
-    }
-
-    if (populateFields?.length > 0) {
-      query = query.populate(populateFields);
-    }
-
-    // Enable allowDiskUse to handle large sorts that exceed 32MB RAM
-    query = query.allowDiskUse(true);
-
-    const result = await query.lean();
-
-    // Get the total count of documents matching the filter
-    const totalDocuments = await this.model.countDocuments(filterCon);
-
-    return {
-      result,
-      currentPage: pageNum,
-      totalPages: Math.ceil(totalDocuments / limitNum),
-      totalDocuments,
-    };
   }
 
   async update(id, data) {
