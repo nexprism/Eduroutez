@@ -415,26 +415,30 @@ export async function updateInstitute(req, res) {
       // }
 
 
-      if (req.files["instituteLogo"]) {
+      // Only process specific file fields - explicitly ignore gallery files here
+      // Gallery files should be handled by the addGallery endpoint only
+      if (req.files && req.files["instituteLogo"] && Array.isArray(req.files["instituteLogo"])) {
         payload.instituteLogo = req.files["instituteLogo"][0].filename;
       }
-      if (req.files["coverImage"]) {
+      if (req.files && req.files["coverImage"] && Array.isArray(req.files["coverImage"])) {
         payload.coverImage = req.files["coverImage"][0].filename;
       }
-      if (req.files["thumbnailImage"]) {
+      if (req.files && req.files["thumbnailImage"] && Array.isArray(req.files["thumbnailImage"])) {
         payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
       }
-      if (req.files["brochure"]) {
+      if (req.files && req.files["brochure"] && Array.isArray(req.files["brochure"])) {
         payload.brochure = req.files["brochure"][0].filename;
+      }
+
+      // Explicitly ignore gallery files in update endpoint
+      // Gallery should only be updated via addGallery/deleteGallery endpoints
+      if (req.files && req.files["gallery"]) {
+        console.warn("Gallery files detected in updateInstitute - ignoring. Use addGallery endpoint instead.");
       }
 
       if (payload.instituteName) {
         payload.slug = payload.instituteName.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
-      
-      // if (req.files["gallery"]) {
-      //   payload.gallery = req.files["gallery"].map((file) => file.filename);
-      // }
 
       // Update the institute with new data
       // console.log(payload);
@@ -664,25 +668,39 @@ export async function getHelpList(req, res) {
 
 
 
+// Create a dedicated uploader for gallery images only
+const galleryUploader = FileUpload.upload.fields([
+  {
+    name: "gallery",
+    maxCount: 10,
+  },
+]);
+
 export const addGallery = async (req, res) => {
   try {
-    multiUploader(req, res, async function (err) {
+    galleryUploader(req, res, async function (err) {
       if (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
       }
 
-      console.log('file',req.files);
-
+      console.log('Gallery upload - files received:', req.files);
 
       const instituteId = req.params.id;
       const payload = { ...req.body };
-      // console.log(payload);
 
-    
-      if (req.files["gallery"]) {
+      // Only process gallery files - ignore any other files
+      if (req.files && req.files["gallery"] && Array.isArray(req.files["gallery"])) {
         payload.gallery = req.files["gallery"].map((file) => file.filename);
+        console.log('Gallery files processed:', payload.gallery);
+      } else {
+        console.warn('No gallery files found in request');
+        return res.status(StatusCodes.BAD_REQUEST).json({ 
+          error: "No gallery images provided",
+          message: "Please upload images with the 'gallery' field name"
+        });
       }
-      console.log('payload',payload);
+
+      console.log('Payload being sent to service:', payload);
       const response = await instituteService.addGallery(instituteId, payload);
 
       SuccessResponse.data = response;
@@ -690,6 +708,7 @@ export const addGallery = async (req, res) => {
       return res.status(StatusCodes.OK).json(SuccessResponse);
     });
   } catch (error) {
+    console.error('Error in addGallery:', error);
     ErrorResponse.error = error;
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
