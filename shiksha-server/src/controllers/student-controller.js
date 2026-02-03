@@ -144,7 +144,9 @@ export async function getStudents(req, res) {
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+    // Use default status code if error.statusCode is undefined
+    const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    return res.status(statusCode).json(ErrorResponse);
   }
 }
 
@@ -155,14 +157,30 @@ export async function getStudents(req, res) {
 
 export async function getStudent(req, res) {
   try {
-    const response = await studentService.get(req.params.id);
+    const studentId = req.params.id;
+    
+    // Validate student ID
+    if (!studentId || studentId === "null" || studentId === "undefined" || studentId.trim() === "") {
+      ErrorResponse.error = { message: "Invalid student ID provided" };
+      return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+    }
+    
+    // Check if ID is a valid MongoDB ObjectId format (24 hex characters)
+    if (!/^[0-9a-fA-F]{24}$/.test(studentId)) {
+      ErrorResponse.error = { message: "Invalid student ID format" };
+      return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+    }
+    
+    const response = await studentService.get(studentId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the student";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     console.error("Get student error:", error.message);
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+    // Use default status code if error.statusCode is undefined
+    const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    return res.status(statusCode).json(ErrorResponse);
   }
 }
 
@@ -260,12 +278,28 @@ export async function updateStudent(req, res) {
 
 export async function deleteStudent(req, res) {
   try {
-    const response = await studentService.delete(req.params.id);
+    const studentId = req.params.id;
+    
+    // Validate student ID
+    if (!studentId || studentId === "null" || studentId === "undefined" || studentId.trim() === "") {
+      ErrorResponse.error = { message: "Invalid student ID provided" };
+      return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+    }
+    
+    // Check if ID is a valid MongoDB ObjectId format
+    if (!/^[0-9a-fA-F]{24}$/.test(studentId)) {
+      ErrorResponse.error = { message: "Invalid student ID format" };
+      return res.status(StatusCodes.BAD_REQUEST).json(ErrorResponse);
+    }
+    
+    const response = await studentService.delete(studentId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully deleted the student";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+    // Use default status code if error.statusCode is undefined
+    const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    return res.status(statusCode).json(ErrorResponse);
   }
 }
