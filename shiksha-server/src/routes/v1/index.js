@@ -362,7 +362,7 @@ router.delete("/feedback/:id", accessTokenAutoRefresh, passport.authenticate("jw
 /**
  * question-answer routes
  */
-router.post("/question-answer",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createQuestionAnswer);
+router.post("/question-answer", createQuestionAnswer); // Allow public question submission
 router.get("/question-answers", getQuestionAnswers);
 router.get("/question-answer/:email", getQuestionAnswerByEmail);
 router.get("/question-answer-detail/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswer);

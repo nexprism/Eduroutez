@@ -63,37 +63,41 @@ class CrudRepository {
       console.log('Final Sort:', sortCon);
       console.log('Limit:', limitNum);
       
-      // Build the query properly
-      let query = this.model.find(filterCon).sort(sortCon);
-
-      if (pageNum > 0 && limitNum && limitNum < 10000) { // Cap limit to prevent memory issues
-        query = query.skip((pageNum - 1) * limitNum).limit(limitNum);
-      } else if (limitNum >= 10000) {
-        // If limit is too large, cap it to prevent memory issues
-        console.warn(`Limit ${limitNum} is too large, capping to 10000`);
-        query = query.skip((pageNum - 1) * 10000).limit(10000);
-      }
+      // Cap limit to prevent memory and timeout issues
+      const maxLimit = 100; // Reduced from 1000 to prevent timeouts
+      const safeLimit = Math.min(limitNum || 100, maxLimit);
+      const safePage = Math.max(pageNum || 1, 1);
+      
+      // Build the query properly with timeout protection
+      let query = this.model.find(filterCon)
+        .sort(sortCon)
+        .limit(safeLimit)
+        .skip((safePage - 1) * safeLimit)
+        .maxTimeMS(30000); // 30 second timeout
 
       if (selectFields && Object.keys(selectFields).length > 0) {
         query = query.select(selectFields);
       }
 
       if (populateFields?.length > 0) {
-        // Populate each field individually
+        // Populate each field individually with lean option for better performance
         populateFields.forEach(field => {
-          query = query.populate(field);
+          query = query.populate({
+            path: field,
+            select: '-__v' // Exclude version field for better performance
+          });
         });
       }
 
       const result = await query.lean().exec();
 
-      // Get the total count of documents matching the filter
-      const totalDocuments = await this.model.countDocuments(filterCon);
+      // Get the total count of documents matching the filter (with timeout)
+      const totalDocuments = await this.model.countDocuments(filterCon).maxTimeMS(10000).exec();
 
       return {
         result,
-        currentPage: pageNum,
-        totalPages: Math.ceil(totalDocuments / (limitNum < 10000 ? limitNum : 10000)),
+        currentPage: safePage,
+        totalPages: Math.ceil(totalDocuments / safeLimit),
         totalDocuments,
       };
     } catch (error) {
