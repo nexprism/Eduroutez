@@ -16,11 +16,11 @@ const querySchema = new mongoose.Schema(
         },
         city: {
             type: String,
-            required: true,
+            required: false,
         },
         queryRelatedTo: {
             type: String,
-            required: true,
+            required: false,
         },
         stream: {
             type: mongoose.Schema.Types.ObjectId,

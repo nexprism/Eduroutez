@@ -13,6 +13,12 @@ class questionAnswerService {
 
   async create(data) {
     try {
+      // Transform instituteId (singular) to instituteIds (plural array) if provided
+      if (data.instituteId && !data.instituteIds) {
+        data.instituteIds = [data.instituteId];
+        delete data.instituteId;
+      }
+      
       const questionAnswer = await this.queryRepository.create(data);
       return questionAnswer;
     } catch (error) {
