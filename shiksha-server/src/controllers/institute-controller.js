@@ -20,6 +20,35 @@ import bcrypt from "bcrypt";
 const singleUploader = FileUpload.upload.single("image");
 const fileUploader = FileUpload.upload.single("file");
 
+// Uploader for update endpoint - excludes gallery to prevent accidental assignment to logo/thumbnail
+const updateUploader = FileUpload.upload.fields([
+  {
+    name: "instituteLogo",
+    maxCount: 1,
+  },
+  {
+    name: "coverImage",
+    maxCount: 1,
+  },
+  {
+    name: "thumbnailImage",
+    maxCount: 1,
+  },
+  {
+    name: "brochure",
+    maxCount: 1,
+  },
+  {
+    name: "image",
+    maxCount: 1,
+  },
+  {
+    name: "file",
+    maxCount: 1,
+  },
+]);
+
+// Uploader that includes gallery (for create endpoint and other operations)
 const multiUploader = FileUpload.upload.fields([
   {
     name: "instituteLogo",
@@ -49,7 +78,6 @@ const multiUploader = FileUpload.upload.fields([
     name: "file",
     maxCount: 1,
   },
-
 ]);
 const instituteService = new InstituteService();
 const userService = new UserService();
@@ -383,7 +411,7 @@ export async function getInstituteByEmail(req, res) {
  */
 
 export async function updateInstitute(req, res) {
-  multiUploader(req, res, async (err) => {
+  updateUploader(req, res, async (err) => {
     if (err) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }
@@ -417,23 +445,40 @@ export async function updateInstitute(req, res) {
 
       // Only process specific file fields - explicitly ignore gallery files here
       // Gallery files should be handled by the addGallery endpoint only
-      if (req.files && req.files["instituteLogo"] && Array.isArray(req.files["instituteLogo"])) {
-        payload.instituteLogo = req.files["instituteLogo"][0].filename;
-      }
-      if (req.files && req.files["coverImage"] && Array.isArray(req.files["coverImage"])) {
-        payload.coverImage = req.files["coverImage"][0].filename;
-      }
-      if (req.files && req.files["thumbnailImage"] && Array.isArray(req.files["thumbnailImage"])) {
-        payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
-      }
-      if (req.files && req.files["brochure"] && Array.isArray(req.files["brochure"])) {
-        payload.brochure = req.files["brochure"][0].filename;
-      }
-
-      // Explicitly ignore gallery files in update endpoint
-      // Gallery should only be updated via addGallery/deleteGallery endpoints
+      
+      // First, check if gallery files are present and warn/remove them
       if (req.files && req.files["gallery"]) {
         console.warn("Gallery files detected in updateInstitute - ignoring. Use addGallery endpoint instead.");
+        // Remove gallery files from req.files to prevent any accidental processing
+        delete req.files["gallery"];
+      }
+      
+      // Only process explicitly named fields - be strict about field names
+      if (req.files && req.files["instituteLogo"] && Array.isArray(req.files["instituteLogo"]) && req.files["instituteLogo"].length > 0) {
+        payload.instituteLogo = req.files["instituteLogo"][0].filename;
+        console.log('Processing instituteLogo:', payload.instituteLogo);
+      }
+      if (req.files && req.files["coverImage"] && Array.isArray(req.files["coverImage"]) && req.files["coverImage"].length > 0) {
+        payload.coverImage = req.files["coverImage"][0].filename;
+        console.log('Processing coverImage:', payload.coverImage);
+      }
+      if (req.files && req.files["thumbnailImage"] && Array.isArray(req.files["thumbnailImage"]) && req.files["thumbnailImage"].length > 0) {
+        payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
+        console.log('Processing thumbnailImage:', payload.thumbnailImage);
+      }
+      if (req.files && req.files["brochure"] && Array.isArray(req.files["brochure"]) && req.files["brochure"].length > 0) {
+        payload.brochure = req.files["brochure"][0].filename;
+        console.log('Processing brochure:', payload.brochure);
+      }
+      
+      // Log all received files for debugging
+      if (req.files) {
+        console.log('All files received in updateInstitute:', Object.keys(req.files));
+        Object.keys(req.files).forEach(key => {
+          if (key !== "gallery") {
+            console.log(`File field "${key}":`, req.files[key].map(f => f.filename));
+          }
+        });
       }
 
       if (payload.instituteName) {
