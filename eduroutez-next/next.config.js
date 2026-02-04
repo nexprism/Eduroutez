@@ -9,6 +9,14 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Server Actions configuration - disable if causing issues
+  experimental: {
+    // Temporarily disable serverActions to prevent errors
+    // serverActions: {
+    //   bodySizeLimit: '2mb',
+    //   allowedOrigins: ['localhost', 'eduroutez.com', 'admin.eduroutez.com'],
+    // },
+  },
   images: {
     domains: ['eduroutez-3.onrender.com', 'utfs.io', 'eduroutez.nexprism.in', 'localhost', 'coupon.nexprism.in', 'admin.eduroutez.com'],
 

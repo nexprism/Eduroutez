@@ -10,7 +10,9 @@
     "lint": "next lint",
     "format": "prettier . --write",
     "prepare": "husky",
-    "postinstall": "next build"
+    "clean": "rm -rf .next node_modules/.cache",
+    "clean:build": "rm -rf .next && npm run build",
+    "postinstall": "echo 'Installation complete. Run npm run build manually if needed.'"
   },
   "lint-staged": {
     "**/*": [
