@@ -38,6 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import PasswordStrength from '@/components/password-strength';
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }),
@@ -452,6 +453,7 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
                     {...field}
                   />
                 </FormControl>
+                <PasswordStrength password={field.value} />
                 <FormMessage />
               </FormItem>
             )}

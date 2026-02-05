@@ -25,6 +25,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { usePathname, useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
+import PasswordStrength from '@/components/password-strength';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -163,7 +164,7 @@ export default function CounselorForm() {
     formData.append('contactno', values.contactno);
     formData.append('email', values.email);
     if (!isEdit) {
-      formData.append('password', values.password);
+      formData.append('password', (values as any).password);
     }
     formData.append('category', values.category);
     formData.append('instituteId', values.instituteId);
@@ -279,8 +280,8 @@ export default function CounselorForm() {
               />
               {!isEdit && (
                 <FormField
-                  control={form.control}
-                  name="password"
+                  control={form.control as any}
+                  name={"password" as any}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Password</FormLabel>
@@ -291,6 +292,7 @@ export default function CounselorForm() {
                           {...field}
                         />
                       </FormControl>
+                      <PasswordStrength password={field.value} />
                       <FormMessage />
                     </FormItem>
                   )}
