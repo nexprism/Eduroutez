@@ -57,7 +57,10 @@ const getFormSchema = (isEdit: boolean) => {
       ...baseSchema,
       password: z.string().min(8, {
         message: 'Password must be at least 8 characters.'
-      })
+      }).regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|.*[!@#$%^&*(),.?":{}|<>]).*$/,
+        'Password must contain an uppercase letter, a lowercase letter, and a number or special character.'
+      )
     });
   }
 
@@ -299,14 +302,14 @@ export default function CounselorForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={(value) => {
                         field.onChange(value);
                         const selectedCategory = categories?.find((cat: { name: string }) => cat?.name === value);
                         if (selectedCategory?.name) {
                           setSelectedCategoryName(selectedCategory.name);
                         }
-                      }} 
+                      }}
                       defaultValue={field.value}
                     >
                       <FormControl>
@@ -318,8 +321,8 @@ export default function CounselorForm() {
                       </FormControl>
                       <SelectContent className="max-h-60 overflow-y-auto">
                         {Array.isArray(categories) && categories.map((category: any) => (
-                          <SelectItem 
-                            key={category?.name || 'default'} 
+                          <SelectItem
+                            key={category?.name || 'default'}
                             value={category?.name || ''}
                           >
                             {category?.name || 'Unnamed Category'}

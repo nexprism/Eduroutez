@@ -47,7 +47,11 @@ const formSchema = z.object({
     .min(1, { message: 'Contact number is required' }),
   role: z.string().min(1, { message: 'Role is required' }),
   email: z.string().email({ message: 'Enter a valid email address' }),
-  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+  password: z.string().min(8, { message: 'Password must be at least 8 characters' })
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|.*[!@#$%^&*(),.?":{}|<>]).*$/,
+      'Password must contain an uppercase letter, a lowercase letter, and a number or special character.'
+    ),
   confirmPassword: z
     .string()
     .min(8, { message: 'Password must be at least 8 characters' }),
@@ -102,7 +106,7 @@ const OTPInput: React.FC<OTPInputProps> = ({ setOtp, maxLength = 6 }) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text');
     const pastedNumbers = pastedData.replace(/[^\d]/g, '').split('').slice(0, maxLength);
-    
+
     const newOtpValues = [...otpValues];
     pastedNumbers.forEach((value, index) => {
       if (index < maxLength) {
@@ -219,7 +223,7 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
     },
     onSuccess: (data) => {
       toast.success('Signed Up Successfully!');
-      if(data.data.user.role === 'counsellor'){
+      if (data.data.user.role === 'counsellor') {
         setShowAlert(false);
         setToggle(!toggle);
         localStorage.setItem('accessToken', JSON.stringify(data.data.accessToken));
@@ -299,8 +303,8 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
               </button>
             )}
           </div>
-          <Button 
-            onClick={verifyAndSignup} 
+          <Button
+            onClick={verifyAndSignup}
             className="w-full"
             disabled={otp.length !== 6 || signupMutation.isPending}
           >
@@ -346,8 +350,8 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
   const roleSpecificLabel = role === 'institute'
     ? 'Institute Name'
     : role === 'counsellor'
-    ? 'Counsellor Name'
-    : 'Name';
+      ? 'Counsellor Name'
+      : 'Name';
 
   const isLoading = signupMutation.status === 'pending' || sendOtpMutation.status === 'pending';
 
@@ -416,7 +420,7 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
               <FormItem>
                 <FormLabel>Role Type</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
+                  <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select Role Type" />
                     </SelectTrigger>
@@ -431,7 +435,7 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
                 </Select>
                 <FormMessage />
               </FormItem>
-              
+
             )}
           />
           <FormField
@@ -470,9 +474,9 @@ export default function UserSignupForm({ setToggle, toggle }: { setToggle: (valu
               </FormItem>
             )}
           />
-          <button 
-            className="w-full justify-end text-blue-600 ml-0" 
-            onClick={() => setToggle(!toggle)} 
+          <button
+            className="w-full justify-end text-blue-600 ml-0"
+            onClick={() => setToggle(!toggle)}
             type="button"
           >
             Already have an account? Sign In

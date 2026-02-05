@@ -5,7 +5,7 @@ import StudentService from "../services/student-service.js";
 import InstituteService from "../services/institute-service.js";
 import CounselorService from "../services/counselor-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
-import axios from "axios";  
+import axios from "axios";
 const singleUploader = FileUpload.upload.single("image");
 
 const userService = new UserService();
@@ -15,45 +15,45 @@ const studentService = new StudentService();
 
 //getCountries
 export const getCountries = async (req, res) => {
-  
-    var config = {
-      method: 'get',
-      url: 'https://api.countrystatecity.in/v1/countries',
-      headers: {
-        'X-CSCAPI-KEY': process.env.COUNTRY_STATE_CITY_API_KEY
-      }
-    };
 
-    axios(config)
-      .then(function (response) {
-        const countries = JSON.stringify(response.data);
-        return res.status(200).json({
-          success: true,
-          message: "Successfully fetched countries",
-          data: response.data,
-          err: {},
-        });
-      })
-      .catch(function (error) {
-        return res.status(500).json({
-          message: "Something went wrong",
-          data: {},
-          success: false,
-          err: error.message,
-        });
+  var config = {
+    method: 'get',
+    url: 'https://api.countrystatecity.in/v1/countries',
+    headers: {
+      'X-CSCAPI-KEY': process.env.COUNTRY_STATE_CITY_API_KEY
+    }
+  };
+
+  axios(config)
+    .then(function (response) {
+      const countries = JSON.stringify(response.data);
+      return res.status(200).json({
+        success: true,
+        message: "Successfully fetched countries",
+        data: response.data,
+        err: {},
       });
-    
-    
-  
+    })
+    .catch(function (error) {
+      return res.status(500).json({
+        message: "Something went wrong",
+        data: {},
+        success: false,
+        err: error.message,
+      });
+    });
+
+
+
 }
 
 //getStates
 export const getStatesByCountry = async (req, res) => {
-  
+
   const countryCode = req.body.countryCode;
   var config = {
     method: 'get',
-    url: 'https://api.countrystatecity.in/v1/countries/' + countryCode +'/states',
+    url: 'https://api.countrystatecity.in/v1/countries/' + countryCode + '/states',
     headers: {
       'X-CSCAPI-KEY': process.env.COUNTRY_STATE_CITY_API_KEY
     }
@@ -77,43 +77,43 @@ export const getStatesByCountry = async (req, res) => {
         err: error.message,
       });
     });
-    
-  
+
+
 };
 
 //getCitiesByState
 export const getCitiesByState = async (req, res) => {
-  
-    const stateCode = req.body.stateCode;
-    const countryCode = req.body.countryCode;
 
-    var config = {
-      method: 'get',
-      url: 'https://api.countrystatecity.in/v1/countries/' + countryCode +'/states/'+stateCode+'/cities',
-      headers: {
-        'X-CSCAPI-KEY': process.env.COUNTRY_STATE_CITY_API_KEY
-      }
-    };
+  const stateCode = req.body.stateCode;
+  const countryCode = req.body.countryCode;
 
-    axios(config)
-      .then(function (response) {
-        const cities = JSON.stringify(response.data);
-        return res.status(200).json({
-          success: true,
-          message: "Successfully fetched Citites",
-          data: response.data,
-          err: {},
-        });
-      })
-      .catch(function (error) {
-        return res.status(500).json({
-          message: "Something went wrong",
-          data: {},
-          success: false,
-          err: error.message,
-        });
+  var config = {
+    method: 'get',
+    url: 'https://api.countrystatecity.in/v1/countries/' + countryCode + '/states/' + stateCode + '/cities',
+    headers: {
+      'X-CSCAPI-KEY': process.env.COUNTRY_STATE_CITY_API_KEY
+    }
+  };
+
+  axios(config)
+    .then(function (response) {
+      const cities = JSON.stringify(response.data);
+      return res.status(200).json({
+        success: true,
+        message: "Successfully fetched Citites",
+        data: response.data,
+        err: {},
       });
-    
+    })
+    .catch(function (error) {
+      return res.status(500).json({
+        message: "Something went wrong",
+        data: {},
+        success: false,
+        err: error.message,
+      });
+    });
+
 };
 
 
@@ -154,9 +154,9 @@ export async function sendOtp(req, res) {
       }
     }
 
-    var  otp = Math.floor(100000 + Math.random() * 900000);
+    var otp = Math.floor(100000 + Math.random() * 900000);
     const response = await userService.sendOtp(otp, req.body.contact_number);
-    if (!response.data.return) 
+    if (!response.data.return)
       return res.status(400).json({
         message: response.data.message,
         data: {},
@@ -167,7 +167,7 @@ export async function sendOtp(req, res) {
     SuccessResponse.message = "Successfully sent OTP";
     return res.status(200).json(SuccessResponse);
   } catch (error) {
-    console.log('error in sendOtp',error.message);
+    console.log('error in sendOtp', error.message);
     return res.status(500).json({
       message: error.message,
       data: {},
@@ -203,17 +203,17 @@ export async function verifyOtp(req, res) {
     }
 
     const response = await userService.verifyOtp(req.body.otp, req.body.contact_number);
-    if (!response){
+    if (!response) {
       return res.status(400).json({
-        
+
         message: "Invalid OTP",
         data: {},
         success: false,
         err: {},
       });
     }
-    
-    SuccessResponse.message = "Successfully verified OTP";  
+
+    SuccessResponse.message = "Successfully verified OTP";
     return res.status(200).json(SuccessResponse);
   } catch (error) {
     return res.status(500).json({
@@ -253,7 +253,7 @@ export const signup = async (req, res) => {
   //req parms refercode
 
   try {
-    
+
     //check email already exists
     const user = await userService.getUserByEmail(req.body.email);
     if (user) {
@@ -266,7 +266,7 @@ export const signup = async (req, res) => {
     }
     // console.log('user', user);
     //contact number length check
-    if(req.body.contact_number.length !== 10){
+    if (req.body.contact_number.length !== 10) {
 
       return res.status(400).json({
         message: "Contact number should be of 10 digits",
@@ -276,7 +276,27 @@ export const signup = async (req, res) => {
       });
     }
 
-    if(req.body.otp.length !== 6){
+    // Password strength validation
+    const password = req.body.password;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+    if (!password || password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password must contain an uppercase letter, a lowercase letter, and a number or special character",
+        data: {},
+        success: false,
+        err: {},
+      });
+    }
+
+    if (req.body.otp.length !== 6) {
 
       return res.status(400).json({
         message: "OTP should be of 6 digits",
@@ -288,7 +308,7 @@ export const signup = async (req, res) => {
 
     //check otp
     const otpResponse = await userService.verifyOtp(req.body.otp, req.body.contact_number);
-    if (!otpResponse){
+    if (!otpResponse) {
       return res.status(400).json({
         message: "Invalid OTP",
         data: {},
@@ -303,19 +323,19 @@ export const signup = async (req, res) => {
     var status = true;
     //generate random referalCode
     var referalCode = Math.random().toString(36).substring(7);
-    
-    
-    if (req.body.role === 'institute'){
+
+
+    if (req.body.role === 'institute') {
       is_verified = true;
       status = true;
     }
 
     var referdata = {};
-    
 
-    if(req.body.referal_Code){
+
+    if (req.body.referal_Code) {
       const referalUser = await userService.getUserByReferalCode(req.body.referal_Code);
-      if(!referalUser){
+      if (!referalUser) {
         return res.status(400).json({
           message: "Referal code Invalid",
           data: {},
@@ -323,103 +343,103 @@ export const signup = async (req, res) => {
           err: {},
         });
       }
-     
-     var referdata = {
+
+      var referdata = {
         refer_by: referalUser._id,
       };
 
 
     }
 
-    
 
 
 
 
-    
+
+
 
 
     const response = await userService.signup(
       {
-        name:req.body.name,
-        contact_number:req.body.contact_number,
+        name: req.body.name,
+        contact_number: req.body.contact_number,
         email: req.body.email,
         password: req.body.password,
         role: req.body?.role,
-        city:req.body.city,
-        state:req.body.state,
-        country:req.body.country,
+        city: req.body.city,
+        state: req.body.state,
+        country: req.body.country,
         is_verified: is_verified,
         referalCode: referalCode,
-      ...referdata  
+        ...referdata
       },
       res
     );
 
     const userId = response.user._id;
     if (response.user.role === 'student') {
-if(req.body.referal_Code){
+      if (req.body.referal_Code) {
 
-  if (req.body.referal_Code) {
-    const referalUser = await userService.getUserByReferalCode(req.body.referal_Code);
-    if (!referalUser) {
-      return res.status(400).json({
-        message: "Referal code Invalid",
-        data: {},
-        success: false,
-        err: {},
-      });
+        if (req.body.referal_Code) {
+          const referalUser = await userService.getUserByReferalCode(req.body.referal_Code);
+          if (!referalUser) {
+            return res.status(400).json({
+              message: "Referal code Invalid",
+              data: {},
+              success: false,
+              err: {},
+            });
+          }
+
+          console.log('referalUser', referalUser);
+
+          const referalUserResponse = await userService.updateReferalUser(referalUser, userId);
+        }
+
+      }
+
+
+      //save in student table
+
+      const studentPayload = {
+        _id: userId,
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.contact_number,
+        country: req.body.country,
+        state: req.body.state,
+        city: req.body.city,
+      };
+
+      const studentResponse = await studentService.create(studentPayload);
+
+
+
+
+
+
     }
 
-    console.log('referalUser',referalUser);
 
-    const referalUserResponse = await userService.updateReferalUser(referalUser, userId);
-}
+    if (req.body.role === 'institute') {
 
-}
+      const institutePayload = {
+        instituteName: req.body.name,
+        email: req.body.email,
+        institutePhone: req.body.contact_number,
+        password: req.body.password,
+        _id: userId,
+        status: status,
+        country: req.body.country,
+        state: req.body.state,
+        city: req.body.city,
+      };
 
+      console.log('institutePayload', institutePayload);
 
-//save in student table
+      const instituteResponse = await instituteService.create(institutePayload);
 
-  const studentPayload = {
-    _id: userId,
-    name: req.body.name,
-    email: req.body.email,
-    phone: req.body.contact_number,
-    country: req.body.country,
-    state: req.body.state,
-    city: req.body.city,
-  };
-
-const studentResponse = await studentService.create(studentPayload);
-
-    
-
-
-
-
-}
-
-
-  if(req.body.role === 'institute'){
-    
-    const institutePayload = {
-      instituteName: req.body.name,
-      email: req.body.email,
-      institutePhone: req.body.contact_number,
-      password: req.body.password,
-      _id: userId,
-      status: status,
-      country: req.body.country,
-      state: req.body.state,
-      city: req.body.city,
-    };
-
-    console.log('institutePayload',institutePayload);
-
-    const instituteResponse = await instituteService.create(institutePayload);
-
-  }
+    }
 
     if (req.body.role === 'counsellor') {
 
@@ -433,15 +453,15 @@ const studentResponse = await studentService.create(studentPayload);
         state: req.body.state,
         city: req.body.city,
       };
-    
+
       const counselorResponse = await counselorService.create(counsellorpayload);
 
     }
 
-  
+
     return res.status(201).json({
       success: true,
-      message: "Successfully created a new "+req.body.role,
+      message: "Successfully created a new " + req.body.role,
       data: response,
       err: {},
     });
@@ -504,9 +524,9 @@ export const login = async (req, res) => {
       data: token,
       err: {},
     });
-    
+
   } catch (error) {
-    console.log('login error',error.message);
+    console.log('login error', error.message);
     return res.status(500).json({
       message: error.message,
       data: {},
@@ -545,7 +565,7 @@ export const logout = async (req, res) => {
     res.clearCookie("refreshToken");
     res.clearCookie("is_auth");
 
-  
+
     if (refreshToken) {
       await UserRefreshToken.findOneAndDelete({ token: refreshToken });
     }
@@ -569,7 +589,15 @@ export const changeUserPassword = async (req, res) => {
     if (password !== password_confirmation) {
       return res.status(400).json({ status: "failed", message: "New Password and Confirm New Password don't match" });
     }
-    // above part will be in middleware ^
+
+    // Password strength validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+    if (password.length < 8) {
+      return res.status(400).json({ status: "failed", message: "Password must be at least 8 characters long" });
+    }
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ status: "failed", message: "Password must contain an uppercase letter, a lowercase letter, and a number or special character" });
+    }
 
     // Update user's password
     await userService.changeUserPassword(req.user._id, password);
@@ -610,6 +638,16 @@ export const userPasswordReset = async (req, res) => {
     if (password !== password_confirmation) {
       return res.status(400).json({ status: "failed", message: "New Password and Confirm New Password don't match" });
     }
+
+    // Password strength validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+    if (password.length < 8) {
+      return res.status(400).json({ status: "failed", message: "Password must be at least 8 characters long" });
+    }
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ status: "failed", message: "Password must contain an uppercase letter, a lowercase letter, and a number or special character" });
+    }
+
     userService.userPasswordReset(id, token, password, password_confirmation);
     // Send success response
     res.status(200).json({ status: "success", message: "Password reset successfully" });
