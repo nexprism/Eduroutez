@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { applySoftDelete } from "../middlewares/softDelete.js"; 
+import { applySoftDelete } from "../middlewares/softDelete.js";
 const careerSchema = new mongoose.Schema(
   {
     title: {
@@ -29,6 +29,10 @@ const careerSchema = new mongoose.Schema(
       type: String,
       // required: true,
     },
+    stream: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Stream",
+    },
     jobRoles: {
       type: String,
       // required: true,
@@ -52,21 +56,21 @@ const careerSchema = new mongoose.Schema(
       default: 0,
     },
     reviews: [
-          {
-            studentId: {
-              type: mongoose.Schema.Types.ObjectId,
-              ref: "Student",
-            },
-            rating: {
-              type: Number,
-              // required: true,
-            },
-            comment: {
-              type: String,
-              // required: true,
-            }
-          },
-        ],
+      {
+        studentId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Student",
+        },
+        rating: {
+          type: Number,
+          // required: true,
+        },
+        comment: {
+          type: String,
+          // required: true,
+        }
+      },
+    ],
     instituteId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institute",
