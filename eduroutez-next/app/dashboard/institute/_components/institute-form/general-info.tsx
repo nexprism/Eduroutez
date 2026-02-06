@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import { Key } from '@/types/common';
 import { useState } from 'react';
 import CustomEditor from '@/components/custom-editor';
@@ -57,8 +57,8 @@ const formSchema = z.object({
   minFees: z.any().optional(),
   affiliation: z.any().optional(),
   highestPackage: z.any().optional(),
-  streams:z.any().optional(),
-  specialization:z.any().optional(),
+  streams: z.any().optional(),
+  specialization: z.any().optional(),
   state: z.any({
     required_error: 'Please select a state.'
   }),
@@ -100,33 +100,33 @@ const GeneralInfo = () => {
   const [previewLogoUrl, setPreviewLogoUrl] = React.useState<string | null>(
     null
   );
-    const [previewbrochure, setPreviewbrochure] = React.useState<string | null>(
-      null
-    );
+  const [previewbrochure, setPreviewbrochure] = React.useState<string | null>(
+    null
+  );
   const baseURL = process.env.NEXT_PUBLIC_NEW_IMAGES;
   ;
 
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
-interface State {
-  iso2: any;
-  id: string;
-  _id: string;
-  name: string;
-}
+  interface State {
+    iso2: any;
+    id: string;
+    _id: string;
+    name: string;
+  }
 
-interface City {
-  id: Key | null | undefined;
-  _id: string;
-  name: string;
-}
-interface Country {
+  interface City {
+    id: Key | null | undefined;
+    _id: string;
+    name: string;
+  }
+  interface Country {
     id: string;
     name: string;
     iso2: string;
   }
-  
+
   const [countries, setCountries] = useState<Country[]>([]);
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -134,8 +134,8 @@ interface Country {
   const [citiesLoaded, setCitiesLoaded] = useState(false);
   const [initialCountryName, setInitialCountryName] = useState("");
   const [initialStateName, setInitialStateName] = useState("");
-const [initialCityName, setInitialCityName] = useState("");
-    const fileInputBrochureRef = React.useRef<HTMLInputElement | null>(null);
+  const [initialCityName, setInitialCityName] = useState("");
+  const fileInputBrochureRef = React.useRef<HTMLInputElement | null>(null);
 
   const pathname = usePathname();
   const segments = pathname.split('/');
@@ -150,11 +150,12 @@ const [initialCityName, setInitialCityName] = useState("");
         const response = await axiosInstance.get(`${apiUrl}/streams`,
           {
             params: {
-              page: 0
+              page: 0,
+              limit: 200
             }
           }
         );
-        console.log('streams',response.data);
+        console.log('streams', response.data);
         setStreams(response.data?.data?.result || []);
       } catch (error) {
         console.error('Error fetching streams:', error);
@@ -222,22 +223,22 @@ const [initialCityName, setInitialCityName] = useState("");
       });
 
       // Update preview URLs with proper null handling
-      setPreviewThumbnailUrl(instituteData.thumbnailImage && instituteData.thumbnailImage !== "null" 
+      setPreviewThumbnailUrl(instituteData.thumbnailImage && instituteData.thumbnailImage !== "null"
         ? `${baseURL}/${instituteData.thumbnailImage}` : null);
-      setPreviewCoverUrl(instituteData.coverImage && instituteData.coverImage !== "null" 
+      setPreviewCoverUrl(instituteData.coverImage && instituteData.coverImage !== "null"
         ? `${baseURL}/${instituteData.coverImage}` : null);
-      setPreviewLogoUrl(instituteData.instituteLogo && instituteData.instituteLogo !== "null" 
+      setPreviewLogoUrl(instituteData.instituteLogo && instituteData.instituteLogo !== "null"
         ? `${baseURL}/${instituteData.instituteLogo}` : null);
-      setPreviewbrochure(instituteData.brochure && instituteData.brochure !== "null" 
+      setPreviewbrochure(instituteData.brochure && instituteData.brochure !== "null"
         ? `${baseURL}/${instituteData.brochure}` : null);
-      
+
       console.log('Form values after reset:', form.getValues());
     } catch (error) {
       console.error('Error fetching institute:', error);
       toast.error('Failed to load institute data');
     }
   };
-  
+
 
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -314,7 +315,7 @@ const [initialCityName, setInitialCityName] = useState("");
         formData.append('country[iso2]', selectedCountry.iso2);
       }
     }
-    
+
     if (values.state) {
       const selectedState = states.find(state => state.id.toString() === values.state.toString());
       if (selectedState) {
@@ -322,14 +323,14 @@ const [initialCityName, setInitialCityName] = useState("");
         formData.append('state[iso2]', selectedState.iso2);
       }
     }
-    
+
     if (values.city) {
       const selectedCity = cities.find(city => city.id.toString() === values.city.toString());
       if (selectedCity) {
         formData.append('city[name]', selectedCity.name);
       }
     }
-  
+
 
     mutate(formData);
   }
@@ -363,107 +364,107 @@ const [initialCityName, setInitialCityName] = useState("");
     }
   });
 
-   const handleBrochureChange = (e: React.ChangeEvent<HTMLInputElement>) => {  
-      const file = e.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPreviewbrochure(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-        form.setValue('brochure', file);
-      } else {
-        setPreviewbrochure(null);
-        form.setValue('brochure', undefined);
+  const handleBrochureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewbrochure(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      form.setValue('brochure', file);
+    } else {
+      setPreviewbrochure(null);
+      form.setValue('brochure', undefined);
+    }
+  };
+
+
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await axiosInstance.get(`${apiUrl}/countries`);
+        setCountries(res.data?.data || []);
+      } catch (err) {
+        console.error("Failed to fetch countries:", err);
       }
     };
 
+    fetchCountries();
+  }, [apiUrl]);
 
+  // Fetch States when the selected country changes
+  useEffect(() => {
+    const selectedCountryId = form.watch("country");
 
-    useEffect(() => {
-      const fetchCountries = async () => {
-        try {
-          const res = await axiosInstance.get(`${apiUrl}/countries`);
-          setCountries(res.data?.data || []);
-        } catch (err) {
-          console.error("Failed to fetch countries:", err);
+    if (!selectedCountryId || countries.length === 0) return;
+
+    console.log("Fetching states for country:", selectedCountryId);
+
+    const fetchStates = async () => {
+      try {
+        const selectedCountry = countries.find(
+          (country: any) => country.id.toString() === selectedCountryId.toString()
+        );
+
+        if (selectedCountry) {
+          const res = await axiosInstance.post(`${apiUrl}/states-by-country`, {
+            countryCode: selectedCountry.iso2,
+          });
+
+          setStates(res.data?.data || []);
+          setStatesLoaded(true);
+          form.setValue("state", ""); // Reset state when country changes
+          form.setValue("city", ""); // Reset city when country changes
         }
-      };
-  
-      fetchCountries();
-    }, [apiUrl]);
-  
-    // Fetch States when the selected country changes
-    useEffect(() => {
-      const selectedCountryId = form.watch("country");
-  
-      if (!selectedCountryId || countries.length === 0) return;
-  
-      console.log("Fetching states for country:", selectedCountryId);
-  
-      const fetchStates = async () => {
-        try {
-          const selectedCountry = countries.find(
-            (country:any) => country.id.toString() === selectedCountryId.toString()
-          );
-  
-          if (selectedCountry) {
-            const res = await axiosInstance.post(`${apiUrl}/states-by-country`, {
-              countryCode: selectedCountry.iso2,
-            });
-  
-            setStates(res.data?.data || []);
-            setStatesLoaded(true);
-            form.setValue("state", ""); // Reset state when country changes
-            form.setValue("city", ""); // Reset city when country changes
-          }
-        } catch (err) {
-          console.error("Failed to fetch states:", err);
-        }
-      };
-  
-      fetchStates();
-    }, [form.watch("country"), countries, apiUrl]);
-  
-    // Fetch Cities when the selected state changes
-    useEffect(() => {
-      const selectedStateId = form.watch("state");
-      const selectedCountryId = form.watch("country");
-  
-      if (!selectedStateId || !selectedCountryId) {
-        setCities([]);
-        setCitiesLoaded(false);
-        return;
+      } catch (err) {
+        console.error("Failed to fetch states:", err);
       }
-  
-      console.log("Fetching cities for state:", selectedStateId);
-  
-      const fetchCities = async () => {
-        try {
-          const selectedCountry = countries.find(
-            (country) => country.id.toString() === selectedCountryId.toString()
-          );
-          const selectedState = states.find(
-            (state) => state.id.toString() === selectedStateId.toString()
-          );
-  
-          if (selectedCountry && selectedState) {
-            const res = await axiosInstance.post(`${apiUrl}/cities-by-state`, {
-              countryCode: selectedCountry.iso2,
-              stateCode: selectedState.iso2,
-            });
-  
-            setCities(res.data?.data || []);
-            setCitiesLoaded(true);
-            form.setValue("city", ""); // Reset city when state changes
-          }
-        } catch (err) {
-          console.error("Failed to fetch cities:", err);
+    };
+
+    fetchStates();
+  }, [form.watch("country"), countries, apiUrl]);
+
+  // Fetch Cities when the selected state changes
+  useEffect(() => {
+    const selectedStateId = form.watch("state");
+    const selectedCountryId = form.watch("country");
+
+    if (!selectedStateId || !selectedCountryId) {
+      setCities([]);
+      setCitiesLoaded(false);
+      return;
+    }
+
+    console.log("Fetching cities for state:", selectedStateId);
+
+    const fetchCities = async () => {
+      try {
+        const selectedCountry = countries.find(
+          (country) => country.id.toString() === selectedCountryId.toString()
+        );
+        const selectedState = states.find(
+          (state) => state.id.toString() === selectedStateId.toString()
+        );
+
+        if (selectedCountry && selectedState) {
+          const res = await axiosInstance.post(`${apiUrl}/cities-by-state`, {
+            countryCode: selectedCountry.iso2,
+            stateCode: selectedState.iso2,
+          });
+
+          setCities(res.data?.data || []);
+          setCitiesLoaded(true);
+          form.setValue("city", ""); // Reset city when state changes
         }
-      };
-  
-      fetchCities();
-    }, [form.watch("state"), form.watch("country"), states, countries, apiUrl]);
+      } catch (err) {
+        console.error("Failed to fetch cities:", err);
+      }
+    };
+
+    fetchCities();
+  }, [form.watch("state"), form.watch("country"), states, countries, apiUrl]);
 
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -569,12 +570,12 @@ const [initialCityName, setInitialCityName] = useState("");
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                              if (Object.keys(errors).length > 0) {
-                                toast.error(
-                                  'Please correct the errors in the form before submitting.'
-                                );
-                              }
-                            })} className="space-y-8">
+            if (Object.keys(errors).length > 0) {
+              toast.error(
+                'Please correct the errors in the form before submitting.'
+              );
+            }
+          })} className="space-y-8">
             <FormField
               control={form.control}
               name="instituteName"
@@ -677,111 +678,111 @@ const [initialCityName, setInitialCityName] = useState("");
                   </FormItem>
                 )}
               />
-    
 
-  <FormField
-            control={form.control}
-            name="country"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Country</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-          
-                    field.onChange(value);
-                  }}
-                  value={field.value || ""}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Country">
-                        {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
-                      </SelectValue>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="max-h-60 overflow-y-auto">
-                    {countries.map((country) => (
-                      <SelectItem key={country.id} value={country.id}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          
-          
-                {/* State Select */}
-                <FormField
-                  control={form.control}
-                  name="state"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>State</FormLabel>
-                      <Select
-                  onValueChange={(value) => {
-          
-                    field.onChange(value);
-                  }}
-                  value={field.value || ""}
-                >
-                        <FormControl>
-                          <SelectTrigger>
+
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+
+                        field.onChange(value);
+                      }}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Country">
+                            {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {countries.map((country) => (
+                          <SelectItem key={country.id} value={country.id}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+
+
+              {/* State Select */}
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+
+                        field.onChange(value);
+                      }}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
                           <SelectValue placeholder="Select State">
-                          {states.find((c) => c.id == field.value)?.name || initialStateName || ""}
-                      </SelectValue>           
-                           </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-60 overflow-y-auto">
-                          {states.map((state) => (
-                            <SelectItem key={state.id} value={state.id}>
-                              {state.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-          
-                {/* City Select */}
-                <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <Select
-                  onValueChange={(value) => {
-          
-                    field.onChange(value);
-                  }}
-                  value={field.value || ""}
-                >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select City" >
+                            {states.find((c) => c.id == field.value)?.name || initialStateName || ""}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {states.map((state) => (
+                          <SelectItem key={state.id} value={state.id}>
+                            {state.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* City Select */}
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+
+                        field.onChange(value);
+                      }}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select City" >
                             {cities.find((c) => c.id == field.value)?.name || initialCityName || ""}
-                            </SelectValue>
-          
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-60 overflow-y-auto">
-                          {cities.map((city) => (
-                            <SelectItem key={city.id} value={city.id}>
-                              {city.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                          </SelectValue>
+
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {cities.map((city) => (
+                          <SelectItem key={city.id} value={city.id}>
+                            {city.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
 
               <FormField
@@ -838,114 +839,114 @@ const [initialCityName, setInitialCityName] = useState("");
               />
             </div>
             <FormField
-      control={form.control}
-      name="streams"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Streams</FormLabel>
-          <FormControl>
-            <div className="relative">
-              <Select
-                onValueChange={(value) => {
-                  const currentStreams = field.value || [];
-                  if (!currentStreams.includes(value)) {
-                    const newStreams = [...currentStreams, value];
-                    field.onChange(newStreams);
-                    setSelectedStreams(newStreams);
-                  }
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select streams" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60 overflow-y-auto">
-                  {streams.map((stream) => (
-                    <SelectItem
-                      key={stream.id}
-                      value={stream.name}
-                      disabled={selectedStreams.includes(stream.name)}
-                    >
-                      {stream.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {/* Selected streams display */}
-              <div className="mt-2 flex flex-wrap gap-2">
-                {selectedStreams.map((streamName) => (
-                  <div
-                    key={streamName}
-                    className="flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1"
-                  >
-                    <span>{streamName}</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newStreams = selectedStreams.filter(
-                          (s) => s !== streamName
-                        );
-                        setSelectedStreams(newStreams);
-                        field.onChange(newStreams);
-                      }}
-                      className="ml-1 text-red-500 hover:text-red-700"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-                <FormField
-                  control={form.control}
-                  name="specialization"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Specialization (comma separated)</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Add specializations like -> AI, ML, Data Science"
-                          {...field}
-                          onChange={(e) => field.onChange(e.target.value.split(',').map(item => item.trim()))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="examAccepted"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Exam Accepted</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter exams accepted" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              control={form.control}
+              name="streams"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Streams</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Select
+                        onValueChange={(value) => {
+                          const currentStreams = field.value || [];
+                          if (!currentStreams.includes(value)) {
+                            const newStreams = [...currentStreams, value];
+                            field.onChange(newStreams);
+                            setSelectedStreams(newStreams);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select streams" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {streams.map((stream) => (
+                            <SelectItem
+                              key={stream.id}
+                              value={stream.name}
+                              disabled={selectedStreams.includes(stream.name)}
+                            >
+                              {stream.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Selected streams display */}
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedStreams.map((streamName) => (
+                          <div
+                            key={streamName}
+                            className="flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1"
+                          >
+                            <span>{streamName}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newStreams = selectedStreams.filter(
+                                  (s) => s !== streamName
+                                );
+                                setSelectedStreams(newStreams);
+                                field.onChange(newStreams);
+                              }}
+                              className="ml-1 text-red-500 hover:text-red-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="specialization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Specialization (comma separated)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Add specializations like -> AI, ML, Data Science"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value.split(',').map(item => item.trim()))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="examAccepted"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Exam Accepted</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter exams accepted" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
 
-<FormField
-                control={form.control}
-                name="rank"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Rank</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter Rank" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="rank"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rank</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter Rank" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
 
             <FormField
@@ -1049,7 +1050,7 @@ const [initialCityName, setInitialCityName] = useState("");
                           ref={fileInputThumbnailRef} // Reference to reset input
                           className="hidden "
                         />
-      
+
                         {previewThumbnailUrl ? (
                           <div className="relative">
                             <Image
@@ -1101,7 +1102,7 @@ const [initialCityName, setInitialCityName] = useState("");
                         />
 
                         {previewCoverUrl ? (
-                            <div className="relative">
+                          <div className="relative">
                             <Image
                               src={previewCoverUrl}
                               alt="Preview"
@@ -1119,7 +1120,7 @@ const [initialCityName, setInitialCityName] = useState("");
                               <X className="h-4 w-4" />
                               <span className="sr-only">Remove image</span>
                             </Button>
-                            </div>
+                          </div>
                         ) : (
                           <div
                             onClick={triggerCoverFileInput}
@@ -1136,56 +1137,56 @@ const [initialCityName, setInitialCityName] = useState("");
               />
             </div>
 
-           <FormField
-                         control={form.control}
-                         name="brochure"
-                         render={({ field }) => (
-                           <FormItem>
-                             <FormLabel>Brochure (Recommended size: 1414px x 400px)</FormLabel>
-                             <FormControl>
-                               <div className="space-y-4">
-                                 <Input
-                                   type="file"
-                                   accept="image/png, image/jpeg, image/webp, application/pdf"
-                                   onChange={handleBrochureChange}
-                                   ref={fileInputBrochureRef} // Reference to reset input
-                                   className="hidden "
-                                 />
-           
-                                 {previewbrochure ? (
-                                   <div className="relative">
-                                     <Image
-                                       src={previewbrochure}
-                                       alt="Preview"
-                                       className="max-h-[200px] max-w-full rounded-md object-cover"
-                                       width={1200}
-                                       height={1200}
-                                     />
-                                     <Button
-                                       type="button"
-                                       variant="destructive"
-                                       size="icon"
-                                       className="absolute right-0 top-0 -mr-2 -mt-2"
-                                       onClick={removeBrochure}
-                                     >
-                                       <X className="h-4 w-4" />
-                                       <span className="sr-only">Remove image</span>
-                                     </Button>
-                                   </div>
-                                 ) : (
-                                   <div
-                                     onClick={triggerBrochureFileInput}
-                                     className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
-                                   >
-                                     <Plus className="text-grey-400 h-10 w-10" />
-                                   </div>
-                                 )}
-                               </div>
-                             </FormControl>
-                             <FormMessage />
-                           </FormItem>
-                         )}
-                       />
+            <FormField
+              control={form.control}
+              name="brochure"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Brochure (Recommended size: 1414px x 400px)</FormLabel>
+                  <FormControl>
+                    <div className="space-y-4">
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp, application/pdf"
+                        onChange={handleBrochureChange}
+                        ref={fileInputBrochureRef} // Reference to reset input
+                        className="hidden "
+                      />
+
+                      {previewbrochure ? (
+                        <div className="relative">
+                          <Image
+                            src={previewbrochure}
+                            alt="Preview"
+                            className="max-h-[200px] max-w-full rounded-md object-cover"
+                            width={1200}
+                            height={1200}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-0 top-0 -mr-2 -mt-2"
+                            onClick={removeBrochure}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove image</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={triggerBrochureFileInput}
+                          className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                        >
+                          <Plus className="text-grey-400 h-10 w-10" />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="flex justify-end">
               <Button type="submit">Save & Update</Button>

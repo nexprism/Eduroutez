@@ -15,7 +15,7 @@ class StreamService {
   }
   async getAll(query) {
     try {
-      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 100, filters = "{}", searchFields = "{}", sort = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -25,7 +25,12 @@ class StreamService {
       const parsedSort = JSON.parse(sort);
 
       // Build filter conditions for multiple fields
-    const filterConditions = { deletedAt: null };
+      const filterConditions = {
+        $or: [
+          { deletedAt: null },
+          { deletedAt: { $exists: false } }
+        ]
+      };
 
       for (const [key, value] of Object.entries(parsedFilters)) {
         filterConditions[key] = value;

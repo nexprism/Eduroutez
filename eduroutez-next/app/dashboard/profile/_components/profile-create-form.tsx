@@ -59,11 +59,11 @@ export const profileSchema = z.object({
   instituteEmail: z
     .string().min(1, { message: ' lastName must be at least 3 characters' }),
   contactno: z.coerce.number(),
-  language:z.string(),
-  ExperienceYear:z.string(),
+  language: z.string(),
+  ExperienceYear: z.string(),
   country: z.string().optional(),
   city: z.any(),
-  state:z.any(),
+  state: z.any(),
   gender: z.string(),
   dateOfBirth: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
     message: 'Start date should be in the format YYYY-MM-DD'
@@ -107,7 +107,7 @@ export const profileSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
-    about: z.string().optional(),
+  about: z.string().optional(),
   experiences: z.array(
     z.object({
       title: z.string().min(1, { message: 'Please enter title' }),
@@ -163,33 +163,33 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   >(null);
   const [data, setData] = useState({});
   const [isEdit, setIsEdit] = React.useState(!!initialData);
-  
+
   interface State {
     iso2: any;
     id: string;
     _id: string;
     name: string;
   }
-  
+
   interface City {
     id: any;
     _id: string;
     name: string;
   }
-  
+
   const [states, setStates] = React.useState<State[]>([]);
   const [cities, setCities] = React.useState<City[]>([]);
   const [countries, setCountries] = React.useState<any[]>([]);
-const [statesLoaded, setStatesLoaded] = useState(false);
+  const [statesLoaded, setStatesLoaded] = useState(false);
   const [citiesLoaded, setCitiesLoaded] = useState(false);
-   const [initialCountryName, setInitialCountryName] = useState("");
-   const [initialStateName, setInitialStateName] = useState("");
- const [initialCityName, setInitialCityName] = useState("");
+  const [initialCountryName, setInitialCountryName] = useState("");
+  const [initialStateName, setInitialStateName] = useState("");
+  const [initialCityName, setInitialCityName] = useState("");
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const IMAGE_URL = process.env.NEXT_PUBLIC_NEW_IMAGES;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-   const delta = currentStep - previousStep;
+  const delta = currentStep - previousStep;
 
   const defaultValues = {
     email: localStorage.getItem('email') || '',
@@ -224,49 +224,49 @@ const [statesLoaded, setStatesLoaded] = useState(false);
     if (counselorData && counselorData.data && counselorData.data.length > 0) {
       const counselor = counselorData.data[0];
       setIsEdit(true);
-      
+
       // Format date from ISO to YYYY-MM-DD
       const formatDate = (dateString: any) => {
         if (!dateString) return '';
         const date = new Date(dateString);
         return date.toISOString().split('T')[0];
       };
-      
+
       // Set selected location IDs
       if (counselor && counselor.country) {
         // Save the country name for display purposes
         setInitialCountryName(counselor.country.name);
-        
+
         // Set the ID in the form
         form.setValue("country", counselor.country.id);
       }
-    
+
       if (counselor && counselor.state) {
         // Save the state name for display purposes
         setInitialStateName(counselor.state.name);
-        
+
         // Set the ID in the form
         form.setValue("state", counselor.state.id);
       }
-    
+
       if (counselor && counselor.city) {
         // Save the city name for display purposes
         setInitialCityName(counselor.city.name);
-        
+
         // Set the ID in the form
         form.setValue("city", counselor.city.id);
       }
-    
-      
+
+
       // Format experiences dates
       const formattedExperiences = counselor.experiences.length > 0
         ? counselor.experiences.map((exp: any) => ({
-            ...exp,
-            startDate: formatDate(exp.startDate),
-            endDate: formatDate(exp.endDate)
-          }))
+          ...exp,
+          startDate: formatDate(exp.startDate),
+          endDate: formatDate(exp.endDate)
+        }))
         : [defaultValues.experiences[0]];
-      
+
       // Set image previews if available
       if (counselor.panCard) {
         console.log('panCard', counselor.panCard);
@@ -292,7 +292,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
 
         setPreviewProfilePhotoUrl(profilePhotoUrl);
       }
-      
+
       // Reset form with counselor data
       form.reset({
         firstname: counselor.firstname || '',
@@ -442,7 +442,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
           companyName: exp.companyName
         }))
       };
-  
+
       const formData = new FormData();
 
       // Add location data as objects, not IDs
@@ -453,7 +453,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
           formData.append('country[iso2]', selectedCountry.iso2);
         }
       }
-      
+
       if (values.state) {
         const selectedState = states.find(state => state.id.toString() === values.state.toString());
         if (selectedState) {
@@ -461,14 +461,14 @@ const [statesLoaded, setStatesLoaded] = useState(false);
           formData.append('state[iso2]', selectedState.iso2);
         }
       }
-      
+
       if (values.city) {
         const selectedCity = cities.find(city => city.id.toString() === values.city.toString());
         if (selectedCity) {
           formData.append('city[name]', selectedCity.name);
         }
       }
-  
+
       // Append each field from submissionData to FormData
       Object.entries(submissionData).forEach(([key, value]) => {
         if (key === 'experiences') {
@@ -486,7 +486,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
           formData.append(key, value as string);
         }
       });
-      
+
       // Append files - only append if new files are selected or if existing files are removed
       if (values.panCard instanceof File) {
         formData.append('panCard', values.panCard);
@@ -503,7 +503,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
       } else if (values.profilePhoto == null || values.profilePhoto === undefined) {
         formData.append('profilePhoto', '');
       }
-  
+
       console.log('Submitting form with location objects:', submissionData);
       mutate(formData);
     } catch (error) {
@@ -516,7 +516,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
   const { mutate } = useMutation({
     mutationFn: async (formData: any) => {
       const Institute = localStorage.getItem('instituteId') || '';
-      const endpoint = `${apiUrl}/counselor/${Institute}`; 
+      const endpoint = `${apiUrl}/counselor/${Institute}`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: 'patch',
@@ -547,7 +547,8 @@ const [statesLoaded, setStatesLoaded] = useState(false);
       try {
         const response = await axiosInstance.get(`${apiUrl}/streams`, {
           params: {
-            page: 0
+            page: 0,
+            limit: 200
           }
         });
         setStreamCategories(response.data.data.result || []);
@@ -573,7 +574,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
   }, [apiUrl]);
 
   // Helper functions for fetching states and cities
-  const fetchStatesForCountry = async (countryCode:any) => {
+  const fetchStatesForCountry = async (countryCode: any) => {
     try {
       const res = await axiosInstance.post(
         `${apiUrl}/states-by-country`,
@@ -586,7 +587,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
     }
   };
 
-  const fetchCitiesForState = async (countryCode:any, stateCode:any) => {
+  const fetchCitiesForState = async (countryCode: any, stateCode: any) => {
     try {
       const res = await axiosInstance.post(`${apiUrl}/cities-by-state`, {
         countryCode: countryCode,
@@ -798,31 +799,31 @@ const [statesLoaded, setStatesLoaded] = useState(false);
           onSubmit={form.handleSubmit(onSubmit, (errors) => {
             if (Object.keys(errors).length > 0) {
               const errorMessages: { [key: string]: string } = {
-          firstname: 'First name must be at least 3 characters.',
-          lastname: 'Last name must be at least 3 characters.',
-          email: 'Please enter a valid email address.',
-          contactno: 'Please enter a valid contact number.',
-          country: 'Please select a country.',
-          city: 'Please select a city.',
-          state: 'Please select a state.',
-          gender: 'Please select a gender.',
-          dateOfBirth: 'Date of birth should be in the format YYYY-MM-DD.',
-          language: 'Please select a language.',
-          ExperienceYear: 'Please enter your years of experience.',
-          category: 'Please select a category.',
-          instituteEmail: 'Please enter a valid institute email.',
-          panCard: 'Please upload a valid PAN card image.',
-          adharCard: 'Please upload a valid Aadhar card image.',
-          profilePhoto: 'Please upload a valid profile photo.',
-          bankName: 'Please enter your bank name.',
-          accountNumber: 'Please enter your account number.',
-          accountHolderName: 'Please enter the account holder name.',
-          ifscCode: 'Please enter a valid IFSC code.',
-          experiences: 'Please fill out all experience fields correctly.'
+                firstname: 'First name must be at least 3 characters.',
+                lastname: 'Last name must be at least 3 characters.',
+                email: 'Please enter a valid email address.',
+                contactno: 'Please enter a valid contact number.',
+                country: 'Please select a country.',
+                city: 'Please select a city.',
+                state: 'Please select a state.',
+                gender: 'Please select a gender.',
+                dateOfBirth: 'Date of birth should be in the format YYYY-MM-DD.',
+                language: 'Please select a language.',
+                ExperienceYear: 'Please enter your years of experience.',
+                category: 'Please select a category.',
+                instituteEmail: 'Please enter a valid institute email.',
+                panCard: 'Please upload a valid PAN card image.',
+                adharCard: 'Please upload a valid Aadhar card image.',
+                profilePhoto: 'Please upload a valid profile photo.',
+                bankName: 'Please enter your bank name.',
+                accountNumber: 'Please enter your account number.',
+                accountHolderName: 'Please enter the account holder name.',
+                ifscCode: 'Please enter a valid IFSC code.',
+                experiences: 'Please fill out all experience fields correctly.'
               };
               const errorMessage = Object.keys(errors)
-          .map((key) => errorMessages[key as keyof typeof errorMessages])
-          .join(', ');
+                .map((key) => errorMessages[key as keyof typeof errorMessages])
+                .join(', ');
               toast.error(`Please correct the errors in the form before submitting: ${errorMessage}`);
             }
           })}
@@ -910,7 +911,7 @@ const [statesLoaded, setStatesLoaded] = useState(false);
                     </FormItem>
                   )}
                 />
-              
+
 
 
                 <FormField
@@ -947,29 +948,29 @@ const [statesLoaded, setStatesLoaded] = useState(false);
                     </FormItem>
                   )}
                 />
-              
 
-              <FormField
-  control={form.control}
-  name="gender"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Gender</FormLabel>
-      <select
-        className="w-full rounded-md border border-input bg-background px-3 py-2"
-        disabled={loading}
-        onChange={(e) => field.onChange(e.target.value)}
-        value={field.value || ""}
-      >
-        <option value="" disabled>Select Gender</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-        <option value="other">Other</option>
-      </select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
+                      <select
+                        className="w-full rounded-md border border-input bg-background px-3 py-2"
+                        disabled={loading}
+                        onChange={(e) => field.onChange(e.target.value)}
+                        value={field.value || ""}
+                      >
+                        <option value="" disabled>Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
 
                 <FormField
@@ -986,197 +987,197 @@ const [statesLoaded, setStatesLoaded] = useState(false);
                   )}
                 />
 
-<FormField
-                      control={form.control}
-                      name="about"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>About</FormLabel>
+                <FormField
+                  control={form.control}
+                  name="about"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>About</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          disabled={loading}
+                          placeholder="Tell us about yourself (max 50 words)"
+                          {...field}
+                          onChange={(e) => {
+                            if (e.target.value.split(' ').length <= 50) {
+                              field.onChange(e);
+                            } else {
+                              toast.error('About section cannot exceed 50 words.');
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+
+
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+
+                          field.onChange(value);
+                        }}
+                        value={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Country">
+                              {console.log('fghjk', field.value)}
+                              {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {countries.map((country) => (
+                            <SelectItem key={country.id} value={country.id}>
+                              {country.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+
+
+                {/* State Select */}
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+
+                          field.onChange(value);
+                        }}
+                        value={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select State">
+                              {states.find((c) => c.id == field.value)?.name || initialStateName || ""}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {states.map((state) => (
+                            <SelectItem key={state.id} value={state.id}>
+                              {state.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* City Select */}
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+
+                          field.onChange(value);
+                        }}
+                        value={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select City" >
+                              {cities.find((c) => c.id == field.value)?.name || initialCityName || ""}
+                            </SelectValue>
+
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {cities.map((city) => (
+                            <SelectItem key={city.id} value={city.id}>
+                              {city.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+
+
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => {
+                    // Debug log
+                    console.log("Category field rendering with value:", field.value);
+
+                    // Always initialize the ref, never conditionally
+                    const initialValueRef = React.useRef(field.value);
+
+                    // Update ref if needed, but don't skip the hook
+                    React.useEffect(() => {
+                      // Store the initial non-empty value
+                      if (field.value && !initialValueRef.current) {
+                        initialValueRef.current = field.value;
+                      }
+
+                      // Restore from ref if needed
+                      if (!field.value && initialValueRef.current) {
+                        console.log("Restoring category value:", initialValueRef.current);
+                        field.onChange(initialValueRef.current);
+                      }
+                    }, [field.value, field.onChange]);
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select
+                          disabled={loading}
+                          onValueChange={field.onChange}
+                          value={field.value || initialValueRef.current || ""}
+                          defaultValue={field.value || initialValueRef.current || ""}
+                        >
                           <FormControl>
-                            <Input
-                              type="text"
-                              disabled={loading}
-                              placeholder="Tell us about yourself (max 50 words)"
-                              {...field}
-                              onChange={(e) => {
-                                if (e.target.value.split(' ').length <= 50) {
-                                  field.onChange(e);
-                                } else {
-                                  toast.error('About section cannot exceed 50 words.');
-                                }
-                              }}
-                            />
+                            <SelectTrigger>
+                              <SelectValue>
+                                {field.value || initialValueRef.current || "Select Category"}
+                              </SelectValue>
+                            </SelectTrigger>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-
-
-                     <FormField
-                                control={form.control}
-                                name="country"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Country</FormLabel>
-                                    <Select
-                                      onValueChange={(value) => {
-                              
-                                        field.onChange(value);
-                                      }}
-                                      value={field.value || ""}
-                                    >
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Select Country">
-                                            {console.log('fghjk',field.value)}
-                                            {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
-                                          </SelectValue>
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent className="max-h-60 overflow-y-auto">
-                                        {countries.map((country) => (
-                                          <SelectItem key={country.id} value={country.id}>
-                                            {country.name}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              
-                              
-                                    {/* State Select */}
-                                    <FormField
-                                      control={form.control}
-                                      name="state"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel>State</FormLabel>
-                                          <Select
-                                      onValueChange={(value) => {
-                              
-                                        field.onChange(value);
-                                      }}
-                                      value={field.value || ""}
-                                    >
-                                            <FormControl>
-                                              <SelectTrigger>
-                                              <SelectValue placeholder="Select State">
-                                              {states.find((c) => c.id == field.value)?.name || initialStateName || ""}
-                                          </SelectValue>           
-                                               </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent className="max-h-60 overflow-y-auto">
-                                              {states.map((state) => (
-                                                <SelectItem key={state.id} value={state.id}>
-                                                  {state.name}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                              
-                                    {/* City Select */}
-                                    <FormField
-                                      control={form.control}
-                                      name="city"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel>City</FormLabel>
-                                          <Select
-                                      onValueChange={(value) => {
-                              
-                                        field.onChange(value);
-                                      }}
-                                      value={field.value || ""}
-                                    >
-                                            <FormControl>
-                                              <SelectTrigger>
-                                                <SelectValue placeholder="Select City" >
-                                                {cities.find((c) => c.id == field.value)?.name || initialCityName || ""}
-                                                </SelectValue>
-                              
-                                              </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent className="max-h-60 overflow-y-auto">
-                                              {cities.map((city) => (
-                                                <SelectItem key={city.id} value={city.id}>
-                                                  {city.name}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                    
-
-
-                    <FormField
-  control={form.control}
-  name="category"
-  render={({ field }) => {
-    // Debug log
-    console.log("Category field rendering with value:", field.value);
-    
-    // Always initialize the ref, never conditionally
-    const initialValueRef = React.useRef(field.value);
-    
-    // Update ref if needed, but don't skip the hook
-    React.useEffect(() => {
-      // Store the initial non-empty value
-      if (field.value && !initialValueRef.current) {
-        initialValueRef.current = field.value;
-      }
-      
-      // Restore from ref if needed
-      if (!field.value && initialValueRef.current) {
-        console.log("Restoring category value:", initialValueRef.current);
-        field.onChange(initialValueRef.current);
-      }
-    }, [field.value, field.onChange]);
-    
-    return (
-      <FormItem>
-        <FormLabel>Category</FormLabel>
-        <Select
-          disabled={loading}
-          onValueChange={field.onChange}
-          value={field.value || initialValueRef.current || ""}
-          defaultValue={field.value || initialValueRef.current || ""}
-        >
-          <FormControl>
-            <SelectTrigger>
-              <SelectValue>
-                {field.value || initialValueRef.current || "Select Category"}
-              </SelectValue>
-            </SelectTrigger>
-          </FormControl>
-          <SelectContent className="max-h-60 overflow-y-auto">
-            {streamCategories?.map((category) => (
-              <SelectItem 
-                key={category?._id ?? ''} 
-                value={category?.name ?? ''}
-              >
-                {category?.name ?? 'Unknown'}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <FormMessage />
-      </FormItem>
-    );
-  }}
-/>
+                          <SelectContent className="max-h-60 overflow-y-auto">
+                            {streamCategories?.map((category) => (
+                              <SelectItem
+                                key={category?._id ?? ''}
+                                value={category?.name ?? ''}
+                              >
+                                {category?.name ?? 'Unknown'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
 
 
                 <FormField
@@ -1616,13 +1617,13 @@ const [statesLoaded, setStatesLoaded] = useState(false);
           )}
           {currentStep === 4 && (
             <div>
-                <div className="text-center">
+              <div className="text-center">
                 <h1 className="text-2xl font-bold">Profile Completed</h1>
                 <p className="mt-4 text-lg">Here is the summary of your profile:</p>
                 <pre className="mt-4 whitespace-pre-wrap bg-gray-100 p-4 rounded-md text-left">
                   {JSON.stringify(data, null, 2)}
                 </pre>
-                </div>
+              </div>
             </div>
           )}
           {currentStep === 4 && (

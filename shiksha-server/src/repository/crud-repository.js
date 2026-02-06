@@ -62,12 +62,12 @@ class CrudRepository {
       sortCon = Object.keys(sortCon).length === 0 ? { createdAt: -1 } : sortCon;
       console.log('Final Sort:', sortCon);
       console.log('Limit:', limitNum);
-      
+
       // Cap limit to prevent memory and timeout issues
-      const maxLimit = 100; // Reduced from 1000 to prevent timeouts
-      const safeLimit = Math.min(limitNum || 100, maxLimit);
+      const maxLimit = 500; // Increased to allow more items in dropdowns
+      const safeLimit = Math.min(limitNum || 200, maxLimit);
       const safePage = Math.max(pageNum || 1, 1);
-      
+
       // Build the query properly with timeout protection
       let query = this.model.find(filterCon)
         .sort(sortCon)

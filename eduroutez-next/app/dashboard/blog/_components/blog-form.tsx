@@ -49,7 +49,7 @@ const formSchema = z.object({
   stream: z
     .string()
     .min(1, { message: 'Stream is required.' }),
-    image: z
+  image: z
     .instanceof(File)
     .optional()
     .nullable()
@@ -133,10 +133,10 @@ export default function BlogForm() {
     formData.append('stream', values.stream);
     formData.append('description', values.description);
     formData.append('blogCreatedBy', instituteId);
-    if(instituteId) {
+    if (instituteId) {
       formData.append('instituteId', instituteId);
     }
-    
+
     if (values.image) {
       formData.append('images', values.image);
     }
@@ -168,11 +168,11 @@ export default function BlogForm() {
         ? 'Blog updated successfully'
         : 'Blog created successfully';
       toast.success(message);
-      
+
       form.reset();
       setPreviewImageUrl(null);
       setThumbnail(null);
-      
+
       if (message === "Blog updated successfully") {
         // Get the page number from localStorage that was set when navigating to the update page
         const lastPage = localStorage.getItem('lastBlogPage') || '1';
@@ -262,18 +262,19 @@ export default function BlogForm() {
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/blog-category?page=0`);
+      const response = await axiosInstance.get(`${apiUrl}/blog-category?page=0&limit=200`);
       return response.data.data.result;
-      
+
     }
   });
 
   const { data: streams } = useQuery({
     queryKey: ['streams'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/streams`,{
+      const response = await axiosInstance.get(`${apiUrl}/streams`, {
         params: {
-          page: 0
+          page: 0,
+          limit: 200
         }
       });
       return response.data.data.result;
@@ -292,7 +293,7 @@ export default function BlogForm() {
       if (blog.data.image) {
         setPreviewImageUrl(`${IMAGE_URL}/${blog.data.image}`);
       }
-      
+
       if (blog.data.thumbnail) {
         setThumbnail({
           preview: `${IMAGE_URL}/${blog.data.thumbnail}`,
@@ -478,7 +479,7 @@ export default function BlogForm() {
               )}
             />
 
-              <FormField
+            <FormField
               control={form.control}
               name="description"
               render={({ field }) => (

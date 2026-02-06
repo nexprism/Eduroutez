@@ -102,7 +102,8 @@ export default function CounselorForm() {
       try {
         const response = await axiosInstance.get(`${apiUrl}/streams`, {
           params: {
-            page: 0
+            page: 0,
+            limit: 200
           }
         });
         return response.data?.data?.result || [];

@@ -92,10 +92,10 @@ export default function CounselorForm() {
       image: undefined
     }
   });
-  
+
   const router = useRouter();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  
+
   const statuses = [
     { value: 'active', label: 'Active' },
     { value: 'inactive', label: 'Inactive' }
@@ -112,7 +112,7 @@ export default function CounselorForm() {
   const { data: streamsData } = useQuery({
     queryKey: ['streams'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/streams?page=0`);
+      const response = await axiosInstance.get(`${apiUrl}/streams?page=0&limit=200`);
       console.log('Streams API response:', response.data);
       return response.data;
     }
@@ -129,7 +129,7 @@ export default function CounselorForm() {
       } else if (Array.isArray(streamsData.data)) {
         streamsList = streamsData.data;
       }
-      
+
       console.log('Processed streams data:', streamsList);
       setStreams(streamsList);
     }
@@ -137,16 +137,16 @@ export default function CounselorForm() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log('Submitting form with values:', values);
-    
+
     // Create FormData to handle file upload
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('description', values.description);
-    
+
     if (values.status) formData.append('status', values.status);
     if (values.stream) formData.append('stream', values.stream);
     if (values.level) formData.append('level', values.level);
-    
+
     // Handle the image field
     if (values.image instanceof File) {
       formData.append('image', values.image);
@@ -154,7 +154,7 @@ export default function CounselorForm() {
       // If it's a string URL in edit mode, pass it as is
       formData.append('image', rawData.image);
     }
-    
+
     mutate(formData);
   }
 
@@ -183,7 +183,7 @@ export default function CounselorForm() {
       setImagePreview(null);
       router.push('/dashboard/manage-page');
     },
-    onError: (error:any) => {
+    onError: (error: any) => {
       console.error('Form submission error:', error);
       const errorMessage = error?.response?.data?.message || 'An error occurred';
       toast.error(errorMessage);
@@ -219,19 +219,19 @@ export default function CounselorForm() {
   React.useEffect(() => {
     if (isEdit && rawData && !pageDataLoaded) {
       console.log('Setting form values from raw data:', rawData);
-      
+
       // First set individual fields
       form.setValue('title', rawData.title || '');
       form.setValue('description', rawData.description || '');
       form.setValue('status', rawData.status || '');
       form.setValue('stream', rawData.stream || '');
       form.setValue('level', rawData.level || '');
-      
+
       // Set image preview if exists
       if (rawData.image) {
         setImagePreview(`${rawData.image}`);
       }
-      
+
       // Then force a re-render
       setTimeout(() => {
         setPageDataLoaded(true);
@@ -245,7 +245,7 @@ export default function CounselorForm() {
     if (file) {
       if (file.size <= 1024 * 1024 && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
         form.setValue('image', file);
-        
+
         // Create a preview URL
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -445,13 +445,13 @@ export default function CounselorForm() {
                               />
                             ) : (
                               <Image
-                              // Ensure proper URL construction with path joining
-                              src={`${IMAGE_URL}/${imagePreview.replace(/^\//, '')}`}
-                              alt="Preview"
-                              className="max-h-[400px] max-w-full rounded-md object-cover"
-                              width={1200}
-                              height={400}
-                            />
+                                // Ensure proper URL construction with path joining
+                                src={`${IMAGE_URL}/${imagePreview.replace(/^\//, '')}`}
+                                alt="Preview"
+                                className="max-h-[400px] max-w-full rounded-md object-cover"
+                                width={1200}
+                                height={400}
+                              />
                             )}
                             <Button
                               type="button"
