@@ -101,7 +101,9 @@ export default function InstituteCreateForm() {
       router.push('/dashboard/institute');
     },
     onError: (error) => {
-      toast.error('Something went wrong');
+      // Try to show specific error message from API response
+      const apiError = error?.response?.data?.error || error?.message || 'Something went wrong';
+      toast.error(apiError);
     }
   });
 

@@ -82,9 +82,12 @@ export const createCounselor = async (req, res) => {
 
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
+    // Handle duplicate email error from MongoDB
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
+      return res.status(400).json({ error: "Email already exists" });
+    }
     ErrorResponse.error = error;
     console.log(error.message);
-
     return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 };
