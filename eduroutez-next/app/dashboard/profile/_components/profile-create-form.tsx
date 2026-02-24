@@ -31,9 +31,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 // import { m } from 'framer-motion';
 import { AlertTriangleIcon, Trash, Trash2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import axiosInstance from '@/lib/axios';
 import * as z from 'zod';
@@ -111,25 +111,26 @@ export const profileSchema = z.object({
   experiences: z.array(
     z.object({
       title: z.string().min(1, { message: 'Please enter title' }),
-      employmentType: z
-        .string()
-        .min(1, { message: 'Please enter employment type' }),
+      employmentType: z.string().min(1, { message: 'Please enter employment type' }),
       location: z.string().optional(),
-      companyName: z
-        .string()
-        .min(3, { message: 'Product Name must be at least 3 characters' }),
+      companyName: z.string().min(3, { message: 'Product Name must be at least 3 characters' }),
       description: z.string().optional(),
-      startDate: z
-        .string()
-        .refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
-          message: 'Start date should be in the format YYYY-MM-DD'
-        }),
-      endDate: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
-        message: 'End date should be in the format YYYY-MM-DD'
-      })
+      startDate: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
+        message: 'Start date should be in the format YYYY-MM-DD'
+      }),
+      endDate: z.string().optional(),
+      isCurrentlyWorking: z.boolean()
     })
+  ).refine(
+    (exps) => exps.every(
+      (exp) => exp.isCurrentlyWorking || (!!exp.endDate && /^\d{4}-\d{2}-\d{2}$/.test(exp.endDate))
+    ),
+    {
+      message: 'End date is required and must be in YYYY-MM-DD format if not currently working',
+      path: ['experiences'],
+    }
   )
-});
+})
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
@@ -140,6 +141,25 @@ interface ProfileFormType {
 const ProfileCreateForm: React.FC<ProfileFormType> = ({
   initialData
 }) => {
+  const counselorId = typeof window !== 'undefined' ? localStorage.getItem('instituteId') : null;
+
+  // Fetch the logged-in counsellor's own profile
+  const { data: counselorQueryData, isLoading: isCounselorLoading } = useQuery({
+    queryKey: ['counselor-profile', counselorId],
+    queryFn: async () => {
+      if (!counselorId) return null;
+      const response = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/counselor-by-id/${counselorId}`);
+      return response.data?.data ?? null;
+    },
+    enabled: !!counselorId
+  });
+
+  // Memoize so we don't create a new object reference on every render
+  const counselorData = useMemo(
+    () => (counselorQueryData ? { data: [counselorQueryData] } : null),
+    [counselorQueryData]
+  );
+
   const [streamCategories, setStreamCategories] = useState<any[]>([]);
   const [, setOpen] = useState(false);
   const [loading] = useState(false);
@@ -201,7 +221,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         location: '',
         endDate: '',
         description: '',
-        companyName: ''
+        companyName: '',
+        isCurrentlyWorking: false
       }
     ],
     instituteEmail: 'N/A',
@@ -209,16 +230,12 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     accountHolderName: '',
   };
 
-  // Query to fetch counselor data
-  const { data: counselorData, isLoading: isCounselorLoading } = useQuery({
-    queryKey: ['counselor'],
-    queryFn: async () => {
-      const email = localStorage.getItem('email');
-      const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`);
-      return response.data;
-    },
+  // ── form must be declared BEFORE the useEffect that uses it ──
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
+    defaultValues,
+    mode: 'onChange'
   });
-
 
   useEffect(() => {
     if (counselorData && counselorData.data && counselorData.data.length > 0) {
@@ -318,16 +335,15 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     }
   }, [counselorData]);
 
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileSchema),
-    defaultValues,
-    mode: 'onChange'
-  });
-
   const {
     control,
     formState: { errors }
   } = form;
+
+  // Stable watched values – use useWatch so dependency arrays don't cause infinite loops
+  const watchedCountry = useWatch({ control, name: 'country' });
+  const watchedState = useWatch({ control, name: 'state' });
+  const watchedIsCurrentlyWorking = useWatch({ control, name: 'experiences' });
 
   const { append, remove, fields } = useFieldArray({
     control,
@@ -365,14 +381,17 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       id: 'Step 2',
       name: 'Professional Information',
       fields: fields
-        ?.map((_, index) => [
-          `experiences.${index}.title`,
-          `experiences.${index}.companyName`,
-          `experiences.${index}.startDate`,
-          `experiences.${index}.endDate`,
-          `experiences.${index}.location`
-          // Add other field names as needed
-        ])
+        ?.map((_, index) => {
+          const isWorking = form.getValues(`experiences.${index}.isCurrentlyWorking`);
+          return [
+            `experiences.${index}.title`,
+            `experiences.${index}.companyName`,
+            `experiences.${index}.startDate`,
+            // Only include endDate in validation when NOT currently working
+            ...(!isWorking ? [`experiences.${index}.endDate`] : []),
+            `experiences.${index}.location`
+          ];
+        })
         .flat()
     },
     {
@@ -396,6 +415,24 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     });
 
     if (!output) return;
+
+    // Step 3 (index 2) = Upload Documents – require panCard and adharCard
+    if (currentStep === 2) {
+      const panCardValue = form.getValues('panCard');
+      const adharCardValue = form.getValues('adharCard');
+
+      const hasPanCard = panCardValue instanceof File || !!previewPanCardUrl;
+      const hasAdharCard = adharCardValue instanceof File || !!previewAdharCardUrl;
+
+      const missing: string[] = [];
+      if (!hasPanCard) missing.push('PAN Card');
+      if (!hasAdharCard) missing.push('Aadhaar Card');
+
+      if (missing.length > 0) {
+        toast.error(`Please upload the following before continuing: ${missing.join(', ')}`);
+        return;
+      }
+    }
 
     if (currentStep < steps.length - 1) {
       if (currentStep === steps.length - 2) {
@@ -436,10 +473,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
           title: exp.title,
           employmentType: exp.employmentType,
           startDate: exp.startDate,
-          endDate: exp.endDate,
+          endDate: exp.isCurrentlyWorking ? '' : (exp.endDate || ''),
           location: exp.location || '',
           description: exp.description || '',
-          companyName: exp.companyName
+          companyName: exp.companyName,
+          isCurrentlyWorking: exp.isCurrentlyWorking
         }))
       };
 
@@ -475,7 +513,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
           // Handle experiences array
           submissionData.experiences.forEach((exp: any, index: number) => {
             Object.entries(exp).forEach(([expKey, expValue]) => {
-              formData.append(`experiences[${index}][${expKey}]`, expValue as string);
+              // Serialize boolean values as strings for FormData
+              formData.append(`experiences[${index}][${expKey}]`, String(expValue ?? ''));
             });
           });
         } else if (key === 'country' || key === 'state' || key === 'city') {
@@ -602,14 +641,12 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
 
   // Watch for country changes to load states
   useEffect(() => {
-    const countryValue = form.watch("country");
-
-    if (!countryValue || countries.length === 0) return;
+    if (!watchedCountry || countries.length === 0) return;
 
     const fetchStates = async () => {
       try {
         const selectedCountry = countries.find(
-          (country) => country.id.toString() === countryValue.toString()
+          (country) => country.id.toString() === watchedCountry.toString()
         );
 
         if (selectedCountry) {
@@ -621,19 +658,16 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     };
 
     fetchStates();
-  }, [form.watch("country"), countries, apiUrl]);
+  }, [watchedCountry, countries, apiUrl]);
 
   // Watch for state changes to load cities
   useEffect(() => {
     const fetchCities = async () => {
-      const selectedStateId = form.watch("state");
-      const selectedCountryId = form.watch("country");
-
-      if (!selectedStateId || !selectedCountryId) return;
+      if (!watchedState || !watchedCountry) return;
 
       try {
-        const selectedCountry = countries.find(country => country.id.toString() === selectedCountryId.toString());
-        const selectedState = states.find(state => state.id.toString() === selectedStateId.toString());
+        const selectedCountry = countries.find(country => country.id.toString() === watchedCountry.toString());
+        const selectedState = states.find(state => state.id.toString() === watchedState.toString());
 
         if (selectedCountry && selectedState) {
           fetchCitiesForState(selectedCountry.iso2, selectedState.iso2);
@@ -646,10 +680,10 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     setCities([]); // Clear previous cities when state changes
     setCitiesLoaded(false); // Reset city loading state
 
-    if (states.length > 0 && form.watch("state")) {
+    if (states.length > 0 && watchedState) {
       fetchCities();
     }
-  }, [form.watch("state"), form.watch("country"), states, countries, apiUrl]);
+  }, [watchedState, watchedCountry, states, countries, apiUrl]);
 
   const handlePanCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1125,58 +1159,35 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                 <FormField
                   control={form.control}
                   name="category"
-                  render={({ field }) => {
-                    // Debug log
-                    console.log("Category field rendering with value:", field.value);
-
-                    // Always initialize the ref, never conditionally
-                    const initialValueRef = React.useRef(field.value);
-
-                    // Update ref if needed, but don't skip the hook
-                    React.useEffect(() => {
-                      // Store the initial non-empty value
-                      if (field.value && !initialValueRef.current) {
-                        initialValueRef.current = field.value;
-                      }
-
-                      // Restore from ref if needed
-                      if (!field.value && initialValueRef.current) {
-                        console.log("Restoring category value:", initialValueRef.current);
-                        field.onChange(initialValueRef.current);
-                      }
-                    }, [field.value, field.onChange]);
-
-                    return (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select
-                          disabled={loading}
-                          onValueChange={field.onChange}
-                          value={field.value || initialValueRef.current || ""}
-                          defaultValue={field.value || initialValueRef.current || ""}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue>
-                                {field.value || initialValueRef.current || "Select Category"}
-                              </SelectValue>
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="max-h-60 overflow-y-auto">
-                            {streamCategories?.map((category) => (
-                              <SelectItem
-                                key={category?._id ?? ''}
-                                value={category?.name ?? ''}
-                              >
-                                {category?.name ?? 'Unknown'}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select
+                        disabled={loading}
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Category">
+                              {field.value || "Select Category"}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-60 overflow-y-auto">
+                          {streamCategories?.map((category) => (
+                            <SelectItem
+                              key={category?._id ?? ''}
+                              value={category?.name ?? ''}
+                            >
+                              {category?.name ?? 'Unknown'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
 
 
@@ -1247,6 +1258,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                                   <Input
                                     type="text"
                                     disabled={loading}
+                                    placeholder="e.g. Senior Counselor"
                                     {...field}
                                   />
                                 </FormControl>
@@ -1259,11 +1271,12 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                             name={`experiences.${index}.companyName`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Company Name</FormLabel>
+                                <FormLabel>Company / Organisation Name</FormLabel>
                                 <FormControl>
                                   <Input
                                     type="text"
                                     disabled={loading}
+                                    placeholder="e.g. ABC Institute"
                                     {...field}
                                   />
                                 </FormControl>
@@ -1322,23 +1335,44 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                               </FormItem>
                             )}
                           />
+                          {/* Currently Working Checkbox */}
                           <FormField
                             control={form.control}
-                            name={`experiences.${index}.endDate`}
+                            name={`experiences.${index}.isCurrentlyWorking`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>End date</FormLabel>
+                                <FormLabel>Currently Working</FormLabel>
                                 <FormControl>
-                                  <Input
-                                    type="date"
-                                    disabled={loading}
-                                    {...field}
+                                  <input
+                                    type="checkbox"
+                                    checked={field.value}
+                                    onChange={e => field.onChange(e.target.checked)}
                                   />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
+                          {/* End Date only if not currently working */}
+                          {!watchedIsCurrentlyWorking?.[index]?.isCurrentlyWorking && (
+                            <FormField
+                              control={form.control}
+                              name={`experiences.${index}.endDate`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>End date</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="date"
+                                      disabled={loading}
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
 
                           <FormField
                             control={form.control}
@@ -1376,7 +1410,8 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         startDate: '',
                         endDate: '',
                         location: '',
-                        description: ''
+                        description: '',
+                        isCurrentlyWorking: false
                       })
                     }
                   >

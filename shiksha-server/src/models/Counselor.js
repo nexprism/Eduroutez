@@ -169,29 +169,28 @@ const counselorSchema = new mongoose.Schema(
       {
         title: {
           type: String,
-          
         },
         employmentType: {
           type: String,
-          
         },
         companyName: {
           type: String,
-          
         },
         location: {
           type: String,
-          
         },
         locationType: {
           type: String,
         },
         startDate: {
           type: Date,
-          
         },
         endDate: {
           type: Date,
+        },
+        isCurrentlyWorking: {
+          type: Boolean,
+          default: false,
         },
         description: {
           type: String,

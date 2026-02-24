@@ -40,10 +40,10 @@ export const createCounselor = async (req, res) => {
     let counselorpayload = { ...payload };
 
     if (req.body.password) {
-        const emailExists = await userService.getUserByEmail(req.body.email);
-        if (emailExists) {
-          return res.status(400).json({ error: "Email already exists" });
-        }
+      const emailExists = await userService.getUserByEmail(req.body.email);
+      if (emailExists) {
+        return res.status(400).json({ error: "Email already exists" });
+      }
       const userPayload = {
         name: `${req.body.firstname} ${req.body.lastname}`,
         email: req.body.email,
@@ -57,24 +57,24 @@ export const createCounselor = async (req, res) => {
       const userId = userResponse.user._id;
 
 
-        counselorpayload = {
-          ...payload,
-          _id: userId,
-        };
+      counselorpayload = {
+        ...payload,
+        _id: userId,
+      };
 
-      }
+    }
 
 
-      // counselorpayload = {
-      //   ...payload,
-      //   userId: userId,
-      // };
+    // counselorpayload = {
+    //   ...payload,
+    //   userId: userId,
+    // };
 
-      
-      const response = await counselorService.create(counselorpayload);
-      //if password get from body then add it payload and save in user model
 
-      // const user = await counselorService.make(req.body.email, payload);
+    const response = await counselorService.create(counselorpayload);
+    //if password get from body then add it payload and save in user model
+
+    // const user = await counselorService.make(req.body.email, payload);
 
 
     SuccessResponse.data = response;
@@ -100,7 +100,7 @@ export const createCounselor = async (req, res) => {
 
 
 //getCouselorsByInstitute
-export const getCounselorsByInstitute = async (req, res) => { 
+export const getCounselorsByInstitute = async (req, res) => {
   try {
     const instituteId = req.params.institute;
     console.log("InstituteId:", instituteId);
@@ -124,7 +124,7 @@ export const getCounselorsByInstitute = async (req, res) => {
     console.error("Error in getCounselorsByInstitute:", error.message);
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
-  } 
+  }
 };
 
 
@@ -179,7 +179,7 @@ export const updateCounselor = async (req, res) => {
       });
     });
 
-    
+
 
     const { id } = req.params;
     const payload = { ...req.body };
@@ -200,6 +200,18 @@ export const updateCounselor = async (req, res) => {
       }
     }
 
+    // Normalize experiences array: convert isCurrentlyWorking from string to boolean
+    if (payload.experiences && Array.isArray(payload.experiences)) {
+      payload.experiences = payload.experiences.map((exp) => ({
+        ...exp,
+        isCurrentlyWorking: exp.isCurrentlyWorking === 'true' || exp.isCurrentlyWorking === true,
+        // Clear endDate if currently working
+        endDate: (exp.isCurrentlyWorking === 'true' || exp.isCurrentlyWorking === true)
+          ? null
+          : exp.endDate || null,
+      }));
+    }
+
     console.log("update counselor Payload:", payload);
 
     const response = await counselorService.update(id, payload);
@@ -216,18 +228,18 @@ export const updateCounselor = async (req, res) => {
 
 //getCounselorById
 export const getCounselorById = async (req, res) => {
-    try {
-      console.log("Request:", req.params.id);
-      const response = await counselorService.getById(req.params.id);
-      console.log("Response:", response);
-      SuccessResponse.data = response;
-      SuccessResponse.message = "Successfully fetched the counselor";
-      return res.status(StatusCodes.OK).json(SuccessResponse);
-    } catch (error) {
-      conosoel.error("Error in getCounselor:", error.message);
-      ErrorResponse.error = error;
-      return res.status(error.statusCode).json(ErrorResponse);
-    }
+  try {
+    console.log("Request:", req.params.id);
+    const response = await counselorService.getById(req.params.id);
+    console.log("Response:", response);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched the counselor";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    conosoel.error("Error in getCounselor:", error.message);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
 };
 
 //getCounselorsByCategory
@@ -288,9 +300,9 @@ export const bookSlots = async (req, res) => {
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully booked the slot";
     return res.status(200).json(SuccessResponse);
-    
+
   } catch (error) {
-    console.log('error',error.message);
+    console.log('error', error.message);
     ErrorResponse.error = error.message;
     return res.status(500).json(ErrorResponse);
   }
@@ -303,7 +315,7 @@ export const markSlot = async (req, res) => {
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully booked the slot";
     return res.status(200).json(SuccessResponse);
-    
+
   } catch (error) {
     ErrorResponse.error = error;
     return res.status(500).json(ErrorResponse);
