@@ -862,7 +862,11 @@ const [initialCityName, setInitialCityName] = useState("");
                                  <SelectValue placeholder="Select streams" />
                                </SelectTrigger>
                                <SelectContent className="max-h-60 overflow-y-auto">
-                                 {streams.map((stream) => (
+                                 {streams.concat([
+                                   { id: 'govt-exams', name: 'Government Exams' },
+                                   { id: 'animation', name: 'Animation' },
+                                   { id: 'vfx', name: 'VFX' }
+                                 ]).map((stream) => (
                                    <SelectItem
                                      key={stream.id}
                                      value={stream.name}

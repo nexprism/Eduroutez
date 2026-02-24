@@ -1242,7 +1242,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                             name={`experiences.${index}.title`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Job title</FormLabel>
+                                <FormLabel>Job Designation</FormLabel>
                                 <FormControl>
                                   <Input
                                     type="text"
