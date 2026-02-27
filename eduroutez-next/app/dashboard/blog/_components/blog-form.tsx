@@ -121,6 +121,7 @@ export default function BlogForm() {
   });
 
   function onSubmit(values: FormValues) {
+    console.log('Form values:', values);
     const instituteId = localStorage.getItem('instituteId');
     if (!instituteId) {
       toast.error('Institute ID not found');
