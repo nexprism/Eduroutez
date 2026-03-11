@@ -538,7 +538,17 @@ export const login = async (req, res) => {
 
 export const userProfile = async (req, res) => {
   try {
-    const user = req.user;
+    let user = req.user.toObject ? req.user.toObject() : req.user;
+
+    if (user.role === 'counsellor') {
+      const counselor = await counselorService.counselorRepository.getByid(user._id);
+      if (counselor) {
+        user.verificationStatus = counselor.verificationStatus;
+        user.isVerified = counselor.isVerified;
+        user.verifiedBadge = counselor.verifiedBadge;
+        user.certificateUrl = counselor.certificateUrl;
+      }
+    }
 
     return res.status(200).json({
       success: true,

@@ -24,12 +24,12 @@ class CounselorRepository extends CrudRepository {
 
     return counselor;
   }
-  
+
   async get(email) {
     try {
-      console.log('counsellor email',email);
+      console.log('counsellor email', email);
       const result = await this.model.find({ email: email });
-      console.log('counsellor result',result)
+      console.log('counsellor result', result)
       return result;
     } catch (error) {
       throw error;
@@ -37,12 +37,12 @@ class CounselorRepository extends CrudRepository {
   }
 
   async getByid(id) {
-    console.log('result',id);
+    console.log('result', id);
     try {
       const result = await this.model.findOne({ _id: id });
       return result;
     } catch (error) {
-      console.log('error',error.message);
+      console.log('error', error.message);
     }
   }
 
@@ -60,7 +60,7 @@ class CounselorRepository extends CrudRepository {
   async getByEmail(email) {
     try {
       const result = await Counselor.findOne({ email });
-      console.log('result',result);
+      console.log('result', result);
       return result;
     } catch (error) {
       throw error;
@@ -80,7 +80,7 @@ class CounselorRepository extends CrudRepository {
 
   async book(id, studentData) {
     try {
-      
+
       const counselor = await this.model.findOne({ _id: id });
 
       const slot = await ScheduleSlot.findOne({ date: studentData.date, slot: studentData.slot, status: "scheduled" });
@@ -108,7 +108,7 @@ class CounselorRepository extends CrudRepository {
       commissionrate = user.commission / 100;
 
       var commission = totalamount * commissionrate;
-      
+
 
       if (user) {
         // If user exists, update the existing entry
@@ -129,9 +129,9 @@ class CounselorRepository extends CrudRepository {
         amount: commission,
         remarks: "Counselling fee of slot " + studentData.slot + " booked by " + student.name + " On " + studentData.date,
         status: "COMPLETED",
-        paymentId: studentData.paymentId, 
+        paymentId: studentData.paymentId,
       });
-  
+
       return newSlot; // Return the updated document
     } catch (error) {
       console.error("Error in book function:", error.message);
@@ -146,27 +146,32 @@ class CounselorRepository extends CrudRepository {
 
       // First check if counselor exists in User table
       const user = await User.findOne({ _id: id });
-      console.log('user', user);
       if (user) {
-        // If user exists, update the existing entry
-        user.name = data.firstname + ' ' + data.lastname;
-        user.email = data.email;
-        user.contact_number = data.contactno; 
-        user.country = data.country;
-        user.state = data.state;
-        user.city = data.city;
+        // Only update fields if they are provided
+        if (data.firstname || data.lastname) {
+          user.name = (data.firstname || user.name?.split(' ')[0] || '') + ' ' + (data.lastname || user.name?.split(' ')[1] || '');
+        }
+        if (data.email) user.email = data.email;
+        if (data.contactno) user.contact_number = data.contactno;
+        if (data.country) user.country = data.country;
+        if (data.state) user.state = data.state;
+        if (data.city) user.city = data.city;
 
         await user.save();
-        
       }
-  
+
       // Check if counselor already exists in Counselor table
       let counselor = await this.model.findOne({ _id: id });
-  
+
       if (!counselor) {
-        // If counselor doesn't exist, create new entry
+        // If counselor doesn't exist, create new entry using User data as base
+        const user = await User.findOne({ _id: id });
         counselor = await this.model.create({
-          _id: id,  // Use same ID as user table
+          _id: id,
+          firstname: user?.name?.split(' ')[0] || 'Counselor',
+          lastname: user?.name?.split(' ')[1] || '',
+          email: user?.email || '',
+          contactno: user?.contact_number || '',
           ...data
         });
       } else {
@@ -177,9 +182,9 @@ class CounselorRepository extends CrudRepository {
           { new: true }
         );
       }
-  
+
       return counselor;
-  
+
     } catch (error) {
       console.log('error', error.message);
       throw error;
@@ -189,41 +194,41 @@ class CounselorRepository extends CrudRepository {
   async mark(data) {
     try {
       const { email, studentEmail } = data;
-  
+
       // Find the counselor and ensure the student exists
       const counselor = await this.model.findOne({ email });
       if (!counselor) {
         throw new Error('Counselor with the given email not found');
       }
-  
+
       // Find the index of the student in the students array
       const studentIndex = counselor.students.findIndex(student => student.studentEmail === studentEmail);
       if (studentIndex === -1) {
         throw new Error('Student with the given email not found');
       }
-  
+
       // Toggle the 'completed' field for the student
       const student = counselor.students[studentIndex];
       student.completed = !student.completed;
-  
+
       // Update the specific student in the students array
       const result = await this.model.findOneAndUpdate(
         { email, "students.studentEmail": studentEmail },
         { $set: { "students.$.completed": student.completed } }, // Update only the matched student's `completed` field
         { new: true } // Return the updated document
       );
-  
+
       if (!result) {
         throw new Error('Failed to update the student status');
       }
-  
+
       return result; // Return the updated counselor document
     } catch (error) {
       console.error("Error in mark function:", error);
       throw error;
     }
   }
-  
+
 }
 
 

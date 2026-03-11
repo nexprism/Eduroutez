@@ -14,7 +14,7 @@ class CounselorTestService {
     // Counselor: Start process / Record Payment
     async recordPayment(counselorId, paymentDetails) {
         try {
-            const updatedCounselor = await this.counselorRepository.update(counselorId, {
+            const updatedCounselor = await this.counselorRepository.updateCounsellor(counselorId, {
                 verificationStatus: "test_pending",
             });
             return updatedCounselor;
@@ -90,10 +90,13 @@ class CounselorTestService {
             });
 
             // Update Counselor status
-            await this.counselorRepository.update(counselorId, {
+            // We need to make sure we don't hit validation errors if creating a new counselor
+            const counselorUpdateData = {
                 verificationStatus: "verification_in_progress",
                 testResult: testResult._id,
-            });
+            };
+
+            await this.counselorRepository.updateCounsellor(counselorId, counselorUpdateData);
 
             return testResult;
         } catch (error) {
@@ -119,7 +122,7 @@ class CounselorTestService {
     // Admin: Verify Counselor
     async verifyCounselor(counselorId) {
         try {
-            const counselor = await this.counselorRepository.getById(counselorId);
+            const counselor = await this.counselorRepository.getByid(counselorId);
             if (!counselor) {
                 throw new AppError("Counselor not found", StatusCodes.NOT_FOUND);
             }
@@ -127,13 +130,13 @@ class CounselorTestService {
             // Automatically generate certificate (using placeholder for now)
             const certificateUrl = `https://eduroutez.com/certificates/counselor_${counselorId}.pdf`;
 
-            const updatedCounselor = await this.counselorRepository.update(counselorId, {
+            console.log("Verifying counselor:", counselorId);
+            const updatedCounselor = await this.counselorRepository.updateCounsellor(counselorId, {
                 verificationStatus: "verified",
                 isVerified: true,
                 verifiedBadge: true,
                 certificateUrl,
             });
-
             return updatedCounselor;
         } catch (error) {
             throw error;

@@ -1,5 +1,5 @@
 import { ServerConfig } from "../config/index.js";
-import { EmailVerificationRepository, UserRepository } from "../repository/index.js";
+import { EmailVerificationRepository, UserRepository, CounselorRepository } from "../repository/index.js";
 import { sendEmail } from "../utils/Email/email.js";
 import { Token } from "../utils/index.js";
 import bcrypt from "bcrypt";
@@ -12,6 +12,7 @@ class UserService {
   constructor() {
     this.userRepository = new UserRepository();
     this.emailVerificationRepository = new EmailVerificationRepository();
+    this.counselorRepository = new CounselorRepository();
   }
 
   hashPassword(password) {
@@ -35,12 +36,12 @@ class UserService {
   //getStatesCities
   async getStatesCities(query) {
     try {
-      
+
       //get state cities with search query
       const { search } = query;
       const states = await this.userRepository.getStatesCities(search);
       return states;
-      
+
     } catch (error) {
       throw error;
     }
@@ -76,22 +77,35 @@ class UserService {
   //getbyid
   async getUserById(id) {
     try {
-      console.log('id',id);
+      console.log('id', id);
       const user = await this.userRepository.getById(id);
-      
-      return user;
+      if (!user) return null;
+
+      let userObj = user.toObject ? user.toObject() : user;
+
+      if (userObj.role === 'counsellor') {
+        const counselor = await this.counselorRepository.getByid(userObj._id);
+        if (counselor) {
+          userObj.verificationStatus = counselor.verificationStatus;
+          userObj.isVerified = counselor.isVerified;
+          userObj.verifiedBadge = counselor.verifiedBadge;
+          userObj.certificateUrl = counselor.certificateUrl;
+        }
+      }
+
+      return userObj;
     } catch (error) {
       throw error;
     }
   }
-  
+
 
   async signup(data, res) {
     try {
-      console.log('data',data)
+      console.log('data', data)
       data.password = this.hashPassword(data.password);
       const user = await this.userRepository.create(data);
-      console.log('user',user)
+      console.log('user', user)
       const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = await Token.generateTokens(user);
       Token.setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);
 
@@ -104,10 +118,10 @@ class UserService {
   }
 
   //saveotp
-  async saveOtp(otp,phone) {
+  async saveOtp(otp, phone) {
     try {
       //save otp in node cache
-      otpCache.set(phone,otp);
+      otpCache.set(phone, otp);
       return otp;
     } catch (error) {
       throw error;
@@ -115,9 +129,9 @@ class UserService {
   }
 
   //getStateCityById
-  async getStateCityById(id,type) {
+  async getStateCityById(id, type) {
     try {
-      const stateCity = await this.userRepository.getStateCityById(id,type);
+      const stateCity = await this.userRepository.getStateCityById(id, type);
       return stateCity;
     } catch (error) {
       throw error;
@@ -125,7 +139,7 @@ class UserService {
   }
 
   //verifyOtp
-  async verifyOtp(otp,phone) {
+  async verifyOtp(otp, phone) {
     try {
       // console.log('phone',phone)
       // const cacheOtps = otpCache.set(phone,otp);
@@ -133,28 +147,28 @@ class UserService {
       //get all otpcache
       // console.log('otpCache',otpCache)
 
-      if (otpCache.data){
+      if (otpCache.data) {
         var cache_Otp = otpCache.get(phone);
-      
-      
-      console.log('otp', otp)
-      console.log('cacheOtp', cache_Otp)
-      if (otp == cache_Otp){
-        return true;
-      }else{
-        return false;
 
+
+        console.log('otp', otp)
+        console.log('cacheOtp', cache_Otp)
+        if (otp == cache_Otp) {
+          return true;
+        } else {
+          return false;
+
+        }
+      } else {
+        return false;
       }
-    }else{
-      return false;
-    }
     } catch (error) {
       throw error;
     }
   }
 
   //sendOtp
-  async sendOtp(otp,phone) {
+  async sendOtp(otp, phone) {
     try {
 
       var sender_id = 'Edurtz';
@@ -163,12 +177,12 @@ class UserService {
       var route = 'dlt';
       var numbers = phone;
       var schedule_time = "";
-      var url = 'https://www.fast2sms.com/dev/bulkV2?authorization=' + process.env.FAST2SMS_API_KEY +'&route='+route+'&sender_id='+sender_id+'&message='+message+'&variables_values='+variables_values+'&numbers='+numbers+'&schedule_time='+schedule_time;
+      var url = 'https://www.fast2sms.com/dev/bulkV2?authorization=' + process.env.FAST2SMS_API_KEY + '&route=' + route + '&sender_id=' + sender_id + '&message=' + message + '&variables_values=' + variables_values + '&numbers=' + numbers + '&schedule_time=' + schedule_time;
       const response = await axios.get(url);
-      if(response.data.return === true){
+      if (response.data.return === true) {
         //save otp in node cache
-        this.saveOtp(otp,phone);
-        console.log('otp sent successfully',otp)
+        this.saveOtp(otp, phone);
+        console.log('otp sent successfully', otp)
 
       }
       return response;
@@ -177,7 +191,7 @@ class UserService {
     }
   }
 
-      
+
 
 
   //getUserByReferalCode
@@ -189,7 +203,7 @@ class UserService {
       throw error;
     }
   }
-  
+
 
   ////update referalUser my_referrals
   async updateReferalUser(referalUser, userId) {
@@ -204,7 +218,7 @@ class UserService {
         points: referalUser.points + 50,
       };
 
-      const referalUserPayload = {  ...referdata };
+      const referalUserPayload = { ...referdata };
 
       // console.log('referalUserPayload',referalUserPayload)
 
@@ -216,7 +230,7 @@ class UserService {
     }
   }
 
-  
+
 
   async verifyEmail(email, otp) {
     const existingUser = await this.userRepository.getUserByEmail(email);
@@ -280,11 +294,11 @@ class UserService {
       //check is_verified or not
       if (!user.is_verified) {
         throw {
-          message: "Your Account is not Activated", 
+          message: "Your Account is not Activated",
         };
       }
 
-      
+
 
 
 
@@ -292,7 +306,19 @@ class UserService {
 
       Token.setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);
 
-      return { accessToken, refreshToken, accessTokenExp, refreshTokenExp, user };
+      let userObj = user.toObject ? user.toObject() : user;
+
+      if (userObj.role === 'counsellor') {
+        const counselor = await this.counselorRepository.getByid(userObj._id);
+        if (counselor) {
+          userObj.verificationStatus = counselor.verificationStatus;
+          userObj.isVerified = counselor.isVerified;
+          userObj.verifiedBadge = counselor.verifiedBadge;
+          userObj.certificateUrl = counselor.certificateUrl;
+        }
+      }
+
+      return { accessToken, refreshToken, accessTokenExp, refreshTokenExp, user: userObj };
     } catch (error) {
       throw error;
     }
