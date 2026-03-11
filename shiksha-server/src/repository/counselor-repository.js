@@ -147,6 +147,12 @@ class CounselorRepository extends CrudRepository {
       // First check if counselor exists in User table
       const user = await User.findOne({ _id: id });
       if (user) {
+        // Update role to counsellor if not already
+        if (user.role !== 'counsellor' && user.role !== 'admin' && user.role !== 'SUPER_ADMIN') {
+          user.role = 'counsellor';
+          user.level = 'Career Advisor';
+        }
+
         // Only update fields if they are provided
         if (data.firstname || data.lastname) {
           user.name = (data.firstname || user.name?.split(' ')[0] || '') + ' ' + (data.lastname || user.name?.split(' ')[1] || '');

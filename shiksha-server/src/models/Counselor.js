@@ -241,6 +241,30 @@ const counselorSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "CounselorTestResult",
     },
+    certificate: {
+      type: String,
+    },
+    achievements: {
+      type: String,
+    },
+    marksheet10th: {
+      type: String,
+    },
+    marksheet12th: {
+      type: String,
+    },
+    graduationCertificate: {
+      type: String,
+    },
+    postGraduationCertificate: {
+      type: String,
+    },
+    experienceLetter: {
+      type: String,
+    },
+    eduRouteCertificate: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

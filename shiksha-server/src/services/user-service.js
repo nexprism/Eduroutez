@@ -83,14 +83,19 @@ class UserService {
 
       let userObj = user.toObject ? user.toObject() : user;
 
-      if (userObj.role === 'counsellor') {
-        const counselor = await this.counselorRepository.getByid(userObj._id);
-        if (counselor) {
-          userObj.verificationStatus = counselor.verificationStatus;
-          userObj.isVerified = counselor.isVerified;
-          userObj.verifiedBadge = counselor.verifiedBadge;
-          userObj.certificateUrl = counselor.certificateUrl;
+      const counselor = await this.counselorRepository.getByid(userObj._id);
+      if (counselor) {
+        // If they have a counselor record but role is not set, sync it
+        if (userObj.role !== 'counsellor' && userObj.role !== 'admin' && userObj.role !== 'SUPER_ADMIN') {
+          await this.userRepository.update(userObj._id, { role: 'counsellor', level: 'Career Advisor' });
+          userObj.role = 'counsellor';
+          userObj.level = 'Career Advisor';
         }
+
+        userObj.verificationStatus = counselor.verificationStatus;
+        userObj.isVerified = counselor.isVerified;
+        userObj.verifiedBadge = counselor.verifiedBadge;
+        userObj.certificateUrl = counselor.certificateUrl;
       }
 
       return userObj;
@@ -308,14 +313,19 @@ class UserService {
 
       let userObj = user.toObject ? user.toObject() : user;
 
-      if (userObj.role === 'counsellor') {
-        const counselor = await this.counselorRepository.getByid(userObj._id);
-        if (counselor) {
-          userObj.verificationStatus = counselor.verificationStatus;
-          userObj.isVerified = counselor.isVerified;
-          userObj.verifiedBadge = counselor.verifiedBadge;
-          userObj.certificateUrl = counselor.certificateUrl;
+      const counselor = await this.counselorRepository.getByid(userObj._id);
+      if (counselor) {
+        // If they have a counselor record but role is not set, sync it
+        if (userObj.role !== 'counsellor' && userObj.role !== 'admin' && userObj.role !== 'SUPER_ADMIN') {
+          await this.userRepository.update(userObj._id, { role: 'counsellor', level: 'Career Advisor' });
+          userObj.role = 'counsellor';
+          userObj.level = 'Career Advisor';
         }
+
+        userObj.verificationStatus = counselor.verificationStatus;
+        userObj.isVerified = counselor.isVerified;
+        userObj.verifiedBadge = counselor.verifiedBadge;
+        userObj.certificateUrl = counselor.certificateUrl;
       }
 
       return { accessToken, refreshToken, accessTokenExp, refreshTokenExp, user: userObj };

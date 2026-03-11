@@ -107,6 +107,14 @@ export const profileSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
+  certificate: z.instanceof(File).optional(),
+  achievements: z.instanceof(File).optional(),
+  marksheet10th: z.instanceof(File).optional(),
+  marksheet12th: z.instanceof(File).optional(),
+  graduationCertificate: z.instanceof(File).optional(),
+  postGraduationCertificate: z.instanceof(File).optional(),
+  experienceLetter: z.instanceof(File).optional(),
+  eduRouteCertificate: z.instanceof(File).optional(),
   about: z.string().optional(),
   experiences: z.array(
     z.object({
@@ -181,6 +189,28 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const [previewProfilePhotoUrl, setPreviewProfilePhotoUrl] = React.useState<
     string | null
   >(null);
+  const [previews, setPreviews] = useState<{ [key: string]: string | null }>({
+    certificate: null,
+    achievements: null,
+    marksheet10th: null,
+    marksheet12th: null,
+    graduationCertificate: null,
+    postGraduationCertificate: null,
+    experienceLetter: null,
+    eduRouteCertificate: null,
+  });
+
+  const refs = {
+    certificate: React.useRef<HTMLInputElement | null>(null),
+    achievements: React.useRef<HTMLInputElement | null>(null),
+    marksheet10th: React.useRef<HTMLInputElement | null>(null),
+    marksheet12th: React.useRef<HTMLInputElement | null>(null),
+    graduationCertificate: React.useRef<HTMLInputElement | null>(null),
+    postGraduationCertificate: React.useRef<HTMLInputElement | null>(null),
+    experienceLetter: React.useRef<HTMLInputElement | null>(null),
+    eduRouteCertificate: React.useRef<HTMLInputElement | null>(null),
+  };
+
   const [data, setData] = useState({});
   const [isEdit, setIsEdit] = React.useState(!!initialData);
 
@@ -302,13 +332,27 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         setPreviewAdharCardUrl(adharCardUrl);
       }
       if (counselor.profilePhoto) {
-        console.log('profilePhoto', counselor.profilePhoto);
-        const profilePhotoFilename = counselor.profilePhoto.replace(/^.*[\\\/]/, ''); // Extract filename
-        const profilePhotoUrl = `${IMAGE_URL}/${profilePhotoFilename}`;
-        console.log('profilePhoto filename', profilePhotoFilename);
-
-        setPreviewProfilePhotoUrl(profilePhotoUrl);
+        setPreviewProfilePhotoUrl(`${IMAGE_URL}/${counselor.profilePhoto.replace(/^.*[\\\/]/, '')}`);
       }
+
+      const docFields = [
+        'certificate',
+        'achievements',
+        'marksheet10th',
+        'marksheet12th',
+        'graduationCertificate',
+        'postGraduationCertificate',
+        'experienceLetter',
+        'eduRouteCertificate'
+      ];
+
+      const newPreviews: { [key: string]: string | null } = { ...previews };
+      docFields.forEach(field => {
+        if (counselor[field]) {
+          newPreviews[field] = `${IMAGE_URL}/${counselor[field].replace(/^.*[\\\/]/, '')}`;
+        }
+      });
+      setPreviews(newPreviews);
 
       // Reset form with counselor data
       form.reset({
@@ -397,7 +441,19 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     {
       id: 'Step 3',
       name: 'Upload Documents',
-      fields: ['panCard', 'adharCard', 'markSheet']
+      fields: [
+        'panCard',
+        'adharCard',
+        'profilePhoto',
+        'certificate',
+        'achievements',
+        'marksheet10th',
+        'marksheet12th',
+        'graduationCertificate',
+        'postGraduationCertificate',
+        'experienceLetter',
+        'eduRouteCertificate'
+      ]
     },
     {
       id: 'Step 4',
@@ -416,20 +472,29 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
 
     if (!output) return;
 
-    // Step 3 (index 2) = Upload Documents – require panCard and adharCard
+    // Step 3 (index 2) = Upload Documents – require all files
     if (currentStep === 2) {
-      const panCardValue = form.getValues('panCard');
-      const adharCardValue = form.getValues('adharCard');
-
-      const hasPanCard = panCardValue instanceof File || !!previewPanCardUrl;
-      const hasAdharCard = adharCardValue instanceof File || !!previewAdharCardUrl;
-
+      const stepFields = steps[currentStep].fields as string[];
       const missing: string[] = [];
-      if (!hasPanCard) missing.push('PAN Card');
-      if (!hasAdharCard) missing.push('Aadhaar Card');
+
+      stepFields.forEach(fieldName => {
+        const value = form.getValues(fieldName as any);
+        const hasFile = value instanceof File || (typeof value === 'string' && value !== '');
+
+        // Special check for existing previews if form value is undefined
+        const hasPreview = (fieldName === 'panCard' && !!previewPanCardUrl) ||
+          (fieldName === 'adharCard' && !!previewAdharCardUrl) ||
+          (fieldName === 'profilePhoto' && !!previewProfilePhotoUrl) ||
+          (previews[fieldName] !== null && previews[fieldName] !== undefined);
+
+        if (!hasFile && !hasPreview) {
+          const label = steps[currentStep].fields.find(f => f === fieldName);
+          missing.push(fieldName);
+        }
+      });
 
       if (missing.length > 0) {
-        toast.error(`Please upload the following before continuing: ${missing.join(', ')}`);
+        toast.error(`Please upload all required documents: ${missing.join(', ')}`);
         return;
       }
     }
@@ -542,6 +607,27 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       } else if (values.profilePhoto == null || values.profilePhoto === undefined) {
         formData.append('profilePhoto', '');
       }
+
+      const docFields = [
+        'certificate',
+        'achievements',
+        'marksheet10th',
+        'marksheet12th',
+        'graduationCertificate',
+        'postGraduationCertificate',
+        'experienceLetter',
+        'eduRouteCertificate'
+      ];
+
+      docFields.forEach(field => {
+        const val = (values as any)[field];
+        if (val instanceof File) {
+          formData.append(field, val);
+        } else if (val === null || val === undefined) {
+          // Keep existing if not explicitly removed, though based on previous logic:
+          // formData.append(field, '');
+        }
+      });
 
       console.log('Submitting form with location objects:', submissionData);
       mutate(formData);
@@ -708,7 +794,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     setPreviewPanCardUrl(null);
     form.setValue('panCard', undefined);
     if (fileInputPanCardRef.current) {
-      fileInputPanCardRef.current.value = ''; // Reset the file input
+      fileInputPanCardRef.current.value = '';
     }
   };
 
@@ -735,7 +821,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     setPreviewAdharCardUrl(null);
     form.setValue('adharCard', undefined);
     if (fileInputAdharCardRef.current) {
-      fileInputAdharCardRef.current.value = ''; // Reset the file input
+      fileInputAdharCardRef.current.value = '';
     }
   };
 
@@ -762,9 +848,39 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
     setPreviewProfilePhotoUrl(null);
     form.setValue('profilePhoto', undefined);
     if (fileInputProfilePhotoRef.current) {
-      fileInputProfilePhotoRef.current.value = ''; // Reset the file input
+      fileInputProfilePhotoRef.current.value = '';
     }
   };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviews(prev => ({ ...prev, [fieldName]: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+      form.setValue(fieldName as any, file);
+    } else {
+      setPreviews(prev => ({ ...prev, [fieldName]: null }));
+      form.setValue(fieldName as any, undefined);
+    }
+  };
+
+  const triggerFileInput = (fieldName: string) => {
+    refs[fieldName as keyof typeof refs]?.current?.click();
+  };
+
+  const removeFile = (fieldName: string) => {
+    setPreviews(prev => ({ ...prev, [fieldName]: null }));
+    form.setValue(fieldName as any, undefined);
+    const refKey = fieldName as keyof typeof refs;
+    if (refs[refKey]?.current) {
+      refs[refKey].current!.value = '';
+    }
+  };
+
+
 
   const gender = [
     { id: 'male', name: 'Male' },
@@ -1447,16 +1563,42 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                               width={1200}
                               height={400}
                             />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute right-0 top-0 -mr-2 -mt-2"
-                              onClick={removePanCard}
-                            >
-                              <X className="h-4 w-4" />
-                              <span className="sr-only">Remove image</span>
-                            </Button>
+                            <div className="absolute right-0 top-0 -mr-2 -mt-2 flex gap-2">
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="h-8 w-8 rounded-full"
+                                onClick={() => window.open(previewPanCardUrl!, '_blank')}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                  <polyline points="15 3 21 3 21 9" />
+                                  <line x1="10" y1="14" x2="21" y2="3" />
+                                </svg>
+                                <span className="sr-only">Open file</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="h-8 w-8 rounded-full"
+                                onClick={removePanCard}
+                              >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Remove image</span>
+                              </Button>
+                            </div>
                           </div>
                         ) : (
                           <div
@@ -1497,16 +1639,42 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                               width={1200}
                               height={400}
                             />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute right-0 top-0 -mr-2 -mt-2"
-                              onClick={removeAdharCard}
-                            >
-                              <X className="h-4 w-4" />
-                              <span className="sr-only">Remove image</span>
-                            </Button>
+                            <div className="absolute right-0 top-0 -mr-2 -mt-2 flex gap-2">
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="h-8 w-8 rounded-full"
+                                onClick={() => window.open(previewAdharCardUrl!, '_blank')}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                  <polyline points="15 3 21 3 21 9" />
+                                  <line x1="10" y1="14" x2="21" y2="3" />
+                                </svg>
+                                <span className="sr-only">Open file</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="h-8 w-8 rounded-full"
+                                onClick={removeAdharCard}
+                              >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Remove image</span>
+                              </Button>
+                            </div>
                           </div>
                         ) : (
                           <div
@@ -1547,16 +1715,42 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                               width={1200}
                               height={400}
                             />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute right-0 top-0 -mr-2 -mt-2"
-                              onClick={removeProfilePhoto}
-                            >
-                              <X className="h-4 w-4" />
-                              <span className="sr-only">Remove image</span>
-                            </Button>
+                            <div className="absolute right-0 top-0 -mr-2 -mt-2 flex gap-2">
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="h-8 w-8 rounded-full"
+                                onClick={() => window.open(previewProfilePhotoUrl!, '_blank')}
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                  <polyline points="15 3 21 3 21 9" />
+                                  <line x1="10" y1="14" x2="21" y2="3" />
+                                </svg>
+                                <span className="sr-only">Open file</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="h-8 w-8 rounded-full"
+                                onClick={removeProfilePhoto}
+                              >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Remove image</span>
+                              </Button>
+                            </div>
                           </div>
                         ) : (
                           <div
@@ -1572,6 +1766,101 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                   </FormItem>
                 )}
               />
+
+              {[
+                { name: 'certificate', label: 'Certificate' },
+                { name: 'achievements', label: 'Achievements' },
+                { name: 'marksheet10th', label: '10th Marksheet' },
+                { name: 'marksheet12th', label: '12th Marksheet' },
+                { name: 'graduationCertificate', label: 'Graduation Certificate' },
+                { name: 'postGraduationCertificate', label: 'Post Graduation Certificate' },
+                { name: 'experienceLetter', label: 'Experience Letter' },
+                { name: 'eduRouteCertificate', label: 'EduRoute Certificate' },
+              ].map((doc) => (
+                <FormField
+                  key={doc.name}
+                  control={form.control}
+                  name={doc.name as any}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{doc.label}</FormLabel>
+                      <FormControl>
+                        <div className="space-y-4">
+                          <input
+                            type="file"
+                            accept=".pdf,image/*"
+                            onChange={(e) => handleFileChange(e, doc.name)}
+                            ref={refs[doc.name as keyof typeof refs]}
+                            className="hidden"
+                          />
+                          {previews[doc.name] ? (
+                            <div className="relative">
+                              {previews[doc.name]?.startsWith('data:image') || previews[doc.name]?.match(/\.(jpg|jpeg|png|webp|jfif|avif|bmp|gif)/i) ? (
+                                <Image
+                                  src={previews[doc.name]!}
+                                  alt="Preview"
+                                  className="max-h-[400px] w-full rounded-md object-contain"
+                                  width={1200}
+                                  height={400}
+                                />
+                              ) : (
+                                <div className="flex items-center justify-center h-[200px] border rounded-md">
+                                  <span>PDF Document</span>
+                                </div>
+                              )}
+                              <div className="absolute right-0 top-0 -mr-2 -mt-2 flex gap-2">
+                                <Button
+                                  type="button"
+                                  variant="secondary"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-full"
+                                  onClick={() => window.open(previews[doc.name]!, '_blank')}
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                    <polyline points="15 3 21 3 21 9" />
+                                    <line x1="10" y1="14" x2="21" y2="3" />
+                                  </svg>
+                                  <span className="sr-only">Open file</span>
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-full"
+                                  onClick={() => removeFile(doc.name)}
+                                >
+                                  <X className="h-4 w-4" />
+                                  <span className="sr-only">Remove file</span>
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() => triggerFileInput(doc.name)}
+                              className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                            >
+                              <Plus className="text-grey-400 h-10 w-10" />
+                              <span className="ml-2">Upload {doc.label}</span>
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
             </div>
           )}
           {currentStep === 3 && (

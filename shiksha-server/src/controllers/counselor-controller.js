@@ -19,6 +19,38 @@ const multiUploader = FileUpload.upload.fields([
     name: "panCard",
     maxCount: 1,
   },
+  {
+    name: "certificate",
+    maxCount: 1,
+  },
+  {
+    name: "achievements",
+    maxCount: 1,
+  },
+  {
+    name: "marksheet10th",
+    maxCount: 1,
+  },
+  {
+    name: "marksheet12th",
+    maxCount: 1,
+  },
+  {
+    name: "graduationCertificate",
+    maxCount: 1,
+  },
+  {
+    name: "postGraduationCertificate",
+    maxCount: 1,
+  },
+  {
+    name: "experienceLetter",
+    maxCount: 1,
+  },
+  {
+    name: "eduRouteCertificate",
+    maxCount: 1,
+  },
 ]);
 const counselorService = new CounselorService();
 const userService = new UserService();
@@ -198,6 +230,23 @@ export const updateCounselor = async (req, res) => {
       if (req.files.panCard && req.files.panCard[0]) {
         payload.panCard = req.files.panCard[0].path;
       }
+
+      const fileFields = [
+        "certificate",
+        "achievements",
+        "marksheet10th",
+        "marksheet12th",
+        "graduationCertificate",
+        "postGraduationCertificate",
+        "experienceLetter",
+        "eduRouteCertificate"
+      ];
+
+      fileFields.forEach(field => {
+        if (req.files[field] && req.files[field][0]) {
+          payload[field] = req.files[field][0].path;
+        }
+      });
     }
 
     // Normalize experiences array: convert isCurrentlyWorking from string to boolean
