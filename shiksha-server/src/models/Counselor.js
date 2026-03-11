@@ -62,7 +62,7 @@ const counselorSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       'ref': 'Institute',
     },
-    
+
     category: {
       type: String,
       // ref: "Category",
@@ -75,15 +75,15 @@ const counselorSchema = new mongoose.Schema(
       type: String,
       // ref: "Category",
     },
-    rating:{
-      type:Number,
-      default:2
+    rating: {
+      type: Number,
+      default: 2
     },
     wallet: {
       type: String,
       // ref: "Level",
     },
-    
+
     points: {
       type: Number,
       default: 0,
@@ -98,7 +98,7 @@ const counselorSchema = new mongoose.Schema(
       default: "Career Advisor",
     },
 
-  
+
     bankName: { type: String },
     accountNumber: { type: String },
     accountHolderName: { type: String },
@@ -215,12 +215,32 @@ const counselorSchema = new mongoose.Schema(
           type: String,
           // required: true,
         },
-        completed:{
-          type:Boolean,
-          default:false
+        completed: {
+          type: Boolean,
+          default: false
         }
       },
     ],
+    verificationStatus: {
+      type: String,
+      enum: ["not_applied", "payment_pending", "test_pending", "verification_in_progress", "verified", "rejected"],
+      default: "not_applied",
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verifiedBadge: {
+      type: Boolean,
+      default: false,
+    },
+    certificateUrl: {
+      type: String,
+    },
+    testResult: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CounselorTestResult",
+    },
   },
   { timestamps: true }
 );

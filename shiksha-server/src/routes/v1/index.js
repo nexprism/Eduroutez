@@ -1,23 +1,23 @@
 import express from "express";
 import { EventEmitter } from "events";
-EventEmitter.defaultMaxListeners = 20;``
+EventEmitter.defaultMaxListeners = 20; ``
 
-import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset, getCountries, getStatesByCountry, getCitiesByState, getStatesCities, sendOtp,getStateCityById, verifyOtp } from "../../controllers/auth-controller.js";
+import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset, getCountries, getStatesByCountry, getCitiesByState, getStatesCities, sendOtp, getStateCityById, verifyOtp } from "../../controllers/auth-controller.js";
 import accessTokenAutoRefresh from "../../middlewares/accessTokenAutoRefresh.js";
-import passport from "passport";  
+import passport from "passport";
 import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from "../../controllers/coupon-controller.js";
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
-import { getUsers, updateUser, allowUser, denyUser, holdUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike,submitReview,updateAllSlugs } from "../../controllers/users-controller.js";
-import { createCategory, deleteCategory,getCategory, updateCategory } from "../../controllers/category-controller.js";
+import { getUsers, updateUser, allowUser, denyUser, holdUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike, submitReview, updateAllSlugs } from "../../controllers/users-controller.js";
+import { createCategory, deleteCategory, getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, trendingStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue,getIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure, megamenuCollages } from "../../controllers/institute-controller.js";
-import { createCareer, deleteCareer, getCareer, getCareers, updateCareer ,getCareerByinstituteId } from "../../controllers/career-controller.js";
-import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";``
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue, getIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure, megamenuCollages } from "../../controllers/institute-controller.js";
+import { createCareer, deleteCareer, getCareer, getCareers, updateCareer, getCareerByinstituteId } from "../../controllers/career-controller.js";
+import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js"; ``
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview, getCounselorById, getCounselorsByCategory } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
@@ -25,22 +25,23 @@ import { createReview, deleteReview, getReview, getReviews, updateReview, getRev
 import { createBlogCategory, deleteBlogCategory, getBlogCategories, getBlogCategory, updateBlogCategory } from "../../controllers/blog-category-controller.js";
 import { createCareerCategory, deleteCareerCategory, getCareerCategories, getCareerCategory, updateCareerCategory } from "../../controllers/career-category-controller.js";
 import { createRecruiter, deleteRecruiter, getRecruiters, getRecruitersByInstitute, getRecruiter, updateRecruiter } from "../../controllers/recruiters-controller.js";
-import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog,getBlogsByInstitute } from "../../controllers/blog-controller.js";
+import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog, getBlogsByInstitute } from "../../controllers/blog-controller.js";
 import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, getNewsBySuperAdmin, updateNews } from "../../controllers/news-controller.js";
 import { createPayout, deletePayout, getPayout, getPayouts, updatePayout, getPayoutsByUser } from "../../controllers/payout-controller.js";
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
-import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer ,getQuestionAnswerByEmail} from "../../controllers/question-answer-controller.js";
+import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer, getQuestionAnswerByEmail } from "../../controllers/question-answer-controller.js";
 import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishlist } from "../../controllers/wishlist-controller.js";
 import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount } from "../../controllers/webinar-controller.js";
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
-import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot, getScheduleSlots, updateScheduleSlot, getAllScheduleSlots ,getScheduleSlotbyId } from "../../controllers/counselorSlot-controller.js";
+import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot, getScheduleSlots, updateScheduleSlot, getAllScheduleSlots, getScheduleSlotbyId } from "../../controllers/counselorSlot-controller.js";
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
 import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, updateQuery, QueryAllocation } from "../../controllers/query-controller.js";
-import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ ,getFAQsByInstitute} from "../../controllers/faq-controller.js";
+import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ, getFAQsByInstitute } from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage, getPageByStreamLevel } from "../../controllers/customPage-controller.js";
+import { createQuestionSet, getAllQuestionSets, getRandomTestSet, submitTestResult, getPendingVerifications, verifyCounselor, recordPayment } from "../../controllers/counselor-test-controller.js";
 import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
 
@@ -124,7 +125,7 @@ router.post("/query", createQuery);
 router.get("/queries", getQueries);
 router.get("/query/:id", getQuery);
 router.get("/query-by-institute/:id", getQueryByInstitute);
-router.patch("/query/:id",  updateQuery);
+router.patch("/query/:id", updateQuery);
 router.delete("/query/:id", deleteQuery);
 //QueryAllocation
 router.get("/lead-allocation", QueryAllocation);
@@ -207,23 +208,39 @@ router.delete("/career/:id", accessTokenAutoRefresh, passport.authenticate("jwt"
  * counselor routes
  */
 router.post(
-    '/counselor',
-    (req, res, next) => {
-      console.log('Headers:', req.headers);
-      console.log('Body:', req.body); // Will show parsed form-data fields
-      next();
-    },
-    upload.none(),
-    createCounselor
-  );//get couselor by institute
-router.get("/counselors-by-institute/:institute",  getCounselorsByInstitute);
+  '/counselor',
+  (req, res, next) => {
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body); // Will show parsed form-data fields
+    next();
+  },
+  upload.none(),
+  createCounselor
+);//get couselor by institute
+router.get("/counselors-by-institute/:institute", getCounselorsByInstitute);
 router.get("/counselors", getCounselors);
 router.get("/counselor/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselor);
 router.get("/counselor-by-id/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselorById);
 //counselloers-by-category
-router.post("/counselors-by-category",  getCounselorsByCategory);
+router.post("/counselors-by-category", getCounselorsByCategory);
 router.patch("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCounselor);
 router.delete("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselor);
+
+/**
+ * counselor verification & test routes
+ */
+// Superadmin only
+router.post("/question-set", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createQuestionSet);
+router.get("/question-sets", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getAllQuestionSets);
+router.get("/counselor-test/pending-verifications", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPendingVerifications);
+router.post("/counselor-test/verify/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), verifyCounselor);
+
+// Counselor only
+router.post("/counselor-test/record-payment", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), recordPayment);
+router.get("/counselor-test/questions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getRandomTestSet);
+router.post("/counselor-test/submit", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitTestResult);
+
+
 
 /**
  * counselorSlots routes
@@ -271,12 +288,12 @@ router.delete("/payment-method/:id", accessTokenAutoRefresh, passport.authentica
 // router.patch("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateReview);
 // router.delete("/review/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteReview);
 
-router.post("/review",  createReview);
+router.post("/review", createReview);
 router.get("/review", getReviews);
-router.get("/review/:id",  getReview);
+router.get("/review/:id", getReview);
 router.patch("/review/:id", updateReview);
 router.delete("/review/:id", deleteReview);
-router.get("/reviews-by-user/:email",getReviewsByUser);
+router.get("/reviews-by-user/:email", getReviewsByUser);
 //my-review
 router.post("/my-reviews", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyReviews);
 
@@ -317,7 +334,7 @@ router.delete("/career-category/:id", accessTokenAutoRefresh, passport.authentic
  */
 router.post("/blog", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBlog);
 router.get("/blogs", getBlogs);
-router.get("/blogs-by-institute/:instituteId", getBlogsByInstitute);    
+router.get("/blogs-by-institute/:instituteId", getBlogsByInstitute);
 // router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
 router.get("/blog/:id", getBlog);
 
@@ -331,7 +348,7 @@ router.delete("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", 
 //newsa
 router.post("/create-news", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createNews);
 router.get("/news", getNews);
-router.get("/news/superadmin",getNewsBySuperAdmin)
+router.get("/news/superadmin", getNewsBySuperAdmin)
 router.get("/news/:institute", getNewsByInstitute);
 router.get("/news/data/:id", getNewsById);
 router.get("/news-by-institute/:id", getNewsByInstitute);
@@ -365,18 +382,18 @@ router.delete("/feedback/:id", accessTokenAutoRefresh, passport.authenticate("jw
 router.post("/question-answer", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createQuestionAnswer); // Require authentication for question submission
 router.get("/question-answers", getQuestionAnswers);
 router.get("/question-answer/:email", getQuestionAnswerByEmail);
-router.get("/question-answer-detail/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswer);
-router.patch("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  updateQuestionAnswer);
-router.delete("/question-answer/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  deleteQuestionAnswer);
+router.get("/question-answer-detail/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionAnswer);
+router.patch("/question-answer/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateQuestionAnswer);
+router.delete("/question-answer/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteQuestionAnswer);
 
 /**
  * FAQs routes
  */
-router.post("/faq",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createFAQ);
+router.post("/faq", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createFAQ);
 router.get("/faq", getFAQs);
-router.get("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getFAQ);
-router.patch("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  updateFAQ);
-router.delete("/faq/:id",accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }),  deleteFAQ);
+router.get("/faq/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getFAQ);
+router.patch("/faq/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateFAQ);
+router.delete("/faq/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteFAQ);
 router.get("/faq-by-institute/:id", getFAQsByInstitute);
 
 /**
@@ -393,7 +410,7 @@ router.delete("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jw
  */
 router.post("/webinar", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createWebinar);
 router.get("/webinars", getWebinars);
-router.get("/webinars-by-institute/:instituteId",  getWebinarsByInstitute);
+router.get("/webinars-by-institute/:instituteId", getWebinarsByInstitute);
 router.get("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinar);
 router.patch("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateWebinar);
 router.delete("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteWebinar);
@@ -476,7 +493,7 @@ router.delete("/coupon/:id", accessTokenAutoRefresh, passport.authenticate("jwt"
  * transaction routes
  */
 router.post("/transaction", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createTransaction);
-router.get("/transactions",  getTransactions);
+router.get("/transactions", getTransactions);
 /**
  * template routes
  */
@@ -506,7 +523,7 @@ router.delete("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt",
 
 router.post("/page", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createPage);
 router.get("/page", getPages);
-router.get("/page-by-institute/:instituteId", getPagesByInstitute);    
+router.get("/page-by-institute/:instituteId", getPagesByInstitute);
 
 // router.get("/blog/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBlog);
 router.get("/page/:id", getPage);

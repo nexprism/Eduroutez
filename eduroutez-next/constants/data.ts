@@ -77,6 +77,20 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Counselor Verification',
+    url: '/dashboard/counselor-verification',
+    icon: 'award',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Test Question Sets',
+    url: '/dashboard/counselor-question-sets',
+    icon: 'post',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
     title: 'Users',
     url: '/dashboard/admin',
     icon: 'usersround',
@@ -262,7 +276,7 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: [] // No child items
   },
-  
+
 
   {
     title: 'Online counselling',
@@ -280,25 +294,25 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
 
-   {
- title: 'Refer and Earn',
-   url: '/dashboard/refer-earn',
-   icon: 'receipt-indian-rupee',
-  isActive: false,
-  items: [] // No child items
-},
-{
-  title: 'Redeem',
+  {
+    title: 'Refer and Earn',
+    url: '/dashboard/refer-earn',
+    icon: 'receipt-indian-rupee',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Redeem',
     url: '/dashboard/redeem',
     icon: 'receipt-indian-rupee',
-   isActive: false,
-   items: [] // No child items
- },
- {
-  title: 'Help And Support',
-  url: '/dashboard/help-support',
-  icon: 'school',
-  isActive: false,
-  items: [] // No child items
-}
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Help And Support',
+    url: '/dashboard/help-support',
+    icon: 'school',
+    isActive: false,
+    items: [] // No child items
+  }
 ];

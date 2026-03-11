@@ -51,3 +51,14 @@ export type ReviewResponse = {
 };
 
 // Ensure data is typed as ReviewResponse where used
+
+export interface NavItem {
+  title: string;
+  url: string;
+  disabled?: boolean;
+  external?: boolean;
+  icon?: string;
+  description?: string;
+  isActive?: boolean;
+  items?: NavItem[];
+}
