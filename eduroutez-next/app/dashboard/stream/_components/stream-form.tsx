@@ -29,6 +29,7 @@ import axiosInstance from '@/lib/axios';
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   status: z.boolean(),
+  streamType: z.enum(['course', 'counsellor', 'both']),
 });
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
@@ -45,6 +46,7 @@ export default function StreamForm() {
     defaultValues: {
       name: '',
       status: true,
+      streamType: 'course',
     },
   });
 
@@ -98,6 +100,7 @@ headers: {
       form.reset({
         name: stream.data.name,
         status: stream.data.status,
+        streamType: stream.data.streamType,
       });
    
     }
@@ -107,6 +110,9 @@ headers: {
     const formData = new FormData();
     formData.append('name', values.name);
     formData.append('status', values.status ? 'true' : 'false');
+    formData.append('isCourseStream', values.streamType === 'course' || values.streamType === 'both' ? 'true' : 'false');
+    formData.append('isCounsellorStream', values.streamType === 'counsellor' || values.streamType === 'both' ? 'true' : 'false');
+    formData.append('isBoth', values.streamType === 'both' ? 'true' : 'false');
     
 
 
@@ -156,6 +162,32 @@ headers: {
                       <SelectContent>
                         <SelectItem value={'Active'}>Active</SelectItem>
                         <SelectItem value={'Inactive'}>Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="streamType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stream Type</FormLabel>
+                    <Select
+                      onValueChange={(value) => field.onChange(value)}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select stream type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={'course'}>Course</SelectItem>
+                        <SelectItem value={'counsellor'}>Counsellor</SelectItem>
+                        <SelectItem value={'both'}>Both</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

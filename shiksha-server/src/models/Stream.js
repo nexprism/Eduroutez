@@ -11,6 +11,18 @@ const streamSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isCourseStream: {
+      type: Boolean,
+      default: false,
+    },
+    isCounsellorStream: {
+      type: Boolean,
+      default: false,
+    },
+    isBoth: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

@@ -23,6 +23,7 @@ class CounselorService {
 
   async create(data) {
     try {
+      // Accept isCourseStream and isCounsellorStream in data
       const counselor = await this.counselorRepository.create(data);
       return counselor;
     } catch (error) {

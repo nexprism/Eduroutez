@@ -16,6 +16,13 @@ export const createStream = async (req, res) => {
   try {
     console.log("Create stream request body:", req.body);
     const payload = { ...req.body };
+    // Accept isCourseStream and isCounsellorStream from req.body if provided
+    if (typeof req.body.isCourseStream !== 'undefined') {
+      payload.isCourseStream = req.body.isCourseStream;
+    }
+    if (typeof req.body.isCounsellorStream !== 'undefined') {
+      payload.isCounsellorStream = req.body.isCounsellorStream;
+    }
 
     const response = await streamService.create(payload);
 
@@ -121,12 +128,15 @@ export async function updateStream(req, res) {
     if (req.body.name) {
       payload.name = req.body.name;
     }
-
-    if(req.body.status){
+    if (typeof req.body.status !== 'undefined') {
       payload.status = req.body.status;
     }
-
-
+    if (typeof req.body.isCourseStream !== 'undefined') {
+      payload.isCourseStream = req.body.isCourseStream;
+    }
+    if (typeof req.body.isCounsellorStream !== 'undefined') {
+      payload.isCounsellorStream = req.body.isCounsellorStream;
+    }
     const response = await streamService.update(streamId, payload);
 
     // Return success response

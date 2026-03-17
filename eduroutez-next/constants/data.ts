@@ -37,6 +37,8 @@ export const navItems: NavItem[] = [
     url: '/dashboard/stream',
     icon: 'microscope',
     isActive: false,
+    isCourseStream: true,
+    isCounsellorStream: false,
     items: [] // No child items
   },
   {
@@ -44,6 +46,8 @@ export const navItems: NavItem[] = [
     url: '/dashboard/course',
     icon: 'bookmark',
     isActive: false,
+    isCourseStream: true,
+    isCounsellorStream: false,
     items: [
       {
         title: 'Course',
@@ -74,6 +78,8 @@ export const navItems: NavItem[] = [
     url: '/dashboard/counselor',
     icon: 'users',
     isActive: false,
+    isCourseStream: false,
+    isCounsellorStream: true,
     items: [] // No child items
   },
   {
@@ -81,6 +87,8 @@ export const navItems: NavItem[] = [
     url: '/dashboard/counselor-verification',
     icon: 'award',
     isActive: false,
+    isCourseStream: false,
+    isCounsellorStream: true,
     items: [] // No child items
   },
   {
@@ -88,6 +96,8 @@ export const navItems: NavItem[] = [
     url: '/dashboard/counselor-question-sets',
     icon: 'post',
     isActive: false,
+    isCourseStream: false,
+    isCounsellorStream: true,
     items: [] // No child items
   },
   {

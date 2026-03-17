@@ -1,3 +1,4 @@
+// Add/update PATCH/PUT logic for isCourseStream and isCounsellorStream if not present
 import fs from "fs/promises";
 import path from "path";
 import { StatusCodes } from "http-status-codes";
@@ -69,6 +70,13 @@ export const createCounselor = async (req, res) => {
     }
 
     const payload = { ...req.body };
+    // Accept isCourseStream and isCounsellorStream from req.body if provided
+    if (typeof req.body.isCourseStream !== 'undefined') {
+      payload.isCourseStream = req.body.isCourseStream;
+    }
+    if (typeof req.body.isCounsellorStream !== 'undefined') {
+      payload.isCounsellorStream = req.body.isCounsellorStream;
+    }
     let counselorpayload = { ...payload };
 
     if (req.body.password) {

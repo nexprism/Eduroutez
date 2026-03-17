@@ -7,6 +7,14 @@ const counselorSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isCourseStream: {
+      type: Boolean,
+      default: false,
+    },
+    isCounsellorStream: {
+      type: Boolean,
+      default: false,
+    },
     lastname: {
       type: String,
     },
