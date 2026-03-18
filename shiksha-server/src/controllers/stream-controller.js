@@ -23,6 +23,18 @@ export const createStream = async (req, res) => {
     if (typeof req.body.isCounsellorStream !== 'undefined') {
       payload.isCounsellorStream = req.body.isCounsellorStream;
     }
+    if (typeof req.body.isBoth !== 'undefined') {
+      payload.isBoth = req.body.isBoth;
+    }
+    if (typeof req.body.isCollege !== 'undefined') {
+      payload.isCollege = req.body.isCollege;
+    }
+    if (typeof req.body.isInstitute !== 'undefined') {
+      payload.isInstitute = req.body.isInstitute;
+    }
+    if (typeof req.body.isUniversity !== 'undefined') {
+      payload.isUniversity = req.body.isUniversity;
+    }
 
     const response = await streamService.create(payload);
 
@@ -136,6 +148,18 @@ export async function updateStream(req, res) {
     }
     if (typeof req.body.isCounsellorStream !== 'undefined') {
       payload.isCounsellorStream = req.body.isCounsellorStream;
+    }
+    if (typeof req.body.isBoth !== 'undefined') {
+      payload.isBoth = req.body.isBoth;
+    }
+    if (typeof req.body.isCollege !== 'undefined') {
+      payload.isCollege = req.body.isCollege;
+    }
+    if (typeof req.body.isInstitute !== 'undefined') {
+      payload.isInstitute = req.body.isInstitute;
+    }
+    if (typeof req.body.isUniversity !== 'undefined') {
+      payload.isUniversity = req.body.isUniversity;
     }
     const response = await streamService.update(streamId, payload);
 

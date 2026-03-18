@@ -23,6 +23,18 @@ const streamSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isCollege: {
+      type: Boolean,
+      default: false,
+    },
+    isInstitute: {
+      type: Boolean,
+      default: false,
+    },
+    isUniversity: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

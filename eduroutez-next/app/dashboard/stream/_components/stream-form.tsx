@@ -61,10 +61,10 @@ export default function StreamForm() {
         url: endpoint,
         method: isEdit ? 'patch' : 'post',
         data,
-headers: {
+        headers: {
           'Content-Type': 'application/json',
         },
-     });
+      });
       return response.data;
     },
     onSuccess: () => {
@@ -102,7 +102,6 @@ headers: {
         status: stream.data.status,
         streamType: stream.data.streamType,
       });
-   
     }
   }, [stream, form]);
 
@@ -113,9 +112,6 @@ headers: {
     formData.append('isCourseStream', values.streamType === 'course' || values.streamType === 'both' ? 'true' : 'false');
     formData.append('isCounsellorStream', values.streamType === 'counsellor' || values.streamType === 'both' ? 'true' : 'false');
     formData.append('isBoth', values.streamType === 'both' ? 'true' : 'false');
-    
-
-
     mutate(formData);
   };
   
@@ -143,15 +139,14 @@ headers: {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="status"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(value === 'Active')} 
+                    <Select
+                      onValueChange={(value) => field.onChange(value === 'Active')}
                       value={field.value ? 'Active' : 'Inactive'}
                     >
                       <FormControl>
@@ -168,7 +163,6 @@ headers: {
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="streamType"
@@ -194,9 +188,8 @@ headers: {
                   </FormItem>
                 )}
               />
-             
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isPending}
                 className="col-span-full"
               >
