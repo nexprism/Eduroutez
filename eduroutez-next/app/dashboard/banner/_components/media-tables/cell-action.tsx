@@ -28,7 +28,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const deleteMediaMutation = useMutation({
     mutationFn: async (mediaId: string) => {
       const response = await axiosInstance({
-        url: `${apiUrl}/media/${mediaId}`,
+        url: `${apiUrl}/banner/${mediaId}`,
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -38,8 +38,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['medias'] });
-      router.push('/dashboard/media');
+      queryClient.invalidateQueries({ queryKey: ['banner'] });
+      router.push('/dashboard/banner');
     },
     onSettled: () => {
       setOpen(false);
@@ -72,7 +72,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
           <DropdownMenuItem
             onClick={() =>
-              router.push(`/dashboard/media/update/${data._id}/`)
+              router.push(`/dashboard/banner/update/${data._id}/`)
             }
           >
             <Edit className="mr-2 h-4 w-4" /> Update

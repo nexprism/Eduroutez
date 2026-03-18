@@ -20,9 +20,9 @@ export default function MediaListingPage({}: TMediaListingPage) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['media', searchQuery],
+    queryKey: ['banner', searchQuery],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/media`, {
+      const response = await axiosInstance.get(`${apiUrl}/banners`, {
         params: {
           searchFields: JSON.stringify({}),
           sort: JSON.stringify({ createdAt: 'desc' }),
@@ -43,8 +43,8 @@ export default function MediaListingPage({}: TMediaListingPage) {
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Media (${data.data.totalDocuments})`}
-                description="All medias online and offline are listed here."
+                title={`Banner (${data.data.totalDocuments})`}
+                description="All banners online and offline are listed here."
               />
               <Button asChild className="w-fit whitespace-nowrap px-2">
                 <Link href="/dashboard/banner/new">

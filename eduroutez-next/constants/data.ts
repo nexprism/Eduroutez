@@ -185,7 +185,7 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'Media',
+    title: 'Banner',
     url: '/dashboard/banner',
     icon: 'bookmark',
     isActive: false,

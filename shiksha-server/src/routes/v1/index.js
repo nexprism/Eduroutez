@@ -35,6 +35,7 @@ import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, g
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
+import { createBanner, deleteBanner, getBanner, getBanners, updateBanner } from "../../controllers/banner-controller.js";
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
 import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot, getScheduleSlots, updateScheduleSlot, getAllScheduleSlots, getScheduleSlotbyId } from "../../controllers/counselorSlot-controller.js";
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
@@ -425,13 +426,13 @@ router.patch("/level/:id", accessTokenAutoRefresh, passport.authenticate("jwt", 
 router.delete("/level/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteLevel);
 
 /**
- * role routes
+ * banner routes
  */
-// router.post("/role", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBanner);
-// router.get("/roles", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBanners);
-// router.get("/role/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBanner);
-// router.patch("/role/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBanner);
-// router.delete("/role/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBanner);
+router.post("/banner", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBanner);
+router.get("/banners", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBanners);
+router.get("/banner/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBanner);
+router.patch("/banner/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBanner);
+router.delete("/banner/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBanner);
 
 /**
  * user routes

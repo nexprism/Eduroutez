@@ -52,6 +52,15 @@ export type ReviewResponse = {
 
 // Ensure data is typed as ReviewResponse where used
 
+export type Media = {
+  _id: string;
+  title: string;
+  work?: string;
+  images?: string[];
+  video?: string;
+  createdAt?: string;
+};
+
 export interface NavItem {
   title: string;
   url: string;

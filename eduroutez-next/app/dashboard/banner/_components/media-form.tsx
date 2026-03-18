@@ -19,7 +19,6 @@ import {
 
 import { Input } from '@/components/ui/input';
 import { X, Plus } from 'lucide-react';
-import { CourseCategory } from '@/types';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
@@ -94,8 +93,8 @@ export default function CourseCategoryForm() {
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
-        ? `${apiUrl}/media/${segments[4]}`
-        : `${apiUrl}/media`;
+        ? `${apiUrl}/banner/${segments[4]}`
+        : `${apiUrl}/banner`;
       const response = await axiosInstance({
         url: `${endpoint}`,
         method: isEdit ? 'patch' : 'post',
@@ -150,7 +149,7 @@ export default function CourseCategoryForm() {
   };
 
   const fetchCategories = async () => {
-    const response = await axiosInstance.get(`${apiUrl}/media`);
+    const response = await axiosInstance.get(`${apiUrl}/banners`);
     return response.data;
   };
 
@@ -164,7 +163,7 @@ export default function CourseCategoryForm() {
     queryKey: ['media', segments[4]],
     queryFn: async () => {
       const response = await axiosInstance.get(
-        `${apiUrl}/media/${segments[4]}`
+        `${apiUrl}/banner/${segments[4]}`
       );
       return response.data;
     },
@@ -174,21 +173,22 @@ export default function CourseCategoryForm() {
   console.log(category);
 
   React.useEffect(() => {
-    if (category?.data && courseCategories?.data?.result) {
-      // Find the matching parent category
-      const parentCategory = courseCategories.data.result.find(
-        (cat: CourseCategory) => cat._id === category.data.parentCategory
-      );
-
+    if (category?.data) {
+      // Populate form with existing banner data
       form.reset({
-        title: category.data.title,
+        title: category.data.title || '',
+        work: category.data.work || 'Banner',
+        image: undefined
       });
 
-      if (category.data.icon) {
-        setPreviewImageUrl(`${IMAGE_URL}/${category.data.icon}`);
+      // Show existing image preview if present
+      if (Array.isArray(category.data.images) && category.data.images.length > 0) {
+        setPreviewImageUrl(`${IMAGE_URL}/${category.data.images[0]}`);
+      } else {
+        setPreviewImageUrl(null);
       }
     }
-  }, [category, courseCategories, form]);
+  }, [category, form]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading categories</div>;
