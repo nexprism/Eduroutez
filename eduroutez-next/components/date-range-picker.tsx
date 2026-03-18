@@ -15,9 +15,10 @@ import { DateRange } from 'react-day-picker';
 export function CalendarDateRangePicker({
   className
 }: React.HTMLAttributes<HTMLDivElement>) {
+  const today = new Date();
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(2023, 0, 20),
-    to: addDays(new Date(2023, 0, 20), 20)
+    from: today,
+    to: addDays(today, 20)
   });
 
   return (

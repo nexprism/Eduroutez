@@ -2,12 +2,50 @@
 
 import * as React from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
-import { DayPicker } from 'react-day-picker';
+import { DayPicker, CaptionProps, useNavigation } from 'react-day-picker';
+import { format } from 'date-fns';
 
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+
+function YearCaption(props: CaptionProps) {
+  const { displayMonth } = props;
+  const { goToMonth } = useNavigation();
+  const currentYear = displayMonth.getFullYear();
+
+  const years = React.useMemo(
+    () => Array.from({ length: 40 }, (_, i) => 2000 + i),
+    []
+  );
+
+  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newYear = Number(event.target.value);
+    const newMonth = new Date(displayMonth);
+    newMonth.setFullYear(newYear);
+    goToMonth(newMonth);
+  };
+
+  return (
+    <div className="flex items-center justify-between px-2 pt-1">
+      <span className="text-sm font-medium">
+        {format(displayMonth, 'MMMM yyyy')}
+      </span>
+      <select
+        className="h-7 rounded border px-2 text-xs focus:outline-none"
+        value={currentYear}
+        onChange={handleYearChange}
+      >
+        {years.map((year) => (
+          <option key={year} value={year}>
+            {year}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 function Calendar({
   className,
@@ -59,6 +97,7 @@ function Calendar({
         ...classNames
       }}
       components={{
+        Caption: YearCaption,
         IconLeft: ({ ...props }) => <ChevronLeftIcon className="h-4 w-4" />,
         IconRight: ({ ...props }) => <ChevronRightIcon className="h-4 w-4" />
       }}

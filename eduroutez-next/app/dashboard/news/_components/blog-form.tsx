@@ -205,7 +205,11 @@ export default function NewsForm() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={(date) => field.onChange(date || new Date())} />
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={(date) => field.onChange(date || new Date())}
+                        />
                       </PopoverContent>
                     </Popover>
                   </div>

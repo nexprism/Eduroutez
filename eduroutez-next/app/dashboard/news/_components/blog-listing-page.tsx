@@ -10,6 +10,7 @@ import BlogTable from './blog-tables';
 import { useQuery } from '@tanstack/react-query';
 import { useBlogTableFilters } from './blog-tables/use-blog-table-filters';
 import axiosInstance from '@/lib/axios';
+import { CalendarDateRangePicker } from '@/components/date-range-picker';
 
 type News = {
   _id: string;
@@ -140,7 +141,8 @@ export default function NewsListingPage({}: TNewsListingPage) {
                     : "All news for your institute are listed here."
                 }
               />
-              <div className="flex gap-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                <CalendarDateRangePicker />
                 <Button asChild className="w-fit whitespace-nowrap px-2">
                   <Link href="/dashboard/news/new">
                     <Plus className="mr-1 h-4 w-4" /> Add New News
