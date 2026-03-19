@@ -49,6 +49,24 @@ const orgTypes = [
   { value: 'private', label: 'Private' }
 ];
 
+const organisationOptions = [
+  { value: 'University', label: 'University' },
+  { value: 'College', label: 'College' },
+  { value: 'Institute', label: 'Institute' }
+];
+
+const organisationTypeOptions = [
+  { value: 'Central', label: 'Central' },
+  { value: 'State', label: 'State' },
+  { value: 'Local Body', label: 'Local Body' },
+  { value: 'Private', label: 'Private' },
+  { value: 'Aided', label: 'Aided' },
+  { value: 'Autonomous', label: 'Autonomous' },
+  { value: 'Affiliated', label: 'Affiliated' },
+  { value: 'Deemed', label: 'Deemed' },
+  { value: 'Distance / Open', label: 'Distance / Open' }
+];
+
 const formSchema = z.object({
   instituteName: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
@@ -87,12 +105,31 @@ const formSchema = z.object({
   // about: z.string({
   //   required_error: 'Please enter about.'
   // }),
-  organisationType: z.string({
-    required_error: 'Please select an organization type.'
+  organization: z.string({
+    required_error: 'Please select an organisation.'
   }),
+  organisationType: z.enum(
+    [
+      'Central',
+      'State',
+      'Local Body',
+      'Private',
+      'Aided',
+      'Autonomous',
+      'Affiliated',
+      'Deemed',
+      'Distance / Open'
+    ],
+    {
+      required_error: 'Please select an organisation type.'
+    }
+  ),
   brochure: z.any().optional(),
   country: z.any().optional(),
-    rank: z.any().optional()
+  rank: z.any().optional(),
+  isBestRatedUniversity: z.boolean().optional(),
+  isBestRatedCollege: z.boolean().optional(),
+  isBestRatedInstitute: z.boolean().optional()
 });
 
 
@@ -217,6 +254,7 @@ const [initialCityName, setInitialCityName] = useState("");
           institutePhone: instituteData.institutePhone,
           email: instituteData.email,
           establishedYear: instituteData.establishedYear,
+          organization: instituteData.organization,
           organisationType: instituteData.organisationType,
           website: instituteData.website,
           country:instituteData.country?.id,
@@ -235,7 +273,10 @@ const [initialCityName, setInitialCityName] = useState("");
           cover: instituteData.coverImage,
           logo: instituteData.instituteLogo,
           brochure: instituteData.brochure,
-            rank: instituteData.rank || ''
+          rank: instituteData.rank || '',
+          isBestRatedUniversity: instituteData.isBestRatedUniversity || false,
+          isBestRatedCollege: instituteData.isBestRatedCollege || false,
+          isBestRatedInstitute: instituteData.isBestRatedInstitute || false
         });
 
         setPreviewThumbnailUrl(instituteData.thumbnailImage && instituteData.thumbnailImage !== "null" 
@@ -259,6 +300,7 @@ const [initialCityName, setInitialCityName] = useState("");
       institutePhone:'',
       email:'',
       establishedYear:'',
+      organization:'',
       organisationType:'',
       website:'',
       city:'',
@@ -274,6 +316,9 @@ const [initialCityName, setInitialCityName] = useState("");
       streams:'',
       specialization:'',
       examAccepted: '', // Add this line
+      isBestRatedUniversity: false,
+      isBestRatedCollege: false,
+      isBestRatedInstitute: false
     }
   });
 
@@ -286,6 +331,7 @@ const [initialCityName, setInitialCityName] = useState("");
     formData.append('institutePhone', values.institutePhone);
     formData.append('email', values.email);
     formData.append('establishedYear', values.establishedYear);
+    formData.append('organization', values.organization);
     formData.append('organisationType', values.organisationType);
     formData.append('website', values.website);
     if (values.rank) {
@@ -316,6 +362,16 @@ const [initialCityName, setInitialCityName] = useState("");
       if (selectedCity) {
         formData.append('city[name]', selectedCity.name);
       }
+    }
+
+    if (typeof values.isBestRatedUniversity === 'boolean') {
+      formData.append('isBestRatedUniversity', String(values.isBestRatedUniversity));
+    }
+    if (typeof values.isBestRatedCollege === 'boolean') {
+      formData.append('isBestRatedCollege', String(values.isBestRatedCollege));
+    }
+    if (typeof values.isBestRatedInstitute === 'boolean') {
+      formData.append('isBestRatedInstitute', String(values.isBestRatedInstitute));
     }
     
     // Original address field
@@ -598,7 +654,7 @@ const [initialCityName, setInitialCityName] = useState("");
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter Title"
+                        placeholder="Enter phone number"
                         {...field}
                         type="number"
                       />
@@ -614,7 +670,7 @@ const [initialCityName, setInitialCityName] = useState("");
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter Title" {...field} />
+                      <Input placeholder="Enter email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -628,7 +684,7 @@ const [initialCityName, setInitialCityName] = useState("");
                     <FormLabel>Established Year</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter Title"
+                        placeholder="Enter year"
                         {...field}
                         type="number"
                       />
@@ -637,30 +693,50 @@ const [initialCityName, setInitialCityName] = useState("");
                   </FormItem>
                 )}
               />
-
+              <FormField
+                control={form.control}
+                name="organization"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Organisation</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select organisation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organisationOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="organisationType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Organization Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}                     >
-                    
-                      <FormControl>
+                    <FormLabel>Organisation Type</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Organization Type" />
+                          <SelectValue placeholder="Select organisation type" />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="max-h-60 overflow-y-auto">
-                        {orgTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectContent>
+                          {organisationTypeOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -672,118 +748,116 @@ const [initialCityName, setInitialCityName] = useState("");
                   <FormItem>
                     <FormLabel>Website</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter Title" {...field} />
+                      <Input placeholder="Enter website" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-             
 
-            <FormField
-            control={form.control}
-            name="country"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Country</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-          
-                    field.onChange(value);
-                  }}
-                  value={field.value || ""}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Country">
-                        {console.log('fghjk',field.value)}
-                        {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
-                      </SelectValue>
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent className="max-h-60 overflow-y-auto">
-                    {countries.map((country) => (
-                      <SelectItem key={country.id} value={country.id}>
-                        {country.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          
-          
-                {/* State Select */}
-                <FormField
-                  control={form.control}
-                  name="state"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>State</FormLabel>
-                      <Select
-                  onValueChange={(value) => {
-          
-                    field.onChange(value);
-                  }}
-                  value={field.value || ""}
-                >
-                        <FormControl>
-                          <SelectTrigger>
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+
+                        field.onChange(value);
+                      }}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Country">
+                            {countries.find((c) => c.id == field.value)?.name || initialCountryName || ""}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {countries.map((country) => (
+                          <SelectItem key={country.id} value={country.id}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+
+
+              {/* State Select */}
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+
+                        field.onChange(value);
+                      }}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
                           <SelectValue placeholder="Select State">
-                          {states.find((c) => c.id == field.value)?.name || initialStateName || ""}
-                      </SelectValue>           
-                           </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-60 overflow-y-auto">
-                          {states.map((state) => (
-                            <SelectItem key={state.id} value={state.id}>
-                              {state.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-          
-                {/* City Select */}
-                <FormField
-                  control={form.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <Select
-                  onValueChange={(value) => {
-          
-                    field.onChange(value);
-                  }}
-                  value={field.value || ""}
-                >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select City" >
+                            {states.find((c) => c.id == field.value)?.name || initialStateName || ""}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {states.map((state) => (
+                          <SelectItem key={state.id} value={state.id}>
+                            {state.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* City Select */}
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+
+                        field.onChange(value);
+                      }}
+                      value={field.value || ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select City" >
                             {cities.find((c) => c.id == field.value)?.name || initialCityName || ""}
-                            </SelectValue>
-          
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-60 overflow-y-auto">
-                          {cities.map((city) => (
-                            <SelectItem key={city.id} value={city.id}>
-                              {city.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                          </SelectValue>
+
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-60 overflow-y-auto">
+                        {cities.map((city) => (
+                          <SelectItem key={city.id} value={city.id}>
+                            {city.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
 
 
@@ -794,7 +868,7 @@ const [initialCityName, setInitialCityName] = useState("");
                   <FormItem>
                     <FormLabel>Min Fees</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter minimum Fees" {...field} />
+                      <Input placeholder="Enter minimum fees" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -833,12 +907,70 @@ const [initialCityName, setInitialCityName] = useState("");
                   <FormItem>
                     <FormLabel>Highest Package</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter highest Package" {...field} />
+                      <Input placeholder="Enter highest package" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {form.watch('organization') === 'University' && (
+                <FormField
+                  control={form.control}
+                  name="isBestRatedUniversity"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value ?? false}
+                          onChange={e => field.onChange(e.target.checked)}
+                        />
+                      </FormControl>
+                      <FormLabel className="mb-0">Best Rated University</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {form.watch('organization') === 'College' && (
+                <FormField
+                  control={form.control}
+                  name="isBestRatedCollege"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value ?? false}
+                          onChange={e => field.onChange(e.target.checked)}
+                        />
+                      </FormControl>
+                      <FormLabel className="mb-0">Best Rated College</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {form.watch('organization') === 'Institute' && (
+                <FormField
+                  control={form.control}
+                  name="isBestRatedInstitute"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value ?? false}
+                          onChange={e => field.onChange(e.target.checked)}
+                        />
+                      </FormControl>
+                      <FormLabel className="mb-0">Best Rated Institute</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
                    <FormField
                      control={form.control}

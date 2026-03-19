@@ -62,11 +62,38 @@ const instituteSchema = new mongoose.Schema(
     thumbnailImage: {
       type: String,
     }, //image
+    organization: {
+      type: String,
+      enum: ["University", "College", "Institute"],
+    },
     organisationType: {
       type: String,
+      enum: [
+        "Central",
+        "State",
+        "Local Body",
+        "Private",
+        "Aided",
+        "Autonomous",
+        "Affiliated",
+        "Deemed",
+        "Distance / Open",
+      ],
       // required: true,
     },
     isTopInstitute: {
+      type: Boolean,
+      default: false,
+    },
+    isBestRatedUniversity: {
+      type: Boolean,
+      default: false,
+    },
+    isBestRatedCollege: {
+      type: Boolean,
+      default: false,
+    },
+    isBestRatedInstitute: {
       type: Boolean,
       default: false,
     },

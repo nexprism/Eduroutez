@@ -17,11 +17,25 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import axiosInstance from '@/lib/axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+const organisationOptions = [
+  { value: 'University', label: 'University' },
+  { value: 'College', label: 'College' },
+  { value: 'Institute', label: 'Institute' }
+];
+
 const formSchema = z.object({
   title: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
@@ -40,6 +54,9 @@ const formSchema = z.object({
     .email({
       message: 'Please enter a valid email address.'
     }),
+  organization: z.string({
+    required_error: 'Please select organization.'
+  }),
   password: z
     .string({
       required_error: 'Please enter a password.'
@@ -50,7 +67,10 @@ const formSchema = z.object({
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|.*[!@#$%^&*(),.?":{}|<>]).*$/,
       'Password must contain an uppercase letter, a lowercase letter, and a number or special character.'
-    )
+    ),
+  isBestRatedUniversity: z.boolean().optional(),
+  isBestRatedCollege: z.boolean().optional(),
+  isBestRatedInstitute: z.boolean().optional()
 });
 
 export default function InstituteCreateForm() {
@@ -61,7 +81,11 @@ export default function InstituteCreateForm() {
       title: '',
       phone: '',
       email: '',
+      organization: '',
       password: '',
+      isBestRatedUniversity: false,
+      isBestRatedCollege: false,
+      isBestRatedInstitute: false
     },
   });
 
@@ -71,6 +95,10 @@ export default function InstituteCreateForm() {
       institutePhone: values.phone,
       email: values.email,
       password: values.password,
+      organization: values.organization,
+      isBestRatedUniversity: values.isBestRatedUniversity,
+      isBestRatedCollege: values.isBestRatedCollege,
+      isBestRatedInstitute: values.isBestRatedInstitute,
     };
     mutate(instituteData);
   }
@@ -167,6 +195,35 @@ export default function InstituteCreateForm() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="organization"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Organization</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="select organization" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organisationOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="password"
@@ -174,12 +231,74 @@ export default function InstituteCreateForm() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input placeholder="enter password" {...field} />
+                      <Input
+                        placeholder="enter password"
+                        type="password"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                {form.watch('organization') === 'University' && (
+                  <FormField
+                    control={form.control}
+                    name="isBestRatedUniversity"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-2 space-y-0">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value ?? false}
+                            onChange={e => field.onChange(e.target.checked)}
+                          />
+                        </FormControl>
+                        <FormLabel className="mb-0">Best Rated University</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {form.watch('organization') === 'College' && (
+                  <FormField
+                    control={form.control}
+                    name="isBestRatedCollege"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-2 space-y-0">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value ?? false}
+                            onChange={e => field.onChange(e.target.checked)}
+                          />
+                        </FormControl>
+                        <FormLabel className="mb-0">Best Rated College</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                {form.watch('organization') === 'Institute' && (
+                  <FormField
+                    control={form.control}
+                    name="isBestRatedInstitute"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center gap-2 space-y-0">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value ?? false}
+                            onChange={e => field.onChange(e.target.checked)}
+                          />
+                        </FormControl>
+                        <FormLabel className="mb-0">Best Rated Institute</FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                )}
+              </div>
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={isPending}>

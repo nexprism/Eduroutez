@@ -46,6 +46,24 @@ const orgTypes = [
   { value: 'private', label: 'Private' }
 ];
 
+const organisationOptions = [
+  { value: 'University', label: 'University' },
+  { value: 'College', label: 'College' },
+  { value: 'Institute', label: 'Institute' }
+];
+
+const organisationTypeOptions = [
+  { value: 'Central', label: 'Central' },
+  { value: 'State', label: 'State' },
+  { value: 'Local Body', label: 'Local Body' },
+  { value: 'Private', label: 'Private' },
+  { value: 'Aided', label: 'Aided' },
+  { value: 'Autonomous', label: 'Autonomous' },
+  { value: 'Affiliated', label: 'Affiliated' },
+  { value: 'Deemed', label: 'Deemed' },
+  { value: 'Distance / Open', label: 'Distance / Open' }
+];
+
 const formSchema = z.object({
   instituteName: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
@@ -81,13 +99,32 @@ const formSchema = z.object({
   // about: z.string({
   //   required_error: 'Please enter about.'
   // }),
-  organisationType: z.string({
-    required_error: 'Please select an organization type.'
+  organization: z.string({
+    required_error: 'Please select an organisation.'
   }),
+  organisationType: z.enum(
+    [
+      'Central',
+      'State',
+      'Local Body',
+      'Private',
+      'Aided',
+      'Autonomous',
+      'Affiliated',
+      'Deemed',
+      'Distance / Open'
+    ],
+    {
+      required_error: 'Please select an organisation type.'
+    }
+  ),
   brochure: z.any().optional(),
   examAccepted: z.string().optional(),
   country: z.any(),
-  rank: z.any().optional()
+  rank: z.any().optional(),
+  isBestRatedUniversity: z.boolean().optional(),
+  isBestRatedCollege: z.boolean().optional(),
+  isBestRatedInstitute: z.boolean().optional()
 });
 
 const GeneralInfo = () => {
@@ -195,12 +232,13 @@ const GeneralInfo = () => {
         form.setValue("city", instituteData.city.id);
       }
 
-      // Reset form with all values from API
+        // Reset form with all values from API
       form.reset({
         instituteName: instituteData.instituteName || '',
         institutePhone: instituteData.institutePhone || '',
         email: instituteData.email || '',
         establishedYear: instituteData.establishedYear || '',
+          organization: instituteData.organization || '',
         organisationType: instituteData.organisationType || '',
         website: instituteData.website || '',
         country: instituteData.country?.id || '',
@@ -219,7 +257,10 @@ const GeneralInfo = () => {
         logo: instituteData.instituteLogo,
         brochure: instituteData.brochure,
         examAccepted: instituteData.examAccepted || '',
-        rank: instituteData.rank || ''
+        rank: instituteData.rank || '',
+        isBestRatedUniversity: instituteData.isBestRatedUniversity || false,
+        isBestRatedCollege: instituteData.isBestRatedCollege || false,
+        isBestRatedInstitute: instituteData.isBestRatedInstitute || false
       });
 
       // Update preview URLs with proper null handling
@@ -249,6 +290,7 @@ const GeneralInfo = () => {
       email: '',
       establishedYear: '',
       website: '',
+      organization: '',
       organisationType: '',
       country: '',
       city: '',
@@ -261,7 +303,10 @@ const GeneralInfo = () => {
       highestPackage: '',
       streams: [],
       specialization: '',
-      examAccepted: ''
+      examAccepted: '',
+      isBestRatedUniversity: false,
+      isBestRatedCollege: false,
+      isBestRatedInstitute: false
     }
   });
 
@@ -291,6 +336,7 @@ const GeneralInfo = () => {
     if (values.establishedYear) {
       formData.append('establishedYear', values.establishedYear);
     }
+    formData.append('organization', values.organization);
     formData.append('organisationType', values.organisationType);
     formData.append('website', values.website);
 
@@ -329,6 +375,16 @@ const GeneralInfo = () => {
       if (selectedCity) {
         formData.append('city[name]', selectedCity.name);
       }
+    }
+
+    if (typeof values.isBestRatedUniversity === 'boolean') {
+      formData.append('isBestRatedUniversity', String(values.isBestRatedUniversity));
+    }
+    if (typeof values.isBestRatedCollege === 'boolean') {
+      formData.append('isBestRatedCollege', String(values.isBestRatedCollege));
+    }
+    if (typeof values.isBestRatedInstitute === 'boolean') {
+      formData.append('isBestRatedInstitute', String(values.isBestRatedInstitute));
     }
 
 
@@ -599,7 +655,7 @@ const GeneralInfo = () => {
                     <FormLabel>Phone Number</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter Title"
+                        placeholder="Enter phone number"
                         {...field}
                         type="number"
                       />
@@ -615,7 +671,7 @@ const GeneralInfo = () => {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter Title" {...field} />
+                      <Input placeholder="Enter email" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -629,7 +685,7 @@ const GeneralInfo = () => {
                     <FormLabel>Established Year</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter Title"
+                        placeholder="Enter year"
                         {...field}
                         type="number"
                       />
@@ -638,29 +694,50 @@ const GeneralInfo = () => {
                   </FormItem>
                 )}
               />
-
+              <FormField
+                control={form.control}
+                name="organization"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Organisation</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select organisation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organisationOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="organisationType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Organization Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}                     >
-                      <FormControl>
+                    <FormLabel>Organisation Type</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Organization Type" />
+                          <SelectValue placeholder="Select organisation type" />
                         </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="max-h-60 overflow-y-auto">
-                        {orgTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectContent>
+                          {organisationTypeOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -837,6 +914,64 @@ const GeneralInfo = () => {
                   </FormItem>
                 )}
               />
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {form.watch('organization') === 'University' && (
+                <FormField
+                  control={form.control}
+                  name="isBestRatedUniversity"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value ?? false}
+                          onChange={e => field.onChange(e.target.checked)}
+                        />
+                      </FormControl>
+                      <FormLabel className="mb-0">Best Rated University</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {form.watch('organization') === 'College' && (
+                <FormField
+                  control={form.control}
+                  name="isBestRatedCollege"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value ?? false}
+                          onChange={e => field.onChange(e.target.checked)}
+                        />
+                      </FormControl>
+                      <FormLabel className="mb-0">Best Rated College</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {form.watch('organization') === 'Institute' && (
+                <FormField
+                  control={form.control}
+                  name="isBestRatedInstitute"
+                  render={({ field }) => (
+                    <FormItem className="flex items-center gap-2 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          checked={field.value ?? false}
+                          onChange={e => field.onChange(e.target.checked)}
+                        />
+                      </FormControl>
+                      <FormLabel className="mb-0">Best Rated Institute</FormLabel>
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
             <FormField
               control={form.control}
