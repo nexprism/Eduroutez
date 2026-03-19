@@ -95,20 +95,21 @@ export default function CounselorForm() {
   });
   const router = useRouter();
 
-  // Fetch categories/streams
+  // Fetch counsellor-specific stream categories
   const { data: categories } = useQuery({
-    queryKey: ['streams', 0], // Added page to queryKey
+    queryKey: ['streams', 0, 'counsellor'],
     queryFn: async () => {
       try {
         const response = await axiosInstance.get(`${apiUrl}/streams`, {
           params: {
             page: 0,
-            limit: 200
+            limit: 200,
+            filters: JSON.stringify({ isCounsellorStream: true })
           }
         });
         return response.data?.data?.result || [];
       } catch (error) {
-        console.error('Error fetching streams:', error);
+        console.error('Error fetching counsellor streams:', error);
         return [];
       }
     }

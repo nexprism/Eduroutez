@@ -673,12 +673,13 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         const response = await axiosInstance.get(`${apiUrl}/streams`, {
           params: {
             page: 0,
-            limit: 200
+            limit: 200,
+            filters: JSON.stringify({ isCounsellorStream: true })
           }
         });
         setStreamCategories(response.data.data.result || []);
       } catch (error) {
-        console.error('Failed to fetch stream categories', error);
+        console.error('Failed to fetch counsellor stream categories', error);
         toast.error('Unable to load categories');
       }
     };

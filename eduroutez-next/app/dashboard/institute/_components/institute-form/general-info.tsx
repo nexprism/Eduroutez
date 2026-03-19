@@ -184,14 +184,13 @@ const GeneralInfo = () => {
   useEffect(() => {
     const fetchStreams = async () => {
       try {
-        const response = await axiosInstance.get(`${apiUrl}/streams`,
-          {
-            params: {
-              page: 0,
-              limit: 200
-            }
+        const response = await axiosInstance.get(`${apiUrl}/streams`, {
+          params: {
+            page: 0,
+            limit: 200,
+            filters: JSON.stringify({ isCourseStream: true })
           }
-        );
+        });
         console.log('streams', response.data);
         setStreams(response.data?.data?.result || []);
       } catch (error) {
