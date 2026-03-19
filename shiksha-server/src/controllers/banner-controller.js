@@ -83,24 +83,48 @@ export async function getBanner(req, res) {
  */
 export async function updateBanner(req, res) {
   try {
-    const bannerId = req.params.id;
-    const payload = {};
+    multiUploader(req, res, async function (err) {
+      if (err) {
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json({ message: "Something went wrong. Please try again later." });
+      }
 
-    if (req.body.title) {
-      payload.title = req.body.title;
-    }
-    if (req.body.work) {
-      payload.work = req.body.work;
-    }
+      try {
+        const bannerId = req.params.id;
+        const payload = {};
 
-    const response = await bannerService.update(bannerId, payload);
+        if (req.body.title) {
+          payload.title = req.body.title;
+        }
+        if (req.body.work) {
+          payload.work = req.body.work;
+        }
 
-    SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully updated the banner";
-    return res.status(StatusCodes.OK).json(SuccessResponse);
+        if (req.files && req.files["images"]) {
+          payload.images = req.files["images"].map((file) => file.filename);
+        }
+        if (req.files && req.files["video"]) {
+          payload.video = req.files["video"][0].filename;
+        }
+
+        const response = await bannerService.update(bannerId, payload);
+
+        SuccessResponse.data = response;
+        SuccessResponse.message = "Successfully updated the banner";
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+      } catch (error) {
+        ErrorResponse.error = error;
+        return res
+          .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+          .json(ErrorResponse);
+      }
+    });
   } catch (error) {
     ErrorResponse.error = error;
-    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+    return res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(ErrorResponse);
   }
 }
 
