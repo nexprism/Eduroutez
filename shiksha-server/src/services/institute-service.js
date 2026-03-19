@@ -484,7 +484,11 @@ escapeRegex(str) {
 
       return institute;
     } catch (error) {
-      throw new AppError("Cannot update the institute ", StatusCodes.INTERNAL_SERVER_ERROR);
+      console.error("Raw error while updating institute:", error?.message || error);
+      throw new AppError(
+        `Cannot update the institute: ${error?.message || "Unknown error"}`,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
