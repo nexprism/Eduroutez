@@ -429,7 +429,7 @@ router.delete("/level/:id", accessTokenAutoRefresh, passport.authenticate("jwt",
  * banner routes
  */
 router.post("/banner", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createBanner);
-router.get("/banners", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBanners);
+router.get("/banners", getBanners);
 router.get("/banner/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getBanner);
 router.patch("/banner/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateBanner);
 router.delete("/banner/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteBanner);
