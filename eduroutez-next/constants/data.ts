@@ -273,6 +273,13 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Coupons',
+    url: '/dashboard/coupons',
+    icon: 'ticket',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
     title: 'FAQs',
     url: '/dashboard/question-answer',
     icon: 'message-circle-question',

@@ -277,6 +277,24 @@ export async function getMyRefferal(req, res) {
   }
 }
 
+// my coupons based on referral count
+export async function getMyCoupons(req, res) {
+  try {
+    const userId = req.user._id;
+    const response = await userService.getMyCoupons(userId);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched my coupons";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.error('Error in getMyCoupons:', error.message);
+
+    return res
+      .status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(ErrorResponse);
+  }
+}
+
 
 export async function getAllRefferal(req, res) {
   try {

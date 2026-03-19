@@ -126,14 +126,21 @@ class UserService {
   ////update referalUser my_referrals
   async updateReferalUser(referalUser, userId) {
     try {
-      const my_referrals = [];
-      if (referalUser.my_referrals) {
+      // Ensure we keep existing referrals and append the new one once
+      const my_referrals = Array.isArray(referalUser.my_referrals)
+        ? [...referalUser.my_referrals]
+        : [];
+
+      const userIdStr = userId.toString();
+      const alreadyReferred = my_referrals.some((id) => id.toString() === userIdStr);
+
+      if (!alreadyReferred) {
         my_referrals.push(userId);
       }
 
       const referdata = {
-        my_referrals: my_referrals,
-        points: referalUser.points + 50,
+        my_referrals,
+        points: (referalUser.points || 0) + 50,
       };
 
       const referalUserPayload = { ...referdata };
@@ -145,6 +152,48 @@ class UserService {
       return referalUserResponse;
     } catch (error) {
       throw error;
+    }
+  }
+
+  // Compute "my coupons" based on referral count (e.g. 1 coupon after 9 referrals)
+  async getMyCoupons(userId) {
+    try {
+      // Count actual referred users using refer_by field
+      const referredUsers = await this.userRepository.getAll({ refer_by: userId });
+
+      let referralCount = 0;
+
+      if (Array.isArray(referredUsers)) {
+        referralCount = referredUsers.length;
+      } else if (
+        referredUsers &&
+        typeof referredUsers === "object" &&
+        typeof referredUsers.totalDocuments === "number"
+      ) {
+        referralCount = referredUsers.totalDocuments;
+      }
+
+      const hasWebinarCoupon = referralCount >= 9;
+
+      const coupons = [];
+
+      if (hasWebinarCoupon) {
+        coupons.push({
+          code: "WEBINAR9",
+          description: "Webinar referral reward coupon for inviting 9 friends.",
+          referralCount,
+        });
+      }
+
+      return {
+        referralCount,
+        coupons,
+      };
+    } catch (error) {
+      throw new AppError(
+        "Cannot fetch data of my coupons",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
     }
   }
 

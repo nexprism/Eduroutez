@@ -13,6 +13,7 @@ import { CalendarDateRangePicker } from '@/components/date-range-picker';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Users, Building2, Activity, DollarSign, BookOpen, GraduationCap, TrendingUp, CircleDollarSign } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
+import Link from 'next/link';
 
 const Dashboard = () => {
   const [role, setRole] = useState('');
@@ -165,13 +166,11 @@ const fetchCounselorData = async () => {
             <h1 className="text-2xl font-bold">Institute Dashboard Overview 👋</h1>
             <p className="text-muted-foreground">Monitor your institute's performance and metrics.</p>
           </div>
-          {/* <div className="flex items-center gap-2">
-            <CalendarDateRangePicker />
-            <Button className="bg-primary">
-              <DollarSign className="mr-2 h-4 w-4" />
-              Download Report
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link href="/dashboard/webinar">Go to Webinars</Link>
             </Button>
-          </div> */}
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -318,13 +317,11 @@ const fetchCounselorData = async () => {
           <h1 className="text-2xl font-bold">Admin Dashboard Overview 👋</h1>
           <p className="text-muted-foreground">Monitor your platform metrics and performance.</p>
         </div>
-        {/* <div className="flex items-center gap-2">
-          <CalendarDateRangePicker />
-          <Button className="bg-primary">
-            <DollarSign className="mr-2 h-4 w-4" />
-            Download Report
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline">
+            <Link href="/dashboard/webinar">Go to Webinars</Link>
           </Button>
-        </div> */}
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">

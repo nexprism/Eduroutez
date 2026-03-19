@@ -9,7 +9,7 @@ import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from 
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
 import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
-import { getUsers, updateUser, allowUser, denyUser, holdUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike, submitReview, updateAllSlugs } from "../../controllers/users-controller.js";
+import { getUsers, updateUser, allowUser, denyUser, holdUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike, submitReview, updateAllSlugs, getMyCoupons } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory, getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, trendingStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
@@ -443,6 +443,7 @@ router.get("/users", UserMiddleware.validateGetAllRequest, accessTokenAutoRefres
 //get my refferal api
 router.get("/counselors", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselors);
 router.get("/my-refferal", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyRefferal);
+router.get("/my-coupons", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyCoupons);
 router.get("/all-refferal", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getAllRefferal);
 //get-eaarning-reports
 router.get("/earning-reports", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), earningReports);

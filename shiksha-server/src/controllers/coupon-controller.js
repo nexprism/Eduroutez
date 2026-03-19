@@ -30,7 +30,11 @@ export const createCoupon = async (req, res) => {
   } catch (error) {
     ErrorResponse.error = error;
 
-    return res.status(error.statusCode).json(ErrorResponse);
+    const statusCode = Number.isInteger(error?.statusCode)
+      ? error.statusCode
+      : 500;
+
+    return res.status(statusCode).json(ErrorResponse);
   }
 };
 
@@ -48,7 +52,12 @@ export async function getCoupons(req, res) {
   } catch (error) {
     console.error("Error creating coupon:", error);
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+
+    const statusCode = Number.isInteger(error?.statusCode)
+      ? error.statusCode
+      : 500;
+
+    return res.status(statusCode).json(ErrorResponse);
   }
 }
 
@@ -67,7 +76,12 @@ export async function getCoupon(req, res) {
     console.log("error aa gu", error);
 
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+
+    const statusCode = Number.isInteger(error?.statusCode)
+      ? error.statusCode
+      : 500;
+
+    return res.status(statusCode).json(ErrorResponse);
   }
 }
 
@@ -154,6 +168,11 @@ export async function deleteCoupon(req, res) {
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+
+    const statusCode = Number.isInteger(error?.statusCode)
+      ? error.statusCode
+      : 500;
+
+    return res.status(statusCode).json(ErrorResponse);
   }
 }

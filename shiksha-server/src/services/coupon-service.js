@@ -1,4 +1,6 @@
+import { StatusCodes } from "http-status-codes";
 import { CouponRepository } from "../repository/index.js";
+import AppError from "../utils/errors/app-error.js";
 
 class CouponService {
   constructor() {
@@ -17,16 +19,37 @@ class CouponService {
   async getAll(query) {
     try {
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
-      const pageNum = parseInt(page);
-      const limitNum = parseInt(limit);
+      const pageNum = parseInt(page) || 1;
+      const limitNum = parseInt(limit) || 10;
 
-      // Parse JSON strings from query parameters to objects
-      const parsedFilters = JSON.parse(filters);
-      const parsedSearchFields = JSON.parse(searchFields);
-      const parsedSort = JSON.parse(sort);
+      // Parse JSON strings from query parameters to objects (with safety)
+      let parsedFilters = {};
+      let parsedSearchFields = {};
+      let parsedSort = {};
+
+      try {
+        parsedFilters = typeof filters === "string" ? JSON.parse(filters) : filters;
+      } catch (e) {
+        console.error("Error parsing coupon filters:", e.message);
+        parsedFilters = {};
+      }
+
+      try {
+        parsedSearchFields = typeof searchFields === "string" ? JSON.parse(searchFields) : searchFields;
+      } catch (e) {
+        console.error("Error parsing coupon searchFields:", e.message);
+        parsedSearchFields = {};
+      }
+
+      try {
+        parsedSort = typeof sort === "string" ? JSON.parse(sort) : sort;
+      } catch (e) {
+        console.error("Error parsing coupon sort:", e.message);
+        parsedSort = {};
+      }
 
       // Build filter conditions for multiple fields
-    const filterConditions = { deletedAt: null };
+      const filterConditions = { deletedAt: null };
 
       for (const [key, value] of Object.entries(parsedFilters)) {
         if (parsedFilters.category !== "by-category") {
@@ -50,8 +73,16 @@ class CouponService {
       }
 
       // Execute query with dynamic filters, sorting, and pagination
-      const populateFields = ["createdBy", "category"];
-      const coupons = await this.couponRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+      // Note: We only populate `createdBy` because there is no registered
+      // Mongoose model named "Category" for the `category` field.
+      const populateFields = ["createdBy"];
+      const coupons = await this.couponRepository.getAll(
+        filterConditions,
+        sortConditions,
+        pageNum,
+        limitNum,
+        populateFields
+      );
 
       // Check if grouping by category is requested
       if (parsedFilters.category === "by-category") {
