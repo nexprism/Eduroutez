@@ -47,8 +47,6 @@ const orgTypes = [
 ];
 
 const organisationOptions = [
-  { value: 'University', label: 'University' },
-  { value: 'College', label: 'College' },
   { value: 'Institute', label: 'Institute' }
 ];
 
@@ -124,10 +122,15 @@ const formSchema = z.object({
   rank: z.any().optional(),
   isBestRatedUniversity: z.boolean().optional(),
   isBestRatedCollege: z.boolean().optional(),
-  isBestRatedInstitute: z.boolean().optional()
+  isBestRatedInstitute: z.boolean().optional(),
+
 });
 
 const GeneralInfo = () => {
+  const [role, setRole] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    setRole(typeof window !== 'undefined' ? localStorage.getItem('role') : null);
+  }, []);
   const [previewThumbnailUrl, setPreviewThumbnailUrl] = React.useState<
     string | null
   >(null);
@@ -259,7 +262,8 @@ const GeneralInfo = () => {
         rank: instituteData.rank || '',
         isBestRatedUniversity: instituteData.isBestRatedUniversity || false,
         isBestRatedCollege: instituteData.isBestRatedCollege || false,
-        isBestRatedInstitute: instituteData.isBestRatedInstitute || false
+        isBestRatedInstitute: instituteData.isBestRatedInstitute || false,
+
       });
 
       // Update preview URLs with proper null handling
@@ -305,7 +309,8 @@ const GeneralInfo = () => {
       examAccepted: '',
       isBestRatedUniversity: false,
       isBestRatedCollege: false,
-      isBestRatedInstitute: false
+      isBestRatedInstitute: false,
+
     }
   });
 
@@ -385,6 +390,7 @@ const GeneralInfo = () => {
     if (typeof values.isBestRatedInstitute === 'boolean') {
       formData.append('isBestRatedInstitute', String(values.isBestRatedInstitute));
     }
+
 
 
     mutate(formData);
@@ -915,45 +921,7 @@ const GeneralInfo = () => {
               />
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              {form.watch('organization') === 'University' && (
-                <FormField
-                  control={form.control}
-                  name="isBestRatedUniversity"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center gap-2 space-y-0">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value ?? false}
-                          onChange={e => field.onChange(e.target.checked)}
-                        />
-                      </FormControl>
-                      <FormLabel className="mb-0">Best Rated University</FormLabel>
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              {form.watch('organization') === 'College' && (
-                <FormField
-                  control={form.control}
-                  name="isBestRatedCollege"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center gap-2 space-y-0">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value ?? false}
-                          onChange={e => field.onChange(e.target.checked)}
-                        />
-                      </FormControl>
-                      <FormLabel className="mb-0">Best Rated College</FormLabel>
-                    </FormItem>
-                  )}
-                />
-              )}
-
-              {form.watch('organization') === 'Institute' && (
+              {role === 'SUPER_ADMIN' && (
                 <FormField
                   control={form.control}
                   name="isBestRatedInstitute"

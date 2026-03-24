@@ -14,9 +14,15 @@ function YearCaption(props: CaptionProps) {
   const { displayMonth } = props;
   const { goToMonth } = useNavigation();
   const currentYear = displayMonth.getFullYear();
+  const currentMonth = displayMonth.getMonth();
 
   const years = React.useMemo(
     () => Array.from({ length: 40 }, (_, i) => 2000 + i),
+    []
+  );
+
+  const months = React.useMemo(
+    () => Array.from({ length: 12 }, (_, i) => format(new Date(2020, i, 1), 'MMMM')),
     []
   );
 
@@ -27,15 +33,32 @@ function YearCaption(props: CaptionProps) {
     goToMonth(newMonth);
   };
 
+  const handleMonthChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMonthIndex = Number(event.target.value);
+    const newMonth = new Date(displayMonth);
+    newMonth.setMonth(newMonthIndex);
+    goToMonth(newMonth);
+  };
+
   return (
-    <div className="flex items-center justify-between px-2 pt-1">
-      <span className="text-sm font-medium">
-        {format(displayMonth, 'MMMM yyyy')}
-      </span>
+    <div className="flex w-full items-center justify-center gap-2 px-8 pt-1">
       <select
-        className="h-7 rounded border px-2 text-xs focus:outline-none"
+        className="h-7 rounded border bg-background px-2 text-xs focus:outline-none"
+        value={currentMonth}
+        onChange={handleMonthChange}
+        aria-label="Select month"
+      >
+        {months.map((month, index) => (
+          <option key={month} value={index}>
+            {month}
+          </option>
+        ))}
+      </select>
+      <select
+        className="h-7 rounded border bg-background px-2 text-xs focus:outline-none"
         value={currentYear}
         onChange={handleYearChange}
+        aria-label="Select year"
       >
         {years.map((year) => (
           <option key={year} value={year}>

@@ -50,8 +50,6 @@ const orgTypes = [
 ];
 
 const organisationOptions = [
-  { value: 'University', label: 'University' },
-  { value: 'College', label: 'College' },
   { value: 'Institute', label: 'Institute' }
 ];
 
@@ -129,7 +127,7 @@ const formSchema = z.object({
   rank: z.any().optional(),
   isBestRatedUniversity: z.boolean().optional(),
   isBestRatedCollege: z.boolean().optional(),
-  isBestRatedInstitute: z.boolean().optional()
+
 });
 
 
@@ -276,7 +274,7 @@ const [initialCityName, setInitialCityName] = useState("");
           rank: instituteData.rank || '',
           isBestRatedUniversity: instituteData.isBestRatedUniversity || false,
           isBestRatedCollege: instituteData.isBestRatedCollege || false,
-          isBestRatedInstitute: instituteData.isBestRatedInstitute || false
+
         });
 
         setPreviewThumbnailUrl(instituteData.thumbnailImage && instituteData.thumbnailImage !== "null" 
@@ -318,7 +316,7 @@ const [initialCityName, setInitialCityName] = useState("");
       examAccepted: '', // Add this line
       isBestRatedUniversity: false,
       isBestRatedCollege: false,
-      isBestRatedInstitute: false
+
     }
   });
 
@@ -370,9 +368,7 @@ const [initialCityName, setInitialCityName] = useState("");
     if (typeof values.isBestRatedCollege === 'boolean') {
       formData.append('isBestRatedCollege', String(values.isBestRatedCollege));
     }
-    if (typeof values.isBestRatedInstitute === 'boolean') {
-      formData.append('isBestRatedInstitute', String(values.isBestRatedInstitute));
-    }
+
     
     // Original address field
     formData.append('address', values.address);
@@ -915,62 +911,9 @@ const [initialCityName, setInitialCityName] = useState("");
               />
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              {form.watch('organization') === 'University' && (
-                <FormField
-                  control={form.control}
-                  name="isBestRatedUniversity"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center gap-2 space-y-0">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value ?? false}
-                          onChange={e => field.onChange(e.target.checked)}
-                        />
-                      </FormControl>
-                      <FormLabel className="mb-0">Best Rated University</FormLabel>
-                    </FormItem>
-                  )}
-                />
-              )}
 
-              {form.watch('organization') === 'College' && (
-                <FormField
-                  control={form.control}
-                  name="isBestRatedCollege"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center gap-2 space-y-0">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value ?? false}
-                          onChange={e => field.onChange(e.target.checked)}
-                        />
-                      </FormControl>
-                      <FormLabel className="mb-0">Best Rated College</FormLabel>
-                    </FormItem>
-                  )}
-                />
-              )}
 
-              {form.watch('organization') === 'Institute' && (
-                <FormField
-                  control={form.control}
-                  name="isBestRatedInstitute"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center gap-2 space-y-0">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value ?? false}
-                          onChange={e => field.onChange(e.target.checked)}
-                        />
-                      </FormControl>
-                      <FormLabel className="mb-0">Best Rated Institute</FormLabel>
-                    </FormItem>
-                  )}
-                />
-              )}
+
             </div>
                    <FormField
                      control={form.control}

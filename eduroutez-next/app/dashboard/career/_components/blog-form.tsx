@@ -581,7 +581,7 @@ export default function CounselorForm() {
                 name="topColleges"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Top Colleges</FormLabel>
+                    <FormLabel>Top Institutes</FormLabel>
                     <FormControl>
                       <Controller
                         name="topColleges"
