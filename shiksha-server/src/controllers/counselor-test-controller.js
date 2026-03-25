@@ -13,8 +13,9 @@ export const canCounselorGiveTest = async (req, res) => {
         // Find the counselor
         const counselor = await counselorRepository.getByid(counselorId);
         if (!counselor) {
-            ErrorResponse.error = "Counselor not found";
-            return res.status(StatusCodes.NOT_FOUND).json(ErrorResponse);
+            SuccessResponse.data = { eligible: false, reason: "need to pay" };
+            SuccessResponse.message = "Counselor needs to pay.";
+            return res.status(StatusCodes.OK).json(SuccessResponse);
         }
 
         // Find the latest COMPLETED transaction for this counselor (user)
