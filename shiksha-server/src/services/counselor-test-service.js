@@ -14,10 +14,24 @@ class CounselorTestService {
     // Counselor: Start process / Record Payment
     async recordPayment(counselorId, paymentDetails) {
         try {
+            // Create a Transaction with status COMPLETED
+            const { amount, subscription, paymentId, remarks } = paymentDetails;
+            const Transaction = (await import("../models/Transaction.js")).default;
+            const transaction = await Transaction.create({
+                user: counselorId,
+                subscription: subscription || null,
+                amount: amount || 0,
+                transactionDate: new Date(),
+                remarks: remarks || "Counselor test payment",
+                paymentId: paymentId || (Math.random().toString(36).substring(2, 15)),
+                status: "COMPLETED",
+            });
+
+            // Update counselor status
             const updatedCounselor = await this.counselorRepository.updateCounsellor(counselorId, {
                 verificationStatus: "test_pending",
             });
-            return updatedCounselor;
+            return { ...updatedCounselor.toObject(), transactionId: transaction._id };
         } catch (error) {
             throw error;
         }

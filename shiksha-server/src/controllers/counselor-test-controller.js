@@ -1,3 +1,64 @@
+// Counselor: Check if eligible to give test (within 30 days of payment, not already taken)
+import { TransactionRepository } from "../repository/transaction-repository.js";
+import CounselorTestResultRepository from "../repository/counselor-test-result-repository.js";
+import { CounselorRepository } from "../repository/counselor-repository.js";
+
+const transactionRepository = new TransactionRepository();
+const testResultRepository = new CounselorTestResultRepository();
+const counselorRepository = new CounselorRepository();
+
+export const canCounselorGiveTest = async (req, res) => {
+    try {
+        const counselorId = req.user._id;
+        // Find the counselor
+        const counselor = await counselorRepository.getByid(counselorId);
+        if (!counselor) {
+            ErrorResponse.error = "Counselor not found";
+            return res.status(StatusCodes.NOT_FOUND).json(ErrorResponse);
+        }
+
+        // Find the latest COMPLETED transaction for this counselor (user)
+        const transaction = await transactionRepository.model.findOne({
+            user: counselorId,
+            status: "COMPLETED"
+        }).sort({ transactionDate: -1 });
+
+        if (!transaction) {
+            SuccessResponse.data = { eligible: false, reason: "No completed payment found" };
+            SuccessResponse.message = "Counselor has not paid yet.";
+            return res.status(StatusCodes.OK).json(SuccessResponse);
+        }
+
+        // Check if the payment is within 30 days
+        const now = new Date();
+        const paymentDate = new Date(transaction.transactionDate);
+        const diffDays = Math.floor((now - paymentDate) / (1000 * 60 * 60 * 24));
+        if (diffDays > 30) {
+            SuccessResponse.data = { eligible: false, reason: "Payment expired", paymentDate };
+            SuccessResponse.message = "Payment is older than 30 days.";
+            return res.status(StatusCodes.OK).json(SuccessResponse);
+        }
+
+        // Check if counselor has already given the test after this payment
+        const testResult = await testResultRepository.model.findOne({
+            counselorId: counselorId,
+            paymentId: transaction.paymentId
+        });
+
+        if (testResult) {
+            SuccessResponse.data = { eligible: false, reason: "Test already taken for this payment", testResultId: testResult._id };
+            SuccessResponse.message = "Counselor has already taken the test for this payment.";
+            return res.status(StatusCodes.OK).json(SuccessResponse);
+        }
+
+        SuccessResponse.data = { eligible: true, paymentDate };
+        SuccessResponse.message = "Counselor is eligible to take the test.";
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.status(error.statusCode || 500).json(ErrorResponse);
+    }
+};
 import { StatusCodes } from "http-status-codes";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import CounselorTestService from "../services/counselor-test-service.js";

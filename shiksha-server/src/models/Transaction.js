@@ -11,7 +11,7 @@ const transactionSchema = new mongoose.Schema(
     subscription: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Subscription", // Reference to the subscription purchased
-      required: true,
+      required: false,
     },
     amount: {
       type: Number,

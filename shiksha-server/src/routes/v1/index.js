@@ -238,6 +238,11 @@ router.post("/counselor-test/verify/:id", accessTokenAutoRefresh, passport.authe
 
 // Counselor only
 router.post("/counselor-test/record-payment", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), recordPayment);
+
+// Counselor: Check if eligible to give test
+import { canCounselorGiveTest } from "../../controllers/counselor-test-controller.js";
+router.get("/counselor-test/can-give", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), canCounselorGiveTest);
+
 router.get("/counselor-test/questions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getRandomTestSet);
 router.post("/counselor-test/submit", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitTestResult);
 
