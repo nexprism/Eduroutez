@@ -85,8 +85,8 @@ class UserService {
 
       const counselor = await this.counselorRepository.getByid(userObj._id);
       if (counselor) {
-        // If they have a counselor record but role is not set, sync it
-        if (userObj.role !== 'counsellor' && userObj.role !== 'admin' && userObj.role !== 'SUPER_ADMIN') {
+        // Only set role to counsellor if counselor is verified
+        if (counselor.isVerified === true && userObj.role !== 'counsellor' && userObj.role !== 'admin' && userObj.role !== 'SUPER_ADMIN') {
           await this.userRepository.update(userObj._id, { role: 'counsellor', level: 'Career Advisor' });
           userObj.role = 'counsellor';
           userObj.level = 'Career Advisor';
@@ -315,8 +315,8 @@ class UserService {
 
       const counselor = await this.counselorRepository.getByid(userObj._id);
       if (counselor) {
-        // If they have a counselor record but role is not set, sync it
-        if (userObj.role !== 'counsellor' && userObj.role !== 'admin' && userObj.role !== 'SUPER_ADMIN') {
+        // Only set role to counsellor if counselor is verified
+        if (counselor.isVerified === true && userObj.role !== 'counsellor' && userObj.role !== 'admin' && userObj.role !== 'SUPER_ADMIN') {
           await this.userRepository.update(userObj._id, { role: 'counsellor', level: 'Career Advisor' });
           userObj.role = 'counsellor';
           userObj.level = 'Career Advisor';

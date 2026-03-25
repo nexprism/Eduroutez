@@ -89,8 +89,7 @@ export const createCounselor = async (req, res) => {
         email: req.body.email,
         contact_number: req.body.contactno,
         password: req.body.password,
-        role: "counsellor",
-        is_verified: true,
+        // role and is_verified will be set after admin approval
       };
 
       const userResponse = await userService.signup(userPayload, res);

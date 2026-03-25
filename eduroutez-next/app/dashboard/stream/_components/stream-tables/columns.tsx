@@ -6,6 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Stream } from '@/types';
 
 export const columns: ColumnDef<Stream>[] = [
+    {
+      header: 'TYPE',
+      cell: ({ row }) => {
+        const isCourse = !!row.original.isCourseStream;
+        const isCounsellor = !!row.original.isCounsellorStream;
+        let label = '';
+        if (isCourse && isCounsellor) label = 'Both';
+        else if (isCourse && !isCounsellor) label = 'College';
+        else if (isCounsellor && !isCourse) label = 'Counsellor';
+        return label ? <Badge className="text-xs">{label}</Badge> : null;
+      }
+    },
   // {
   //   id: 'select',
   //   header: ({ table }) => (

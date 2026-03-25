@@ -159,6 +159,7 @@ class CounselorTestService {
                 isVerified: true,
                 verifiedBadge: true,
                 certificateUrl,
+                setRoleCounsellor: true,
             });
             return updatedCounselor;
         } catch (error) {
