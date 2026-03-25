@@ -39,15 +39,20 @@ export const canCounselorGiveTest = async (req, res) => {
             return res.status(StatusCodes.OK).json(SuccessResponse);
         }
 
-        // Check if counselor has already given the test after this payment
+
+        // Always require a new payment for each test attempt, regardless of result status
         const testResult = await testResultRepository.model.findOne({
             counselorId: counselorId,
             paymentId: transaction.paymentId
         });
 
         if (testResult) {
-            SuccessResponse.data = { eligible: false, reason: "Test already taken for this payment", testResultId: testResult._id };
-            SuccessResponse.message = "Counselor has already taken the test for this payment.";
+            SuccessResponse.data = {
+                eligible: false,
+                reason: "Test already taken for this payment, please pay again to retake.",
+                testResultId: testResult._id
+            };
+            SuccessResponse.message = "Counselor has already taken the test for this payment. Please pay again to retake the test.";
             return res.status(StatusCodes.OK).json(SuccessResponse);
         }
 

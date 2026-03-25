@@ -78,6 +78,15 @@ class CounselorTestService {
                 throw new AppError("Question set not found", StatusCodes.NOT_FOUND);
             }
 
+            // Find the latest COMPLETED transaction for this counselor
+            const Transaction = (await import("../models/Transaction.js")).default;
+            const latestTransaction = await Transaction.findOne({
+                user: counselorId,
+                status: "COMPLETED"
+            }).sort({ transactionDate: -1 });
+
+            let paymentId = latestTransaction ? latestTransaction.paymentId : undefined;
+
             let score = 0;
             const processedAnswers = answers.map((ans) => {
                 const question = questionSet.questions.id(ans.questionId);
@@ -101,10 +110,10 @@ class CounselorTestService {
                 totalQuestions: questionSet.totalQuestions,
                 timeTaken,
                 status: resultStatus,
+                paymentId // Save paymentId in test result
             });
 
             // Update Counselor status
-            // We need to make sure we don't hit validation errors if creating a new counselor
             const counselorUpdateData = {
                 verificationStatus: "verification_in_progress",
                 testResult: testResult._id,
