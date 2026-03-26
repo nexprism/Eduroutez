@@ -18,6 +18,9 @@ const bannerSchema = new mongoose.Schema(
     video: {
       type: String,
     },
+    destinationLink: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
