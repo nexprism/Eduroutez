@@ -118,3 +118,35 @@ export async function deleteMedia(req, res) {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 }
+/**
+ * POST : /upload-editor
+ * req.file {}
+ */
+export async function uploadEditorFile(req, res) {
+  try {
+    if (!req.file) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: "No file uploaded",
+        success: false
+      });
+    }
+
+    // Return the filename or full URL. 
+    // Since images are served via /images/:filename, we return that.
+    const filename = req.file.filename;
+    
+    // CKEditor 5 Simple Upload Adapter expects an object with a 'url' property
+    // The images are served from /api/uploads
+    const imageUrl = process.env.IMAGES_URL || `http://localhost:4001/api/uploads`;
+    
+    return res.status(StatusCodes.OK).json({
+      url: `${imageUrl}/${req.file.filename}`,
+      filename: filename, // Keeping filename for consistency, though CKEditor might only need 'url'
+      success: true
+    });
+  } catch (error) {
+    console.error("Upload Editor File error:", error);
+    ErrorResponse.error = error;
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+}

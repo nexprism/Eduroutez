@@ -37,7 +37,9 @@ import {
   TableToolbar,
   TextTransformation,
   TodoList,
-  Underline
+  Underline,
+  FileRepository,
+  ButtonView
 } from 'ckeditor5';
 
 import 'ckeditor5/ckeditor5.css';
@@ -46,6 +48,157 @@ import 'ckeditor5/ckeditor5.css';
  * Create a free account with a trial: https://portal.ckeditor.com/checkout?plan=free
  */
 const LICENSE_KEY = 'GPL'; // or <YOUR_LICENSE_KEY>.
+
+class MyUploadAdapter {
+  constructor(loader, url) {
+    this.loader = loader;
+    this.url = url;
+  }
+
+  upload() {
+    return this.loader.file.then(
+      (file) =>
+        new Promise((resolve, reject) => {
+          this._initRequest();
+          this._initListeners(resolve, reject, file);
+          this._sendRequest(file);
+        })
+    );
+  }
+
+  abort() {
+    if (this.xhr) {
+      this.xhr.abort();
+    }
+  }
+
+  _initRequest() {
+    const xhr = (this.xhr = new XMLHttpRequest());
+    xhr.open('POST', this.url, true);
+    xhr.responseType = 'json';
+
+    // Add authentication headers
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      xhr.setRequestHeader('x-access-token', accessToken);
+    }
+  }
+
+  _initListeners(resolve, reject, file) {
+    const xhr = this.xhr;
+    const loader = this.loader;
+    const genericErrorText = `Couldn't upload file: ${file.name}.`;
+
+    xhr.addEventListener('error', () => reject(genericErrorText));
+    xhr.addEventListener('abort', () => reject());
+    xhr.addEventListener('load', () => {
+      const response = xhr.response;
+
+      if (!response || response.error) {
+        return reject(response && response.error ? response.error.message : genericErrorText);
+      }
+
+      resolve({
+        default: response.url
+      });
+    });
+
+    if (xhr.upload) {
+      xhr.upload.addEventListener('progress', (evt) => {
+        if (evt.lengthComputable) {
+          loader.uploadTotal = evt.total;
+          loader.uploaded = evt.loaded;
+        }
+      });
+    }
+  }
+
+  _sendRequest(file) {
+    const data = new FormData();
+    data.append('upload', file);
+    this.xhr.send(data);
+  }
+}
+
+function MediaUploadSupport(editor) {
+  // Configures the upload adapter
+  editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api/v1';
+    return new MyUploadAdapter(loader, `${apiUrl}/upload-editor`);
+  };
+
+  // Registers the videoUpload component
+  editor.ui.componentFactory.add('videoUpload', (locale) => {
+    const view = new ButtonView(locale);
+
+    view.set({
+      label: 'Upload Video',
+      icon: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10 15l5.197-3L10 9v6z"/><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 18V6h16v12H4z"/></svg>',
+      tooltip: true
+    });
+
+    view.on('execute', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'video/*';
+
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('upload', file);
+
+        const accessToken = localStorage.getItem('accessToken');
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api/v1';
+
+        try {
+          const response = await fetch(`${apiUrl}/upload-editor`, {
+            method: 'POST',
+            headers: {
+              'x-access-token': accessToken || ''
+            },
+            body: formData
+          });
+
+          const data = await response.json();
+          console.log('Video upload response:', data);
+          console.log('Available editor commands:', Array.from(editor.commands.names()));
+          
+          if (data.url) {
+            try {
+              // Try the official mediaEmbed command first
+              if (editor.commands.get('mediaEmbed')) {
+                editor.execute('mediaEmbed', data.url);
+              } else {
+                // Fallback: insert as a link which MediaEmbed might pick up
+                editor.model.change(writer => {
+                  const p = writer.createElement('paragraph');
+                  const link = writer.createText(data.url, { linkHref: data.url });
+                  writer.append(link, p);
+                  editor.model.insertContent(p);
+                });
+              }
+            } catch (embedError) {
+              console.error('Media embed execution failed:', embedError);
+              // Final fallback: just insert the text as a link
+              editor.model.change(writer => {
+                const pos = editor.model.document.selection.getFirstPosition() || editor.model.document.getRoot().getChild(0);
+                writer.insertText(data.url, { linkHref: data.url }, pos);
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Video upload failed:', error);
+        }
+      };
+
+      input.click();
+    });
+
+    return view;
+  });
+}
 
 export default function CustomEditor({ value, onChange }) {
   const editorContainerRef = useRef(null);
@@ -115,6 +268,8 @@ export default function CustomEditor({ value, onChange }) {
             'underline',
             '|',
             'link',
+            'uploadImage',
+            'videoUpload',
             'mediaEmbed',
             'insertTable',
             'blockQuote',
@@ -163,7 +318,9 @@ export default function CustomEditor({ value, onChange }) {
           TableToolbar,
           TextTransformation,
           TodoList,
-          Underline
+          Underline,
+          FileRepository,
+          MediaUploadSupport
         ],
         heading: {
           options: [
@@ -246,6 +403,25 @@ export default function CustomEditor({ value, onChange }) {
           }
         },
         placeholder: 'Type or paste your content here!',
+        mediaEmbed: {
+          extraProviders: [
+            {
+              name: 'local',
+              url: [
+                /^localhost:4001\/api\/uploads\/.+/,
+                /^http:\/\/localhost:4001\/api\/uploads\/.+/
+              ],
+              html: match => {
+                const url = match[0].startsWith('http') ? match[0] : `http://${match[0]}`;
+                return (
+                  '<div style="position: relative; padding-bottom: 100%; height: 0; padding-bottom: 56.2493%;">' +
+                    `<video controls src="${url}" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></video>` +
+                  '</div>'
+                );
+              }
+            }
+          ]
+        },
         table: {
           contentToolbar: [
             'tableColumn',
@@ -260,6 +436,7 @@ export default function CustomEditor({ value, onChange }) {
   }, [isLayoutReady]);
 
   const handleEditorChange = (event, editor) => {
+    if (!editor || typeof editor.getData !== 'function') return;
     try {
       isUserEditingRef.current = true;
       const data = editor.getData();
