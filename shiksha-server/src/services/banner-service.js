@@ -7,6 +7,7 @@ class BannerService {
 
   async create(data) {
     try {
+      // destinationLink is now supported in data
       const banner = await this.bannerRepository.create(data);
       return banner;
     } catch (error) {
@@ -62,6 +63,7 @@ class BannerService {
 
   async update(id, data) {
     try {
+      // destinationLink is now supported in data
       const banner = await this.bannerRepository.update(id, data);
       return banner;
     } catch (error) {

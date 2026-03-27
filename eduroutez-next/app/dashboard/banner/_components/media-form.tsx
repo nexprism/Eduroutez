@@ -37,6 +37,7 @@ const formSchema = z.object({
     message: 'Title must be at least 2 characters.'
   }),
   work: z.string(),
+  destinationLink: z.string().url({ message: 'Must be a valid URL.' }),
   image: z
     .instanceof(File)
     .optional()
@@ -73,7 +74,8 @@ export default function CourseCategoryForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
-      work:'Banner',
+      work: 'Banner',
+      destinationLink: '',
       image: undefined,
     }
   });
@@ -82,10 +84,10 @@ export default function CourseCategoryForm() {
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('work', values.work);
+    formData.append('destinationLink', values.destinationLink);
     if (values.image) {
       formData.append('images', values.image);
     }
-
     mutate(formData);
   }
 
@@ -178,6 +180,7 @@ export default function CourseCategoryForm() {
       form.reset({
         title: category.data.title || '',
         work: category.data.work || 'Banner',
+        destinationLink: category.data.destinationLink || '',
         image: undefined
       });
 
@@ -203,6 +206,7 @@ export default function CourseCategoryForm() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+
               <FormField
                 control={form.control}
                 name="title"
@@ -211,6 +215,20 @@ export default function CourseCategoryForm() {
                     <FormLabel>Title</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter Title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="destinationLink"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Destination Link</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

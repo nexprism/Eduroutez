@@ -28,7 +28,12 @@ export const createBanner = async (req, res) => {
           .json({ message: "Something went wrong. Please try again later." });
       }
 
+
       const payload = { ...req.body };
+
+      if (req.body.destinationLink) {
+        payload.destinationLink = req.body.destinationLink;
+      }
 
       if (req.files && req.files["images"]) {
         payload.images = req.files["images"].map((file) => file.filename);
@@ -100,7 +105,9 @@ export async function updateBanner(req, res) {
         if (req.body.work) {
           payload.work = req.body.work;
         }
-
+        if (req.body.destinationLink) {
+          payload.destinationLink = req.body.destinationLink;
+        }
         if (req.files && req.files["images"]) {
           payload.images = req.files["images"].map((file) => file.filename);
         }
