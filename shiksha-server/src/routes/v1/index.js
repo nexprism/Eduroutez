@@ -34,7 +34,7 @@ import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishli
 import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount } from "../../controllers/webinar-controller.js";
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
-import { createMedia, deleteMedia, getMedia, getMedias, updateMedia } from "../../controllers/media-controller.js";
+import { createMedia, deleteMedia, getMedia, getMedias, updateMedia, uploadEditorFile } from "../../controllers/media-controller.js";
 import { createBanner, deleteBanner, getBanner, getBanners, updateBanner } from "../../controllers/banner-controller.js";
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
 import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot, getScheduleSlots, updateScheduleSlot, getAllScheduleSlots, getScheduleSlotbyId } from "../../controllers/counselorSlot-controller.js";
@@ -523,6 +523,7 @@ router.delete("/promotion/:id", accessTokenAutoRefresh, passport.authenticate("j
  * media routes
  */
 router.post("/media", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createMedia);
+router.post("/upload-editor", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), upload.single('upload'), uploadEditorFile);
 router.get("/media", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMedias);
 router.get("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMedia);
 router.patch("/media/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateMedia);

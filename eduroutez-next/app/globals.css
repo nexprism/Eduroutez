@@ -185,3 +185,8 @@
 .editor-container_classic-editor .editor-container__editor {
   width: 100%;
 }
+
+.ck-editor__editable_inline {
+  min-height: 200px;
+  height: auto;
+}
