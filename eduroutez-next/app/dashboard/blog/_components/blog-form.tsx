@@ -52,7 +52,7 @@ const formSchema = z.object({
   coverImages: z.array(z.any()).optional(),
 });
 
-function BlogForm(props) {
+function BlogForm(props: any) {
   const [previewImageUrls, setPreviewImageUrls] = React.useState<string[]>([]);
   const [thumbnail, setThumbnail] = React.useState<{ file: File; preview: string } | null>(null);
   const fileInputImageRef = React.useRef<HTMLInputElement>(null);
@@ -62,7 +62,8 @@ function BlogForm(props) {
   const segments = pathname.split('/');
   const isEdit = Boolean(segments[4]);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-  const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL || '';
+  // Use the same env variable as the rest of the project for images
+  const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES || '';
 
   type BlogFormValues = z.infer<typeof formSchema>;
   const form = useForm<BlogFormValues>({
@@ -181,7 +182,8 @@ function BlogForm(props) {
         description: blog.data.description,
       });
       if (blog.data.coverImages && Array.isArray(blog.data.coverImages)) {
-        setPreviewImageUrls(blog.data.coverImages.map((img: string) => `${IMAGE_URL}/${img}`));
+        const urls = blog.data.coverImages.map((img: string) => `${IMAGE_URL}/${img}`);
+        setPreviewImageUrls(urls);
       }
       if (blog.data.thumbnail) {
         setThumbnail({
@@ -190,7 +192,7 @@ function BlogForm(props) {
         });
       }
     }
-  }, [blog, form]);
+  }, [blog, form, IMAGE_URL]);
 
   const handleCoverImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -342,7 +344,7 @@ function BlogForm(props) {
                         <div className="relative inline-block">
                           <Image
                             src={thumbnail.preview}
-                            alt="Thumbnail"
+                            alt={thumbnail.preview.split('/').pop() || 'Thumbnail'}
                             className="h-40 w-full rounded-md object-cover"
                             width={200}
                             height={160}
@@ -413,29 +415,39 @@ function BlogForm(props) {
                         className="hidden"
                       />
                       {previewImageUrls.length > 0 ? (
-                        <div className="flex flex-wrap gap-4">
-                          {previewImageUrls.map((url, idx) => (
-                            <div key={idx} className="relative inline-block">
-                              <Image
-                                src={url}
-                                alt={`Preview ${idx + 1}`}
-                                className="max-h-[200px] max-w-full rounded-md object-cover"
-                                width={300}
-                                height={200}
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute right-0 top-0 -mr-2 -mt-2"
-                                onClick={() => removeCoverImage(idx)}
-                              >
-                                <X className="h-4 w-4" />
-                                <span className="sr-only">Remove image</span>
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
+                        <>
+                          <div className="flex flex-wrap gap-4">
+                            {previewImageUrls.map((url, idx) => (
+                              <div key={url} className="relative inline-block">
+                                <Image
+                                  src={url}
+                                  alt={url.split('/').pop() || `Preview ${idx + 1}`}
+                                  className="max-h-[200px] max-w-full rounded-md object-cover"
+                                  width={300}
+                                  height={200}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="absolute right-0 top-0 -mr-2 -mt-2"
+                                  onClick={() => removeCoverImage(idx)}
+                                >
+                                  <X className="h-4 w-4" />
+                                  <span className="sr-only">Remove image</span>
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="mt-2"
+                            onClick={() => fileInputImageRef.current?.click()}
+                          >
+                            Add Image
+                          </Button>
+                        </>
                       ) : (
                         <div
                           onClick={() => fileInputImageRef.current?.click()}

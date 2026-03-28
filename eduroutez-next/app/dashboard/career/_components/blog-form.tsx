@@ -427,29 +427,39 @@ export default function CounselorForm() {
                         className="hidden"
                       />
                       {previewImageUrls.length > 0 ? (
-                        <div className="flex flex-wrap gap-4">
-                          {previewImageUrls.map((url, idx) => (
-                            <div key={url} className="relative inline-block">
-                              <Image
-                                src={url}
-                                alt={`Preview ${idx + 1}`}
-                                className="max-h-[200px] max-w-full rounded-md object-cover"
-                                width={300}
-                                height={200}
-                              />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute right-0 top-0 -mr-2 -mt-2"
-                                onClick={() => removeCoverImage(idx)}
-                              >
-                                <X className="h-4 w-4" />
-                                <span className="sr-only">Remove image</span>
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
+                        <>
+                          <div className="flex flex-wrap gap-4">
+                            {previewImageUrls.map((url, idx) => (
+                              <div key={url} className="relative inline-block">
+                                <Image
+                                  src={url}
+                                  alt={`Preview ${idx + 1}`}
+                                  className="max-h-[200px] max-w-full rounded-md object-cover"
+                                  width={300}
+                                  height={200}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="absolute right-0 top-0 -mr-2 -mt-2"
+                                  onClick={() => removeCoverImage(idx)}
+                                >
+                                  <X className="h-4 w-4" />
+                                  <span className="sr-only">Remove image</span>
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="mt-2"
+                            onClick={() => fileInputImageRef.current?.click()}
+                          >
+                            Add Image
+                          </Button>
+                        </>
                       ) : (
                         <div
                           onClick={() => fileInputImageRef.current?.click()}
