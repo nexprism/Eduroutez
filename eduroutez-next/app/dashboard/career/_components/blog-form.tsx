@@ -48,16 +48,7 @@ const formSchema = z.object({
     ),
   counselorType: z.string().optional(),
   coverImages: z
-    .array(z.instanceof(File)
-      .refine((file) => file.size <= 1024 * 1024, {
-        message: 'Image size must be less than 1 MB.'
-      })
-      .refine((file) => ['image/png', 'image/jpeg', 'image/webp'].includes(file.type), {
-        message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
-      })
-    )
-    .min(1, { message: 'At least one cover image is required.' })
-    .optional(),
+    .array(z.union([z.instanceof(File), z.string()])).optional(),
   thumbnail: z
     .instanceof(File)
     .optional()
@@ -159,33 +150,33 @@ export default function CounselorForm() {
 
   // Populate form when counselor data is loaded
   React.useEffect(() => {
-    if (counselor) {
+    if (counselor && counselor.data) {
       // Reset form with all fetched data fields
       form.reset({
-        title: counselor.title || '',
-        category: counselor.category || '',
-        description: counselor.description || '',
-        eligibility: counselor.eligibility || '',
-        jobRoles: counselor.jobRoles || '',
-        opportunity: counselor.opportunity || '',
-        topColleges: counselor.topColleges || '',
-        counselorType: counselor.counselorType || '',
+        title: counselor.data.title || '',
+        category: counselor.data.category || '',
+        description: counselor.data.description || '',
+        eligibility: counselor.data.eligibility || '',
+        jobRoles: counselor.data.jobRoles || '',
+        opportunity: counselor.data.opportunity || '',
+        topColleges: counselor.data.topColleges || '',
+        counselorType: counselor.data.counselorType || '',
         thumbnail: undefined,
-        coverImages: []
+        coverImages: counselor.data.coverImages || []
       });
 
       // Update cover image previews
-      if (counselor.coverImages && Array.isArray(counselor.coverImages)) {
-        setPreviewImageUrls(counselor.coverImages.map((img: string) => `${IMAGE_URL}/${img}`));
+      if (counselor.data.coverImages && Array.isArray(counselor.data.coverImages)) {
+        setPreviewImageUrls(counselor.data.coverImages.map((img) => `${IMAGE_URL}/${img}`));
       }
 
       // Update thumbnail preview
       setFormState(prev => ({
         ...prev,
-        thumbnail: counselor.thumbnail
+        thumbnail: counselor.data.thumbnail
           ? {
               file: new File([], 'existing-thumbnail'),
-              preview: `${IMAGE_URL}/${counselor.thumbnail}`
+              preview: `${IMAGE_URL}/${counselor.data.thumbnail}`
             }
           : null
       }));
@@ -333,8 +324,13 @@ export default function CounselorForm() {
     }
 
     if (values.coverImages && Array.isArray(values.coverImages)) {
-      values.coverImages.forEach((file) => {
-        formData.append('images', file);
+      values.coverImages.forEach((fileOrString) => {
+        if (fileOrString instanceof File) {
+          formData.append('images', fileOrString);
+        } else if (typeof fileOrString === 'string') {
+          // Existing image, send as a separate field or handle on backend
+          formData.append('existingImages', fileOrString);
+        }
       });
     }
 
