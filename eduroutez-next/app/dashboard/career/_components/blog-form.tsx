@@ -233,27 +233,33 @@ export default function CounselorForm() {
     }
   };
 
+  // Robust handleCoverImagesChange: merge new files with existing images
   const handleCoverImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length > 0) {
-      const readers = files.map(
-        (file) =>
-          new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(file);
-          })
-      );
-      Promise.all(readers).then((urls) => {
-        setPreviewImageUrls(urls);
-      });
-      form.setValue('coverImages', files);
-    } else {
-      setPreviewImageUrls([]);
-      form.setValue('coverImages', undefined);
-    }
+    const currentCoverImages = form.getValues('coverImages') || [];
+    // Only add files that are not already present (avoid duplicates)
+    const newFiles = files.filter(
+      (file) => !currentCoverImages.some((img: any) => img instanceof File && img.name === file.name)
+    );
+    const updatedCoverImages = [...currentCoverImages, ...newFiles];
+
+    // Update preview: keep existing previews, add new ones
+    const existingPreviews = previewImageUrls.slice(0, currentCoverImages.length);
+    const readers = newFiles.map(
+      (file) =>
+        new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        })
+    );
+    Promise.all(readers).then((newUrls) => {
+      setPreviewImageUrls([...existingPreviews, ...newUrls]);
+    });
+    form.setValue('coverImages', updatedCoverImages);
   };
 
+  // Robust removeCoverImage: remove from both preview and form state
   const removeCoverImage = (index: number) => {
     setPreviewImageUrls((prev) => prev.filter((_, i) => i !== index));
     const files = form.getValues('coverImages') || [];
@@ -303,12 +309,10 @@ export default function CounselorForm() {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     const formData = new FormData();
     const instituteId = localStorage.getItem('instituteId');
-    
     if (!instituteId) {
       toast.error('Institute ID not found. Please login again.');
       return;
     }
-
     formData.append('instituteId', instituteId);
     formData.append('title', values.title);
     formData.append('category', values.category);
@@ -317,23 +321,18 @@ export default function CounselorForm() {
     formData.append('jobRoles', values.jobRoles);
     formData.append('opportunity', values.opportunity);
     formData.append('topColleges', values.topColleges);
-    
-    
     if (values.thumbnail) {
       formData.append('thumbnail', values.thumbnail);
     }
-
     if (values.coverImages && Array.isArray(values.coverImages)) {
       values.coverImages.forEach((fileOrString) => {
         if (fileOrString instanceof File) {
           formData.append('images', fileOrString);
         } else if (typeof fileOrString === 'string') {
-          // Existing image, send as a separate field or handle on backend
           formData.append('existingImages', fileOrString);
         }
       });
     }
-
     mutate(formData);
   };
 

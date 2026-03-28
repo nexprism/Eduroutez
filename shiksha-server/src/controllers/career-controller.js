@@ -140,32 +140,24 @@ export async function updateCareer(req, res) {
 
       console.log("files:", req.files);
       console.log("file:", req.file);
-      // Check if a new image is uploaded
-      if (req.files) {
-        const career = await careerService.get(careerId);
-
-        // Record the old image path if it exists
-        // if (career.image) {
-        //   oldImagePath = path.join("uploads", career.image);
-        // }
-
-        // //thumbnail
-        // if (career.thumbnail) {
-        //   oldImagePath = path.join("uploads", career.thumbnail);
-        // }
-        
-
-        // Set the new image filename in payload
-        //image
-        if (req.files && req.files["images"]) {
-          payload.image = req.files["images"][0].filename;
+      // Merge new uploaded images and existing images
+      let coverImages = [];
+      if (req.files && req.files["images"]) {
+        coverImages = req.files["images"].map((file) => file.filename);
+      }
+      if (req.body.existingImages) {
+        if (Array.isArray(req.body.existingImages)) {
+          coverImages = [...coverImages, ...req.body.existingImages];
+        } else {
+          coverImages.push(req.body.existingImages);
         }
-
-        console.log("files thumb:", req.files);
-        //thumbnail
-        if (req.files && req.files["thumbnail"]) {
-          payload.thumbnail = req.files["thumbnail"][0].filename;
-        }
+      }
+      if (coverImages.length > 0) {
+        payload.coverImages = coverImages;
+      }
+      // Handle thumbnail
+      if (req.files && req.files["thumbnail"]) {
+        payload.thumbnail = req.files["thumbnail"][0].filename;
       }
 
       if(req.body.description) {
