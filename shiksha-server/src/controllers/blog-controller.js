@@ -9,7 +9,7 @@ import randomstring from "randomstring";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "images",
-    maxCount: 1,
+    maxCount: 10, // Allow up to 10 images for coverImages array
   },
   {
     name: "thumbnail",
@@ -32,7 +32,7 @@ export const createBlog = async (req, res) => {
       }
       const payload = { ...req.body };
       if (req.files && req.files["images"]) {
-        payload.image = req.files["images"][0].filename;
+        payload.coverImages = req.files["images"].map((file) => file.filename);
       }
 
       //thumbnail

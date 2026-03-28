@@ -47,24 +47,21 @@ const formSchema = z.object({
       }
     ),
   counselorType: z.string().optional(),
-  image: z
-    .instanceof(File)
-    .optional()
-    .refine((file) => !file || file.size <= 1024 * 1024, {
-      message: 'Image size must be less than 1 MB.'
-    })
-    .refine(
-      (file) =>
-        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
-      {
+  coverImages: z
+    .array(z.instanceof(File)
+      .refine((file) => file.size <= 1024 * 1024, {
+        message: 'Image size must be less than 1 MB.'
+      })
+      .refine((file) => ['image/png', 'image/jpeg', 'image/webp'].includes(file.type), {
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
-      }
-    ),
+      })
+    )
+    .min(1, { message: 'At least one cover image is required.' })
+    .optional(),
   thumbnail: z
     .instanceof(File)
     .optional()
     .refine((file) => !file || file.size <= 1024 * 1024, {
-      message: 'Thumbnail size must be less than 1 MB.'
     })
     .refine(
       (file) =>
@@ -99,7 +96,8 @@ export default function CounselorForm() {
     opportunity: '',
     topColleges: '',
     counselorType: '',
-    thumbnail: undefined
+    thumbnail: undefined,
+    coverImages: []
   }), []);
 
   // Create form with stable configuration
@@ -115,11 +113,22 @@ export default function CounselorForm() {
     thumbnail: null as { file: File; preview: string } | null
   });
 
-  // Determine edit mode based on pathname
+  // Fetch counselor data if in edit mode
+  const segments = pathname.split('/');
+  const shouldEdit = segments.length === 5 && segments[3] === 'update';
+  const careerId = shouldEdit ? segments[4] : null;
+  const { data: counselor } = useQuery({
+    queryKey: careerId ? ['career', careerId] : ['career', 'new'],
+    queryFn: async () => {
+      if (!careerId) return null;
+      const response = await axiosInstance.get(`${apiUrl}/career/${careerId}`);
+      return response.data;
+    },
+    enabled: !!careerId
+  });
+
+  // Effect to set edit mode and reset form
   React.useEffect(() => {
-    const segments = pathname.split('/');
-    const shouldEdit = segments.length === 5 && segments[3] === 'update';
-    
     setFormState(prev => {
       if (prev.isEdit !== shouldEdit) {
         return {
@@ -131,26 +140,11 @@ export default function CounselorForm() {
       }
       return prev;
     });
-
     // Reset form when not in edit mode
     if (!shouldEdit) {
       form.reset(defaultFormValues);
     }
-  }, [pathname, form, defaultFormValues]);
-
-  // Fetch career details
-  const { data: counselor } = useQuery({
-    queryKey: ['career', pathname.split('/')[4]],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/career/${pathname.split('/')[4]}`
-      );
-      return response.data;
-    },
-    enabled: formState.isEdit,
-    refetchOnWindowFocus: false,
-    refetchInterval: false
-  });
+  }, [pathname, form, defaultFormValues, shouldEdit]);
 
   // Fetch categories
   const { data: categories } = useQuery({
@@ -165,30 +159,33 @@ export default function CounselorForm() {
 
   // Populate form when counselor data is loaded
   React.useEffect(() => {
-    if (counselor?.data) {
-      // Reset form with fetched data
+    if (counselor) {
+      // Reset form with all fetched data fields
       form.reset({
-        title: counselor.data.title,
-        category: counselor.data.category,
-        description: counselor.data.description,
-        image: undefined,
-        eligibility: counselor.data.eligibility,
-        jobRoles: counselor.data.jobRoles,
-        opportunity: counselor.data.opportunity,
-        topColleges: counselor.data.topColleges,
-        counselorType: counselor.data.counselorType
+        title: counselor.title || '',
+        category: counselor.category || '',
+        description: counselor.description || '',
+        eligibility: counselor.eligibility || '',
+        jobRoles: counselor.jobRoles || '',
+        opportunity: counselor.opportunity || '',
+        topColleges: counselor.topColleges || '',
+        counselorType: counselor.counselorType || '',
+        thumbnail: undefined,
+        coverImages: []
       });
 
-      // Update image previews
+      // Update cover image previews
+      if (counselor.coverImages && Array.isArray(counselor.coverImages)) {
+        setPreviewImageUrls(counselor.coverImages.map((img: string) => `${IMAGE_URL}/${img}`));
+      }
+
+      // Update thumbnail preview
       setFormState(prev => ({
         ...prev,
-        previewImageUrl: counselor.data.image 
-          ? `${IMAGE_URL}/${counselor.data.image}` 
-          : null,
-        thumbnail: counselor.data.thumbnail
+        thumbnail: counselor.thumbnail
           ? {
               file: new File([], 'existing-thumbnail'),
-              preview: `${IMAGE_URL}/${counselor.data.thumbnail}`
+              preview: `${IMAGE_URL}/${counselor.thumbnail}`
             }
           : null
       }));
@@ -242,6 +239,37 @@ export default function CounselorForm() {
         thumbnail: null
       }));
       form.setValue('thumbnail', undefined);
+    }
+  };
+
+  const handleCoverImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const readers = files.map(
+        (file) =>
+          new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          })
+      );
+      Promise.all(readers).then((urls) => {
+        setPreviewImageUrls(urls);
+      });
+      form.setValue('coverImages', files);
+    } else {
+      setPreviewImageUrls([]);
+      form.setValue('coverImages', undefined);
+    }
+  };
+
+  const removeCoverImage = (index: number) => {
+    setPreviewImageUrls((prev) => prev.filter((_, i) => i !== index));
+    const files = form.getValues('coverImages') || [];
+    const newFiles = files.filter((_: any, i: number) => i !== index);
+    form.setValue('coverImages', newFiles.length > 0 ? newFiles : undefined);
+    if (fileInputImageRef.current) {
+      fileInputImageRef.current.value = '';
     }
   };
 
@@ -299,12 +327,15 @@ export default function CounselorForm() {
     formData.append('opportunity', values.opportunity);
     formData.append('topColleges', values.topColleges);
     
-    if (values.image) {
-      formData.append('images', values.image);
-    }
     
     if (values.thumbnail) {
       formData.append('thumbnail', values.thumbnail);
+    }
+
+    if (values.coverImages && Array.isArray(values.coverImages)) {
+      values.coverImages.forEach((file) => {
+        formData.append('images', file);
+      });
     }
 
     mutate(formData);
@@ -312,14 +343,7 @@ export default function CounselorForm() {
 
   // Render methods
   const removeImage = () => {
-    setFormState(prev => ({
-      ...prev,
-      previewImageUrl: null
-    }));
-    form.setValue('image', undefined);
-    if (fileInputImageRef.current) {
-      fileInputImageRef.current.value = '';
-    }
+    // Deprecated: No single image field in form. Remove logic.
   };
 
   const removeThumbnail = () => {
@@ -332,6 +356,8 @@ export default function CounselorForm() {
       thumbnailInputRef.current.value = '';
     }
   };
+
+  const [previewImageUrls, setPreviewImageUrls] = React.useState<string[]>([]);
 
   return (
     <Card className="mx-auto w-full">
@@ -382,58 +408,62 @@ export default function CounselorForm() {
                   </FormItem>
                 )}
               />
-            </div>
             {/* Image and Thumbnail Fields */}
-            <div className="grid grid-cols-1">
-              <FormField
-                control={form.control}
-                name="image"
-                render={() => (
-                  <FormItem>
-                    <FormLabel>Image</FormLabel>
-                    <FormControl>
-                      <div className="space-y-4">
-                        <Input
-                          type="file"
-                          accept="image/png, image/jpeg, image/webp"
-                          onChange={handleImageChange}
-                          ref={fileInputImageRef}
-                          className="hidden"
-                        />
 
-                        {formState.previewImageUrl ? (
-                          <div className="relative inline-block">
-                            <Image
-                              src={formState.previewImageUrl}
-                              alt="Preview"
-                              className="max-h-[400px] max-w-full rounded-md object-cover"
-                              width={1200}
-                              height={400}
-                            />
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="icon"
-                              className="absolute right-0 top-0 -mr-2 -mt-2"
-                              onClick={removeImage}
-                            >
-                              <X className="h-4 w-4" />
-                              <span className="sr-only">Remove image</span>
-                            </Button>
-                          </div>
-                        ) : (
-                          <div
-                            onClick={() => fileInputImageRef.current?.click()}
-                            className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
-                          >
-                            <Plus className="text-grey-400 h-10 w-10" />
-                          </div>
-                        )}
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="coverImages"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cover Images</FormLabel>
+                  <FormControl>
+                    <div className="space-y-4">
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        multiple
+                        onChange={handleCoverImagesChange}
+                        ref={fileInputImageRef}
+                        className="hidden"
+                      />
+                      {previewImageUrls.length > 0 ? (
+                        <div className="flex flex-wrap gap-4">
+                          {previewImageUrls.map((url, idx) => (
+                            <div key={url} className="relative inline-block">
+                              <Image
+                                src={url}
+                                alt={`Preview ${idx + 1}`}
+                                className="max-h-[200px] max-w-full rounded-md object-cover"
+                                width={300}
+                                height={200}
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute right-0 top-0 -mr-2 -mt-2"
+                                onClick={() => removeCoverImage(idx)}
+                              >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Remove image</span>
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div
+                          onClick={() => fileInputImageRef.current?.click()}
+                          className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                        >
+                          <Plus className="text-grey-400 h-10 w-10" />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
               <FormField
                 control={form.control}

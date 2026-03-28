@@ -13,10 +13,12 @@ const blogSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institute",
     },
-    image: {
-      type: String,
-      required: true,
-    },
+    coverImages: [
+      {
+        type: String,
+        required: true,
+      }
+    ],
     thumbnail: {
       type: String,
     },

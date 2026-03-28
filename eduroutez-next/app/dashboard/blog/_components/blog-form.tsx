@@ -46,146 +46,35 @@ const formSchema = z.object({
         message: 'Please select a category.'
       }
     ),
-  stream: z
-    .string()
-    .min(1, { message: 'Stream is required.' }),
-  image: z
-    .instanceof(File)
-    .optional()
-    .nullable()
-    .refine((file) => {
-      // Only validate if file is provided (for new uploads)
-      if (file === null || file === undefined) return true;
-      return file.size <= 1024 * 1024;
-    }, {
-      message: 'Image size must be less than 1 MB.'
-    })
-    .refine((file) => {
-      // Only validate if file is provided (for new uploads)
-      if (file === null || file === undefined) return true;
-      return ['image/png', 'image/jpeg', 'image/webp'].includes(file.type);
-    }, {
-      message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
-    }),
-  thumbnail: z
-    .instanceof(File)
-    .optional()
-    .nullable()
-    .refine((file) => {
-      // Only validate if file is provided (for new uploads)
-      if (file === null || file === undefined) return true;
-      return file.size <= 1024 * 1024;
-    }, {
-      message: 'Thumbnail size must be less than 1 MB.'
-    })
-    .refine((file) => {
-      // Only validate if file is provided (for new uploads)
-      if (file === null || file === undefined) return true;
-      return ['image/png', 'image/jpeg', 'image/webp'].includes(file.type);
-    }, {
-      message: 'Invalid thumbnail format. Only PNG, JPEG, and WEBP are allowed.'
-    }),
-  description: z.string().min(1, { message: 'Description is required.' })
+  stream: z.string().optional(),
+  description: z.string().optional(),
+  thumbnail: z.any().optional(),
+  coverImages: z.array(z.any()).optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
-const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-export default function BlogForm() {
-  const fileInputImageRef = React.useRef<HTMLInputElement | null>(null);
-  const thumbnailInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [previewImageUrl, setPreviewImageUrl] = React.useState<string | null>(null);
+function BlogForm(props) {
+  const [previewImageUrls, setPreviewImageUrls] = React.useState<string[]>([]);
   const [thumbnail, setThumbnail] = React.useState<{ file: File; preview: string } | null>(null);
+  const fileInputImageRef = React.useRef<HTMLInputElement>(null);
+  const thumbnailInputRef = React.useRef<HTMLInputElement>(null);
+  const router = useRouter();
   const pathname = usePathname();
   const segments = pathname.split('/');
-  const [isEdit, setIsEdit] = React.useState(false);
-  const router = useRouter();
+  const isEdit = Boolean(segments[4]);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL || '';
 
-  React.useEffect(() => {
-    if (segments.length === 5 && segments[3] === 'update') {
-      setIsEdit(true);
-    }
-  }, [segments]);
-
-  const form = useForm<FormValues>({
+  type BlogFormValues = z.infer<typeof formSchema>;
+  const form = useForm<BlogFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       category: '',
       stream: '',
       description: '',
-      thumbnail: undefined
-    }
-  });
-
-  function onSubmit(values: FormValues) {
-    console.log('Form values:', values);
-    const instituteId = localStorage.getItem('instituteId');
-    if (!instituteId) {
-      toast.error('Institute ID not found');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('title', values.title);
-    formData.append('category', values.category);
-    formData.append('stream', values.stream);
-    formData.append('description', values.description);
-    formData.append('blogCreatedBy', instituteId);
-    if (instituteId) {
-      formData.append('instituteId', instituteId);
-    }
-
-    if (values.image) {
-      formData.append('images', values.image);
-    }
-
-    if (values.thumbnail) {
-      formData.append('thumbnail', values.thumbnail);
-    }
-
-    mutate(formData);
-  }
-
-  const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const endpoint = isEdit
-        ? `${apiUrl}/blog/${segments[4]}`
-        : `${apiUrl}/blog`;
-      const response = await axiosInstance({
-        url: endpoint,
-        method: isEdit ? 'patch' : 'post',
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      return response.data;
+      thumbnail: undefined,
+      coverImages: [],
     },
-    onSuccess: () => {
-      const message = isEdit
-        ? 'Blog updated successfully'
-        : 'Blog created successfully';
-      toast.success(message);
-
-      form.reset();
-      setPreviewImageUrl(null);
-      setThumbnail(null);
-
-      if (message === "Blog updated successfully") {
-        // Get the page number from localStorage that was set when navigating to the update page
-        const lastPage = localStorage.getItem('lastBlogPage') || '1';
-        router.push(`/dashboard/blog?page=${lastPage}`);
-      } else {
-        router.push('/dashboard/blog');
-      }
-    },
-    onError: (error) => {
-      toast.error('Something went wrong');
-      console.error('Submission error:', error);
-    }
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,13 +82,13 @@ export default function BlogForm() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImageUrl(reader.result as string);
+        setPreviewImageUrls([reader.result as string]);
       };
       reader.readAsDataURL(file);
-      form.setValue('image', file);
+      form.setValue('coverImages', [file]);
     } else {
-      setPreviewImageUrl(null);
-      form.setValue('image', undefined);
+      setPreviewImageUrls([]);
+      form.setValue('coverImages', undefined);
     }
   };
 
@@ -233,9 +122,11 @@ export default function BlogForm() {
     }
   };
 
-  const removeImage = () => {
-    setPreviewImageUrl(null);
-    form.setValue('image', undefined);
+  const removeCoverImage = (index: number) => {
+    setPreviewImageUrls((prev) => prev.filter((_, i) => i !== index));
+    const files = form.getValues('coverImages') || [];
+    const newFiles = files.filter((_: any, i: number) => i !== index);
+    form.setValue('coverImages', newFiles.length > 0 ? newFiles : undefined);
     if (fileInputImageRef.current) {
       fileInputImageRef.current.value = '';
     }
@@ -265,7 +156,6 @@ export default function BlogForm() {
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/blog-category?page=0&limit=200`);
       return response.data.data.result;
-
     }
   });
 
@@ -290,11 +180,9 @@ export default function BlogForm() {
         stream: blog.data.stream,
         description: blog.data.description,
       });
-
-      if (blog.data.image) {
-        setPreviewImageUrl(`${IMAGE_URL}/${blog.data.image}`);
+      if (blog.data.coverImages && Array.isArray(blog.data.coverImages)) {
+        setPreviewImageUrls(blog.data.coverImages.map((img: string) => `${IMAGE_URL}/${img}`));
       }
-
       if (blog.data.thumbnail) {
         setThumbnail({
           preview: `${IMAGE_URL}/${blog.data.thumbnail}`,
@@ -303,6 +191,61 @@ export default function BlogForm() {
       }
     }
   }, [blog, form]);
+
+  const handleCoverImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const readers = files.map(
+        (file) =>
+          new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(file);
+          })
+      );
+      Promise.all(readers).then((urls) => {
+        setPreviewImageUrls(urls);
+      });
+      form.setValue('coverImages', files);
+    } else {
+      setPreviewImageUrls([]);
+      form.setValue('coverImages', undefined);
+    }
+  };
+
+  const onSubmit = async (data: any) => {
+    try {
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('category', data.category);
+      if (data.stream) formData.append('stream', data.stream);
+      if (data.description) formData.append('description', data.description);
+      if (data.thumbnail) formData.append('thumbnail', data.thumbnail);
+      if (data.coverImages && Array.isArray(data.coverImages)) {
+        data.coverImages.forEach((file: File) => {
+          formData.append('images', file);
+        });
+      }
+
+      let response;
+      if (isEdit) {
+        response = await axiosInstance.patch(`${apiUrl}/blog/${segments[4]}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        response = await axiosInstance.post(`${apiUrl}/blog`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      }
+
+      toast.success(response.data?.message || (isEdit ? 'Blog updated successfully' : 'Blog created successfully'));
+      router.push('/dashboard/blog');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Something went wrong');
+    }
+  };
+
+  const isSubmitting = false; // Replace with actual submitting state if needed
 
   return (
     <Card className="mx-auto w-full">
@@ -378,56 +321,6 @@ export default function BlogForm() {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Featured Image</FormLabel>
-                  <FormControl>
-                    <div className="space-y-4">
-                      <Input
-                        type="file"
-                        accept="image/png, image/jpeg, image/webp"
-                        onChange={handleImageChange}
-                        ref={fileInputImageRef}
-                        className="hidden"
-                      />
-
-                      {previewImageUrl ? (
-                        <div className="relative inline-block">
-                          <Image
-                            src={previewImageUrl}
-                            alt="Preview"
-                            className="max-h-[400px] max-w-full rounded-md object-cover"
-                            width={1200}
-                            height={400}
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute right-0 top-0 -mr-2 -mt-2"
-                            onClick={removeImage}
-                          >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove image</span>
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={triggerImageFileInput}
-                          className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
-                        >
-                          <Plus className="text-grey-400 h-10 w-10" />
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
@@ -503,6 +396,61 @@ export default function BlogForm() {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="coverImages"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cover Images</FormLabel>
+                  <FormControl>
+                    <div className="space-y-4">
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        multiple
+                        onChange={handleCoverImagesChange}
+                        ref={fileInputImageRef}
+                        className="hidden"
+                      />
+                      {previewImageUrls.length > 0 ? (
+                        <div className="flex flex-wrap gap-4">
+                          {previewImageUrls.map((url, idx) => (
+                            <div key={idx} className="relative inline-block">
+                              <Image
+                                src={url}
+                                alt={`Preview ${idx + 1}`}
+                                className="max-h-[200px] max-w-full rounded-md object-cover"
+                                width={300}
+                                height={200}
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute right-0 top-0 -mr-2 -mt-2"
+                                onClick={() => removeCoverImage(idx)}
+                              >
+                                <X className="h-4 w-4" />
+                                <span className="sr-only">Remove image</span>
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div
+                          onClick={() => fileInputImageRef.current?.click()}
+                          className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                        >
+                          <Plus className="text-grey-400 h-10 w-10" />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Submitting...' : isEdit ? 'Update' : 'Submit'}
             </Button>
@@ -512,3 +460,6 @@ export default function BlogForm() {
     </Card>
   );
 }
+
+export default BlogForm;
+

@@ -48,6 +48,10 @@ import 'ckeditor5/ckeditor5.css';
 const LICENSE_KEY = 'GPL'; // or <YOUR_LICENSE_KEY>.
 
 export default function CustomEditor({ value, onChange }) {
+    // Debug: log the value prop on every render
+    useEffect(() => {
+      console.log('CustomEditor value prop:', value);
+    }, [value]);
   const editorContainerRef = useRef(null);
   const editorRef = useRef(null);
   const [isLayoutReady, setIsLayoutReady] = useState(false);

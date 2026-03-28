@@ -9,10 +9,12 @@ const careerSchema = new mongoose.Schema(
     slug: {
       type: String,
     },
-    image: {
-      type: String,
-      required: true,
-    },
+    coverImages: [
+      {
+        type: String,
+        required: true,
+      }
+    ],
     thumbnail: {
       type: String,
     },
