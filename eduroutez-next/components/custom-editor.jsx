@@ -123,7 +123,7 @@ class MyUploadAdapter {
 function MediaUploadSupport(editor) {
   // Configures the upload adapter
   editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001/api/v1';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.eduroutez.com/api/v1';
     return new MyUploadAdapter(loader, `${apiUrl}/upload-editor`);
   };
 

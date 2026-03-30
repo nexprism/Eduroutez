@@ -137,7 +137,7 @@ export async function uploadEditorFile(req, res) {
     
     // CKEditor 5 Simple Upload Adapter expects an object with a 'url' property
     // The images are served from /api/uploads
-    const imageUrl = process.env.IMAGES_URL || `http://localhost:4001/api/uploads`;
+    const imageUrl = process.env.IMAGES_URL || `https://api.eduroutez.com/api/uploads`;
     
     return res.status(StatusCodes.OK).json({
       url: `${imageUrl}/${req.file.filename}`,
