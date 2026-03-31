@@ -21,6 +21,14 @@ const bannerSchema = new mongoose.Schema(
     destinationLink: {
       type: String,
     },
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
