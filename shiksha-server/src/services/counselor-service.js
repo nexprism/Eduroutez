@@ -23,7 +23,13 @@ class CounselorService {
 
   async create(data) {
     try {
-      // Accept isCourseStream and isCounsellorStream in data
+      // Ensure counselors created via API are verified if not set
+      if (typeof data.isVerified === 'undefined') {
+        data.isVerified = true;
+      }
+      if (!data.verificationStatus) {
+        data.verificationStatus = 'verified';
+      }
       const counselor = await this.counselorRepository.create(data);
       return counselor;
     } catch (error) {

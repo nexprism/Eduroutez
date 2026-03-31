@@ -111,6 +111,10 @@ export const createCounselor = async (req, res) => {
 
 
     const response = await counselorService.create(counselorpayload);
+        // Ensure user is marked as verified for login
+        if (counselorpayload._id) {
+          await userService.userRepository.update(counselorpayload._id, { is_verified: true });
+        }
     //if password get from body then add it payload and save in user model
 
     // const user = await counselorService.make(req.body.email, payload);

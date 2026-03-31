@@ -369,7 +369,7 @@ export const signup = async (req, res) => {
         city: req.body.city,
         state: req.body.state,
         country: req.body.country,
-        is_verified: is_verified,
+        is_verified: req.body.role === 'counsellor' ? true : is_verified,
         referalCode: referalCode,
         ...referdata
       },
@@ -452,6 +452,8 @@ export const signup = async (req, res) => {
         country: req.body.country,
         state: req.body.state,
         city: req.body.city,
+        isVerified: true, // Mark counsellor as verified when created by admin
+        verificationStatus: 'verified',
       };
 
       const counselorResponse = await counselorService.create(counsellorpayload);

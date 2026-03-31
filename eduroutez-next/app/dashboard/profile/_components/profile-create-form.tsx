@@ -40,56 +40,52 @@ import * as z from 'zod';
 
 export const profileSchema = z.object({
   firstname: z
-    .string()
-    .min(3, { message: ' firstName must be at least 3 characters' }),
+    .string({ required_error: 'First Name is required' })
+    .min(3, { message: 'First Name must be at least 3 characters' }),
   lastname: z
-    .string()
-    .min(3, { message: ' lastName must be at least 3 characters' }),
+    .string({ required_error: 'Last Name is required' })
+    .min(3, { message: 'Last Name must be at least 3 characters' }),
   category: z
-    .string(),
-  bankName: z.string().min(3, { message: 'Account Name characters' }),
-  accountNumber: z.string().min(10, { message: 'Account Number must be at least 10 characters' }),
-  accountHolderName: z.string().min(3, { message: 'Account Holder Name must be at least 3 characters' }),
+    .string({ required_error: 'Category is required' }),
+  bankName: z.string({ required_error: 'Bank Name is required' }).min(3, { message: 'Bank Name must be at least 3 characters' }),
+  accountNumber: z.string({ required_error: 'Account Number is required' }).min(10, { message: 'Account Number must be at least 10 characters' }),
+  accountHolderName: z.string({ required_error: 'Account Holder Name is required' }).min(3, { message: 'Account Holder Name must be at least 3 characters' }),
   ifscCode: z
-    .string()
-    .min(3, { message: 'Product Name must be at least 3 characters' }),
+    .string({ required_error: 'IFSC Code is required' })
+    .min(3, { message: 'IFSC Code must be at least 3 characters' }),
   email: z
-    .string()
-    .email({ message: 'Product Name must be at least 3 characters' }),
+    .string({ required_error: 'Email is required' })
+    .email({ message: 'Please enter a valid email address' }),
   instituteEmail: z
-    .string().min(1, { message: ' lastName must be at least 3 characters' }),
-  contactno: z.coerce.number(),
-  language: z.string(),
-  ExperienceYear: z.string(),
-  country: z.string().optional(),
-  city: z.any(),
-  state: z.any(),
-  gender: z.string(),
-  dateOfBirth: z.string().refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
-    message: 'Start date should be in the format YYYY-MM-DD'
+    .string({ required_error: 'Institute Email is required' }).min(1, { message: 'Institute Email must be at least 1 character' }),
+  contactno: z.coerce.number({ required_error: 'Contact Number is required' }),
+  language: z.string({ required_error: 'Language is required' }),
+  ExperienceYear: z.string({ required_error: 'Experience Year is required' }),
+  country: z.string({ required_error: 'Country is required' }).optional(),
+  city: z.any({ required_error: 'City is required' }),
+  state: z.any({ required_error: 'State is required' }),
+  gender: z.string({ required_error: 'Gender is required' }),
+  dateOfBirth: z.string({ required_error: 'Date of Birth is required' }).refine((value) => /^\d{4}-\d{2}-\d{2}$/.test(value), {
+    message: 'Date of Birth should be in the format YYYY-MM-DD'
   }),
   panCard: z
-    .instanceof(File)
-    .optional()
-    .refine((file) => !file || file.size <= 1024 * 1024, {
+    .instanceof(File, { message: 'PAN Card is required' })
+    .refine((file) => file && file.size <= 1024 * 1024, {
       message: 'Image size must be less than 1 MB.'
     })
     .refine(
-      (file) =>
-        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      (file) => file && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
       {
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
   adharCard: z
-    .instanceof(File)
-    .optional()
-    .refine((file) => !file || file.size <= 1024 * 1024, {
+    .instanceof(File, { message: 'Aadhaar Card is required' })
+    .refine((file) => file && file.size <= 1024 * 1024, {
       message: 'Image size must be less than 1 MB.'
     })
     .refine(
-      (file) =>
-        !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      (file) => file && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
       {
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
@@ -107,14 +103,14 @@ export const profileSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
-  certificate: z.instanceof(File).optional(),
-  achievements: z.instanceof(File).optional(),
-  marksheet10th: z.instanceof(File).optional(),
-  marksheet12th: z.instanceof(File).optional(),
-  graduationCertificate: z.instanceof(File).optional(),
-  postGraduationCertificate: z.instanceof(File).optional(),
-  experienceLetter: z.instanceof(File).optional(),
-  eduRouteCertificate: z.instanceof(File).optional(),
+  certificate: z.instanceof(File, { message: 'Upload Certificate is required' }),
+  achievements: z.instanceof(File, { message: 'Upload Achievements is required' }),
+  marksheet10th: z.instanceof(File, { message: 'Upload 10th Marksheet is required' }),
+  marksheet12th: z.instanceof(File, { message: 'Upload 12th Marksheet is required' }),
+  graduationCertificate: z.instanceof(File, { message: 'Upload Graduation Certificate is required' }),
+  postGraduationCertificate: z.instanceof(File, { message: 'Upload Post Graduation Certificate is required' }),
+  experienceLetter: z.instanceof(File, { message: 'Upload Experience Letter is required' }),
+  eduRouteCertificate: z.instanceof(File, { message: 'Upload EduRoute Certificate is required' }),
   about: z.string().optional(),
   experiences: z.array(
     z.object({
@@ -1611,7 +1607,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         )}
                       </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-600 font-semibold" />
                   </FormItem>
                 )}
               />
@@ -1687,7 +1683,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         )}
                       </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-600 font-semibold" />
                   </FormItem>
                 )}
               />
@@ -1763,7 +1759,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         )}
                       </div>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-600 font-semibold" />
                   </FormItem>
                 )}
               />
