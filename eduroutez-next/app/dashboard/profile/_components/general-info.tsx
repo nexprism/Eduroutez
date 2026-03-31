@@ -50,7 +50,9 @@ const orgTypes = [
 ];
 
 const organisationOptions = [
-  { value: 'Institute', label: 'Institute' }
+  { value: 'Institute', label: 'Institute' },
+  { value: 'University', label: 'University' },
+  { value: 'College', label: 'College' }
 ];
 
 const organisationTypeOptions = [
@@ -133,6 +135,10 @@ const formSchema = z.object({
 
 
 const GeneralInfo = () => {
+  const [role, setRole] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    setRole(typeof window !== 'undefined' ? localStorage.getItem('role') : null);
+  }, []);
   const [previewThumbnailUrl, setPreviewThumbnailUrl] = React.useState<
     string | null
   >(null);
@@ -911,9 +917,64 @@ const [initialCityName, setInitialCityName] = useState("");
               />
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-
-
-
+              {role === 'SUPER_ADMIN' && (
+                <>
+                  {form.watch('organization') === 'Institute' && (
+                    <FormField
+                      control={form.control}
+                      name="isBestRatedInstitute"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value ?? false}
+                              onChange={e => field.onChange(e.target.checked)}
+                            />
+                          </FormControl>
+                          <FormLabel className="mb-0">Best Rated Institute</FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {form.watch('organization') === 'University' && (
+                    <FormField
+                      control={form.control}
+                      name="isBestRatedUniversity"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value ?? false}
+                              onChange={e => field.onChange(e.target.checked)}
+                            />
+                          </FormControl>
+                          <FormLabel className="mb-0">Best Rated University</FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {form.watch('organization') === 'College' && (
+                    <FormField
+                      control={form.control}
+                      name="isBestRatedCollege"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center gap-2 space-y-0">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value ?? false}
+                              onChange={e => field.onChange(e.target.checked)}
+                            />
+                          </FormControl>
+                          <FormLabel className="mb-0">Best Rated College</FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </>
+              )}
             </div>
                    <FormField
                      control={form.control}

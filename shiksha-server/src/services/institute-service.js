@@ -391,9 +391,9 @@ escapeRegex(str) {
 
 
   //bestRatedInstitute
-  async bestRatedInstitute() {
+  async bestRatedInstitute(type) {
     try {
-      const institute = await this.instituteRepository.bestRatedInstitute();
+      const institute = await this.instituteRepository.bestRatedInstitute(type);
       return institute;
     } catch (error) {
       throw new AppError("Cannot fetch best rated institute", StatusCodes.INTERNAL_SERVER_ERROR);

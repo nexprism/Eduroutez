@@ -280,9 +280,17 @@ class InstituteRepository extends CrudRepository {
 
 
   //bestRatedInstitute
-  async bestRatedInstitute() {
+  async bestRatedInstitute(type) {
     try {
-      const result = await this.model.find({ onhold: false, deletedAt: null }).sort({ rating: -1 }).limit(5);
+      let filter = { onhold: false, deletedAt: null };
+      if (type === 'university') {
+        filter.isBestRatedUniversity = true;
+      } else if (type === 'college') {
+        filter.isBestRatedCollege = true;
+      } else {
+        filter.isBestRatedInstitute = true;
+      }
+      const result = await this.model.find(filter).sort({ rating: -1 }).limit(5);
       return result;
     } catch (error) {
       throw error;

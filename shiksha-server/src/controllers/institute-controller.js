@@ -243,7 +243,8 @@ export async function megamenuCollages(req, res) {
 //bestRatedInstitute
 export async function bestRatedInstitute(req, res) {
   try {
-    const response = await instituteService.bestRatedInstitute();
+    const { type } = req.query;
+    const response = await instituteService.bestRatedInstitute(type);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched institutes";
     return res.status(StatusCodes.OK).json(SuccessResponse);
