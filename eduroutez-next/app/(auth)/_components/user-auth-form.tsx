@@ -86,6 +86,19 @@ export default function UserAuthForm({ setToggle, toggle }: any) {
         'refreshToken',
         JSON.stringify(data.data.refreshToken)
       );
+      
+      // Store test schedule details if available
+      if (data?.data?.user?.scheduledTestDate) {
+        localStorage.setItem('scheduledTestDate', String(data.data.user.scheduledTestDate));
+      }
+      if (data?.data?.user?.scheduledTestSlot) {
+        localStorage.setItem('scheduledTestSlot', String(data.data.user.scheduledTestSlot));
+      }
+      
+      // Notify other components (like the timer) to re-read localStorage
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('counselor-test-update'));
+      }
 
       // Redirect to dashboard
       startTransition(() => {

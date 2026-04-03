@@ -39,6 +39,10 @@ export default function ClientBootstrap({ children }: Props) {
             // store scheduled test info on client as a fallback for components
             if (user.scheduledTestDate) localStorage.setItem('scheduledTestDate', String(user.scheduledTestDate));
             if (user.scheduledTestSlot) localStorage.setItem('scheduledTestSlot', String(user.scheduledTestSlot));
+            
+            // Notify components about the updated storage
+            window.dispatchEvent(new Event('counselor-test-update'));
+            
             // debug: log what we saved to localStorage
             try {
               console.debug('ClientBootstrap: saved keys', {

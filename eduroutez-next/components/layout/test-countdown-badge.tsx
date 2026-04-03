@@ -43,7 +43,14 @@ export default function TestCountdownBadge() {
     checkTest();
     // Re-check periodically in case localStorage changes
     const interval = setInterval(checkTest, 30000);
-    return () => clearInterval(interval);
+    
+    // Listen for custom event (login/profile sync)
+    window.addEventListener('counselor-test-update', checkTest);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('counselor-test-update', checkTest);
+    };
   }, []);
 
   useEffect(() => {
