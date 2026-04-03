@@ -37,6 +37,7 @@ import { useQuery } from '@tanstack/react-query';
 import {Button} from '@/components/ui/button';
 import Image from 'next/image';
 import logo from "@/public/logo.png";
+import TestCountdownBadge from './test-countdown-badge';
 
 
 export const company = {
@@ -305,6 +306,9 @@ export default function AppSidebar({
             <ThemeToggle />
           </div>
         </header>
+        {/* Test countdown for counselors */}
+        <TestCountdownBadge />
+        
         {/* page main content */}
         {children}
       </SidebarInset>

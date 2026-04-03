@@ -19,6 +19,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const { searchQuery, page, limit } = useQuestionAnswerTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const plan = typeof window !== 'undefined' ? localStorage.getItem('plan') : null;
 
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['emails', searchQuery],
@@ -35,13 +36,14 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
     }
   });
   const { data: subscription } = useQuery({
-    queryKey: ['subscription'],
+    queryKey: ['subscription', plan],
     queryFn: async () => {
       const response = await axiosInstance.get(
-        `${apiUrl}/subscription/${localStorage.getItem('plan')}`
+        `${apiUrl}/subscription/${plan}`
       );
       return response.data;
-    }
+    },
+    enabled: !!plan
   });
   console.log('hello', data?.data);
   return (

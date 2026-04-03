@@ -128,6 +128,29 @@ const userSchema = new mongoose.Schema(
   about: {
       type: String,
     },
+    // Scheduled test fields for counsellor role
+    scheduledTestDate: {
+      type: Date,
+    },
+    scheduledTestSlot: {
+      type: String,
+    },
+    scheduledTestReminderSent: {
+      type: Boolean,
+      default: false,
+    },
+    scheduledTestReminder48HourSent: {
+      type: Boolean,
+      default: false,
+    },
+    scheduledTestReminder1DaySent: {
+      type: Boolean,
+      default: false,
+    },
+    scheduledTestReminder1HourSent: {
+      type: Boolean,
+      default: false,
+    },
     course_wishlist: [
       {
         type: mongoose.Schema.Types.ObjectId,

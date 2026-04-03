@@ -72,13 +72,18 @@ export default function CounselorForm() {
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
-  const counselorId = segments[4];
+  // Derive counselorId for both /dashboard/counselor/:id and /dashboard/counselor/update/:id
+  let derivedCounselorId: string | null = null;
+  if (segments[3] === 'update') {
+    derivedCounselorId = segments[4] || null;
+  } else {
+    derivedCounselorId = segments[3] || null;
+  }
+  const counselorId = derivedCounselorId;
   const [selectedCategoryName, setSelectedCategoryName] = React.useState<string>('');
 
   React.useEffect(() => {
-    if (segments.length === 5 && segments[3] === 'update') {
-      setIsEdit(true);
-    }
+    setIsEdit(segments[3] === 'update');
   }, [segments]);
 
   const form = useForm<z.infer<ReturnType<typeof getFormSchema>>>({
@@ -119,14 +124,58 @@ export default function CounselorForm() {
   const { data: counselorData, isLoading } = useQuery({
     queryKey: ['counselor', counselorId],
     queryFn: async () => {
-      if (isEdit && counselorId) {
+      if (counselorId) {
         const response = await axiosInstance.get(`${apiUrl}/counselor-by-id/${counselorId}`);
         return response.data.data;
       }
       return null;
     },
-    enabled: isEdit && !!counselorId
+    enabled: !!counselorId
   });
+
+  // Scheduled test countdown state
+  const [remaining, setRemaining] = React.useState<number | null>(null);
+  const [scheduledDateObj, setScheduledDateObj] = React.useState<Date | null>(null);
+
+  // Initialize countdown when counselorData loads
+  React.useEffect(() => {
+    const scheduled = counselorData?.scheduledTestDate || counselorData?.scheduledTest?.date || counselorData?.scheduledTestDateString;
+    if (scheduled) {
+      const dt = new Date(scheduled);
+      setScheduledDateObj(dt);
+      const update = () => {
+        const now = new Date();
+        const diff = dt.getTime() - now.getTime();
+        setRemaining(diff > 0 ? diff : 0);
+      };
+      update();
+      const id = setInterval(update, 1000);
+      return () => clearInterval(id);
+    }
+    setRemaining(null);
+  }, [counselorData]);
+
+  const formatRemaining = (ms: number) => {
+    if (ms <= 0) return '00:00:00';
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+    const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  };
+
+  const onStartTest = async () => {
+    try {
+      const resp = await axiosInstance.get(`${apiUrl}/counselor-test/can-give`);
+      if (resp.data && resp.data.success) {
+        router.push('/dashboard/counselor-test');
+      } else {
+        toast.error(resp.data?.message || 'Not eligible to start test');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to check eligibility');
+    }
+  };
 
   // Set initial form values and find category name when counselor data is fetched
   React.useEffect(() => {
@@ -216,6 +265,36 @@ export default function CounselorForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* Scheduled test card */}
+              {scheduledDateObj && (
+                <div className="md:col-span-2">
+                  <Card className="mb-4">
+                    <CardHeader>
+                      <CardTitle>Scheduled Test</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Scheduled for</p>
+                          <p className="font-medium">{scheduledDateObj.toLocaleString()}</p>
+                          <p className="text-sm text-muted-foreground">Slot: {counselorData?.scheduledTestSlot || counselorData?.scheduledTestSlot || '-'}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">Starts in</p>
+                          <p className="text-2xl font-semibold">{remaining !== null ? formatRemaining(remaining) : '-'}</p>
+                          <div className="mt-2">
+                            {remaining !== null && remaining <= 0 ? (
+                              <Button onClick={onStartTest}>Start Test</Button>
+                            ) : (
+                              <Button disabled>Start Test</Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
               <FormField
                 control={form.control}
                 name="firstname"

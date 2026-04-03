@@ -122,6 +122,7 @@ export const getCitiesByState = async (req, res) => {
 export async function sendOtp(req, res) {
   try {
     const user = await userService.getUserByEmail(req.body.email);
+    const contact_number = req.body.contact_number || req.body.phoneNo || req.body.phone || req.body.phone_number;
     if (user) {
       return res.status(400).json({
         message: "Email already exists",
@@ -132,7 +133,7 @@ export async function sendOtp(req, res) {
     }
     // console.log('user', user);
     //contact number length check
-    if (req.body.contact_number.length !== 10) {
+    if (!contact_number || contact_number.toString().length !== 10) {
 
       return res.status(400).json({
         message: "Contact number should be of 10 digits",
@@ -155,7 +156,7 @@ export async function sendOtp(req, res) {
     }
 
     var otp = Math.floor(100000 + Math.random() * 900000);
-    const response = await userService.sendOtp(otp, req.body.contact_number);
+    const response = await userService.sendOtp(otp, contact_number);
     if (!response.data.return)
       return res.status(400).json({
         message: response.data.message,
@@ -180,9 +181,10 @@ export async function sendOtp(req, res) {
 //verifyOtp
 export async function verifyOtp(req, res) {
   try {
+    const contact_number = req.body.contact_number || req.body.phoneNo || req.body.phone || req.body.phone_number;
 
     //contact number length check
-    if (req.body.contact_number.length !== 10) {
+    if (!contact_number || contact_number.toString().length !== 10) {
 
       return res.status(400).json({
         message: "Contact number should be of 10 digits",
@@ -191,8 +193,8 @@ export async function verifyOtp(req, res) {
         err: {},
       });
     }
-    console.log('req.body.otp', req.body.otp.length);
-    if (req.body.otp.length !== 6) {
+    console.log('req.body.otp', req.body.otp);
+    if (!req.body.otp || req.body.otp.toString().length !== 6) {
 
       return res.status(400).json({
         message: "OTP should be of 6 digits",
@@ -202,7 +204,7 @@ export async function verifyOtp(req, res) {
       });
     }
 
-    const response = await userService.verifyOtp(req.body.otp, req.body.contact_number);
+    const response = await userService.verifyOtp(req.body.otp, contact_number);
     if (!response) {
       return res.status(400).json({
 
@@ -250,6 +252,7 @@ export const getStateCityById = async (req, res) => {
 
 export const signup = async (req, res) => {
   console.log(req.body);
+    const contact_number = req.body.contact_number || req.body.phoneNo || req.body.phone || req.body.phone_number;
   //req parms refercode
 
   try {
@@ -266,7 +269,7 @@ export const signup = async (req, res) => {
     }
     // console.log('user', user);
     //contact number length check
-    if (req.body.contact_number.length !== 10) {
+    if (!contact_number || contact_number.toString().length !== 10) {
 
       return res.status(400).json({
         message: "Contact number should be of 10 digits",
@@ -277,7 +280,7 @@ export const signup = async (req, res) => {
     }
 
     // Password strength validation
-    const password = req.body.password;
+    const password = req.body.password || req.body.pass || req.body.passwordField || req.body.password_field;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d|.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
     if (!password || password.length < 8) {
       return res.status(400).json({
@@ -296,25 +299,27 @@ export const signup = async (req, res) => {
       });
     }
 
-    if (req.body.otp.length !== 6) {
+    if (req.body.role !== 'counsellor') {
+      if (!req.body.otp || req.body.otp.toString().length !== 6) {
 
-      return res.status(400).json({
-        message: "OTP should be of 6 digits",
-        data: {},
-        success: false,
-        err: {},
-      });
-    }
+        return res.status(400).json({
+          message: "OTP should be of 6 digits",
+          data: {},
+          success: false,
+          err: {},
+        });
+      }
 
-    //check otp
-    const otpResponse = await userService.verifyOtp(req.body.otp, req.body.contact_number);
-    if (!otpResponse) {
-      return res.status(400).json({
-        message: "Invalid OTP",
-        data: {},
-        success: false,
-        err: {},
-      });
+      //check otp
+      const otpResponse = await userService.verifyOtp(req.body.otp, contact_number);
+      if (!otpResponse) {
+        return res.status(400).json({
+          message: "Invalid OTP",
+          data: {},
+          success: false,
+          err: {},
+        });
+      }
     }
 
 
@@ -362,9 +367,9 @@ export const signup = async (req, res) => {
     const response = await userService.signup(
       {
         name: req.body.name,
-        contact_number: req.body.contact_number,
+        contact_number: contact_number,
         email: req.body.email,
-        password: req.body.password,
+        password: password,
         role: req.body?.role,
         city: req.body.city,
         state: req.body.state,
@@ -405,7 +410,7 @@ export const signup = async (req, res) => {
         _id: userId,
         name: req.body.name,
         email: req.body.email,
-        phone: req.body.contact_number,
+        phone: contact_number,
         country: req.body.country,
         state: req.body.state,
         city: req.body.city,
@@ -426,8 +431,8 @@ export const signup = async (req, res) => {
       const institutePayload = {
         instituteName: req.body.name,
         email: req.body.email,
-        institutePhone: req.body.contact_number,
-        password: req.body.password,
+        institutePhone: contact_number,
+        password: password,
         _id: userId,
         status: status,
         country: req.body.country,
@@ -447,7 +452,7 @@ export const signup = async (req, res) => {
         firstname: req.body.name,
         lastname: req.body.name,
         email: req.body.email,
-        contactno: req.body.contact_number,
+        contactno: contact_number,
         _id: userId,
         country: req.body.country,
         state: req.body.state,

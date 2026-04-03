@@ -21,7 +21,9 @@ export function UserNav() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   // const [startTransition] = useTransition();
   const router = useRouter();
-  const email = localStorage.getItem('email');
+  const email = typeof window !== 'undefined' ? localStorage.getItem('email') : null;
+  const name = typeof window !== 'undefined' ? localStorage.getItem('name') : null;
+  const image = typeof window !== 'undefined' ? localStorage.getItem('image') : null;
   const mutation: any = useMutation({
     mutationFn: async () => {
       try {
@@ -63,11 +65,11 @@ export function UserNav() {
 
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={'session.user?.image'}
-              alt={'session.user?.name'}
-            />
-            <AvatarFallback>{email ? email.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+            {image ? (
+              <AvatarImage src={image} alt={name || email || 'User'} />
+            ) : (
+              <AvatarFallback>{(name || email ? (name || email).charAt(0).toUpperCase() : 'U')}</AvatarFallback>
+            )}
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

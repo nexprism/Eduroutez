@@ -62,59 +62,59 @@ const userService = new UserService();
  */
 export const createCounselor = async (req, res) => {
   try {
-    console.log('Incoming data:', req.body); // Debugging
+    const email = req.body.email;
+    let userId;
+    const existingUser = await userService.getUserByEmail(email);
 
-    const emailExists = await userService.getUserByEmail(req.body.email);
-    if (emailExists) {
-      return res.status(400).json({ error: "Email already exists" });
-    }
-
-    const payload = { ...req.body };
-    // Accept isCourseStream and isCounsellorStream from req.body if provided
-    if (typeof req.body.isCourseStream !== 'undefined') {
-      payload.isCourseStream = req.body.isCourseStream;
-    }
-    if (typeof req.body.isCounsellorStream !== 'undefined') {
-      payload.isCounsellorStream = req.body.isCounsellorStream;
-    }
-    let counselorpayload = { ...payload };
-
-    if (req.body.password) {
-      const emailExists = await userService.getUserByEmail(req.body.email);
-      if (emailExists) {
-        return res.status(400).json({ error: "Email already exists" });
+    if (existingUser) {
+      userId = existingUser._id;
+      // Ensure we have a contact number
+      if (!req.body.contactno) {
+        req.body.contactno = existingUser.contact_number;
       }
-      const userPayload = {
-        name: `${req.body.firstname} ${req.body.lastname}`,
-        email: req.body.email,
-        contact_number: req.body.contactno,
-        password: req.body.password,
-        // role and is_verified will be set after admin approval
-      };
-
-      const userResponse = await userService.signup(userPayload, res);
-      const userId = userResponse.user._id;
-
-
-      counselorpayload = {
-        ...payload,
-        _id: userId,
-      };
-
+    } else {
+      // Create new user if password is provided
+      if (req.body.password) {
+        const userPayload = {
+          name: `${req.body.firstname} ${req.body.lastname}`,
+          email: req.body.email,
+          contact_number: req.body.contactno,
+          password: req.body.password,
+        };
+        const userResponse = await userService.signup(userPayload, res);
+        if (!userResponse || !userResponse.user) {
+          throw new Error("User creation failed during counselor signup");
+        }
+        userId = userResponse.user._id;
+      } else {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "User does not exist and no password provided for creation"
+        });
+      }
     }
 
+    const counselorpayload = {
+      ...req.body,
+      _id: userId,
+      contactno: req.body.contactno || (existingUser ? existingUser.contact_number : '')
+    };
 
-    // counselorpayload = {
-    //   ...payload,
-    //   userId: userId,
-    // };
 
+    // create counselor
+    console.debug('[createCounselor] final payload before creation:', {
+      _id: counselorpayload._id,
+      email: counselorpayload.email,
+      contactno: counselorpayload.contactno,
+      firstname: counselorpayload.firstname,
+      lastname: counselorpayload.lastname
+    });
 
     const response = await counselorService.create(counselorpayload);
-        // Ensure user is marked as verified for login
-        if (counselorpayload._id) {
-          await userService.userRepository.update(counselorpayload._id, { is_verified: true });
-        }
+    // Ensure user is marked as verified for login
+    if (counselorpayload._id) {
+      await userService.userRepository.update(counselorpayload._id, { is_verified: true });
+    }
     //if password get from body then add it payload and save in user model
 
     // const user = await counselorService.make(req.body.email, payload);
@@ -296,9 +296,11 @@ export const getCounselorById = async (req, res) => {
     SuccessResponse.message = "Successfully fetched the counselor";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
-    conosoel.error("Error in getCounselor:", error.message);
+    console.error("Error in getCounselorById:", error.message || error);
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+    // Fallback to 500 if statusCode is undefined
+    const status = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    return res.status(status).json(ErrorResponse);
   }
 };
 
@@ -365,6 +367,22 @@ export const bookSlots = async (req, res) => {
     console.log('error', error.message);
     ErrorResponse.error = error.message;
     return res.status(500).json(ErrorResponse);
+  }
+};
+
+// Counselor: Schedule test for later
+export const scheduleTest = async (req, res) => {
+  try {
+    const counselorId = req.user._id;
+    const { date, slot } = req.body;
+    const response = await counselorService.scheduleTest(counselorId, { date, slot });
+    SuccessResponse.data = response;
+    SuccessResponse.message = 'Test scheduled successfully';
+    return res.status(200).json(SuccessResponse);
+  } catch (error) {
+    console.error('Error scheduling test:', error.message || error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 };
 

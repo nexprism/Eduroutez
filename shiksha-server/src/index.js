@@ -14,6 +14,7 @@ import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { setupINIT } from "./utils/helpers/init.js";
 import mg from "mailgun-js";
+import { initTestReminderCron } from "./utils/helpers/test-reminder-cron.js";
 
 const app = express();
 
@@ -108,4 +109,8 @@ app.listen(ServerConfig.PORT, async () => {
   console.log("setup init");
   await setupINIT();
   console.log("setup init done");
+
+  // Initialize background tasks
+  initTestReminderCron();
+  console.log("test reminder cron initialized");
 });

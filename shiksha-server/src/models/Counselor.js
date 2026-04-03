@@ -249,6 +249,29 @@ const counselorSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "CounselorTestResult",
     },
+    // Scheduled test (when counselor chooses to take test later)
+    scheduledTestDate: {
+      type: Date,
+    },
+    scheduledTestSlot: {
+      type: String,
+    },
+    scheduledTestReminderSent: {
+      type: Boolean,
+      default: false,
+    },
+    scheduledTestReminder48HourSent: {
+      type: Boolean,
+      default: false,
+    },
+    scheduledTestReminder1DaySent: {
+      type: Boolean,
+      default: false,
+    },
+    scheduledTestReminder1HourSent: {
+      type: Boolean,
+      default: false,
+    },
     certificate: {
       type: String,
     },

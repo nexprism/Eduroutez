@@ -1,4 +1,6 @@
 import Providers from '@/components/layout/providers';
+import ClientBootstrap from '@/components/layout/client-bootstrap';
+import ScheduleBadge from '@/components/layout/schedule-badge';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { Lato } from 'next/font/google';
@@ -30,8 +32,10 @@ export default async function RootLayout({
       <body className={'overflow-hidden'}>
         <NextTopLoader showSpinner={false} />
         <Providers>
-          <Toaster />
-          {children}
+          <ClientBootstrap>
+            <Toaster />
+            {children}
+          </ClientBootstrap>
         </Providers>
       </body>
     </html>

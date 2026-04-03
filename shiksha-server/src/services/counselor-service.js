@@ -133,8 +133,14 @@ class CounselorService {
       console.log('counselor user',user);
       if(user) {
         
-        //create counselor
-        const counselor = await this.create({userId:user._id,email:user.email,firstname:user.name,lastname:user.lastname});
+        // create counselor with all required info from the user record
+        const counselor = await this.create({
+          _id: user._id, 
+          email: user.email, 
+          firstname: user.name, 
+          lastname: user.lastname || '',
+          contactno: user.contact_number || '0000000000'
+        });
       }
     }
 
@@ -189,8 +195,14 @@ class CounselorService {
       const user = await this.userRepository.getById(id);
       if (user) {
 
-        //create counselor
-        const counselor = await this.create({ userId: user._id, email: user.email, firstname: user.name, lastname: user.lastname });
+        // create counselor with all required info from the user record
+        const counselor = await this.create({
+          _id: user._id, 
+          email: user.email, 
+          firstname: user.name, 
+          lastname: user.lastname || '',
+          contactno: user.contact_number || '0000000000'
+        });
       }
     }
     return counselor;
@@ -204,6 +216,71 @@ class CounselorService {
     // console.log('email',email);
     const counselor = await this.counselorRepository.getByEmail(email);
     return counselor;
+  }
+
+  // Schedule a test for counselor (save date/time and send notification email)
+  async scheduleTest(counselorId, data) {
+    try {
+      const { date, slot } = data; // date: YYYY-MM-DD, slot: HH:mm
+      if (!date || !slot) throw new Error('Both date and slot are required');
+      const scheduledDate = new Date(`${date}T${slot}:00`);
+
+      const payload = {
+        scheduledTestDate: scheduledDate,
+        scheduledTestSlot: slot,
+        scheduledTestReminderSent: false,
+        scheduledTestReminder48HourSent: false,
+        scheduledTestReminder1DaySent: false,
+        scheduledTestReminder1HourSent: false,
+        verificationStatus: 'test_scheduled'
+      };
+
+      const updatedCounselor = await this.counselorRepository.updateCounsellor(counselorId, payload);
+
+      // Also update the User document so frontend reads scheduled test info from User
+      try {
+        // Update user model with scheduling info and unset legacy/typo fields
+        await User.findByIdAndUpdate(counselorId, {
+          $set: {
+            scheduledTestDate: scheduledDate,
+            scheduledTestSlot: slot,
+            scheduledTestReminderSent: false,
+            scheduledTestReminder48HourSent: false,
+            scheduledTestReminder1DaySent: false,
+            scheduledTestReminder1HourSent: false,
+          },
+          $unset: {
+            scheduledTest: "",
+            scheduledTestDateString: "",
+            scheduledTest1HourReminderSent: ""
+          }
+        });
+      } catch (userUpdateErr) {
+        console.error('Failed to update User scheduled test fields:', userUpdateErr?.message || userUpdateErr);
+      }
+      // Send notification email via internal /send-email route
+      try {
+        const serverPort = ServerConfig.PORT || 4001;
+        const sendEmailUrl = `http://localhost:${serverPort}/send-email`;
+        const message = `<p>Dear ${updatedCounselor.firstname || 'Counselor'},</p>
+          <p>Your counselor test has been scheduled on <strong>${scheduledDate.toLocaleString()}</strong>.</p>
+          <p>Please be ready to take the test at that time.</p>
+          <p>Regards,<br/>Eduroutez Team</p>`;
+
+        // Use global fetch (Node >=18) to POST to internal email route
+        await fetch(sendEmailUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: [updatedCounselor.email], subject: 'Counselor Test Scheduled', message })
+        });
+      } catch (emailErr) {
+        console.error('Failed to send scheduled test email:', emailErr?.message || emailErr);
+      }
+
+      return updatedCounselor;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async book(id,data) {

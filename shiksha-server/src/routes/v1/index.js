@@ -18,7 +18,7 @@ import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPop
 import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue, getIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure, megamenuCollages } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer, getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js"; ``
-import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview, getCounselorById, getCounselorsByCategory } from "../../controllers/counselor-controller.js";
+import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview, getCounselorById, getCounselorsByCategory, scheduleTest } from "../../controllers/counselor-controller.js";
 import { createStudent, deleteStudent, getStudent, getStudents, updateStudent } from "../../controllers/student-controller.js";
 import { createPaymentMethod, deletePaymentMethod, getPaymentMethod, getPaymentMethods, updatePaymentMethod } from "../../controllers/payment-method-controller.js";
 import { createReview, deleteReview, getReview, getReviews, updateReview, getReviewsByUser, getReviewByInstitute, getMyReviews } from "../../controllers/review-controller.js";
@@ -253,6 +253,17 @@ router.post("/counselor-test/submit", accessTokenAutoRefresh, passport.authentic
  */
 router.post("/counselorslots", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCounselorSlots);
 router.post("/bookslot", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), bookSlots);
+// schedule test for counselor (choose date/time to take test later)
+router.post("/counselor/schedule-test", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), scheduleTest);
+router.get("/test-reminder-cron", async (req, res) => {
+  try {
+    const { runReminderCheck } = await import("../../utils/helpers/test-reminder-cron.js");
+    await runReminderCheck();
+    res.status(200).json({ message: "Test reminder logic manually triggered. Check server console for logs." });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 router.post("/markslot", markSlot);
 router.get("/counselorslots", getCounselors);
 router.get("/counselorslots/:email", getCounselorSlot);

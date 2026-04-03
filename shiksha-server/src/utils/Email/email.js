@@ -1,7 +1,7 @@
 import { EmailConfig } from "../../config/index.js";
 
-function sendEmail(to, subject, message) {
-  EmailConfig.transporter.sendMail({
+async function sendEmail(to, subject, message) {
+  return await EmailConfig.transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to: to,
     subject: subject,
