@@ -13,8 +13,8 @@ import { DATABASE } from "./utils/database/index.js";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { setupINIT } from "./utils/helpers/init.js";
-import mg from "mailgun-js";
 import { initTestReminderCron } from "./utils/helpers/test-reminder-cron.js";
+import { sendEmail } from "./utils/Email/email.js";
 
 const app = express();
 
@@ -67,13 +67,7 @@ app.get("/", (req, res) => {
 
 app.use("/api", apiRoutes);
 
-// Mailgun config and email route
-const mailgun = () =>
-  mg({
-    apiKey: process.env.MAILGUN_API_KEY,
-    domain: process.env.MAILGUN_DOMAIN,
-  });
-
+// Email route using centralized sendEmail utility
 app.post("/send-email", async (req, res) => {
   const { to, subject, message } = req.body;
 
@@ -83,24 +77,17 @@ app.post("/send-email", async (req, res) => {
       .json({ error: "Recipient email list is empty or invalid" });
   }
 
-  const recipients = to.join(",");
-
-  const data = {
-    from: '"Eduroutez" <eduroutezdigital@gmail.com>',
-    to: recipients,
-    subject: subject,
-    html: message,
-  };
-
-  mailgun().messages().send(data, (error, body) => {
-    if (error) {
-      console.error("Error sending email:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to send email", details: error });
-    }
-    return res.status(200).json({ message: "Email sent successfully", body });
-  });
+  try {
+    const recipients = to.join(",");
+    const info = await sendEmail(recipients, subject, message);
+    console.log("Email sent successfully through Gmail SMTP:", info.messageId);
+    return res.status(200).json({ message: "Email sent successfully", body: info });
+  } catch (error) {
+    console.error("Error sending email through Gmail SMTP:", error);
+    return res
+      .status(500)
+      .json({ error: "Failed to send email", details: error.message });
+  }
 });
 
 app.listen(ServerConfig.PORT, async () => {
