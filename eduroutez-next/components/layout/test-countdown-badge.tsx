@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Clock, Play, GraduationCap, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function TestCountdownBadge() {
   const router = useRouter();
+  const pathname = usePathname();
   const [testTime, setTestTime] = useState<Date | null>(null);
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
   const [isTestTime, setIsTestTime] = useState(false);
@@ -25,6 +26,10 @@ export default function TestCountdownBadge() {
       const sd = localStorage.getItem('scheduledTestDate');
       const ss = localStorage.getItem('scheduledTestSlot');
 
+      // if (!sd) {
+      //   setTestTime(null);
+      //   return;
+      // }
       if (!sd) return;
 
       // Parse the scheduled date.
@@ -84,61 +89,87 @@ export default function TestCountdownBadge() {
     return () => clearInterval(timer);
   }, [testTime, isVisible]);
 
-  if (!isVisible || role !== 'counsellor' || !testTime) return null;
+  if (!isVisible || role !== 'counsellor' || !testTime || pathname !== '/dashboard/overview') return null;
 
   return (
     <AnimatePresence>
       <motion.div 
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: -100, opacity: 0 }}
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-full max-w-sm px-4"
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: 'auto', opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        className="relative w-full py-4 lg:py-6 mt-4 z-10"
       >
-        <div className="bg-white/90 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-1 flex items-center gap-4 overflow-hidden group">
-          {/* Progress / Status Indicator */}
-          <div className={`shrink-0 h-14 w-14 rounded-2xl flex items-center justify-center transition-colors duration-500 ${isTestTime ? 'bg-green-500 text-white animate-pulse' : 'bg-primary/10 text-primary'}`}>
-            {isTestTime ? <Play className="h-8 w-8 fill-current" /> : <Clock className="h-8 w-8" />}
+        <div className="relative overflow-hidden bg-gradient-to-r from-red-50 to-white dark:from-red-950/20 dark:to-slate-900 border border-red-100 dark:border-red-800/10 shadow-sm rounded-2xl py-4 md:p-5 flex flex-col md:flex-row items-center gap-4 group">
+          {/* Status Icon with Dynamic Ring */}
+          <div className="relative shrink-0">
+            <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-all duration-500 shadow-sm ${isTestTime ? 'bg-red-500 text-white shadow-red-200 animate-pulse scale-105 md:scale-110' : 'bg-red-100/50 text-red-600'}`}>
+              {isTestTime ? <Play className="h-6 w-6 fill-current" /> : <Clock className="h-6 w-6" />}
+            </div>
+            {isTestTime && (
+               <div className="absolute -inset-1 bg-red-400 rounded-xl opacity-20 animate-ping -z-10" />
+            )}
           </div>
 
-          <div className="flex-1 min-w-0 pr-2">
-            <div className="flex justify-between items-start">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Certification Test</span>
-              <button 
-                onClick={() => setIsVisible(false)}
-                className="text-slate-400 hover:text-slate-600 transition-colors p-1"
-              >
-                <X className="h-3 w-3" />
-              </button>
+          <div className="flex-1 text-center md:text-left min-w-0">
+            <div className="flex flex-col md:flex-row md:items-center justify-center md:justify-start gap-1 md:gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-600/80 dark:text-red-400">Certification Assessment</span>
+              <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-red-200 dark:bg-red-800" />
+              {isTestTime ? (
+                 <span className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">Test Portal is Open!</span>
+              ) : (
+                 <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Upcoming scheduled assessment</span>
+              )}
             </div>
             
             {isTestTime ? (
-               <div className="mt-0">
-                  <p className="text-sm font-extrabold text-slate-800">IT'S TEST TIME!</p>
-                  <Button 
-                    variant="link" 
-                    className="p-0 h-auto text-xs font-bold text-green-600 hover:text-green-700 underline underline-offset-4"
-                    onClick={() => router.push('/dashboard/counselor-test')}
-                  >
-                    START YOUR ASSESSMENT NOW →
-                  </Button>
+               <div className="mt-1">
+                  <p className="text-xl md:text-2xl font-black bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">IT'S TEST TIME!</p>
                </div>
             ) : timeLeft ? (
-              <div className="mt-0">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-xl font-black text-slate-900 leading-none">
+              <div className="mt-1 flex flex-col md:flex-row items-center justify-center md:justify-start gap-2 md:gap-4">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-black text-slate-900 dark:text-white tabular-nums tracking-tighter">
                     {timeLeft.hours.toString().padStart(2, '0')}:
                     {timeLeft.minutes.toString().padStart(2, '0')}:
                     {timeLeft.seconds.toString().padStart(2, '0')}
                   </span>
-                  <span className="text-[10px] font-bold text-slate-400">REMINDING</span>
+                  <span className="text-[10px] font-bold text-slate-500/70 border-l border-slate-200 dark:border-slate-800 pl-2">REMAINING</span>
                 </div>
-                <p className="text-[10px] text-slate-500 font-medium truncate">Starts at {testTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                <div className="px-2 py-0.5 bg-red-100/50 dark:bg-red-900/30 rounded-md">
+                   <p className="text-[10px] text-red-700 dark:text-red-400 font-bold tracking-wide">
+                     STARTS: {testTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                   </p>
+                </div>
               </div>
             ) : null}
           </div>
 
+          <div className="shrink-0 w-full md:w-auto flex items-center gap-3">
+            {isTestTime && (
+              <Button 
+                className="flex-1 md:flex-none bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-5 md:py-2 rounded-xl shadow-lg shadow-red-200 dark:shadow-none transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
+                onClick={() => router.push('/dashboard/counselor-test')}
+              >
+                Start Test
+                <span className="inline-block transform transition-transform group-hover/btn:translate-x-1">→</span>
+              </Button>
+            )}
+            
+            <button 
+              onClick={() => setIsVisible(false)}
+              className="text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400 transition-colors p-2 md:absolute md:top-1 md:right-1"
+              title="Dismiss"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* Premium Background Accents */}
           {isTestTime && (
-            <div className="absolute inset-0 pointer-events-none opacity-20 bg-gradient-to-r from-green-500/0 via-green-500/50 to-green-500/0 animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+              <div className="absolute -right-4 -top-8 w-32 h-32 bg-red-500/10 rounded-full blur-2xl" />
+              <div className="absolute right-0 bottom-0 top-0 w-1 bg-gradient-to-b from-red-400 via-red-500 to-red-400 animate-shimmer" style={{ backgroundSize: '100% 200%' }} />
+            </div>
           )}
         </div>
       </motion.div>

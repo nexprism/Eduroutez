@@ -35,6 +35,7 @@ export const getCountries = async (req, res) => {
       });
     })
     .catch(function (error) {
+      console?.log("ydghj",error);
       return res.status(500).json({
         message: "Something went wrong",
         data: {},
@@ -168,7 +169,7 @@ export async function sendOtp(req, res) {
     SuccessResponse.message = "Successfully sent OTP";
     return res.status(200).json(SuccessResponse);
   } catch (error) {
-    console.log('error in sendOtp', error.message);
+    console.log('error in sendOtp', error);
     return res.status(500).json({
       message: error.message,
       data: {},

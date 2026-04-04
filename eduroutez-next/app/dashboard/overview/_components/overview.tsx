@@ -14,6 +14,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Users, Building2, Activity, DollarSign, BookOpen, GraduationCap, TrendingUp, CircleDollarSign } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
 import Link from 'next/link';
+import TestCountdownBadge from '@/components/layout/test-countdown-badge';
 
 const Dashboard = () => {
   const [role, setRole] = useState('');
@@ -172,6 +173,7 @@ const fetchCounselorData = async () => {
             </Button>
           </div>
         </div>
+        <TestCountdownBadge />
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
@@ -242,6 +244,7 @@ const fetchCounselorData = async () => {
             </Button>
           </div> */}
         </div>
+        <TestCountdownBadge />
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
@@ -323,6 +326,7 @@ const fetchCounselorData = async () => {
           </Button>
         </div>
       </div>
+      <TestCountdownBadge />
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full max-w-[400px] grid-cols-2">
