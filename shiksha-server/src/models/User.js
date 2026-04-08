@@ -63,13 +63,15 @@ const userSchema = new mongoose.Schema(
     city: {
       type: {
         name: String,
-      }
+      },
+      set: (v) => (v === "" ? null : v),
     },
     state: {
       type: {
         name: String,
         iso2: String,
-      }
+      },
+      set: (v) => (v === "" ? null : v),
     },
     referalCode: {
       type: String,
@@ -89,6 +91,7 @@ const userSchema = new mongoose.Schema(
         name: String,
         iso2: String,
       },
+      set: (v) => (v === "" ? null : v),
     },
     date_of_birth: {
       type: Date,

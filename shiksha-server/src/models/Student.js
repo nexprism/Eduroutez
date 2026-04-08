@@ -31,17 +31,20 @@ const studentSchema = new mongoose.Schema(
         name: String,
         iso2: String,
       },
+      set: (v) => (v === "" ? null : v),
     },
     state: {
       type: { 
         name: String,
         iso2: String,
-      }
+      },
+      set: (v) => (v === "" ? null : v),
     },
     city: {
       type: {
         name: String,
-      }
+      },
+      set: (v) => (v === "" ? null : v),
     },
     designation: {
       type: String,

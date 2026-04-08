@@ -34,11 +34,13 @@ const counselorSchema = new mongoose.Schema(
         name: String,
         iso2: String,
       },
+      set: (v) => (v === "" ? null : v),
     },
     city: {
       type: {
         name: String,
       },
+      set: (v) => (v === "" ? null : v),
     },
     dateOfBirth: {
       type: Date,
@@ -56,6 +58,7 @@ const counselorSchema = new mongoose.Schema(
         name: String,
         iso2: String,
       },
+      set: (v) => (v === "" ? null : v),
     },
     profilePhoto: {
       type: String,
