@@ -1552,7 +1552,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           className="hidden"
                         />
                         {previewPanCardUrl ? (
-                          <div className="relative">
+                          <div className="relative h-[250px] w-full">
                             <Image
                               src={previewPanCardUrl}
                               alt="Preview"
@@ -1600,7 +1600,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         ) : (
                           <div
                             onClick={triggerPanCardFileInput}
-                            className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                            className="border-grey-300 flex h-[250px] w-full cursor-pointer items-center justify-center rounded-md border"
                           >
                             <Plus className="text-grey-400 h-10 w-10" />
                           </div>
@@ -1628,11 +1628,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           className="hidden"
                         />
                         {previewAdharCardUrl ? (
-                          <div className="relative">
+                          <div className="relative h-[250px] w-full">
                             <Image
                               src={previewAdharCardUrl}
                               alt="Preview"
-                              className="max-h-[400px] max-w-full rounded-md object-cover"
+                              className="w-full h-full rounded-md object-cover"
                               width={1200}
                               height={400}
                             />
@@ -1676,7 +1676,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         ) : (
                           <div
                             onClick={triggerAdharCardFileInput}
-                            className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                            className="border-grey-300 flex h-[250px] w-full cursor-pointer items-center justify-center rounded-md border"
                           >
                             <Plus className="text-grey-400 h-10 w-10" />
                           </div>
@@ -1704,7 +1704,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           className="hidden"
                         />
                         {previewProfilePhotoUrl ? (
-                          <div className="relative">
+                          <div className="relative h-[250px] w-full">
                             <Image
                               src={previewProfilePhotoUrl}
                               alt="Preview"
@@ -1752,7 +1752,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         ) : (
                           <div
                             onClick={triggerProfilePhotoFileInput}
-                            className="border-grey-300 flex h-[400px] w-full cursor-pointer items-center justify-center rounded-md border"
+                            className="border-grey-300 flex h-[250px] w-full cursor-pointer items-center justify-center rounded-md border"
                           >
                             <Plus className="text-grey-400 h-10 w-10" />
                           </div>
@@ -1791,17 +1791,17 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                             className="hidden"
                           />
                           {previews[doc.name] ? (
-                            <div className="relative">
+                            <div className="relative h-[250px] w-full">
                               {previews[doc.name]?.startsWith('data:image') || previews[doc.name]?.match(/\.(jpg|jpeg|png|webp|jfif|avif|bmp|gif)/i) ? (
                                 <Image
                                   src={previews[doc.name]!}
                                   alt="Preview"
-                                  className="max-h-[400px] w-full rounded-md object-contain"
+                                  className="w-full h-full rounded-md object-cover"
                                   width={1200}
                                   height={400}
                                 />
                               ) : (
-                                <div className="flex items-center justify-center h-[200px] border rounded-md">
+                                <div className="flex items-center justify-center h-full border rounded-md">
                                   <span>PDF Document</span>
                                 </div>
                               )}
@@ -1845,10 +1845,10 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                           ) : (
                             <div
                               onClick={() => triggerFileInput(doc.name)}
-                              className="border-grey-300 flex h-[200px] w-full cursor-pointer items-center justify-center rounded-md border"
+                              className="border-grey-300 flex h-[250px] w-full cursor-pointer items-center justify-center rounded-md border text-center flex-col px-2"
                             >
-                              <Plus className="text-grey-400 h-10 w-10" />
-                              <span className="ml-2">Upload {doc.label}</span>
+                              <Plus className="text-grey-400 h-10 w-10 mb-2" />
+                              <span className="text-sm">Upload {doc.label}</span>
                             </div>
                           )}
                         </div>
