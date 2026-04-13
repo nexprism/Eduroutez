@@ -110,7 +110,7 @@ export const profileSchema = z.object({
   graduationCertificate: z.instanceof(File, { message: 'Upload Graduation Certificate is required' }),
   postGraduationCertificate: z.instanceof(File, { message: 'Upload Post Graduation Certificate is required' }),
   experienceLetter: z.instanceof(File, { message: 'Upload Experience Letter is required' }),
-  eduRouteCertificate: z.instanceof(File, { message: 'Upload EduRoute Certificate is required' }),
+  eduRouteCertificate: z.instanceof(File, { message: 'Upload EduRoute Certificate' }).optional(),
   about: z.string().optional(),
   experiences: z.array(
     z.object({
@@ -447,8 +447,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         'marksheet12th',
         'graduationCertificate',
         'postGraduationCertificate',
-        'experienceLetter',
-        'eduRouteCertificate'
+        'experienceLetter'
       ]
     },
     {
