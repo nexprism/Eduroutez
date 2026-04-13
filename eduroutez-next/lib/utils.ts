@@ -45,3 +45,16 @@ export function formatBytes(
     sizeType === 'accurate' ? accurateSizes[i] ?? 'Bytest' : sizes[i] ?? 'Bytes'
   }`;
 }
+
+export function getErrorMessage(error: any): string {
+  if (typeof error === 'string') {
+    return error;
+  }
+  if (error?.message && typeof error.message === 'string') {
+    return error.message;
+  }
+  if (error?.response?.data?.message && typeof error.response.data.message === 'string') {
+    return error.response.data.message;
+  }
+  return 'An error occurred. Please try again.';
+}

@@ -104,7 +104,7 @@ export default function BlogListingPage({}: TBlogListingPage) {
       {isLoading ? (
         <div>Loading...</div>
       ) : error ? (
-        <div className="text-red-500">Error: {(error as Error).message}</div>
+        <div className="text-red-500">Error: {typeof error === 'object' && error !== null && 'message' in error ? (error as Error).message : 'Failed to load blogs'}</div>
       ) : (
         isSuccess && data && (
           <div className="space-y-4">

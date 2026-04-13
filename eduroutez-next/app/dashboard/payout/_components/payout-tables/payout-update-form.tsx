@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
 
 const PayoutUpdateForm = () => {
     const [status, setStatus] = useState('PAID');
@@ -41,8 +42,9 @@ const PayoutUpdateForm = () => {
             setSuccess('Payout status updated successfully!');
         } catch (error: any) {
             console.error('There was an error!', error);
-            toast.error(error.response.error || 'Failed to update payout status. Please try again.');
-            setError(error.response.error || 'Failed to update payout status. Please try again.');
+            const errorMessage = getErrorMessage(error.response?.error) || 'Failed to update payout status. Please try again.';
+            toast.error(errorMessage);
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }

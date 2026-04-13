@@ -127,7 +127,7 @@ export default function NewsListingPage({}: TNewsListingPage) {
         </div>
       ) : error ? (
         <div className="text-red-500 p-4 rounded-md bg-red-50">
-          Error: {(error as Error).message}
+          Error: {typeof error === 'object' && error !== null && 'message' in error ? (error as Error).message : 'Failed to load news'}
         </div>
       ) : (
         isSuccess && data && (

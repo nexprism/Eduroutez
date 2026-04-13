@@ -5,6 +5,7 @@ import { string } from 'prop-types';
 import { CreditCard, Wallet, AlertCircle, CheckCircle2, DollarSign } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
 
 const PayoutForm = () => {
   const [paymentMethod, setPaymentMethod] = useState('Bank Transfer');
@@ -43,8 +44,9 @@ toast.success('Payout request submitted successfully!');
       setSuccess('Payout request submitted successfully!');
     } catch (error:any) {
       console.error('There was an error!', error);
-      toast.error(error.response.data.error || 'Failed to process payout request. Please try again.');
-      setError(error.response.data.error || 'Failed to process payout request. Please try again.');
+      const errorMessage = getErrorMessage(error.response?.data?.error) || 'Failed to process payout request. Please try again.';
+      toast.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
