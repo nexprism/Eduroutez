@@ -5,6 +5,14 @@ import axiosInstance from '@/lib/axios';
 
 export default function EnsureSession() {
   useEffect(() => {
+    const hasAuthToken =
+      typeof window !== 'undefined' &&
+      Boolean(localStorage.getItem('accessToken') || localStorage.getItem('refreshToken'));
+
+    if (!hasAuthToken) {
+      return;
+    }
+
     const instituteId = localStorage.getItem('instituteId');
     const role = localStorage.getItem('role');
     if (!instituteId || !role) {

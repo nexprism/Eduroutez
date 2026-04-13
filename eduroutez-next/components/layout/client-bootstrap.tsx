@@ -14,6 +14,17 @@ export default function ClientBootstrap({ children }: Props) {
   useEffect(() => {
     let mounted = true;
 
+    const hasAuthToken =
+      typeof window !== 'undefined' &&
+      Boolean(localStorage.getItem('accessToken') || localStorage.getItem('refreshToken'));
+
+    if (!hasAuthToken) {
+      setReady(true);
+      return () => {
+        mounted = false;
+      };
+    }
+
     async function fetchProfile() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";

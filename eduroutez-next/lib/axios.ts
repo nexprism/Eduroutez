@@ -8,13 +8,15 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     // Add authentication header if token exists
-    const accessToken = localStorage.getItem('accessToken');
-    if (accessToken) {
-      config.headers['x-access-token'] = accessToken;
-    }
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken) {
-      config.headers['x-refresh-token'] = refreshToken;
+    if (typeof window !== 'undefined') {
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        config.headers['x-access-token'] = accessToken;
+      }
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken) {
+        config.headers['x-refresh-token'] = refreshToken;
+      }
     }
 
     return config;
@@ -29,9 +31,15 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle response errors globally
-    if (error.response?.status === 401) {
-      // redirect to login page
-      window.location.href = '/';
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      const isProtectedRoute = pathname.startsWith('/dashboard');
+
+      if (isProtectedRoute) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/';
+      }
     }
     return Promise.reject(error);
   }

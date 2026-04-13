@@ -1,0 +1,9 @@
+{
+  "name": "eduroutez-back",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix shiksha-server run dev",
+    "start": "npm --prefix shiksha-server run start",
+    "test": "npm --prefix shiksha-server run test"
+  }
+}
