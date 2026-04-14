@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Clock, Play, GraduationCap, X } from 'lucide-react';
+import { Clock, Play, GraduationCap, X, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -112,7 +112,9 @@ export default function TestCountdownBadge() {
 
           <div className="flex-1 text-center md:text-left min-w-0">
             <div className="flex flex-col md:flex-row md:items-center justify-center md:justify-start gap-1 md:gap-3">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-600/80 dark:text-red-400">Certification Assessment</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-600/80 dark:text-red-400">
+                Certification Assessment {!isTestTime && testTime && `• ${testTime.toLocaleDateString([], { weekday: 'long' })}`}
+              </span>
               <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-red-200 dark:bg-red-800" />
               {isTestTime ? (
                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">Test Portal is Open!</span>
@@ -135,9 +137,10 @@ export default function TestCountdownBadge() {
                   </span>
                   <span className="text-[10px] font-bold text-slate-500/70 border-l border-slate-200 dark:border-slate-800 pl-2">REMAINING</span>
                 </div>
-                <div className="px-2 py-0.5 bg-red-100/50 dark:bg-red-900/30 rounded-md">
+                <div className="px-2 py-0.5 bg-red-100/50 dark:bg-red-900/30 rounded-md flex items-center gap-1.5">
+                   <Calendar className="h-3 w-3 text-red-600 dark:text-red-400" />
                    <p className="text-[10px] text-red-700 dark:text-red-400 font-bold tracking-wide">
-                     STARTS: {testTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                     {testTime.toLocaleDateString([], { day: 'numeric', month: 'short' }).toUpperCase()} @ {testTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                    </p>
                 </div>
               </div>
