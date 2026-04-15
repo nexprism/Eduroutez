@@ -69,23 +69,25 @@ export const profileSchema = z.object({
     message: 'Date of Birth should be in the format YYYY-MM-DD'
   }),
   panCard: z
-    .instanceof(File, { message: 'PAN Card is required' })
-    .refine((file) => file && file.size <= 1024 * 1024, {
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= 1024 * 1024, {
       message: 'Image size must be less than 1 MB.'
     })
     .refine(
-      (file) => file && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      (file) => !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
       {
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
   adharCard: z
-    .instanceof(File, { message: 'Aadhaar Card is required' })
-    .refine((file) => file && file.size <= 1024 * 1024, {
+    .instanceof(File)
+    .optional()
+    .refine((file) => !file || file.size <= 1024 * 1024, {
       message: 'Image size must be less than 1 MB.'
     })
     .refine(
-      (file) => file && ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
+      (file) => !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
       {
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
@@ -103,13 +105,13 @@ export const profileSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
-  certificate: z.instanceof(File, { message: 'Upload Certificate is required' }),
-  achievements: z.instanceof(File, { message: 'Upload Achievements is required' }),
-  marksheet10th: z.instanceof(File, { message: 'Upload 10th Marksheet is required' }),
-  marksheet12th: z.instanceof(File, { message: 'Upload 12th Marksheet is required' }),
-  graduationCertificate: z.instanceof(File, { message: 'Upload Graduation Certificate is required' }),
-  postGraduationCertificate: z.instanceof(File, { message: 'Upload Post Graduation Certificate is required' }),
-  experienceLetter: z.instanceof(File, { message: 'Upload Experience Letter is required' }),
+  certificate: z.instanceof(File).optional(),
+  achievements: z.instanceof(File).optional(),
+  marksheet10th: z.instanceof(File).optional(),
+  marksheet12th: z.instanceof(File).optional(),
+  graduationCertificate: z.instanceof(File).optional(),
+  postGraduationCertificate: z.instanceof(File).optional(),
+  experienceLetter: z.instanceof(File).optional(),
   eduRouteCertificate: z.instanceof(File, { message: 'Upload EduRoute Certificate' }).optional(),
   about: z.string().optional(),
   experiences: z.array(
@@ -461,12 +463,6 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const next = async () => {
     const fields = steps[currentStep].fields;
 
-    const output = await form.trigger(fields as FieldName[], {
-      shouldFocus: true
-    });
-
-    if (!output) return;
-
     // Step 3 (index 2) = Upload Documents – require all files
     if (currentStep === 2) {
       const stepFields = steps[currentStep].fields as string[];
@@ -492,7 +488,22 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
         toast.error(`Please upload all required documents: ${missing.join(', ')}`);
         return;
       }
+
+      if (currentStep < steps.length - 1) {
+        if (currentStep === steps.length - 2) {
+          await form.handleSubmit(processForm)();
+        }
+        setPreviousStep(currentStep);
+        setCurrentStep((step) => step + 1);
+      }
+      return;
     }
+
+    const output = await form.trigger(fields as FieldName[], {
+      shouldFocus: true
+    });
+
+    if (!output) return;
 
     if (currentStep < steps.length - 1) {
       if (currentStep === steps.length - 2) {
@@ -1939,10 +1950,9 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
             <div>
               <div className="text-center">
                 <h1 className="text-2xl font-bold">Profile Completed</h1>
-                <p className="mt-4 text-lg">Here is the summary of your profile:</p>
-                <pre className="mt-4 whitespace-pre-wrap bg-gray-100 p-4 rounded-md text-left">
-                  {JSON.stringify(data, null, 2)}
-                </pre>
+                <p className="mt-4 text-lg">Please review your profile before submitting. If everything looks correct, click <strong>Submit</strong>. Use <em>Edit</em> to change any section.</p>
+
+                
               </div>
             </div>
           )}
