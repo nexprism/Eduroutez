@@ -83,24 +83,6 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'Counselor Verification',
-    url: '/dashboard/counselor-verification',
-    icon: 'award',
-    isActive: false,
-    isCourseStream: false,
-    isCounsellorStream: true,
-    items: [] // No child items
-  },
-  {
-    title: 'Test Question Sets',
-    url: '/dashboard/counselor-question-sets',
-    icon: 'post',
-    isActive: false,
-    isCourseStream: false,
-    isCounsellorStream: true,
-    items: [] // No child items
-  },
-  {
     title: 'Users',
     url: '/dashboard/admin',
     icon: 'usersround',

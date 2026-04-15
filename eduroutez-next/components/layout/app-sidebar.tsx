@@ -54,6 +54,7 @@ export default function AppSidebar({
   const [mounted, setMounted] = React.useState(false);
   const [filteredNavItems, setFilteredNavItems] = React.useState(navItems);
   const pathname = usePathname();
+  const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
   // Only render after first client-side mount
   useEffect(() => {
     setMounted(true);
@@ -203,6 +204,27 @@ export default function AppSidebar({
                   </SidebarMenuItem>
                 );
               })}
+              {/* Super-admin only links */}
+              {role === 'SUPER_ADMIN' && (
+                <>
+                  <SidebarMenuItem key="Counselor Verification">
+                    <SidebarMenuButton asChild tooltip="Counselor Verification">
+                      <Link href="/dashboard/counselor-verification">
+                        <Icons.award />
+                        <span>Counselor Verification</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem key="Test Question Sets">
+                    <SidebarMenuButton asChild tooltip="Test Question Sets">
+                      <Link href="/dashboard/counselor-question-sets">
+                        <Icons.post />
+                        <span>Test Question Sets</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
+              )}
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
