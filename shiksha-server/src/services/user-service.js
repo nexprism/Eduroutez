@@ -346,6 +346,16 @@ class UserService {
       throw error;
     }
   }
+
+  async update(id, data) {
+    try {
+      const user = await this.userRepository.update(id, data);
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async sendUserPasswordResetEmail(email) {
     try {
       const user = await this.getUserByEmail(email);

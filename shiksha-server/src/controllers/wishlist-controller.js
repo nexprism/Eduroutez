@@ -4,6 +4,7 @@ import UserService from "../services/user-service.js";
 import InstituteService from "../services/institute-service.js";
 import CourseService from "../services/course-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
+import AppError from "../utils/errors/app-error.js";
 const wishlistService = new WishlistService();
 const userService = new UserService();
 const instituteService = new InstituteService();
@@ -39,7 +40,7 @@ export const createWishlist = async (req, res) => {
       if (itemIndex > -1) {
         // Item exists, remove it from user's wishlist
         user[wishlistField].splice(itemIndex, 1);
-        await user.save();
+        await userService.update(studentId, { [wishlistField]: user[wishlistField] });
         console.log(`Removed ${itemId} from user ${studentId}'s ${wishlistField}`);
        
         if (wishlistField === 'college_wishlist') {
@@ -70,7 +71,7 @@ export const createWishlist = async (req, res) => {
       } else {
         // Item doesn't exist in user's wishlist, add it
         user[wishlistField].push(itemId);
-        await user.save();
+        await userService.update(studentId, { [wishlistField]: user[wishlistField] });
         console.log(`Added ${itemId} to user ${studentId}'s ${wishlistField}`);
        
         if (wishlistField === 'college_wishlist') {
