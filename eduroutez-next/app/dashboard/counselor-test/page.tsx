@@ -50,6 +50,17 @@ export default function CounselorTestPage() {
 
   const checkEligibility = async () => {
     try {
+      // Check if they already have a result, if so redirect to test-result
+      try {
+        const resultResponse = await axiosInstance.get(`${API_URL}/counselor-test/get-result`);
+        if (resultResponse.data?.success && resultResponse.data?.data) {
+          router.push('/dashboard/test-result');
+          return;
+        }
+      } catch (err) {
+        // No result yet
+      }
+
       const response = await axiosInstance.get(`${API_URL}/counselor-test/can-give`);
       setEligibility(response.data.data);
       setIsLoading(false);
@@ -99,16 +110,36 @@ export default function CounselorTestPage() {
       };
 
       const response = await axiosInstance.post(`${API_URL}/counselor-test/submit`, payload);
-      setTestResult(response.data.data);
       
-      // Clear scheduled test info from localStorage so banner/notification disappears
+      // Sync status to localStorage for the rest of the app
+      if (response.data.data?.status === 'pass') {
+        localStorage.setItem('verificationStatus', 'verified');
+        if (response.data.data.verifiedBadge !== undefined) {
+          localStorage.setItem('verifiedBadge', String(response.data.data.verifiedBadge));
+        }
+      } else {
+        localStorage.setItem('verificationStatus', 'rejected');
+      }
+
+      // Clear scheduled test info
       localStorage.removeItem('scheduledTestDate');
       localStorage.removeItem('scheduledTestSlot');
       
-      // Notify components to update
-      window.dispatchEvent(new Event('counselor-test-update'));
+      // Redirect to dedicated result page
+      router.push('/dashboard/test-result');
       
       toast.success('Test submitted successfully!');
+
+      // Sync status to localStorage for the rest of the app
+      if (response.data.data?.status === 'pass') {
+        localStorage.setItem('verificationStatus', 'verified');
+        // If the API returns verifiedBadge, sync it too
+        if (response.data.data.verifiedBadge !== undefined) {
+          localStorage.setItem('verifiedBadge', String(response.data.data.verifiedBadge));
+        }
+      } else {
+        localStorage.setItem('verificationStatus', 'rejected');
+      }
     } catch (error) {
       console.error('Submit test error:', error);
       toast.error('Failed to submit test');
@@ -149,72 +180,6 @@ export default function CounselorTestPage() {
     );
   }
 
-  // Final Results Screen
-  if (testResult) {
-    return (
-      <div className="container max-w-4xl py-10 px-4 flex flex-col items-center">
-         <Card className="w-full border-none shadow-xl bg-white/80 backdrop-blur-md overflow-hidden animate-in zoom-in duration-300">
-            <div className={`h-2 w-full ${testResult.status === 'pass' ? 'bg-green-500' : 'bg-red-500'}`} />
-            <CardHeader className="text-center pb-2">
-              <div className="mx-auto mb-4 p-3 rounded-full bg-slate-50 w-fit">
-                {testResult.status === 'pass' ? (
-                  <CheckCircle2 className="h-12 w-12 text-green-500" />
-                ) : (
-                  <AlertCircle className="h-12 w-12 text-red-500" />
-                )}
-              </div>
-              <CardTitle className="text-3xl font-bold">
-                {testResult.status === 'pass' ? 'Congratulations!' : 'Test Completed'}
-              </CardTitle>
-              <CardDescription className="text-lg mt-2">
-                {testResult.status === 'pass' 
-                  ? 'You have successfully passed the Counselor Certification Test.'
-                  : 'You did not reach the required passing score.'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-8 p-8">
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="p-6 rounded-2xl bg-slate-50 text-center border border-slate-100">
-                     <div className="text-sm font-medium text-slate-500 mb-1">Score</div>
-                     <div className="text-4xl font-bold text-slate-900">{testResult.score}/{testResult.totalQuestions}</div>
-                  </div>
-                  <div className="p-6 rounded-2xl bg-slate-50 text-center border border-slate-100">
-                     <div className="text-sm font-medium text-slate-500 mb-1">Accuracy</div>
-                     <div className="text-4xl font-bold text-slate-900">
-                        {Math.round((testResult.score / testResult.totalQuestions) * 100)}%
-                     </div>
-                  </div>
-                  <div className="p-6 rounded-2xl bg-slate-50 text-center border border-slate-100">
-                     <div className="text-sm font-medium text-slate-500 mb-1">Time Taken</div>
-                     <div className="text-4xl font-bold text-slate-900">{Math.floor(testResult.timeTaken / 60)}m</div>
-                  </div>
-               </div>
-
-                <div className="flex flex-col gap-3 pt-4 items-center">
-                  {testResult.status === 'pass' ? (
-                    <Link href="/dashboard" className="w-full md:w-fit">
-                      <Button className="w-full px-8 py-6 text-lg rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold transition-all shadow-lg hover:shadow-red-900/20">
-                        Go to Dashboard
-                      </Button>
-                    </Link>
-                  ) : (
-                    <div className="flex flex-col gap-4 w-full">
-                       <p className="text-center text-slate-500 text-sm font-medium">
-                         Don't worry! You can retake the test after renewing your application fee.
-                       </p>
-                       <Link href="/dashboard" className="w-full">
-                         <Button variant="outline" className="w-full py-6 text-lg rounded-xl border-red-100 text-red-700 hover:bg-red-50 hover:text-red-800 transition-all font-bold">
-                           Return to Dashboard
-                         </Button>
-                       </Link>
-                    </div>
-                  )}
-               </div>
-            </CardContent>
-         </Card>
-      </div>
-    );
-  }
 
   // Not Eligible Screen
   if (eligibility && !eligibility.eligible && !testStarted) {

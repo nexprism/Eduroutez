@@ -166,6 +166,18 @@ class CounselorTestService {
             throw error;
         }
     }
+
+    // Counselor: Get latest test result
+    async getLatestTestResult(counselorId) {
+        try {
+            const result = await this.testResultRepository.model.findOne({
+                counselorId: counselorId,
+            }).sort({ createdAt: -1 });
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 export default CounselorTestService;

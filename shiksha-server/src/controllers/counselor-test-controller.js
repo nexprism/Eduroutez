@@ -50,10 +50,11 @@ export const canCounselorGiveTest = async (req, res) => {
         if (testResult) {
             SuccessResponse.data = {
                 eligible: false,
-                reason: "Test already taken for this payment, please pay again to retake.",
-                testResultId: testResult._id
+                reason: `Test already taken for this payment on ${new Date(testResult.createdAt).toLocaleString()}. Please pay again to retake.`,
+                testResultId: testResult._id,
+                takenAt: testResult.createdAt
             };
-            SuccessResponse.message = "Counselor has already taken the test for this payment. Please pay again to retake the test.";
+            SuccessResponse.message = "Counselor has already taken the test for this payment.";
             return res.status(StatusCodes.OK).json(SuccessResponse);
         }
 
@@ -157,6 +158,20 @@ export const verifyCounselor = async (req, res) => {
         const response = await counselorTestService.verifyCounselor(req.params.id);
         SuccessResponse.data = response;
         SuccessResponse.message = "Counselor verified successfully";
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.status(error.statusCode || 500).json(ErrorResponse);
+    }
+};
+
+// Counselor: Get Result
+export const getLatestTestResult = async (req, res) => {
+    try {
+        const counselorId = req.user._id;
+        const response = await counselorTestService.getLatestTestResult(counselorId);
+        SuccessResponse.data = response;
+        SuccessResponse.message = "Successfully fetched latest test result";
         return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
         ErrorResponse.error = error;

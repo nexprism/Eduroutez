@@ -42,7 +42,7 @@ import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../.
 import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, updateQuery, QueryAllocation } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ, getFAQsByInstitute } from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage, getPageByStreamLevel } from "../../controllers/customPage-controller.js";
-import { createQuestionSet, getAllQuestionSets, getRandomTestSet, submitTestResult, getPendingVerifications, verifyCounselor, recordPayment } from "../../controllers/counselor-test-controller.js";
+import { createQuestionSet, getAllQuestionSets, getRandomTestSet, submitTestResult, getPendingVerifications, verifyCounselor, recordPayment, getLatestTestResult } from "../../controllers/counselor-test-controller.js";
 import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
 
@@ -244,6 +244,7 @@ import { canCounselorGiveTest } from "../../controllers/counselor-test-controlle
 router.get("/counselor-test/can-give", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), canCounselorGiveTest);
 
 router.get("/counselor-test/questions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getRandomTestSet);
+router.get("/counselor-test/get-result", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getLatestTestResult);
 router.post("/counselor-test/submit", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitTestResult);
 
 

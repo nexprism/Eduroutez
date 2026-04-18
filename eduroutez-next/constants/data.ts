@@ -320,5 +320,12 @@ export const navItems: NavItem[] = [
     icon: 'school',
     isActive: false,
     items: [] // No child items
+  },
+  {
+    title: 'Test Result',
+    url: '/dashboard/test-result',
+    icon: 'award',
+    isActive: false,
+    items: []
   }
 ];

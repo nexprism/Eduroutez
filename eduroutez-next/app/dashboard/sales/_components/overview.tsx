@@ -13,6 +13,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend 
 } from 'recharts';
 import axiosInstance from '@/lib/axios';
+import ScheduledTestTimer from '@/components/layout/scheduled-test-timer';
+import Banner from '@/components/layout/counsellor-verification-banner';
+import ScheduleTestModal from '@/components/layout/schedule-test-modal';
+import loadRazorpayScript from '@/lib/razorpay';
 
 const formatCurrency = (amount:any) => 
   `₹${amount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
@@ -28,27 +32,91 @@ export default function SalesOverviewPage() {
   }
 
   const [data, setData] = useState<EarningReports | null>(null);
+  const [counselorData, setCounselorData] = useState<any>(null);
+  const [verificationStatus, setVerificationStatus] = useState<string>(
+    (typeof window !== 'undefined' ? localStorage.getItem('verificationStatus') : null) || ''
+  );
+  const [verifiedBadge, setVerifiedBadge] = useState<boolean>(
+    (typeof window !== 'undefined' ? localStorage.getItem('verifiedBadge') === 'true' : false)
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 
   useEffect(() => {
+    const userRole = localStorage.getItem('role');
+    setRole(userRole);
+
+    // Pre-populate from localStorage
+    if (userRole === 'counsellor') {
+      const storedDate = localStorage.getItem('scheduledTestDate');
+      const storedSlot = localStorage.getItem('scheduledTestSlot');
+      const storedStatus = localStorage.getItem('verificationStatus');
+      const storedBadge = localStorage.getItem('verifiedBadge') === 'true';
+      
+      if (storedDate || storedStatus || storedBadge) {
+        setVerificationStatus(storedStatus || '');
+        setVerifiedBadge(storedBadge);
+        setCounselorData({
+          scheduledTestDate: storedDate,
+          scheduledTestSlot: storedSlot,
+          verificationStatus: storedStatus,
+          verifiedBadge: storedBadge
+        });
+      }
+    }
+
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get(`${apiUrl}/earning-reports`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
+        setLoading(true);
+        const [earningRes, dashboardRes] = await Promise.all([
+          axiosInstance.get(`${apiUrl}/earning-reports`),
+          userRole === 'counsellor' ? axiosInstance.get(`${apiUrl}/counselor-dashboard`) : Promise.resolve({ data: { data: null } })
+        ]);
+
+        if (earningRes.data.success) {
+          setData(earningRes.data.data);
+        }
+
+        if (userRole === 'counsellor') {
+          const cDashboardData = dashboardRes.data?.data;
+          
+          // Secondary fetch for full profile
+          const counselorId = localStorage.getItem('instituteId');
+          let profileData = null;
+          if (counselorId) {
+            try {
+              const profileRes = await axiosInstance.get(`${apiUrl}/counselor-by-id/${counselorId}`);
+              profileData = profileRes.data?.data;
+            } catch (err) {
+              console.error('Secondary profile fetch failed', err);
             }
           }
-        );
-        const result = response?.data?.data;
-        console.log('sd', result);
 
-        if (!response.data.success) throw new Error(response.data.message);
-        setData(result);
-      } catch (err:any) {
+          const mergedCData = {
+            ...(cDashboardData || {}),
+            ...(profileData || {}),
+            verificationStatus: profileData?.verificationStatus || cDashboardData?.verificationStatus || localStorage.getItem('verificationStatus') || '',
+            scheduledTestDate: profileData?.scheduledTestDate || cDashboardData?.scheduledTestDate || localStorage.getItem('scheduledTestDate') || undefined,
+            scheduledTestSlot: profileData?.scheduledTestSlot || cDashboardData?.scheduledTestSlot || localStorage.getItem('scheduledTestSlot') || undefined,
+            verifiedBadge: profileData?.verifiedBadge ?? cDashboardData?.verifiedBadge ?? (localStorage.getItem('verifiedBadge') === 'true')
+          };
+
+          setCounselorData(mergedCData);
+          setVerificationStatus(mergedCData.verificationStatus);
+          setVerifiedBadge(mergedCData.verifiedBadge);
+          
+          if (mergedCData.verificationStatus) localStorage.setItem('verificationStatus', mergedCData.verificationStatus);
+          if (mergedCData.scheduledTestDate) localStorage.setItem('scheduledTestDate', mergedCData.scheduledTestDate);
+          if (mergedCData.scheduledTestSlot) localStorage.setItem('scheduledTestSlot', mergedCData.scheduledTestSlot);
+          localStorage.setItem('verifiedBadge', String(mergedCData.verifiedBadge));
+        }
+
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
@@ -56,6 +124,68 @@ export default function SalesOverviewPage() {
     };
     fetchData();
   }, []);
+
+  const payAnd = async (afterPay: 'test' | 'schedule') => {
+    setIsProcessing(true);
+    const res = await loadRazorpayScript();
+    if (!res) {
+      alert('Razorpay SDK failed to load.');
+      setIsProcessing(false);
+      return;
+    }
+    try {
+      const options = {
+        key: 'rzp_test_SPTvNCnEWS87X0',
+        amount: 9900,
+        currency: 'INR',
+        name: 'Guidance Y',
+        description: 'Counsellor Verification Payment',
+        handler: async function (response: any) {
+          try {
+            await axiosInstance.post(`${apiUrl}/counselor-test/record-payment`, {
+              amount: 99,
+              transactionId: response.razorpay_payment_id || 'demo_payment_id',
+              status: 'success',
+            });
+            if (afterPay === 'test') {
+              const canGiveRes = await axiosInstance.get(`${apiUrl}/counselor-test/can-give`);
+              if (canGiveRes.data?.data?.eligible) {
+                setVerificationStatus('test_pending');
+                localStorage.setItem('verificationStatus', 'test_pending');
+              }
+            } else if (afterPay === 'schedule') {
+              setShowScheduleModal(true);
+            }
+          } catch (err) {
+            console.error('Payment processing failed:', err);
+          }
+        },
+        prefill: { email: localStorage.getItem('email') || '' },
+        theme: { color: '#6366f1' },
+      };
+      // @ts-ignore
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert('Payment initiation failed.');
+    }
+    setIsProcessing(false);
+  };
+
+  const handleScheduleSubmit = async (date: string, slot: string) => {
+    setIsProcessing(true);
+    try {
+      await axiosInstance.post('/counselor/schedule-test', { date, slot });
+      setVerificationStatus('test_scheduled');
+      localStorage.setItem('verificationStatus', 'test_scheduled');
+      localStorage.setItem('scheduledTestDate', date);
+      localStorage.setItem('scheduledTestSlot', slot);
+      setShowScheduleModal(false);
+    } catch (err) {
+      alert('Failed to schedule test.');
+    }
+    setIsProcessing(false);
+  };
 
   if (loading) return (
     <div className="flex items-center justify-center p-8">
@@ -65,6 +195,27 @@ export default function SalesOverviewPage() {
 
   if (error) return <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>;
   if (!data) return <Alert><AlertDescription>No data available</AlertDescription></Alert>;
+
+  const StatCard = ({ title, value, icon: Icon, description, color }: any) => (
+    <Card className="relative overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 group">
+      <div className={`absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity ${color}`} />
+      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+        <CardTitle className="text-sm font-semibold text-muted-foreground tracking-tight group-hover:text-foreground transition-colors">
+          {title}
+        </CardTitle>
+        <div className={`p-2 rounded-lg ${color.replace('bg-', 'bg-').replace('-500', '-500/10')} transition-colors group-hover:scale-110 duration-300`}>
+          <Icon className={`h-4 w-4 ${color.replace('bg-', 'text-')}`} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-3xl font-bold tracking-tight mb-1">{value}</div>
+        <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+          <TrendingUp className="w-3 h-3 text-emerald-500" />
+          {description}
+        </p>
+      </CardContent>
+    </Card>
+  );
 
   const totalEarnings = (
     (data.totalSubscription[0]?.total || 0) +
@@ -101,6 +252,24 @@ export default function SalesOverviewPage() {
         </div>
       </div>
 
+      {role === 'counsellor' && (
+        <>
+          <Banner 
+            status={verificationStatus} 
+            onPay={() => payAnd('test')} 
+            onSchedule={() => payAnd('schedule')} 
+            scheduledTestDate={counselorData?.scheduledTestDate}
+            scheduledTestSlot={counselorData?.scheduledTestSlot}
+            verifiedBadge={verifiedBadge}
+          />
+          <ScheduleTestModal 
+            open={showScheduleModal} 
+            onClose={() => setShowScheduleModal(false)} 
+            onSchedule={handleScheduleSubmit} 
+          />
+        </>
+      )}
+
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -108,45 +277,29 @@ export default function SalesOverviewPage() {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{formatCurrency(totalEarnings)}</div>
-                <p className="text-xs text-muted-foreground">Monthly earnings</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Subscriptions</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(data.totalSubscription[0]?.total || 0)}
-                </div>
-                <p className="text-xs text-muted-foreground">From subscriptions</p>
-              </CardContent>
-            </Card>
-
-  
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Ad Revenue</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency((data.promotionIncome[0]?.total || 0) + 
-                    (data.unlistedpromotionIncome[0]?.total || 0))}
-                </div>
-                <p className="text-xs text-muted-foreground">From all ads</p>
-              </CardContent>
-            </Card>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <StatCard 
+              title="Total Revenue"
+              value={formatCurrency(totalEarnings)}
+              icon={DollarSign}
+              description="Monthly earnings"
+              color="bg-emerald-500"
+            />
+            <StatCard 
+              title="Subscriptions"
+              value={formatCurrency(data.totalSubscription[0]?.total || 0)}
+              icon={Users}
+              description="From subscriptions"
+              color="bg-blue-500"
+            />
+            <StatCard 
+              title="Ad Revenue"
+              value={formatCurrency((data.promotionIncome[0]?.total || 0) + 
+                (data.unlistedpromotionIncome[0]?.total || 0))}
+              icon={TrendingUp}
+              description="From all ads"
+              color="bg-orange-500"
+            />
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">

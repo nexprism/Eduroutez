@@ -1,5 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
+
+import ScheduledTestTimer from '@/components/layout/scheduled-test-timer';
 import {
   Card,
   CardContent,
@@ -14,11 +16,13 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Users, Building2, Activity, DollarSign, BookOpen, GraduationCap, TrendingUp, CircleDollarSign } from 'lucide-react';
 import axiosInstance from '@/lib/axios';
 import Link from 'next/link';
-import TestCountdownBadge from '@/components/layout/test-countdown-badge';
 
+import Banner from '@/components/layout/counsellor-verification-banner';
+import ScheduleTestModal from '@/components/layout/schedule-test-modal';
+import loadRazorpayScript from '@/lib/razorpay';
 const Dashboard = () => {
   const [role, setRole] = useState('');
-  
+
   interface AdminData {
     totalEarning: number;
     totalInstitutes: number;
@@ -47,8 +51,9 @@ const Dashboard = () => {
     totalSlots: number;
     level: string;
     points: number;
-
     // Add other institute-specific fields as needed
+    scheduledTestDate?: string;
+    scheduledTestSlot?: string;
   }
 
   const [adminData, setAdminData] = useState<AdminData | null>(null);
@@ -56,6 +61,17 @@ const Dashboard = () => {
   const [institute, setInstitute] = useState<InstituteData | null>(null);
   const [counselorData, setCounselorData] = useState<InstituteData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [testResult, setTestResult] = useState<any>(null);
+  const [verificationStatus, setVerificationStatus] = useState<string>(
+    (typeof window !== 'undefined' ? localStorage.getItem('verificationStatus') : null) || ''
+  );
+  const [verifiedBadge, setVerifiedBadge] = useState<boolean>(
+    (typeof window !== 'undefined' ? localStorage.getItem('verifiedBadge') === 'true' : false)
+  );
+  const [showTest, setShowTest] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showGuidance, setShowGuidance] = useState(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -63,24 +79,76 @@ const Dashboard = () => {
     const userRole = localStorage.getItem('role');
     setRole(userRole || '');
 
+    // Pre-populate counselorData from localStorage for faster UI response
+    if (userRole === 'counsellor') {
+      const storedDate = localStorage.getItem('scheduledTestDate');
+      const storedSlot = localStorage.getItem('scheduledTestSlot');
+      const storedStatus = localStorage.getItem('verificationStatus');
+
+      if (storedDate || storedSlot || storedStatus) {
+        setVerificationStatus(storedStatus || '');
+        setVerifiedBadge(localStorage.getItem('verifiedBadge') === 'true');
+        setCounselorData({
+          scheduledTestDate: storedDate || undefined,
+          scheduledTestSlot: storedSlot || undefined,
+          verificationStatus: storedStatus || undefined,
+          verifiedBadge: localStorage.getItem('verifiedBadge') === 'true'
+        } as any);
+      }
+    }
+
     if (userRole === 'SUPER_ADMIN') {
       fetchAdminData();
     } else if (userRole === 'institute') {
       fetchInstituteData();
       fetchInstitute();
     }
-    else if(userRole === 'counsellor'){
+    else if (userRole === 'counsellor') {
       fetchCounselorData();
     }
   }, []);
 
 
-const fetchCounselorData = async () => {
+  const fetchCounselorData = async () => {
     try {
-      const email = localStorage.getItem('email');
-      const response = await axiosInstance.get(`${apiUrl}/counselor-dashboard`);
-      console.log('Counselor Data:', response.data.data);
-      setCounselorData(response.data.data);
+      // 1. Fetch from dashboard API first
+      const dashboardResponse = await axiosInstance.get(`${apiUrl}/counselor-dashboard`);
+      const dData = dashboardResponse.data.data;
+
+      // 2. Fetch full profile as a secondary source (often contains more detailed verification info)
+      const counselorId = localStorage.getItem('instituteId');
+      let profileData = null;
+      if (counselorId) {
+        try {
+          const profileResponse = await axiosInstance.get(`${apiUrl}/counselor-by-id/${counselorId}`);
+          profileData = profileResponse.data?.data;
+        } catch (err) {
+          console.error('Secondary profile fetch failed', err);
+        }
+      }
+
+      // 3. Merge data, prioritizing profileData for verification fields as it's usually the source of truth
+      const mergedData = {
+        ...(dData || {}),
+        ...(profileData || {}),
+        // If profileData has it, use it, otherwise keep dashboard data
+        verificationStatus: profileData?.verificationStatus || dData?.verificationStatus || localStorage.getItem('verificationStatus') || '',
+        scheduledTestDate: profileData?.scheduledTestDate || dData?.scheduledTestDate || localStorage.getItem('scheduledTestDate') || undefined,
+        scheduledTestSlot: profileData?.scheduledTestSlot || dData?.scheduledTestSlot || localStorage.getItem('scheduledTestSlot') || undefined,
+        verifiedBadge: profileData?.verifiedBadge ?? dData?.verifiedBadge ?? (localStorage.getItem('verifiedBadge') === 'true')
+      };
+
+      if (mergedData) {
+        setCounselorData(mergedData);
+        setVerificationStatus(mergedData.verificationStatus);
+        setVerifiedBadge(mergedData.verifiedBadge);
+
+        // Sync everything back to localStorage for persistence
+        if (mergedData.verificationStatus) localStorage.setItem('verificationStatus', mergedData.verificationStatus);
+        if (mergedData.scheduledTestDate) localStorage.setItem('scheduledTestDate', mergedData.scheduledTestDate);
+        if (mergedData.scheduledTestSlot) localStorage.setItem('scheduledTestSlot', mergedData.scheduledTestSlot);
+        localStorage.setItem('verifiedBadge', String(mergedData.verifiedBadge));
+      }
       setIsLoading(false);
     } catch (error) {
       console.error('Error fetching counselor data:', error);
@@ -126,7 +194,7 @@ const fetchCounselorData = async () => {
     }
   };
 
-  const formatCurrency = (amount:any) => {
+  const formatCurrency = (amount: any) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
@@ -143,23 +211,32 @@ const fetchCounselorData = async () => {
   }
 
   const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color, description }) => (
-    <Card className="relative overflow-hidden">
-      <div className={`absolute right-0 top-0 h-full w-2 ${color}`} />
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className={`h-4 w-4 ${color.replace('bg-', 'text-')}`} />
+    <Card className="relative overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-300 group">
+      {/* Dynamic background glow */}
+      <div className={`absolute -right-4 -top-4 h-24 w-24 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity ${color}`} />
+
+      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+        <CardTitle className="text-sm font-semibold text-muted-foreground tracking-tight group-hover:text-foreground transition-colors">
+          {title}
+        </CardTitle>
+        <div className={`p-2 rounded-lg ${color.replace('bg-', 'bg-').replace('-500', '-500/10')} transition-colors group-hover:scale-110 duration-300`}>
+          <Icon className={`h-4 w-4 ${color.replace('bg-', 'text-')}`} />
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-3xl font-bold tracking-tight mb-1">{value}</div>
         {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+            <TrendingUp className="w-3 h-3 text-emerald-500" />
+            {description}
+          </p>
         )}
       </CardContent>
     </Card>
   );
 
   if (role === 'institute') {
- 
+
     return (
       <div className="flex h-dvh overflow-y-scroll flex-col gap-4 p-4 bg-gray-50">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -173,8 +250,6 @@ const fetchCounselorData = async () => {
             </Button>
           </div>
         </div>
-        <TestCountdownBadge />
-
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Leads"
@@ -197,38 +272,88 @@ const fetchCounselorData = async () => {
             color="bg-green-500"
             description="All counselling sessions"
           />
-         <div className="p-4 bg-gray-100 rounded-lg shadow-md">
-  <h2 className="text-lg font-semibold mb-2">Subscription Details</h2>
-  <div className="flex flex-col gap-2">
-    <p className="flex items-center gap-2">
-      <BookOpen className="text-green-500" />
-      <span className="font-medium">Current Plan:</span>
-      <span>{institute?.planName || 'N/A'}</span>
-    </p>
-    <p className="flex items-center gap-2">
-      <BookOpen className="text-red-500" />
-      <span className="font-medium">Expiry Date:</span>
-      <span>{new Date(institute?.expiryDate || '').toLocaleDateString('en-IN') || 'N/A'}</span>
-      <span
-        className={`ml-2 px-2 py-1 text-xs font-semibold rounded ${
-          new Date(institute?.expiryDate || '') < new Date() ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
-        }`}
-      >
-        {new Date(institute?.expiryDate || '') < new Date() ? 'Expired' : 'Active'}
-      </span>
-    </p>
-  </div>
-</div>
-
         </div>
-
-
       </div>
     );
   }
 
 
+  // Banner action handlers
+
+  // Payment integration for both flows
+
+  const payAnd = async (afterPay: 'test' | 'schedule') => {
+    setLoading(true);
+    const res = await loadRazorpayScript();
+    if (!res) {
+      alert('Razorpay SDK failed to load.');
+      setLoading(false);
+      return;
+    }
+    try {
+      const options = {
+        key: 'rzp_test_SPTvNCnEWS87X0',
+        amount: 9900,
+        currency: 'INR',
+        name: 'Guidance Y',
+        description: 'Counsellor Verification Demo Payment',
+        handler: async function (response: any) {
+          try {
+            await axiosInstance.post(`${apiUrl}/counselor-test/record-payment`, {
+              amount: 99,
+              transactionId: response.razorpay_payment_id || 'demo_payment_id',
+              status: 'success',
+            });
+            if (afterPay === 'test') {
+              const canGiveRes = await axiosInstance.get(`${apiUrl}/counselor-test/can-give`);
+              if (canGiveRes.data?.data?.eligible) {
+                setVerificationStatus('test_pending');
+                localStorage.setItem('verificationStatus', 'test_pending');
+              }
+            } else if (afterPay === 'schedule') {
+              setShowScheduleModal(true);
+            }
+          } catch (err) {
+            console.error('Payment processing failed:', err);
+            // Fallback: show modal anyway if they paid
+            if (afterPay === 'schedule') setShowScheduleModal(true);
+          }
+        },
+        prefill: {},
+        theme: { color: '#6366f1' },
+      };
+      // @ts-ignore
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert('Payment initiation failed.');
+    }
+    setLoading(false);
+  };
+
+  const handlePay = () => payAnd('test');
+  const handleSchedule = () => payAnd('schedule');
+
+  const handleScheduleSubmit = async (date: string, slot: string) => {
+    setLoading(true);
+    try {
+      await axiosInstance.post('/counselor/schedule-test', { date, slot });
+      setVerificationStatus('test_scheduled');
+      localStorage.setItem('verificationStatus', 'test_scheduled');
+      localStorage.setItem('scheduledTestDate', date);
+      localStorage.setItem('scheduledTestSlot', slot);
+      setShowTest(false);
+      setShowScheduleModal(false);
+    } catch (err) {
+      alert('Failed to schedule test.');
+    }
+    setLoading(false);
+  };
+
   if (role === 'counsellor') {
+    if (isLoading) {
+      return <div className="p-8 text-center text-lg">Loading...</div>;
+    }
     return (
       <div className="flex h-dvh overflow-y-scroll flex-col gap-4 p-4 bg-gray-50">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -236,25 +361,26 @@ const fetchCounselorData = async () => {
             <h1 className="text-2xl font-bold">Counselor Dashboard Overview 👋</h1>
             <p className="text-muted-foreground">Monitor your performance and metrics.</p>
           </div>
-          {/* <div className="flex items-center gap-2">
-            <CalendarDateRangePicker />
-            <Button className="bg-primary">
-              <DollarSign className="mr-2 h-4 w-4" />
-              Download Report
-            </Button>
-          </div> */}
         </div>
-        <TestCountdownBadge />
-
+        <Banner
+          status={verificationStatus}
+          onPay={handlePay}
+          onSchedule={handleSchedule}
+          scheduledTestDate={counselorData?.scheduledTestDate}
+          scheduledTestSlot={counselorData?.scheduledTestSlot}
+          verifiedBadge={verifiedBadge}
+        />
+        <ScheduleTestModal open={showScheduleModal} onClose={() => setShowScheduleModal(false)} onSchedule={handleScheduleSubmit} />
+        {/* Test and guidance are now on separate pages. No inline rendering here. */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
+          <StatCard
             title="Level"
             value={counselorData?.level || "Career Advisor"}
             icon={BookOpen}
             color="bg-green-500"
             description="Counsellor level"
           />
-            <StatCard
+          <StatCard
             title="Points"
             value={counselorData?.points || 0}
             icon={BookOpen}
@@ -282,21 +408,20 @@ const fetchCounselorData = async () => {
             color="bg-green-500"
             description="All counselling sessions"
           />
-            <StatCard
+          <StatCard
             title="Pending Slots"
             value={counselorData?.pendingSlots || 0}
             icon={BookOpen}
             color="bg-green-500"
             description="All counselling sessions"
           />
-            <StatCard
+          <StatCard
             title="Average Rating"
             value={counselorData?.averageRating || 0}
             icon={BookOpen}
             color="bg-green-500"
             description="All counselling sessions"
           />
-          
         </div>
       </div>
     );
@@ -326,7 +451,7 @@ const fetchCounselorData = async () => {
           </Button>
         </div>
       </div>
-      <TestCountdownBadge />
+
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full max-w-[400px] grid-cols-2">
@@ -411,7 +536,7 @@ const fetchCounselorData = async () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value) => formatCurrency(value)}
                   />
                   <Bar dataKey="value" fill="#8884d8" />
@@ -431,7 +556,7 @@ const fetchCounselorData = async () => {
             <CardContent className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={[
-                  { 
+                  {
                     month: 'Current',
                     active: adminData?.activeSubscriptionCount || 0,
                     renewed: adminData?.renewSubscriptionCount || 0
@@ -463,6 +588,6 @@ const fetchCounselorData = async () => {
       </Tabs>
     </div>
   );
-};
+}
 
 export default Dashboard;
