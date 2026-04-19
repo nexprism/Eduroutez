@@ -37,6 +37,8 @@ import { SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form
 import { toast } from 'sonner';
 import axiosInstance from '@/lib/axios';
 import * as z from 'zod';
+import { Checkbox } from '@/components/ui/checkbox';
+
 
 export const profileSchema = z.object({
   firstname: z
@@ -479,13 +481,19 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
           (previews[fieldName] !== null && previews[fieldName] !== undefined);
 
         if (!hasFile && !hasPreview) {
-          const label = steps[currentStep].fields.find(f => f === fieldName);
           missing.push(fieldName);
+          form.setError(fieldName as any, {
+            type: 'manual',
+            message: 'This document is required. Please upload it to continue.'
+          });
+        } else {
+          // Clear error if it was previously set
+          form.clearErrors(fieldName as any);
         }
       });
 
       if (missing.length > 0) {
-        toast.error(`Please upload all required documents: ${missing.join(', ')}`);
+        toast.error('Some documents are missing. Please scroll to see the required fields.');
         return;
       }
 
@@ -922,18 +930,18 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
           {steps.map((step, index) => (
             <li key={step.name} className="md:flex-1">
               {currentStep > index ? (
-                <div className="group flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4">
-                  <span className="text-sm font-medium text-sky-600 transition-colors ">
+                <div className="group flex w-full flex-col border-l-4 border-red-600 py-2 pl-4 transition-colors md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4">
+                  <span className="text-sm font-medium text-red-600 transition-colors ">
                     {step.id}
                   </span>
                   <span className="text-sm font-medium">{step.name}</span>
                 </div>
               ) : currentStep === index ? (
                 <div
-                  className="flex w-full flex-col border-l-4 border-sky-600 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
+                  className="flex w-full flex-col border-l-4 border-red-600 py-2 pl-4 md:border-l-0 md:border-t-4 md:pb-0 md:pl-0 md:pt-4"
                   aria-current="step"
                 >
-                  <span className="text-sm font-medium text-sky-600">
+                  <span className="text-sm font-medium text-red-600">
                     {step.id}
                   </span>
                   <span className="text-sm font-medium">{step.name}</span>
@@ -1463,14 +1471,22 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                             control={form.control}
                             name={`experiences.${index}.isCurrentlyWorking`}
                             render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Currently Working</FormLabel>
+                              <FormItem className="flex flex-col justify-end pb-2">
+                                <FormLabel className="opacity-0 select-none hidden md:block">Spacer</FormLabel>
                                 <FormControl>
-                                  <input
-                                    type="checkbox"
-                                    checked={field.value}
-                                    onChange={e => field.onChange(e.target.checked)}
-                                  />
+                                  <div className="flex items-center space-x-3 h-10">
+                                    <Checkbox
+                                      checked={field.value}
+                                      onCheckedChange={field.onChange}
+                                      className="data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600 h-5 w-5 border-slate-300 transition-colors"
+                                    />
+                                    <span 
+                                      className="text-sm font-bold cursor-pointer text-slate-700 dark:text-slate-300"
+                                      onClick={() => field.onChange(!field.value)}
+                                    >
+                                      Currently Working
+                                    </span>
+                                  </div>
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -1523,7 +1539,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                 <div className="mt-4 flex justify-center">
                   <Button
                     type="button"
-                    className="flex justify-center"
+                    className="flex justify-center bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-200 transition-all"
                     size={'lg'}
                     onClick={() =>
                       append({
@@ -1970,7 +1986,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
             type="button"
             onClick={prev}
             disabled={currentStep === 0}
-            className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-white px-2 py-1 text-sm font-semibold text-red-900 shadow-sm ring-1 ring-inset ring-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1991,7 +2007,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
             type="button"
             onClick={next}
             disabled={currentStep === steps.length - 1}
-            className="rounded bg-white px-2 py-1 text-sm font-semibold text-sky-900 shadow-sm ring-1 ring-inset ring-sky-300 hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-white px-2 py-1 text-sm font-semibold text-red-900 shadow-sm ring-1 ring-inset ring-red-300 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
