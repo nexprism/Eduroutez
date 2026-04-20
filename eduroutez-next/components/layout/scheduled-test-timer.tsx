@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Calendar, Clock, Timer, Bell } from 'lucide-react';
+import { Calendar, Clock, Timer, Bell, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface ScheduledTestTimerProps {
   date: string;
@@ -25,7 +26,6 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
     setIsClient(true);
     let target = new Date(date).getTime();
     
-    // If slot is provided, update the target time's hours and minutes
     if (slot && slot.includes(':')) {
       const [hours, minutes] = slot.split(':').map(Number);
       const testDate = new Date(date);
@@ -61,52 +61,61 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
   const isExpired = new Date().getTime() > testDate.getTime();
 
   return (
-    <div className="w-full max-w-4xl mx-auto mb-8 animate-in fade-in slide-in-from-top duration-700">
-      <Card className="relative overflow-hidden border-none shadow-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white p-6 md:p-8">
+    <div className="w-full mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+      <Card className="relative overflow-hidden border-none shadow-[0_20px_50px_rgba(220,38,38,0.15)] bg-slate-950 text-white p-8 md:p-12 rounded-[2.5rem]">
         {/* Decorative elements */}
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-white/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-red-600/10 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 left-0 -mb-12 -ml-12 w-64 h-64 bg-red-600/5 rounded-full blur-[80px]" />
         
-        <div className="relative flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex-1 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold uppercase tracking-wider mb-4">
-              <Bell className="w-3 h-3" />
-              Assessment Scheduled
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+             style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+
+        <div className="relative flex flex-col lg:flex-row items-center justify-between gap-12">
+          <div className="flex-1 text-center lg:text-left space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-600/10 border border-red-500/20 text-red-500 text-xs font-black uppercase tracking-widest mb-2">
+              <Bell className="w-4 h-4" />
+              Assessment Protocol Active
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">Guidance Test</h2>
-            <p className="text-indigo-100 text-lg opacity-90 max-w-md">
-              Your counsellor verification assessment is scheduled. Prepare well to get your verified badge!
+            <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tighter leading-none">
+              Certification <span className="text-red-500">Assessment</span>
+            </h2>
+            <p className="text-slate-400 text-lg md:text-xl font-medium max-w-xl leading-relaxed">
+              Your path to becoming an Eduroutez Certified Counsellor begins shortly. Please ensure a stable connection.
             </p>
             
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mt-6">
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl">
-                <Calendar className="w-5 h-5 text-indigo-200" />
-                <span className="font-semibold">{testDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4">
+              <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl shadow-inner">
+                <Calendar className="w-6 h-6 text-red-500" />
+                <span className="font-bold text-lg">{testDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl">
-                <Clock className="w-5 h-5 text-indigo-200" />
-                <span className="font-semibold">{slot || testDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-3 rounded-2xl shadow-inner">
+                <Clock className="w-6 h-6 text-red-500" />
+                <span className="font-bold text-lg">{slot || testDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
           </div>
 
-          <div className="w-full md:w-auto flex flex-col items-center">
+          <div className="w-full lg:w-auto flex flex-col items-center">
             {isExpired ? (
-              <div className="bg-white/20 backdrop-blur-md p-6 rounded-2xl text-center min-w-[300px] flex flex-col items-center gap-4 border border-white/30">
-                <Timer className="w-10 h-10 text-white animate-pulse" />
+              <div className="bg-gradient-to-b from-red-600 to-red-700 p-8 rounded-[2rem] text-center min-w-[320px] flex flex-col items-center gap-6 shadow-2xl shadow-red-500/30 border border-red-400/30 animate-pulse">
+                <div className="p-4 bg-white/10 rounded-full">
+                  <Timer className="w-12 h-12 text-white" />
+                </div>
                 <div className="space-y-1">
-                  <p className="text-2xl font-bold uppercase tracking-tight">Test Time!</p>
-                  <p className="text-indigo-100 text-sm">Your scheduled assessment window is now open.</p>
+                  <p className="text-3xl font-black uppercase tracking-tighter">Portal Open</p>
+                  <p className="text-red-100/80 text-sm font-bold">Your assessment window is active.</p>
                 </div>
                 <Button 
-                   onClick={() => router.push('/dashboard/counselor-test')}
-                   className="w-full bg-white text-purple-600 hover:bg-white/90 font-bold h-12 rounded-xl shadow-xl transition-all hover:scale-105 active:scale-95 border-none"
+                   onClick={() => router.push('/dashboard/test-benefits')}
+                   className="w-full bg-white text-red-600 hover:bg-slate-50 font-black h-14 rounded-2xl shadow-xl shadow-black/10 transition-all hover:scale-105 active:scale-95 border-none text-lg group/btn"
                  >
-                   Start Assessment Now
+                   Start Assessment
+                   <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
                  </Button>
               </div>
             ) : (
-              <div className="flex gap-2 md:gap-4">
+              <div className="flex gap-4 md:gap-6">
                 <TimeUnit value={timeLeft.days} label="Days" />
                 <TimeUnit value={timeLeft.hours} label="Hours" />
                 <TimeUnit value={timeLeft.minutes} label="Mins" />
@@ -122,13 +131,15 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
 
 function TimeUnit({ value, label }: { value: number, label: string }) {
   return (
-    <div className="flex flex-col items-center bg-white/10 backdrop-blur-md min-w-[70px] md:min-w-[80px] p-2 md:p-3 rounded-2xl border border-white/20 transition-transform hover:scale-105">
-      <span className="text-2xl md:text-3xl font-black tabular-nums tracking-tighter leading-none mb-1">
-        {value.toString().padStart(2, '0')}
-      </span>
-      <span className="text-[10px] md:text-xs font-medium uppercase tracking-widest text-indigo-200">
-        {label}
-      </span>
+    <div className="flex flex-col items-center group">
+      <div className="flex flex-col items-center bg-white/5 backdrop-blur-xl min-w-[80px] md:min-w-[90px] p-4 md:p-5 rounded-3xl border border-white/10 transition-all group-hover:bg-red-600/10 group-hover:border-red-600/30 group-hover:-translate-y-2 shadow-xl shadow-black/20">
+        <span className="text-3xl md:text-4xl font-black tabular-nums tracking-tighter leading-none mb-1">
+          {value.toString().padStart(2, '0')}
+        </span>
+        <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-red-500">
+          {label}
+        </span>
+      </div>
     </div>
   );
 }

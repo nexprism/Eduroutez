@@ -98,7 +98,7 @@ export default function AppSidebar({
             'Webinars',
             'Help And Support'
           ] // Titles to exclude for 'counsellor'
-        : ['Online counselling','Slots','Subscription',,'Review','Profile','Support','Redeem',"Recruiter","Media"]; // Default: no exclusions
+        : ['Online counselling','Slots','Subscription','Review','Profile','Support','Redeem',"Recruiter","Media"]; // Default: no exclusions
 
     const filteredItems = navItems.filter(
       (item) => !excludedTitles.includes(item.title)
@@ -111,8 +111,10 @@ export default function AppSidebar({
   const { data: subscription } = useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
+      const plan = typeof window !== 'undefined' ? localStorage.getItem('plan') : null;
+      if (!plan) return null;
       const response = await axiosInstance.get(
-        `${apiUrl}/subscription/${localStorage.getItem('plan')}`
+        `${apiUrl}/subscription/${plan}`
       );
       return response.data;
     },

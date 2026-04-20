@@ -151,7 +151,7 @@ export default function TestCountdownBadge() {
             {isTestTime && (
               <Button 
                 className="flex-1 md:flex-none bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-5 md:py-2 rounded-xl shadow-lg shadow-red-200 dark:shadow-none transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
-                onClick={() => router.push('/dashboard/counselor-test')}
+                onClick={() => router.push('/dashboard/test-benefits')}
               >
                 Start Test
                 <span className="inline-block transform transition-transform group-hover/btn:translate-x-1">→</span>
