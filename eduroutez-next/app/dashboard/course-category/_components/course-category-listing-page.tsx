@@ -19,7 +19,7 @@ export default function CourseCategoryListingPage({}: TCourseCategoryListingPage
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['course-categories', searchQuery, page],
+    queryKey: ['course-categories', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/course-categories`, {
         params: {
