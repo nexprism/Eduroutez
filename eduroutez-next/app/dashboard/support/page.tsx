@@ -65,13 +65,13 @@ const SupportPage = () => {
   };
 
   return (
-    <div className="bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 h-screen overflow-y-auto">
+    <div className="bg-background py-12 px-4 sm:px-6 lg:px-8">
       {/* Header Section */}
       <div className="max-w-7xl mx-auto text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <h1 className="text-4xl font-bold text-foreground mb-4">
           How can we help you?
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Our support team is here to assist you. Submit a request or use our quick help options.
         </p>
       </div>
@@ -81,7 +81,7 @@ const SupportPage = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Form Section - Left Side */}
           <div className="lg:w-2/3">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-card rounded-xl shadow-lg overflow-hidden border border-border">
               <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
                 <h2 className="text-2xl font-bold text-white">Submit a Support Request</h2>
                 <p className="text-purple-100 mt-2">We&apos;ll get back to you as soon as possible.</p>
@@ -90,13 +90,13 @@ const SupportPage = () => {
               <form onSubmit={handleSubmit} className="p-6 space-y-6 ">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Category
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border bg-background text-foreground rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     >
                       <option value="general">General Inquiry</option>
                       <option value="technical">Technical Issue</option>
@@ -106,37 +106,37 @@ const SupportPage = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
                       Title
                     </label>
                     <input
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border bg-background text-foreground rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       placeholder="Brief summary of your issue"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
                     Description
                   </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-border bg-background text-foreground rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Please provide as much detail as possible..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
                     Attachments
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center bg-muted/30">
                     <input
                       type="file"
                       onChange={handleImageChange}
@@ -149,7 +149,7 @@ const SupportPage = () => {
                     >
                       Choose File
                     </label>
-                    <p className="mt-2 text-sm text-gray-500">
+                    <p className="mt-2 text-sm text-muted-foreground">
                       or drag and drop files here
                     </p>
                     {imagePreview && (
@@ -185,18 +185,18 @@ const SupportPage = () => {
           {/* Quick Links Section - Right Side */}
           <div className="lg:w-1/3 space-y-6">
             {/* Contact Support */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="bg-card p-6 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow">
               <Phone className="h-8 w-8 text-purple-600 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Contact Support</h3>
-              <p className="text-gray-600">Available 24/7</p>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">Contact Support</h3>
+              <p className="text-muted-foreground">Available 24/7</p>
               <p className="text-purple-600 font-semibold">9867877121</p>
             </div>
             
             {/* Email Support */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div className="bg-card p-6 rounded-xl shadow-sm border border-border hover:shadow-md transition-shadow">
               <Mail className="h-8 w-8 text-purple-600 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Email Support</h3>
-              <p className="text-gray-600">Response within 24 hours</p>
+              <h3 className="text-lg font-semibold mb-2 text-foreground">Email Support</h3>
+              <p className="text-muted-foreground">Response within 24 hours</p>
               <p className="text-purple-600 font-semibold">contact@eduroutez.com</p>
             </div>
             

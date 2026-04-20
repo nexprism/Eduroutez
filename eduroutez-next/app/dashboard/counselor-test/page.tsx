@@ -185,11 +185,11 @@ export default function CounselorTestPage() {
   if (eligibility && !eligibility.eligible && !testStarted) {
     return (
       <div className="container max-w-2xl py-20 px-4 flex flex-col items-center">
-        <div className="p-4 rounded-full bg-amber-50 mb-6">
+        <div className="p-4 rounded-full bg-amber-500/10 mb-6">
           <AlertCircle className="h-12 w-12 text-amber-500" />
         </div>
-        <h1 className="text-3xl font-bold text-center mb-4">Action Required</h1>
-        <p className="text-slate-600 text-lg text-center mb-8">
+        <h1 className="text-3xl font-bold text-center mb-4 text-foreground">Action Required</h1>
+        <p className="text-muted-foreground text-lg text-center mb-8">
           {eligibility.reason || 'You are not eligible to take the test at this moment.'}
         </p>
         <div className="flex flex-col md:flex-row gap-4">
@@ -214,28 +214,28 @@ export default function CounselorTestPage() {
     const progress = ((currentQuestionIndex + 1) / questionSet.questions.length) * 100;
 
     return (
-      <div className="w-full max-w-7xl py-2 px-4 md:px-8 mx-auto h-[calc(100vh-80px)] flex flex-col">
+      <div className="w-full max-w-7xl py-2 px-4 md:px-8 mx-auto flex flex-col min-h-screen">
         {/* Compact Header with Clock & Progress */}
-        <div className="shrink-0 z-10 bg-gray-50/50 backdrop-blur-md pb-2 pt-1">
+        <div className="shrink-0 z-10 bg-background/50 backdrop-blur-md pb-2 pt-1">
           <div className="flex justify-between items-center mb-2 px-1">
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-lg text-slate-800">Question {currentQuestionIndex + 1}</span>
-              <span className="text-slate-400 text-sm">of {questionSet.questions.length}</span>
+              <span className="font-extrabold text-lg text-foreground">Question {currentQuestionIndex + 1}</span>
+              <span className="text-muted-foreground text-sm">of {questionSet.questions.length}</span>
             </div>
-            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-lg ${timeLeft < 120 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-slate-200/50 text-slate-700'}`}>
+            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-lg ${timeLeft < 120 ? 'bg-red-500/10 text-red-600 animate-pulse' : 'bg-muted text-foreground/80'}`}>
               <Clock className="h-4 w-4" />
               {formatTime(timeLeft)}
             </div>
           </div>
-          <Progress value={progress} className="h-1.5 rounded-full bg-slate-200" indicatorClassName="bg-red-600" />
+          <Progress value={progress} className="h-1.5 rounded-full bg-muted" indicatorClassName="bg-red-600" />
         </div>
 
         <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-4 gap-6 mt-4 overflow-hidden">
           {/* Main Question Area */}
           <div className="lg:col-span-3 flex flex-col min-h-0">
-            <Card className="flex-1 flex flex-col border border-slate-100 shadow-sm rounded-2xl overflow-hidden bg-white/70 backdrop-blur-md">
+            <Card className="flex-1 flex flex-col border border-border shadow-sm rounded-2xl overflow-hidden bg-card/70 backdrop-blur-md">
               <CardContent className="flex-1 overflow-y-auto p-5 md:p-7 pt-6">
-                <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-tight mb-8">
+                <h2 className="text-xl md:text-2xl font-bold text-foreground leading-tight mb-8">
                   {currentQuestion.questionText}
                 </h2>
 
@@ -246,14 +246,14 @@ export default function CounselorTestPage() {
                       onClick={() => handleOptionSelect(currentQuestion._id, option._id)}
                       className={`group flex items-center p-4 rounded-xl border-2 transition-all duration-200 text-left ${
                         answers[currentQuestion._id] === option._id 
-                        ? 'border-red-600 bg-red-50/50 shadow-md transform scale-[1.002]' 
-                        : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-red-600 bg-red-500/10 shadow-md transform scale-[1.002]' 
+                        : 'border-border hover:border-muted hover:bg-muted/50'
                       }`}
                     >
                       <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center mr-4 transition-colors ${
                         answers[currentQuestion._id] === option._id 
                         ? 'border-red-600' 
-                        : 'border-slate-300 group-hover:border-slate-400'
+                        : 'border-muted-foreground/30 group-hover:border-muted-foreground/50'
                       }`}>
                          {answers[currentQuestion._id] === option._id && (
                            <div className="h-2.5 w-2.5 rounded-full bg-red-600" />
@@ -261,8 +261,8 @@ export default function CounselorTestPage() {
                       </div>
                       <span className={`text-base transition-colors ${
                         answers[currentQuestion._id] === option._id 
-                        ? 'text-red-700 font-bold' 
-                        : 'text-slate-700'
+                        ? 'text-red-600 dark:text-red-400 font-bold' 
+                        : 'text-foreground/80'
                       }`}>
                         {option.optionText}
                       </span>
@@ -272,11 +272,11 @@ export default function CounselorTestPage() {
               </CardContent>
             </Card>
 
-            <div className="shrink-0 flex justify-between items-center py-4 bg-gray-50/50">
+            <div className="shrink-0 flex justify-between items-center py-4 bg-background/50">
               <Button 
                 variant="outline" 
                 size="lg" 
-                className="rounded-xl px-8 h-12 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                className="rounded-xl px-8 h-12 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
                 onClick={() => setCurrentQuestionIndex(prev => prev - 1)}
                 disabled={currentQuestionIndex === 0}
               >
@@ -308,9 +308,9 @@ export default function CounselorTestPage() {
 
           {/* Sidebar Question Navigator */}
           <div className="hidden lg:flex flex-col space-y-4">
-            <Card className="flex-1 flex flex-col border border-slate-100 shadow-sm rounded-2xl overflow-hidden bg-white/70 backdrop-blur-md">
-              <CardHeader className="py-4 px-5 border-b border-slate-50">
-                <CardTitle className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Test Navigation</CardTitle>
+            <Card className="flex-1 flex flex-col border border-border shadow-sm rounded-2xl overflow-hidden bg-card/70 backdrop-blur-md">
+              <CardHeader className="py-4 px-5 border-b border-border">
+                <CardTitle className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Test Navigation</CardTitle>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto p-5">
                 <div className="grid grid-cols-4 gap-2">
@@ -325,7 +325,7 @@ export default function CounselorTestPage() {
                       } ${
                         answers[q._id] 
                         ? 'bg-red-600 text-white' 
-                        : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
                       }`}
                     >
                       {idx + 1}
@@ -333,21 +333,21 @@ export default function CounselorTestPage() {
                   ))}
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-slate-100 space-y-3">
-                   <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                <div className="mt-8 pt-6 border-t border-border space-y-3">
+                   <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground">
                       <div className="h-2 w-2 rounded-full bg-red-600" />
                       <span>Answered ({Object.keys(answers).length})</span>
                    </div>
-                   <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400">
-                      <div className="h-2 w-2 rounded-full bg-slate-200" />
+                   <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground/60">
+                      <div className="h-2 w-2 rounded-full bg-muted" />
                       <span>Remaining ({questionSet.questions.length - Object.keys(answers).length})</span>
                    </div>
                 </div>
               </CardContent>
-              <div className="p-4 border-t border-slate-50">
-                 <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-center">
-                    <p className="text-[10px] font-bold text-red-700 uppercase tracking-wider">Stability Check</p>
-                    <p className="text-[9px] text-red-600/70 mt-1 leading-tight">Your connection is active. Do not refresh.</p>
+              <div className="p-4 border-t border-border">
+                 <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-center">
+                    <p className="text-[10px] font-bold text-red-600 uppercase tracking-wider">Stability Check</p>
+                    <p className="text-[9px] text-red-500/70 mt-1 leading-tight">Your connection is active. Do not refresh.</p>
                  </div>
               </div>
             </Card>
@@ -360,24 +360,24 @@ export default function CounselorTestPage() {
   // Welcome / Instructions Screen
   return (
     <div className="w-full max-w-[1300px] px-4 md:px-6 mx-auto py-4 animate-in fade-in zoom-in duration-500">
-      <Card className="w-full border border-red-100/50 shadow-2xl shadow-red-900/5 rounded-[2rem] overflow-hidden bg-white/80 backdrop-blur-3xl">
+      <Card className="w-full border border-border shadow-2xl shadow-red-950/20 rounded-[2rem] overflow-hidden bg-card/80 backdrop-blur-3xl">
         {/* Top Accent Bar */}
         <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-red-600 to-red-500" />
         
-        <div className="flex flex-col xl:flex-row divide-y xl:divide-y-0 xl:divide-x divide-slate-100">
+        <div className="flex flex-col xl:flex-row divide-y xl:divide-y-0 xl:divide-x divide-border">
           {/* Left Column: Branding & Intro */}
           <div className="flex-1 p-8 md:p-10 flex flex-col justify-center">
             <div className="flex items-center gap-4 mb-6">
-              <div className="p-3.5 rounded-2xl bg-red-50 border border-red-100 shadow-sm">
+              <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 shadow-sm">
                 <GraduationCap className="h-8 w-8 text-red-600" />
               </div>
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-600">Counselor Certification</span>
-                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Assessment Portal</h1>
+                <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">Assessment Portal</h1>
               </div>
             </div>
             
-            <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-lg mb-8">
+            <p className="text-muted-foreground text-lg font-medium leading-relaxed max-w-lg mb-8">
               Verify your expertise and earn your professional badge. This assessment measures your readiness for independent career advisory.
             </p>
 
@@ -388,13 +388,13 @@ export default function CounselorTestPage() {
                 { title: '50% to Pass', desc: 'Score 25+', icon: CheckCircle2 },
                 { title: 'Single Attempt', desc: 'No Retakes', icon: AlertCircle }
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50/50 border border-slate-100 group transition-colors hover:bg-white">
-                  <div className="p-2 rounded-xl bg-white shadow-sm border border-slate-100 text-red-600">
+                <div key={idx} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/50 border border-border group transition-colors hover:bg-muted">
+                  <div className="p-2 rounded-xl bg-card shadow-sm border border-border text-red-600">
                     <item.icon className="h-4 w-4" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-800 text-sm leading-tight">{item.title}</h4>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{item.desc}</p>
+                    <h4 className="font-bold text-foreground text-sm leading-tight">{item.title}</h4>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -402,7 +402,7 @@ export default function CounselorTestPage() {
           </div>
 
           {/* Right Column: CTA & Action Area */}
-          <div className="xl:w-[450px] p-8 md:p-10 bg-gradient-to-br from-slate-50/50 to-white flex flex-col justify-center">
+          <div className="xl:w-[450px] p-8 md:p-10 bg-muted/20 flex flex-col justify-center">
             <div className="relative overflow-hidden group rounded-3xl h-full flex flex-col justify-between">
                <div className="absolute inset-0 bg-red-700 opacity-[1]" />
                
@@ -443,7 +443,7 @@ export default function CounselorTestPage() {
       </Card>
       
       <div className="mt-6 flex justify-between items-center px-2">
-         <p className="text-slate-400 text-xs font-medium">
+         <p className="text-muted-foreground text-xs font-medium">
             Portal Version 2.0.4 &bull; Eduroutez Counselor Services
          </p>
          <button className="text-red-700 text-xs font-bold hover:underline">Contact Support</button>

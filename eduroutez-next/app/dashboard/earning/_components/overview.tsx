@@ -83,13 +83,13 @@ const formatDate = (date:any) =>
 
 const StatusBadge = ({ status }) => {
   const styles = {
-    COMPLETED: 'bg-green-100 text-green-800',
-    PENDING: 'bg-yellow-100 text-yellow-800',
-    FAILED: 'bg-red-100 text-red-800'
+    COMPLETED: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400',
+    PENDING: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400',
+    FAILED: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
   };
 
   return (
-    <span className={`px-2 py-1 rounded-full text-xs ${styles[status]}`}>
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status]}`}>
       {status}
     </span>
   );
@@ -98,9 +98,9 @@ const StatusBadge = ({ status }) => {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-4 border rounded-lg shadow-lg">
-        <p className="font-medium">{label}</p>
-        <p className="text-blue-600">{formatCurrency(payload[0].value)}</p>
+      <div className="bg-card p-4 border border-border rounded-lg shadow-lg">
+        <p className="font-medium text-foreground">{label}</p>
+        <p className="text-blue-600 dark:text-blue-400">{formatCurrency(payload[0].value)}</p>
       </div>
     );
   }
@@ -189,7 +189,7 @@ export default function EarningsReportPage() {
   const totalEarnings = chartData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="p-6 space-y-6 h-dvh overflow-y-scroll">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Earnings Report</h1>
         <p className="text-sm text-muted-foreground">
@@ -198,7 +198,7 @@ export default function EarningsReportPage() {
       </div>
 
       <div className="grid grid-cols-4 gap-4">
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-card shadow-sm border border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
             <span className="text-blue-500 text-lg font-bold">₹</span>
@@ -208,7 +208,7 @@ export default function EarningsReportPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-card shadow-sm border border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Subscriptions</CardTitle>
             <Users className="h-4 w-4 text-green-500" />
@@ -220,7 +220,7 @@ export default function EarningsReportPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-card shadow-sm border border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Redeem Requests</CardTitle>
             <CreditCard className="h-4 w-4 text-purple-500" />
@@ -233,7 +233,7 @@ export default function EarningsReportPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-card shadow-sm border border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ad Revenue</CardTitle>
             <TrendingUp className="h-4 w-4 text-orange-500" />
@@ -248,7 +248,7 @@ export default function EarningsReportPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-6">
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-card shadow-sm border border-border">
           <CardHeader>
             <CardTitle>Revenue Breakdown</CardTitle>
             <CardDescription>Distribution of income sources</CardDescription>
@@ -263,14 +263,14 @@ export default function EarningsReportPage() {
                   dataKey="value"
                   fill="#8884d8"
                   radius={[4, 4, 0, 0]}
-                  background={{ fill: '#eee' }}
+                  background={{ fill: 'transparent' }}
                 />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="bg-white shadow-sm">
+        <Card className="bg-card shadow-sm border border-border">
           <CardHeader>
             <CardTitle>Recent Transactions</CardTitle>
             <CardDescription>

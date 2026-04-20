@@ -56,11 +56,11 @@ const ImageUrl = process.env.NEXT_PUBLIC_NEW_IMAGES;
 const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
         case 'open':
-            return 'bg-green-100 text-green-800';
+            return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
         case 'closed':
-            return 'bg-gray-100 text-gray-800';
+            return 'bg-muted text-foreground/70';
         default:
-            return 'bg-blue-100 text-blue-800';
+            return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
     }
 };
 
@@ -162,34 +162,34 @@ const HelpSupportPage: React.FC = () => {
     }
 
     return (
-        <div className="h-[700px] flex flex-col bg-gray-50">
-            <div className="p-4 bg-white shadow">
-                <h1 className="text-3xl font-bold text-gray-900">Help & Support Dashboard</h1>
+        <div className="flex flex-col bg-background p-4 md:p-8">
+            <div className="p-4 bg-card shadow border-b border-border">
+                <h1 className="text-3xl font-bold text-foreground">Help & Support Dashboard</h1>
             </div>
 
             <div className="flex-1 overflow-x-scroll p-4">
                 {issues.length > 0 ? (
-                    <div className="bg-white rounded shadow">
+                    <div className="bg-card rounded shadow border border-border">
                         <div className="overflow-x-auto">
                             <table className="w-full">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-muted/50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Title</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Category</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Details</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Dates</th>
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-200">
+                                <tbody className="divide-y divide-border">
                                     {displayedIssues.map((issue) => {
                                         const instituteDetails = getInstituteDetails(issue.institute);
                                         return (
-                                            <tr key={issue._id} className="hover:bg-gray-50">
+                                            <tr key={issue._id} className="hover:bg-muted/30 transition-colors">
                                                 <td className="px-6 py-4">
-                                                    <div className="font-medium">{issue.title}</div>
-                                                    <div className="text-sm text-gray-500 max-w-[400px] truncate">{issue.description}</div>
+                                                    <div className="font-medium text-foreground">{issue.title}</div>
+                                                    <div className="text-sm text-muted-foreground max-w-[400px] truncate">{issue.description}</div>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(issue.status)}`}>
@@ -201,13 +201,13 @@ const HelpSupportPage: React.FC = () => {
                                                         {issue.category}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm">
+                                                <td className="px-6 py-4 text-sm text-foreground">
                                                     <div>{instituteDetails.name}</div>
-                                                    <div className="text-gray-500">{instituteDetails.email}</div>
-                                                    <div className="text-gray-500">{instituteDetails.phone}</div>
-                                                    <div className='text-gray-500'>{instituteDetails.role}</div>
+                                                    <div className="text-muted-foreground">{instituteDetails.email}</div>
+                                                    <div className="text-muted-foreground">{instituteDetails.phone}</div>
+                                                    <div className='text-muted-foreground'>{instituteDetails.role}</div>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-gray-500">
+                                                <td className="px-6 py-4 text-sm text-muted-foreground">
                                                     <div>Created: {new Date(issue.createdAt).toLocaleDateString()}</div>
                                                     <div>Updated: {new Date(issue.updatedAt).toLocaleDateString()}</div>
                                                 </td>
@@ -243,7 +243,7 @@ const HelpSupportPage: React.FC = () => {
                             </table>
                         </div>
                         {hasMoreIssues && (
-                            <div className="py-3 px-6 bg-gray-50 border-t">
+                            <div className="py-3 px-6 bg-muted/50 border-t border-border">
                                 <button 
                                     onClick={handleSeeMore}
                                     className="w-full relative overflow-hidden px-4 py-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-md text-sm font-medium group flex items-center justify-center"
@@ -256,15 +256,15 @@ const HelpSupportPage: React.FC = () => {
                         )}
                     </div>
                 ) : (
-                    <div className="bg-white rounded shadow p-6 text-center">
-                        <p className="text-gray-500">No issues found.</p>
+                    <div className="bg-card rounded shadow border border-border p-6 text-center">
+                        <p className="text-muted-foreground">No issues found.</p>
                     </div>
                 )}
             </div>
 
             {selectedIssueId && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md transform transition-all duration-300">
+                <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
+                    <div className="bg-card rounded-lg shadow-xl border border-border p-6 w-full max-w-md transform transition-all duration-300">
                         {detailLoading ? (
                             <div className="flex justify-center items-center h-40">
                                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
@@ -272,10 +272,10 @@ const HelpSupportPage: React.FC = () => {
                         ) : (
                             <>
                                 <div className="flex justify-between items-center mb-4">
-                                    <h2 className="text-xl font-bold text-gray-800">Issue Details</h2>
+                                    <h2 className="text-xl font-bold text-foreground">Issue Details</h2>
                                     <button 
                                         onClick={handleCloseModal}
-                                        className="text-gray-500 hover:text-gray-700"
+                                        className="text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -285,12 +285,12 @@ const HelpSupportPage: React.FC = () => {
                                 
                                 {issueDetail && (
                                     <div className="space-y-4 max-h-[700px] overflow-y-auto max-w-md">
-                                        <div className="bg-indigo-50 p-4 rounded-lg">
-                                            <h3 className="font-bold text-lg text-indigo-800">{issueDetail.title}</h3>
+                                        <div className="bg-indigo-500/10 p-4 rounded-lg border border-indigo-500/20">
+                                            <h3 className="font-bold text-lg text-indigo-600 dark:text-indigo-400">{issueDetail.title}</h3>
                                             <span className={`mt-2 inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(issueDetail.status)}`}>
                                                 {issueDetail.status}
                                             </span>
-                                            <span className="ml-2 inline-block px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                            <span className="ml-2 inline-block px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full text-xs font-medium">
                                                 {issueDetail.category}
                                             </span>
                                         </div>
@@ -305,43 +305,43 @@ const HelpSupportPage: React.FC = () => {
                                             </div>
                                         )}
                                         
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <h4 className="font-medium text-gray-700 mb-2">Description</h4>
-                                            <p className="text-gray-800 whitespace-pre-line">{issueDetail.description}</p>
+                                        <div className="bg-muted/50 p-4 rounded-lg border border-border">
+                                            <h4 className="font-medium text-foreground mb-2">Description</h4>
+                                            <p className="text-foreground/90 whitespace-pre-line">{issueDetail.description}</p>
                                         </div>
                                         
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <h4 className="font-medium text-gray-700 mb-2">Timeline</h4>
+                                        <div className="bg-muted/50 p-4 rounded-lg border border-border">
+                                            <h4 className="font-medium text-foreground mb-2">Timeline</h4>
                                             <div className="grid grid-cols-2 gap-2 text-sm">
                                                 <div>
-                                                    <p className="text-gray-500">Created</p>
-                                                    <p className="font-medium">{new Date(issueDetail.createdAt).toLocaleString()}</p>
+                                                    <p className="text-muted-foreground">Created</p>
+                                                    <p className="font-medium text-foreground">{new Date(issueDetail.createdAt).toLocaleString()}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-500">Last Updated</p>
-                                                    <p className="font-medium">{new Date(issueDetail.updatedAt).toLocaleString()}</p>
+                                                    <p className="text-muted-foreground">Last Updated</p>
+                                                    <p className="font-medium text-foreground">{new Date(issueDetail.updatedAt).toLocaleString()}</p>
                                                 </div>
                                             </div>
                                         </div>
                                         
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <h4 className="font-medium text-gray-700 mb-2">Information</h4>
+                                        <div className="bg-muted/50 p-4 rounded-lg border border-border">
+                                            <h4 className="font-medium text-foreground mb-2">Information</h4>
                                             {issueDetail.institute && (
                                                 <div className="space-y-2 text-sm">
                                                     <div>
-                                                        <p className="text-gray-500">Name</p>
-                                                        <p className="font-medium">{issueDetail.institute?.name}</p>
+                                                        <p className="text-muted-foreground">Name</p>
+                                                        <p className="font-medium text-foreground">{issueDetail.institute?.name}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-gray-500">Email</p>
-                                                        <p className="font-medium">{issueDetail.institute.email}</p>
+                                                        <p className="text-muted-foreground">Email</p>
+                                                        <p className="font-medium text-foreground">{issueDetail.institute.email}</p>
                                                     </div>
                                                     <div>
-                                                        <p className="text-gray-500">Phone</p>
-                                                        <p className="font-medium">{issueDetail.institute?.contact_number}</p>
+                                                        <p className="text-muted-foreground">Phone</p>
+                                                        <p className="font-medium text-foreground">{issueDetail.institute?.contact_number}</p>
                                                     </div>
-                                                    <p className='text-gray-500'>Role</p>
-                                                    <p className='font-medium'>{issueDetail.institute?.role}</p>
+                                                    <p className='text-muted-foreground'>Role</p>
+                                                    <p className='font-medium text-foreground'>{issueDetail.institute?.role}</p>
                                                 </div>
                                             )}
                                         </div>
@@ -351,7 +351,7 @@ const HelpSupportPage: React.FC = () => {
                                 <div className="mt-6 flex justify-end space-x-3">
                                     <button 
                                         onClick={handleCloseModal}
-                                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md text-sm font-medium hover:bg-gray-300 transition-colors"
+                                        className="px-4 py-2 bg-muted text-foreground rounded-md text-sm font-medium hover:bg-muted/80 transition-colors"
                                     >
                                         Close
                                     </button>

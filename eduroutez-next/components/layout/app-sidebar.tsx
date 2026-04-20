@@ -136,7 +136,7 @@ export default function AppSidebar({
 
   return (
     <SidebarProvider>
-      <Sidebar collapsible="icon">
+      <Sidebar collapsible="icon" className="no-scrollbar">
         <SidebarHeader>
           <div className="flex gap-2 py-2 text-sidebar-accent-foreground ">
             {/* <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
@@ -149,7 +149,7 @@ export default function AppSidebar({
             </div>
           </div>
         </SidebarHeader>
-        <SidebarContent className="overflow-x-hidden">
+        <SidebarContent className="overflow-x-hidden no-scrollbar">
           <SidebarGroup>
             <SidebarGroupLabel>Overview </SidebarGroupLabel>
             <SidebarMenu>

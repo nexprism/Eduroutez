@@ -238,7 +238,7 @@ const Dashboard = () => {
   if (role === 'institute') {
 
     return (
-      <div className="flex h-dvh overflow-y-scroll flex-col gap-4 p-4 bg-gray-50">
+      <div className="flex flex-col gap-4 p-4 bg-background">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">Institute Dashboard Overview 👋</h1>
@@ -355,7 +355,7 @@ const Dashboard = () => {
       return <div className="p-8 text-center text-lg">Loading...</div>;
     }
     return (
-      <div className="flex h-dvh overflow-y-scroll flex-col gap-4 p-4 bg-gray-50">
+      <div className="flex flex-col gap-4 p-4 bg-background">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">Counselor Dashboard Overview 👋</h1>
@@ -438,7 +438,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex h-dvh overflow-y-scroll flex-col gap-4 p-4 bg-gray-50">
+    <div className="flex flex-col gap-4 p-4 bg-background">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
