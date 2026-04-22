@@ -18,6 +18,7 @@ import axiosInstance from '@/lib/axios';
 import Link from 'next/link';
 
 import Banner from '@/components/layout/counsellor-verification-banner';
+import CounsellorTrustCard from '@/components/layout/counsellor-trust-card';
 import ScheduleTestModal from '@/components/layout/schedule-test-modal';
 import loadRazorpayScript from '@/lib/razorpay';
 const Dashboard = () => {
@@ -362,13 +363,18 @@ const Dashboard = () => {
             <p className="text-muted-foreground">Monitor your performance and metrics.</p>
           </div>
         </div>
-        <Banner
+        {/* <Banner
           status={verificationStatus}
           onPay={handlePay}
           onSchedule={handleSchedule}
           scheduledTestDate={counselorData?.scheduledTestDate}
           scheduledTestSlot={counselorData?.scheduledTestSlot}
           verifiedBadge={verifiedBadge}
+        /> */}
+        <CounsellorTrustCard 
+          onPay={handlePay} 
+          onSchedule={handleSchedule} 
+          showButtons={!verifiedBadge && !['test_pending', 'test_scheduled', 'verification_in_progress', 'rejected'].includes(verificationStatus)}
         />
         <ScheduleTestModal open={showScheduleModal} onClose={() => setShowScheduleModal(false)} onSchedule={handleScheduleSubmit} />
         {/* Test and guidance are now on separate pages. No inline rendering here. */}
