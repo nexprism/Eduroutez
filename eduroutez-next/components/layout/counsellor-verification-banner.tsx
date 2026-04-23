@@ -143,7 +143,7 @@ const Banner: React.FC<BannerProps> = ({ status: propStatus, onPay, onSchedule, 
             </Button>
             <Button
               variant="outline"
-              className="border-red-200 text-red-600 hover:bg-red-50 transition-all font-black h-14 px-8 rounded-2xl border-2"
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600 transition-all font-black h-14 px-8 rounded-2xl border-2"
               onClick={onSchedule}
             >
               Pay & Schedule

@@ -51,11 +51,11 @@ const PayoutUpdateForm = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="bg-background py-8 px-4 sm:px-6 lg:px-8">
             <div className=" mx-auto">
-                <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="bg-card rounded-xl shadow-lg p-6 border border-border">
                     <div className="text-center pb-8">
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="text-2xl font-bold text-foreground">
                             Update Payout Status
                         </h2>
                     </div>
@@ -63,13 +63,13 @@ const PayoutUpdateForm = () => {
                     <form onSubmit={handleSubmit} className="space-y-8">
                         {/* Status Selection */}
                         <div className="space-y-4">
-                            <label className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-foreground">
                                 Status
                             </label>
                             <select
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
-                                className="block w-full pl-3 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="block w-full pl-3 pr-10 py-3 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             >
                                 <option value="PAID">PAID</option>
                                 <option value="REJECTED">REJECTED</option>
@@ -79,40 +79,40 @@ const PayoutUpdateForm = () => {
 
                         {/* Payment Status */}
                         <div className="space-y-4">
-                            <label className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-foreground">
                                 Payment Status
                             </label>
                             <input
                                 type="text"
                                 value={paymentStatus}
                                 onChange={(e) => setPaymentStatus(e.target.value)}
-                                className="block w-full pl-3 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="block w-full pl-3 pr-10 py-3 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                         </div>
 
                         {/* Transaction ID */}
                         <div className="space-y-4">
-                            <label className="block text-sm font-medium text-gray-700">
+                            <label className="block text-sm font-medium text-foreground">
                                 Transaction ID
                             </label>
                             <input
                                 type="text"
                                 value={transactionId}
                                 onChange={(e) => setTransactionId(e.target.value)}
-                                className="block w-full pl-3 pr-10 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="block w-full pl-3 pr-10 py-3 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                             />
                         </div>
 
                         {/* Error and Success Messages */}
                         {error && (
-                            <div className="flex items-center gap-2 text-purple-600 bg-purple-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 text-purple-600 bg-purple-500/10 p-3 rounded-lg">
                                 <AlertCircle className="w-5 h-5" />
                                 <p className="text-sm">{error}</p>
                             </div>
                         )}
 
                         {success && (
-                            <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2 text-green-600 bg-green-500/10 p-3 rounded-lg">
                                 <CheckCircle2 className="w-5 h-5" />
                                 <p className="text-sm">{success}</p>
                             </div>

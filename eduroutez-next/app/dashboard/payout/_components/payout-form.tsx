@@ -53,11 +53,11 @@ toast.success('Payout request submitted successfully!');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className=" mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="bg-background py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-card rounded-xl shadow-lg p-6 border border-border">
           <div className="text-center pb-8">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-foreground">
               Request Payout
             </h2>
           </div>
@@ -65,7 +65,7 @@ toast.success('Payout request submitted successfully!');
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Payment Method Selection */}
             <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-foreground">
                 Select Payment Method
               </label>
               <div className="grid grid-cols-3 gap-4">
@@ -76,8 +76,8 @@ toast.success('Payout request submitted successfully!');
                     onClick={() => setPaymentMethod(method.name)}
                     className={`p-4 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${
                       paymentMethod === method.name
-                        ? 'border-purple-500 bg-purple-50 text-purple-600'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-purple-500 bg-purple-500/10 text-purple-600'
+                        : 'border-border hover:border-border/80 bg-card text-foreground'
                     }`}
                   >
                     <method.icon className="w-6 h-6" />
@@ -89,18 +89,18 @@ toast.success('Payout request submitted successfully!');
 
             {/* Amount Input */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-foreground">
                 Amount
               </label>
               <div className="relative mt-1 rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-400 text-lg">₹</span>
+                  <span className="text-muted-foreground text-lg">₹</span>
                 </div>
                 <input
                   type="number"
                   value={requestedAmount}
                   onChange={(e) => setRequestedAmount(Number(e.target.value))}
-                  className="block w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="block w-full pl-10 pr-4 py-3 border border-border bg-background text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Enter amount"
                   min="0"
                   step="0.01"
@@ -110,14 +110,14 @@ toast.success('Payout request submitted successfully!');
 
             {/* Error and Success Messages */}
             {error && (
-              <div className="flex items-center gap-2 text-purple-600 bg-purple-50 p-3 rounded-lg">
+              <div className="flex items-center gap-2 text-purple-600 bg-purple-500/10 p-3 rounded-lg">
                 <AlertCircle className="w-5 h-5" />
                 <p className="text-sm">{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
+              <div className="flex items-center gap-2 text-green-600 bg-green-500/10 p-3 rounded-lg">
                 <CheckCircle2 className="w-5 h-5" />
                 <p className="text-sm">{success}</p>
               </div>

@@ -18,6 +18,7 @@ import axiosInstance from '@/lib/axios';
 import Link from 'next/link';
 
 import Banner from '@/components/layout/counsellor-verification-banner';
+import CounsellorTrustCard from '@/components/layout/counsellor-trust-card';
 import ScheduleTestModal from '@/components/layout/schedule-test-modal';
 import loadRazorpayScript from '@/lib/razorpay';
 const Dashboard = () => {
@@ -238,7 +239,7 @@ const Dashboard = () => {
   if (role === 'institute') {
 
     return (
-      <div className="flex h-dvh overflow-y-scroll flex-col gap-4 p-4 bg-gray-50">
+      <div className="flex flex-col gap-4 p-4 bg-background">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">Institute Dashboard Overview 👋</h1>
@@ -355,20 +356,25 @@ const Dashboard = () => {
       return <div className="p-8 text-center text-lg">Loading...</div>;
     }
     return (
-      <div className="flex h-dvh overflow-y-scroll flex-col gap-4 p-4 bg-gray-50">
+      <div className="flex flex-col gap-4 p-4 bg-background">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">Counselor Dashboard Overview 👋</h1>
             <p className="text-muted-foreground">Monitor your performance and metrics.</p>
           </div>
         </div>
-        <Banner
+        {/* <Banner
           status={verificationStatus}
           onPay={handlePay}
           onSchedule={handleSchedule}
           scheduledTestDate={counselorData?.scheduledTestDate}
           scheduledTestSlot={counselorData?.scheduledTestSlot}
           verifiedBadge={verifiedBadge}
+        /> */}
+        <CounsellorTrustCard 
+          onPay={handlePay} 
+          onSchedule={handleSchedule} 
+          showButtons={!verifiedBadge && !['test_pending', 'test_scheduled', 'verification_in_progress', 'rejected'].includes(verificationStatus)}
         />
         <ScheduleTestModal open={showScheduleModal} onClose={() => setShowScheduleModal(false)} onSchedule={handleScheduleSubmit} />
         {/* Test and guidance are now on separate pages. No inline rendering here. */}
@@ -438,7 +444,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex h-dvh overflow-y-scroll flex-col gap-4 p-4 bg-gray-50">
+    <div className="flex flex-col gap-4 p-4 bg-background">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>

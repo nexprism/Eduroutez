@@ -175,6 +175,20 @@
     height: 100vh; /* Fallback */
     height: 100dvh;
   }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  [data-sidebar="content"]::-webkit-scrollbar {
+    display: none;
+  }
+  [data-sidebar="content"] {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @layer base {
