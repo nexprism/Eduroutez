@@ -3,6 +3,8 @@ import CounselorTestResultRepository from "../repository/counselor-test-result-r
 import { CounselorRepository } from "../repository/index.js";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../utils/errors/app-error.js";
+import { sendEmail } from "../utils/Email/email.js";
+
 
 class CounselorTestService {
     constructor() {
@@ -150,6 +152,9 @@ class CounselorTestService {
                 throw new AppError("Counselor not found", StatusCodes.NOT_FOUND);
             }
 
+            // Fetch test result to include in email
+            const testResult = await this.testResultRepository.getByCounselor(counselorId);
+
             // Automatically generate certificate (using placeholder for now)
             const certificateUrl = `https://eduroutez.com/certificates/counselor_${counselorId}.pdf`;
 
@@ -161,6 +166,41 @@ class CounselorTestService {
                 certificateUrl,
                 setRoleCounsellor: true,
             });
+
+            // Send email to counselor about the result and verification status
+            if (updatedCounselor.email) {
+                const subject = "Verification Successful - Eduroutez";
+                const message = `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                        <h2 style="color: #2c3e50;">Congratulations, ${updatedCounselor.firstname}!</h2>
+                        <p>We are pleased to inform you that your counselor verification has been successfully approved by the Eduroutez team.</p>
+                        
+                        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <h3 style="margin-top: 0;">Test Result Summary:</h3>
+                            <p><strong>Score:</strong> ${testResult ? testResult.score : 'N/A'}</p>
+                            <p><strong>Total Questions:</strong> ${testResult ? testResult.totalQuestions : 'N/A'}</p>
+                            <p><strong>Status:</strong> ${testResult ? (testResult.status === 'pass' ? 'Passed' : testResult.status) : 'N/A'}</p>
+                        </div>
+
+                        <p>You now have full access to your counselor dashboard. You can start managing your profile, setting up your availability, and interacting with students.</p>
+                        
+                        <p>Your official certification is available here: <a href="${certificateUrl}" style="color: #3498db;">Download Certificate</a></p>
+                        
+                        <p>If you have any questions, feel free to reach out to our support team.</p>
+                        
+                        <br>
+                        <p>Best regards,<br><strong>Team Eduroutez</strong></p>
+                    </div>
+                `;
+                try {
+                    await sendEmail(updatedCounselor.email, subject, message);
+                    console.log(`Verification email sent to ${updatedCounselor.email}`);
+                } catch (emailError) {
+                    console.error("Failed to send verification email:", emailError.message);
+                    // We don't throw here to avoid failing the whole verification process if email fails
+                }
+            }
+
             return updatedCounselor;
         } catch (error) {
             throw error;
