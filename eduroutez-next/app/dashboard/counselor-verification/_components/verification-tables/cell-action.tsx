@@ -17,8 +17,11 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogFooter
+    DialogFooter,
+    DialogDescription
 } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+
 
 interface CellActionProps {
     data: any;
@@ -27,7 +30,10 @@ interface CellActionProps {
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     const [loading, setLoading] = useState(false);
     const [showResultDialog, setShowResultDialog] = useState(false);
+    const [showRejectDialog, setShowRejectDialog] = useState(false);
+    const [rejectionReason, setRejectionReason] = useState('');
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
     const router = useRouter();
 
     const onVerify = async () => {
@@ -36,6 +42,24 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             const response = await axiosInstance.post(`${apiUrl}/counselor-test/verify/${data._id}`);
             if (response.data.success) {
                 toast.success('Counselor verified and certificate generated!');
+                window.location.reload();
+            }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Something went wrong');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onReject = async () => {
+        try {
+            setLoading(true);
+            const response = await axiosInstance.post(`${apiUrl}/counselor-test/reject/${data._id}`, {
+                reason: rejectionReason
+            });
+            if (response.data.success) {
+                toast.success('Counselor verification rejected');
+                setShowRejectDialog(false);
                 window.location.reload();
             }
         } catch (error: any) {
@@ -88,6 +112,34 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+            <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Reject Verification</DialogTitle>
+                        <DialogDescription>
+                            Please provide a reason for rejecting the verification of {data.firstname} {data.lastname}.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <Textarea
+                            placeholder="Type the reason for rejection here..."
+                            value={rejectionReason}
+                            onChange={(e) => setRejectionReason(e.target.value)}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
+                        <Button
+                            variant="destructive"
+                            onClick={onReject}
+                            disabled={loading || !rejectionReason.trim()}
+                        >
+                            Confirm Reject
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
 
             <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
@@ -107,7 +159,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                     <DropdownMenuItem onClick={onVerify} disabled={loading} className="text-green-600 font-bold">
                         <CheckCircle className="mr-2 h-4 w-4" /> Approve & Verify
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
+                    <DropdownMenuItem onClick={() => setShowRejectDialog(true)} className="text-red-600">
                         <XCircle className="mr-2 h-4 w-4" /> Reject Verification
                     </DropdownMenuItem>
                 </DropdownMenuContent>

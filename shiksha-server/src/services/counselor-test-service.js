@@ -4,6 +4,8 @@ import { CounselorRepository } from "../repository/index.js";
 import { StatusCodes } from "http-status-codes";
 import AppError from "../utils/errors/app-error.js";
 import { sendEmail } from "../utils/Email/email.js";
+import { ServerConfig } from "../config/index.js";
+
 
 
 class CounselorTestService {
@@ -123,6 +125,36 @@ class CounselorTestService {
 
             await this.counselorRepository.updateCounsellor(counselorId, counselorUpdateData);
 
+            // Send "Test Submitted - Under Review" email
+            const counselor = await this.counselorRepository.getByid(counselorId);
+            if (counselor && counselor.email) {
+                const dashboardLink = `${ServerConfig.FRONTEND_HOST}/dashboard/counselor-verification`;
+                const subject = "Test Submitted Successfully - Eduroutez";
+                const message = `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                        <h2 style="color: #2c3e50;">Test Submitted, ${counselor.firstname}!</h2>
+                        <p>Thank you for completing the counselor verification test. Your results are now under review by our team.</p>
+                        
+                        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                            <p><strong>Status:</strong> Verification In Progress</p>
+                            <p><strong>Score:</strong> ${score} / ${questionSet.totalQuestions}</p>
+                        </div>
+                        
+                        <p>You can track your verification status on your dashboard:</p>
+                        <p><a href="${dashboardLink}" style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px;">View Verification Status</a></p>
+                        
+                        <p>We will notify you once the admin has reviewed your application.</p>
+                        <br>
+                        <p>Best regards,<br><strong>Team Eduroutez</strong></p>
+                    </div>
+                `;
+                try {
+                    await sendEmail(counselor.email, subject, message);
+                } catch (err) {
+                    console.error("Failed to send submission email:", err.message);
+                }
+            }
+
             return testResult;
         } catch (error) {
             throw error;
@@ -184,6 +216,8 @@ class CounselorTestService {
 
                         <p>You now have full access to your counselor dashboard. You can start managing your profile, setting up your availability, and interacting with students.</p>
                         
+                        <p>You can access your verification details here: <a href="${ServerConfig.FRONTEND_HOST}/dashboard/counselor-verification" style="color: #3498db;">Verification Dashboard</a></p>
+
                         <p>Your official certification is available here: <a href="${certificateUrl}" style="color: #3498db;">Download Certificate</a></p>
                         
                         <p>If you have any questions, feel free to reach out to our support team.</p>
@@ -197,7 +231,60 @@ class CounselorTestService {
                     console.log(`Verification email sent to ${updatedCounselor.email}`);
                 } catch (emailError) {
                     console.error("Failed to send verification email:", emailError.message);
-                    // We don't throw here to avoid failing the whole verification process if email fails
+                }
+            }
+
+            return updatedCounselor;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Admin: Reject Counselor
+    async rejectCounselor(counselorId, reason) {
+        try {
+            const counselor = await this.counselorRepository.getByid(counselorId);
+            if (!counselor) {
+                throw new AppError("Counselor not found", StatusCodes.NOT_FOUND);
+            }
+
+            console.log("Rejecting counselor:", counselorId);
+            const updatedCounselor = await this.counselorRepository.updateCounsellor(counselorId, {
+                verificationStatus: "rejected",
+                isVerified: false,
+                verifiedBadge: false,
+            });
+
+            // Send email to counselor about rejection
+            if (updatedCounselor.email) {
+                const subject = "Verification Update - Eduroutez";
+                const message = `
+                    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                        <h2 style="color: #e74c3c;">Verification Status Update</h2>
+                        <p>Hello ${updatedCounselor.firstname},</p>
+                        <p>Thank you for your interest in becoming a counselor on Eduroutez. We have reviewed your application and test results.</p>
+                        
+                        <p>Unfortunately, your verification has not been approved at this time.</p>
+                        
+                        <p>You can check more details on your dashboard: <a href="${ServerConfig.FRONTEND_HOST}/dashboard/counselor-verification" style="color: #e74c3c;">Verification Dashboard</a></p>
+
+                        ${reason ? `<div style="background-color: #fff5f5; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 5px solid #e74c3c;">
+                            <p style="margin: 0;"><strong>Reason:</strong> ${reason}</p>
+                        </div>` : ''}
+
+                        <p>You may review our requirements and try applying again in the future.</p>
+                        
+                        <p>If you have any questions or believe this was a mistake, please contact our support team.</p>
+                        
+                        <br>
+                        <p>Best regards,<br><strong>Team Eduroutez</strong></p>
+                    </div>
+                `;
+                try {
+                    await sendEmail(updatedCounselor.email, subject, message);
+                    console.log(`Rejection email sent to ${updatedCounselor.email}`);
+                } catch (emailError) {
+                    console.error("Failed to send rejection email:", emailError.message);
                 }
             }
 

@@ -165,6 +165,20 @@ export const verifyCounselor = async (req, res) => {
     }
 };
 
+// Superadmin: Reject Counselor
+export const rejectCounselor = async (req, res) => {
+    try {
+        const { reason } = req.body;
+        const response = await counselorTestService.rejectCounselor(req.params.id, reason);
+        SuccessResponse.data = response;
+        SuccessResponse.message = "Counselor verification rejected";
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.status(error.statusCode || 500).json(ErrorResponse);
+    }
+};
+
 // Counselor: Get Result
 export const getLatestTestResult = async (req, res) => {
     try {
