@@ -102,7 +102,7 @@ export default function AppSidebar({
             'Banner',
             'Help And Support'
           ] // Titles to exclude for 'counsellor'
-          : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar"]; // Default: no exclusions
+          : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar", "SMS Templates"]; // Default: no exclusions
 
     const filteredItems = navItems.filter(
       (item) => !excludedTitles.includes(item.title)
