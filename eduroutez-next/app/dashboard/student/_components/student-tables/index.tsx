@@ -16,9 +16,11 @@ export default function StudentTable({
   const { setPage } = useStudentTableFilters();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredData = data.filter(student =>
-    new RegExp(searchQuery, 'i').test(student.name)
-  );
+  const filteredData = Array.isArray(data)
+    ? data.filter(student =>
+        new RegExp(searchQuery, 'i').test(student.name)
+      )
+    : [];
 
   return (
     <div className="space-y-4 ">

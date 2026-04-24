@@ -34,7 +34,7 @@ import { UserNav } from './user-nav';
 import { useEffect } from 'react';
 import axiosInstance from '@/lib/axios';
 import { useQuery } from '@tanstack/react-query';
-import {Button} from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import logo from "@/public/logo.png";
 import TestNavbarNotification from './test-navbar-notification';
@@ -61,10 +61,11 @@ export default function AppSidebar({
     const role = localStorage.getItem('role');
     const excludedTitles =
       role === 'institute'
-        ? ['Institutes', 'Users','Refer and Earn', 'Blogs',
-            'Career','Review','Manage Pages','Subscriptions','Bulk Institute Upload','Help And Support','Earnings','Payouts', 'Streams','Redeem','Students', 'Sales','Media','Online counselling list','Online counselling','Slots'] // Titles to exclude for 'institute'
+        ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
+          'Career', 'Review', 'Reviews', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots', 'Queries',
+          'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars'] // Titles to exclude for 'institute'
         : role === 'counsellor'
-        ? [
+          ? [
             'Institutes',
             'Users',
             'Sales',
@@ -82,7 +83,7 @@ export default function AppSidebar({
             'Courses',
             'Streams',
             'Recruiter',
-            'Manage Pages', 
+            'Manage Pages',
             'Counselors',
             'Users',
             'Students',
@@ -96,9 +97,12 @@ export default function AppSidebar({
             'Bulk Institute Upload',
             'Online counselling list',
             'Webinars',
+            'Coupons',
+            'Webinar',
+            'Banner',
             'Help And Support'
           ] // Titles to exclude for 'counsellor'
-        : ['Online counselling','Slots','Subscription','Review','Profile','Support','Redeem',"Recruiter","Media"]; // Default: no exclusions
+          : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar"]; // Default: no exclusions
 
     const filteredItems = navItems.filter(
       (item) => !excludedTitles.includes(item.title)
@@ -143,7 +147,7 @@ export default function AppSidebar({
               <company.logo className="size-4" />
             </div> */}
             <div className="grid flex-1 text-left text-sm leading-tight">
-            <Image src={logo} alt="Logo" width={150} height={100} />
+              <Image src={logo} alt="Logo" width={150} height={100} />
               {/* <span className="truncate font-semibold">{company.name}</span>
               <span className="truncate text-xs">{company.plan}</span> */}
             </div>
@@ -175,7 +179,7 @@ export default function AppSidebar({
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub>
-                          {item.items?.map((subItem:any) => (
+                          {item.items?.map((subItem: any) => (
                             <SidebarMenuSubItem key={subItem.title}>
                               <SidebarMenuSubButton
                                 asChild
@@ -315,11 +319,11 @@ export default function AppSidebar({
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Button variant="ghost" className="relative flex items-center gap-2 px-4 py-2 hover:text-white transition-colors" onClick={() => window.location.href = 'https://eduroutez.com/'}>
-          <Image src="/homeIcon.png" 
-          width={20}
-          height={20}
-          alt="Visit Website" className="h-8 w-8" />
-        </Button>
+              <Image src="/homeIcon.png"
+                width={20}
+                height={20}
+                alt="Visit Website" className="h-8 w-8" />
+            </Button>
             <Breadcrumbs />
           </div>
           <div className=" hidden w-1/3 items-center gap-2 px-4 md:flex ">

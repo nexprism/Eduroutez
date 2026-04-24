@@ -15,10 +15,12 @@ export default function QuestionAnswerTable({
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter data using regex
-  const filteredData = data.filter((item) => {
-    const regex = new RegExp(searchQuery, 'i'); // 'i' for case-insensitive search
-    return regex.test(item.question); // Replace 'name' with the appropriate field to search
-  });
+  const filteredData = Array.isArray(data)
+    ? data.filter((item) => {
+        const regex = new RegExp(searchQuery, 'i'); // 'i' for case-insensitive search
+        return regex.test(item.question); // Replace 'name' with the appropriate field to search
+      })
+    : [];
 
   return (
     <div className="space-y-4">

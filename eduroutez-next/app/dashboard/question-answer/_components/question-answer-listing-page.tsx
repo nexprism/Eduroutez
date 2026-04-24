@@ -66,10 +66,10 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
               </Button>
             </div>
             <Separator />
-            {data  ? (
+            {data ? (
               <QuestionAnswerTable
-                data={userRole === 'SUPER_ADMIN' ? data?.result : data}
-                totalData={data.totalDocuments}
+                data={Array.isArray(data) ? data : (data?.result || [])}
+                totalData={data?.totalDocuments || (Array.isArray(data) ? data.length : 0)}
               />
             ) : (
               <div>No Frequently Asked Questions found.</div>
