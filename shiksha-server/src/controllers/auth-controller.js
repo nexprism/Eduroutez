@@ -122,26 +122,56 @@ export const getCitiesByState = async (req, res) => {
 //sendOtp 
 export async function sendOtp(req, res) {
   try {
-    const user = await userService.getUserByEmail(req.body.email);
+    const isForgotPassword = req.body.type === "forgot-password" || req.body.isForgotPassword;
     const contact_number = req.body.contact_number || req.body.phoneNo || req.body.phone || req.body.phone_number;
-    if (user) {
+    
+    let user = null;
+    if (req.body.email && contact_number && isForgotPassword) {
+      // For forgot password, if both are provided, ensure they belong to the same user
+      user = await userService.userRepository.findBy({ 
+        email: req.body.email, 
+        contact_number: contact_number.toString() 
+      });
+    } else if (req.body.email) {
+      user = await userService.getUserByEmail(req.body.email);
+    } else if (contact_number) {
+      user = await userService.userRepository.findBy({ contact_number: contact_number.toString() });
+    }
+
+    if (!isForgotPassword && user) {
       return res.status(400).json({
-        message: "Email already exists",
+        message: "User already exists",
         data: {},
         success: false,
         err: {},
       });
     }
-    // console.log('user', user);
-    //contact number length check
-    if (!contact_number || contact_number.toString().length !== 10) {
 
-      return res.status(400).json({
-        message: "Contact number should be of 10 digits",
+    if (isForgotPassword && !user) {
+      return res.status(404).json({
+        message: "User not found with matching details",
         data: {},
         success: false,
         err: {},
       });
+    }
+
+    // Use the registered phone number if only email was provided for forgot password
+    const final_contact_number = contact_number || (isForgotPassword && user?.contact_number);
+
+    //contact number length check
+    if (!final_contact_number || final_contact_number.toString().length !== 10) {
+      // If we have an email, we can send OTP via email instead of failing
+      if (isForgotPassword && req.body.email) {
+        // We'll handle email OTP in the next step
+      } else {
+        return res.status(400).json({
+          message: "Contact number should be of 10 digits",
+          data: {},
+          success: false,
+          err: {},
+        });
+      }
     }
 
     if (req.body.referal_Code) {
@@ -157,10 +187,10 @@ export async function sendOtp(req, res) {
     }
 
     var otp = Math.floor(100000 + Math.random() * 900000);
-    if (contact_number == "7014628523") {
+    if (final_contact_number == "7014628523") {
       otp = 123456;
     }
-    const response = await userService.sendOtp(otp, contact_number);
+    const response = await userService.sendOtp(otp, final_contact_number, req.body.email);
     if (!response.data.return)
       return res.status(400).json({
         message: response.data.message,
@@ -637,7 +667,7 @@ export const sendUserPasswordResetEmail = async (req, res) => {
     if (!email) {
       return res.status(400).json({ status: "failed", message: "Email field is required" });
     }
-    userService.sendUserPasswordResetEmail(email);
+    await userService.sendUserPasswordResetEmail(email);
     // Send success response
     res.status(200).json({ status: "success", message: "Password reset email sent. Please check your email." });
   } catch (error) {
@@ -669,7 +699,7 @@ export const userPasswordReset = async (req, res) => {
       return res.status(400).json({ status: "failed", message: "Password must contain an uppercase letter, a lowercase letter, and a number or special character" });
     }
 
-    userService.userPasswordReset(id, token, password, password_confirmation);
+    await userService.userPasswordReset(id, token, password, password_confirmation);
     // Send success response
     res.status(200).json({ status: "success", message: "Password reset successfully" });
   } catch (error) {
@@ -677,5 +707,18 @@ export const userPasswordReset = async (req, res) => {
       return res.status(400).json({ status: "failed", message: "Token expired. Please request a new password reset link." });
     }
     return res.status(500).json({ status: "failed", message: "Unable to reset password. Please try again later." });
+  }
+};
+
+export const resetPasswordWithOtp = async (req, res) => {
+  try {
+    const { phone, otp, password, email } = req.body;
+    if (!phone || !otp || !password) {
+      return res.status(400).json({ status: "failed", message: "Phone, OTP and Password are required" });
+    }
+    await userService.resetPasswordWithOtp(phone, otp, password, email);
+    res.status(200).json({ status: "success", message: "Password reset successfully" });
+  } catch (error) {
+    res.status(500).json({ status: "failed", message: error.message });
   }
 };

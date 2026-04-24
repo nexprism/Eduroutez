@@ -146,55 +146,85 @@ class UserService {
   //verifyOtp
   async verifyOtp(otp, phone) {
     try {
-      // console.log('phone',phone)
-      // const cacheOtps = otpCache.set(phone,otp);
-      // console.log('set cacheOtps',cacheOtps)
-      //get all otpcache
-      // console.log('otpCache',otpCache)
+      const cache_Otp = otpCache.get(phone);
 
-      if (otpCache.data) {
-        var cache_Otp = otpCache.get(phone);
+      console.log('Verifying OTP - Provided:', otp, 'Cached:', cache_Otp, 'Phone:', phone);
 
-
-        console.log('otp', otp)
-        console.log('cacheOtp', cache_Otp)
-        if (otp == cache_Otp) {
-          return true;
-        } else {
-          return false;
-
-        }
-      } else {
-        return false;
+      if (cache_Otp && otp.toString() === cache_Otp.toString()) {
+        return true;
       }
+      return false;
     } catch (error) {
+      console.error('Error in verifyOtp:', error);
       throw error;
     }
   }
 
   //sendOtp
-  async sendOtp(otp, phone) {
+  async sendOtp(otp, phone, email = null) {
     try {
-      if (phone == "7014628523") {
-        this.saveOtp(otp, phone);
-        return { data: { return: true, message: "Static OTP bypassed SMS gateway successfully" } };
+      let smsResponse = { data: { return: false, message: "SMS not sent" } };
+      let emailSent = false;
+
+      // 1. Send SMS if phone is available
+      if (phone) {
+        if (phone == "7014628523") {
+          this.saveOtp(otp, phone);
+          smsResponse = { data: { return: true, message: "Static OTP bypassed SMS gateway successfully" } };
+        } else {
+          var sender_id = 'Edurtz';
+          var message = '179135';
+          var variables_values = otp;
+          var route = 'dlt';
+          var numbers = phone;
+          var schedule_time = "";
+          var url = 'https://www.fast2sms.com/dev/bulkV2?authorization=' + process.env.FAST2SMS_API_KEY + '&route=' + route + '&sender_id=' + sender_id + '&message=' + message + '&variables_values=' + variables_values + '&numbers=' + numbers + '&schedule_time=' + schedule_time;
+          
+          const response = await axios.get(url);
+          smsResponse = response;
+          if (response.data.return === true) {
+            this.saveOtp(otp, phone);
+            console.log('OTP sent successfully via SMS', otp);
+          }
+        }
       }
 
-      var sender_id = 'Edurtz';
-      var message = '179135';
-      var variables_values = otp;
-      var route = 'dlt';
-      var numbers = phone;
-      var schedule_time = "";
-      var url = 'https://www.fast2sms.com/dev/bulkV2?authorization=' + process.env.FAST2SMS_API_KEY + '&route=' + route + '&sender_id=' + sender_id + '&message=' + message + '&variables_values=' + variables_values + '&numbers=' + numbers + '&schedule_time=' + schedule_time;
-      const response = await axios.get(url);
-      if (response.data.return === true) {
-        //save otp in node cache
-        this.saveOtp(otp, phone);
-        console.log('otp sent successfully', otp)
-
+      // 2. Send Email if email is available
+      if (email) {
+        try {
+          // Also cache OTP by email so it can be verified either way
+          this.saveOtp(otp, email); 
+          
+          const subject = "Your Eduroutez OTP";
+          const html = `
+            <div style="font-family: Arial, sans-serif; color: #333;">
+              <h2>Password Reset OTP</h2>
+              <p>Your One-Time Password (OTP) for password reset is:</p>
+              <h1 style="color: #b82025; font-size: 32px; letter-spacing: 5px;">${otp}</h1>
+              <p>This OTP is valid for 90 seconds. Please do not share it with anyone.</p>
+            </div>
+          `;
+          await sendEmail(email, subject, html);
+          emailSent = true;
+          console.log('OTP sent successfully via Email', otp);
+        } catch (emailError) {
+          console.error("Error sending OTP email:", emailError.message);
+        }
       }
-      return response;
+
+      // Return success if either SMS or Email worked
+      if (smsResponse.data.return || emailSent) {
+        return { 
+          data: { 
+            return: true, 
+            message: "OTP sent successfully",
+            smsSent: smsResponse.data.return,
+            emailSent: emailSent
+          } 
+        };
+      }
+
+      return smsResponse;
     } catch (error) {
       throw error;
     }
@@ -361,7 +391,7 @@ class UserService {
       const user = await this.getUserByEmail(email);
 
       if (!user) {
-        return res.status(404).json({ status: "failed", message: "Email doesn't exist" });
+        throw new Error("Email doesn't exist");
       }
       // Generate token for password reset
       const token = await Token.generateTokenForResetPassword(user);
@@ -377,18 +407,74 @@ class UserService {
 
   async userPasswordReset(id, token, password) {
     try {
-      // Find user by ID
-      const user = this.userRepository.get(id);
+      const user = await this.userRepository.getById(id);
       if (!user) {
-        return res.status(404).json({ status: "failed", message: "User not found" });
+        throw new Error("User not found");
       }
 
-      Token.verifyResetToken(token);
+      const decoded = Token.verifyResetToken(token);
+      
+      // Security check: Verify the token belongs to the user
+      if (decoded.userID && decoded.userID.toString() !== id.toString()) {
+        throw new Error("Invalid token for this user");
+      }
+
+      console.log('Resetting password via token for user:', id);
 
       const hashedPassword = this.hashPassword(password);
-
-      await this.userRepository.update(id, { password: hashedPassword });
+      const updatedUser = await this.userRepository.update(id, { password: hashedPassword });
+      
+      if (!updatedUser) {
+        throw new Error("Failed to update password");
+      }
+      
+      console.log('Password successfully reset via token for user:', id);
     } catch (error) {
+      console.error('Error in userPasswordReset:', error.message);
+      throw error;
+    }
+  }
+
+  async resetPasswordWithOtp(phoneOrEmail, otp, newPassword, email) {
+    try {
+      let query = {};
+      
+      // 1. Identify the user first to get their registered phone number
+      if (email) {
+        query.email = email;
+      } else if (phoneOrEmail.includes('@')) {
+        query.email = phoneOrEmail;
+      } else {
+        // If it's just a phone number and multiple users have it, 
+        // we'll have to pick one, but it's better to use email to disambiguate.
+        query.contact_number = phoneOrEmail.toString();
+      }
+
+      const user = await this.userRepository.findBy(query);
+      if (!user) {
+        throw new Error("User not found with provided identifier");
+      }
+
+      // 2. Use the user's registered phone number to verify the OTP
+      const phone = user.contact_number;
+      const isVerified = await this.verifyOtp(otp, phone);
+      if (!isVerified) {
+        throw new Error("Invalid OTP");
+      }
+
+      console.log('Resetting password for user:', user._id, 'Email:', user.email);
+      
+      const hashedPassword = this.hashPassword(newPassword);
+      const updatedUser = await this.userRepository.update(user._id, { password: hashedPassword });
+      
+      if (!updatedUser) {
+        throw new Error("Failed to update password in database");
+      }
+      
+      console.log('Password successfully updated for user:', updatedUser._id);
+      return updatedUser;
+    } catch (error) {
+      console.error('Error in resetPasswordWithOtp:', error.message);
       throw error;
     }
   }
