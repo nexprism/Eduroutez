@@ -722,3 +722,49 @@ export const resetPasswordWithOtp = async (req, res) => {
     res.status(500).json({ status: "failed", message: error.message });
   }
 };
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ status: "failed", message: "ID Token is required" });
+    }
+    const response = await userService.googleLogin(idToken, res);
+    return res.status(200).json({
+      success: true,
+      message: "Successfully logged in with Google",
+      data: response,
+      err: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+      data: {},
+      success: false,
+      err: error,
+    });
+  }
+};
+
+export const facebookLogin = async (req, res) => {
+  try {
+    const { accessToken } = req.body;
+    if (!accessToken) {
+      return res.status(400).json({ status: "failed", message: "Access Token is required" });
+    }
+    const response = await userService.facebookLogin(accessToken, res);
+    return res.status(200).json({
+      success: true,
+      message: "Successfully logged in with Facebook",
+      data: response,
+      err: {},
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+      data: {},
+      success: false,
+      err: error,
+    });
+  }
+};

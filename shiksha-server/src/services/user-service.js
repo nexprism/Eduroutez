@@ -1,9 +1,11 @@
 import { ServerConfig } from "../config/index.js";
+import { OAuth2Client } from "google-auth-library";
 import { EmailVerificationRepository, UserRepository, CounselorRepository } from "../repository/index.js";
 import { sendEmail } from "../utils/Email/email.js";
 import { Token } from "../utils/index.js";
 import bcrypt from "bcrypt";
 import axios from "axios";
+import randomstring from "randomstring";
 import NodeCache from "node-cache";
 const otpCache = new NodeCache({ stdTTL: 90 }); // OTP expires in 90 seconds
 
@@ -13,6 +15,11 @@ class UserService {
     this.userRepository = new UserRepository();
     this.emailVerificationRepository = new EmailVerificationRepository();
     this.counselorRepository = new CounselorRepository();
+    this.googleClient = new OAuth2Client(ServerConfig.GOOGLE_CLIENT_ID);
+  }
+
+  generateRandomPassword(length = 16) {
+    return randomstring.generate(length);
   }
 
   hashPassword(password) {
@@ -476,6 +483,76 @@ class UserService {
     } catch (error) {
       console.error('Error in resetPasswordWithOtp:', error.message);
       throw error;
+    }
+  }
+
+  async googleLogin(idToken, res) {
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: idToken,
+        audience: ServerConfig.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      const { email, name, picture } = payload;
+
+      let user = await this.getUserByEmail(email);
+
+      if (!user) {
+        // Create new user if not exists
+        const randomPassword = this.generateRandomPassword();
+        user = await this.userRepository.create({
+          email,
+          name,
+          image: picture,
+          password: this.hashPassword(randomPassword),
+          is_verified: true,
+          role: "student", // Default role for social signup
+        });
+      }
+
+      const { accessToken, refreshToken, accessTokenExp, refreshTokenExp } = await Token.generateTokens(user);
+      Token.setTokensCookies(res, accessToken, refreshToken, accessTokenExp, refreshTokenExp);
+
+      return { accessToken, refreshToken, accessTokenExp, refreshTokenExp, user };
+    } catch (error) {
+      console.error("Google Login Error:", error.message);
+      throw new Error("Google authentication failed");
+    }
+  }
+
+  async facebookLogin(accessToken, res) {
+    try {
+      // Verify Facebook token
+      const fbUrl = `https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${accessToken}`;
+      const response = await axios.get(fbUrl);
+      const { email, name, picture } = response.data;
+
+      if (!email) {
+        throw new Error("Facebook account must have an email associated with it.");
+      }
+
+      let user = await this.getUserByEmail(email);
+
+      if (!user) {
+        // Create new user if not exists
+        const randomPassword = this.generateRandomPassword();
+        user = await this.userRepository.create({
+          email,
+          name,
+          image: picture?.data?.url,
+          password: this.hashPassword(randomPassword),
+          is_verified: true,
+          role: "student",
+        });
+      }
+
+      const { accessToken: edAccessToken, refreshToken, accessTokenExp, refreshTokenExp } = await Token.generateTokens(user);
+      Token.setTokensCookies(res, edAccessToken, refreshToken, accessTokenExp, refreshTokenExp);
+
+      return { accessToken: edAccessToken, refreshToken, accessTokenExp, refreshTokenExp, user };
+    } catch (error) {
+      console.error("Facebook Login Error:", error.message);
+      throw new Error("Facebook authentication failed");
     }
   }
 }

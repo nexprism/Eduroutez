@@ -2,7 +2,7 @@ import express from "express";
 import { EventEmitter } from "events";
 EventEmitter.defaultMaxListeners = 20; ``
 
-import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset, getCountries, getStatesByCountry, getCitiesByState, getStatesCities, sendOtp, getStateCityById, verifyOtp, resetPasswordWithOtp } from "../../controllers/auth-controller.js";
+import { signup, verifyEmail, login, userProfile, logout, changeUserPassword, sendUserPasswordResetEmail, userPasswordReset, getCountries, getStatesByCountry, getCitiesByState, getStatesCities, sendOtp, getStateCityById, verifyOtp, resetPasswordWithOtp, googleLogin, facebookLogin } from "../../controllers/auth-controller.js";
 import accessTokenAutoRefresh from "../../middlewares/accessTokenAutoRefresh.js";
 import passport from "passport";
 import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from "../../controllers/coupon-controller.js";
@@ -63,6 +63,8 @@ router.post("/change-password", accessTokenAutoRefresh, passport.authenticate("j
 router.post("/reset-password-link", sendUserPasswordResetEmail);
 router.post("/reset-password/:id/:token", userPasswordReset);
 router.post("/reset-password-otp", resetPasswordWithOtp);
+router.post("/google-login", googleLogin);
+router.post("/facebook-login", facebookLogin);
 
 /**
  * subscription routes
