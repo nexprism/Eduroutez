@@ -244,11 +244,9 @@ class InstituteRepository extends CrudRepository {
       let institute = await Institute.findOne({ [field]: value });
 
         console.log('instituteplan',institute);
-      if (institute.plan && institute.reviews && institute.plan != null && institute.reviews != null) {
+      if (institute && institute.plan && institute.reviews && institute.plan != null && institute.reviews != null) {
         institute = await Institute.findOne({ [field]: value }).populate("plan").populate("reviews");
       }
-
-      
 
       return institute;
     }

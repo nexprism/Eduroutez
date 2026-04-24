@@ -18,7 +18,7 @@ class CourseService {
   }
   async getAll(query) {
     try {
-      const { page = 1, limit = 10000, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 10000, filters = "{}", searchFields = "{}", sort = "{}", search = "" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -43,6 +43,12 @@ class CourseService {
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
+      
+      // Add top-level search parameter support for courseTitle
+      if (search) {
+        searchConditions.push({ courseTitle: { $regex: search, $options: "i" } });
+      }
+
       for (const [field, term] of Object.entries(parsedSearchFields)) {
         searchConditions.push({ [field]: { $regex: term, $options: "i" } });
       }

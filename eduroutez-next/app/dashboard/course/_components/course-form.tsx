@@ -200,10 +200,9 @@ export default function CreateCourse() {
       form.setValue('instituteCategory', instituteId);
     }
 
-    if (userRole == 'SUPER_ADMIN') {
-      setIsInstituteRole(true);
+    if (userRole === 'SUPER_ADMIN') {
+      setIsInstituteRole(false);
       // Reset the institute category if the user is an admin
-     
     }
   }, []);
 
@@ -320,6 +319,7 @@ export default function CreateCourse() {
         params: {
           searchFields: JSON.stringify({}),
           sort: JSON.stringify({ createdAt: 'desc' }),
+          limit: 1000
         }
       });
       return response.data;

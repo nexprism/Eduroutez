@@ -39,7 +39,7 @@ class CounselorService {
 
   async getAll(query) {
     try {
-      const { page = 1, limit = 1000000, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 1000000, filters = "{}", searchFields = "{}", sort = "{}", search = "" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -59,6 +59,13 @@ class CounselorService {
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
+      
+      // Add top-level search parameter support
+      if (search) {
+        searchConditions.push({ firstname: { $regex: search, $options: "i" } });
+        searchConditions.push({ lastname: { $regex: search, $options: "i" } });
+      }
+
       for (const [field, term] of Object.entries(parsedSearchFields)) {
         searchConditions.push({ [field]: { $regex: term, $options: "i" } });
       }

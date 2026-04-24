@@ -88,7 +88,8 @@ escapeRegex(str) {
       filters = "{}",
       searchFields = "{}",
       sort = "{}",
-      select = "{}"
+      select = "{}",
+      search = ""
     } = query;
 
     const pageNum = parseInt(page) || 1;
@@ -229,6 +230,11 @@ escapeRegex(str) {
 
     // 🔧 Escape regex in search conditions
     const searchConditions = [];
+
+    // Add top-level search parameter support
+    if (search) {
+      searchConditions.push({ instituteName: { $regex: this.escapeRegex(search), $options: "i" } });
+    }
     for (const [field, term] of Object.entries(parsedSearchFields)) {
       const escapedTerm = this.escapeRegex(term);
       if (field === 'courseTitle') {
@@ -335,8 +341,12 @@ escapeRegex(str) {
     // Get the institute model
     const instituteModel = await this.instituteRepository.getByField(id, field);
     console.log('instituteModel',instituteModel);
+    
+    if (!instituteModel) {
+      throw new AppError("Institute not found", StatusCodes.NOT_FOUND);
+    }
+
     // Convert model to plain JavaScript object
-    // Different ORMs have different methods to do this:
     let institute;
 
     // For Mongoose
@@ -357,12 +367,10 @@ escapeRegex(str) {
     }
 
     // Update views by 1
-    const views = institute.views + 1;
-    await this.instituteRepository.update(institute.id, { views });
+    const views = (institute.views || 0) + 1;
+    await this.instituteRepository.update(institute._id, { views });
 
-    console.log('institute views',institute.views);
-
-    
+    console.log('institute views', views);
 
     return institute;
   }
