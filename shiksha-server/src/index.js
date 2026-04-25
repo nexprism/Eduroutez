@@ -19,18 +19,40 @@ import { sendEmail } from "./utils/Email/email.js";
 const app = express();
 
 const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "https://admin.eduroutez.com",
-    "https://eduroutez.com",
-  ],
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://admin.eduroutez.com",
+      "https://www.admin.eduroutez.com",
+      "https://eduroutez.com",
+      "https://www.eduroutez.com",
+      "https://eduroutez.nexprism.in",
+    ];
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('eduroutez.com') || origin.endsWith('nexprism.in')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: [
+    "Origin",
+    "X-Requested-With",
+    "Content-Type",
+    "Accept",
+    "Authorization",
+    "x-access-token",
+    "x-refresh-token",
+  ],
   optionsSuccessStatus: 200,
+  maxAge: 86400,
 };
 
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(compression()); // ✅ Enable gzip compression
 app.use(express.json());
 app.use(cookieParser());
