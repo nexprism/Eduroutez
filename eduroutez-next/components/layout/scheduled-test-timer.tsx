@@ -96,7 +96,7 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
             </div>
           </div>
 
-          <div className="w-full lg:w-auto flex flex-col items-center">
+          <div className="w-full lg:w-auto flex flex-col items-center gap-6">
             {isExpired ? (
               <div className="bg-gradient-to-b from-red-600 to-red-700 p-8 rounded-[2rem] text-center min-w-[320px] flex flex-col items-center gap-6 shadow-2xl shadow-red-500/30 border border-red-400/30 animate-pulse">
                 <div className="p-4 bg-white/10 rounded-full">
@@ -110,16 +110,25 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
                    onClick={() => router.push('/dashboard/test-benefits')}
                    className="w-full bg-white text-red-600 hover:bg-slate-50 font-black h-14 rounded-2xl shadow-xl shadow-black/10 transition-all hover:scale-105 active:scale-95 border-none text-lg group/btn"
                  >
-                   Start Assessment
+                   Start Assessment Now
                    <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
                  </Button>
               </div>
             ) : (
-              <div className="flex gap-4 md:gap-6">
-                <TimeUnit value={timeLeft.days} label="Days" />
-                <TimeUnit value={timeLeft.hours} label="Hours" />
-                <TimeUnit value={timeLeft.minutes} label="Mins" />
-                <TimeUnit value={timeLeft.seconds} label="Secs" />
+              <div className="flex flex-col items-center gap-6">
+                <div className="flex gap-4 md:gap-6">
+                  <TimeUnit value={timeLeft.days} label="Days" />
+                  <TimeUnit value={timeLeft.hours} label="Hours" />
+                  <TimeUnit value={timeLeft.minutes} label="Mins" />
+                  <TimeUnit value={timeLeft.seconds} label="Secs" />
+                </div>
+                <Button 
+                   onClick={() => router.push('/dashboard/test-benefits')}
+                   className="w-full bg-red-600 hover:bg-red-700 text-white font-black h-14 px-8 rounded-2xl shadow-xl shadow-red-900/20 transition-all hover:scale-105 active:scale-95 border-none text-lg group/btn"
+                 >
+                   Start Assessment Now
+                   <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
+                 </Button>
               </div>
             )}
           </div>
