@@ -363,18 +363,20 @@ const Dashboard = () => {
             <p className="text-muted-foreground">Monitor your performance and metrics.</p>
           </div>
         </div>
-        {/* <Banner
-          status={verificationStatus}
-          onPay={handlePay}
-          onSchedule={handleSchedule}
-          scheduledTestDate={counselorData?.scheduledTestDate}
-          scheduledTestSlot={counselorData?.scheduledTestSlot}
-          verifiedBadge={verifiedBadge}
-        /> */}
+
+        {verificationStatus === 'test_scheduled' && (counselorData?.scheduledTestDate || (typeof window !== 'undefined' && localStorage.getItem('scheduledTestDate'))) && (
+          <ScheduledTestTimer 
+            date={counselorData?.scheduledTestDate || localStorage.getItem('scheduledTestDate') || ''} 
+            slot={counselorData?.scheduledTestSlot || localStorage.getItem('scheduledTestSlot') || undefined} 
+          />
+        )}
         <CounsellorTrustCard 
           onPay={handlePay} 
           onSchedule={handleSchedule} 
-          showButtons={!verifiedBadge && !['test_pending', 'test_scheduled', 'verification_in_progress', 'rejected'].includes(verificationStatus)}
+          status={verificationStatus}
+          scheduledTestDate={counselorData?.scheduledTestDate}
+          scheduledTestSlot={counselorData?.scheduledTestSlot}
+          verifiedBadge={verifiedBadge}
         />
         <ScheduleTestModal open={showScheduleModal} onClose={() => setShowScheduleModal(false)} onSchedule={handleScheduleSubmit} />
         {/* Test and guidance are now on separate pages. No inline rendering here. */}

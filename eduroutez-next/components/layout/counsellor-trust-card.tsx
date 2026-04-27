@@ -1,18 +1,70 @@
-'use client'
+"use client"
+
 
 import React from 'react';
-import { ShieldCheck, Award, CheckCircle2, UserCheck, Star, ArrowRight, Calendar } from 'lucide-react';
+import { ShieldCheck, Award, CheckCircle2, Star, ArrowRight, Calendar, Clock, Timer } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 interface CounsellorTrustCardProps {
   onPay?: () => void;
   onSchedule?: () => void;
-  showButtons?: boolean;
+  status?: string;
+  scheduledTestDate?: string;
+  scheduledTestSlot?: string;
+  verifiedBadge?: boolean;
 }
 
-const CounsellorTrustCard: React.FC<CounsellorTrustCardProps> = ({ onPay, onSchedule, showButtons = true }) => {
+const CounsellorTrustCard: React.FC<CounsellorTrustCardProps> = ({ 
+  onPay, 
+  onSchedule, 
+  status = 'not_applied',
+  scheduledTestDate,
+  scheduledTestSlot,
+  verifiedBadge
+}) => {
+  const router = useRouter();
+  const [timeLeft, setTimeLeft] = React.useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+    if (status !== 'test_scheduled' || !scheduledTestDate) return;
+
+    const calculateTimeLeft = () => {
+      let target = new Date(scheduledTestDate).getTime();
+      if (scheduledTestSlot && scheduledTestSlot.includes(':')) {
+        const [hours, minutes] = scheduledTestSlot.split(':').map(Number);
+        const testDate = new Date(scheduledTestDate);
+        testDate.setHours(hours, minutes, 0, 0);
+        target = testDate.getTime();
+      }
+
+      const now = new Date().getTime();
+      const difference = target - now;
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(timer);
+  }, [status, scheduledTestDate, scheduledTestSlot]);
+
+  const showInitialButtons = !verifiedBadge && !['test_pending', 'test_scheduled', 'verification_in_progress', 'rejected'].includes(status);
+  const isExpired = isClient && status === 'test_scheduled' && scheduledTestDate && (new Date().getTime() > new Date(scheduledTestDate).getTime());
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -44,19 +96,17 @@ const CounsellorTrustCard: React.FC<CounsellorTrustCardProps> = ({ onPay, onSche
 
               <div className="space-y-6">
                 <h2 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.1] tracking-tight">
-                  Get Certified & <br />
+                  {verifiedBadge ? 'You are an' : 'Get Certified &'} <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
-                    Build Student Trust
+                    {verifiedBadge ? 'Eduroutez Certified Expert' : 'Build Student Trust'}
                   </span>
                 </h2>
                 
                 <p className="text-slate-600 text-lg md:text-xl leading-relaxed font-medium max-w-2xl">
-                  To maintain quality and trust on our platform, counselors are required to take a simple assessment test. 
-                  Once you successfully complete the test, you will receive a 
-                  <span className="text-slate-900 font-bold px-1.5 py-0.5 bg-red-50 rounded-md mx-1 border border-red-100/50">Verified Badge</span> 
-                  on your profile and a 
-                  <span className="text-slate-900 font-bold px-1.5 py-0.5 bg-orange-50 rounded-md mx-1 border border-orange-100/50">certificate</span> 
-                  recognizing you as a Certified Counselor on Eduroutez.
+                  {verifiedBadge 
+                    ? 'Congratulations! Your profile is verified. You now have the verified badge and certificate on your profile.'
+                    : 'To maintain quality and trust on our platform, counselors are required to take a simple assessment test. Once you successfully complete the test, you will receive a Verified Badge and a certificate.'
+                  }
                 </p>
               </div>
 
@@ -83,11 +133,14 @@ const CounsellorTrustCard: React.FC<CounsellorTrustCardProps> = ({ onPay, onSche
                     <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                   </div>
                   <p className="text-slate-700 text-sm font-semibold">
-                    This helps students to interact freely with trusted and qualified experts.
+                    {verifiedBadge 
+                      ? 'Your verified status helps students trust your expertise more.'
+                      : 'This helps students to interact freely with trusted and qualified experts.'
+                    }
                   </p>
                 </div>
 
-                {showButtons && (
+                {showInitialButtons && (
                   <div className="flex flex-wrap items-center gap-4 pt-2">
                     <Button
                       onClick={onPay}
@@ -106,6 +159,37 @@ const CounsellorTrustCard: React.FC<CounsellorTrustCardProps> = ({ onPay, onSche
                     </Button>
                   </div>
                 )}
+
+                {status === 'test_pending' && !verifiedBadge && (
+                  <div className="pt-2">
+                    <Button
+                      onClick={() => router.push('/dashboard/test-benefits')}
+                      className="bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-200 border-none transition-all hover:translate-y-[-4px] h-14 px-10 rounded-2xl font-black text-lg group/btn"
+                    >
+                      Start Assessment Now
+                      <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
+                    </Button>
+                  </div>
+                )}
+
+                {status === 'test_scheduled' && !verifiedBadge && (
+                  <div className="pt-2">
+                    <Button
+                      onClick={() => router.push('/dashboard/test-benefits')}
+                      className="bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-200 border-none transition-all hover:translate-y-[-4px] h-14 px-10 rounded-2xl font-black text-lg group/btn"
+                    >
+                      Start Assessment Now
+                      <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
+                    </Button>
+                  </div>
+                )}
+
+                {verifiedBadge && (
+                  <div className="flex items-center gap-3 px-6 py-4 bg-emerald-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-200 w-fit">
+                    <CheckCircle2 className="w-6 h-6" />
+                    Verified Profile
+                  </div>
+                )}
               </div>
             </div>
 
@@ -118,23 +202,23 @@ const CounsellorTrustCard: React.FC<CounsellorTrustCardProps> = ({ onPay, onSche
                   
                   <div className="space-y-6 flex flex-col items-center w-full">
                     <div className="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center relative overflow-hidden border-4 border-white shadow-inner">
-                      <div className="absolute inset-0 bg-red-500/10 rounded-full animate-ping" />
+                      <div className={`absolute inset-0 bg-red-500/10 rounded-full ${verifiedBadge ? '' : 'animate-ping'}`} />
                       <img 
                         src="https://api.dicebear.com/7.x/notionists/svg?seed=Felix&backgroundColor=ffdfbf" 
                         alt="Counselor Avatar"
                         className="w-full h-full object-cover relative z-10 scale-125"
                       />
                     </div>
-                    <div className="space-y-2 w-full">
+                    <div className="space-y-2 w-full text-center">
                       <div className="h-3 w-3/4 bg-slate-100 rounded-full mx-auto" />
                       <div className="h-3 w-1/2 bg-slate-50 rounded-full mx-auto" />
                     </div>
                   </div>
 
                   <div className="w-full space-y-4">
-                    <div className="flex items-center justify-center gap-2 py-3 px-4 bg-red-600 text-white rounded-xl font-black text-sm shadow-lg shadow-red-200">
+                    <div className={`flex items-center justify-center gap-2 py-3 px-4 ${verifiedBadge ? 'bg-emerald-600' : 'bg-red-600'} text-white rounded-xl font-black text-sm shadow-lg shadow-red-200`}>
                       <ShieldCheck className="w-4 h-4" />
-                      VERIFIED COUNSELOR
+                      {verifiedBadge ? 'VERIFIED EXPERT' : 'VERIFIED COUNSELOR'}
                     </div>
                     <div className="flex items-center justify-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-tighter">
                       <Award className="w-3 h-3" />
@@ -167,5 +251,14 @@ const CounsellorTrustCard: React.FC<CounsellorTrustCardProps> = ({ onPay, onSche
     </motion.div>
   );
 };
+
+function TimeUnit({ value, label }: { value: number, label: string }) {
+  return (
+    <div className="flex flex-col items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 min-w-[55px]">
+      <span className="text-xl font-black tabular-nums text-slate-900">{value.toString().padStart(2, '0')}</span>
+      <span className="text-[8px] font-black uppercase tracking-wider text-red-600">{label}</span>
+    </div>
+  );
+}
 
 export default CounsellorTrustCard;

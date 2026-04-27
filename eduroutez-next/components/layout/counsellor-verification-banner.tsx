@@ -154,7 +154,7 @@ const Banner: React.FC<BannerProps> = ({ status: propStatus, onPay, onSchedule, 
         {status === 'test_pending' && (
           <Button
             className="bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-200 border-none transition-all hover:translate-y-[-4px] font-black h-14 px-10 rounded-2xl text-lg group/btn"
-            onClick={() => router.push('/dashboard/test-benefits')}
+            onClick={() => router.push('/dashboard/counselor-test')}
           >
             Start Assessment Now
             <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
