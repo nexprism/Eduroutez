@@ -52,64 +52,61 @@ export default function AppSidebar({
   children: React.ReactNode;
 }) {
   const [mounted, setMounted] = React.useState(false);
-  const [filteredNavItems, setFilteredNavItems] = React.useState(navItems);
   const pathname = usePathname();
+
+  // Read role synchronously on client and compute filtered nav items immediately
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
-  // Only render after first client-side mount
-  useEffect(() => {
-    setMounted(true);
-    const role = localStorage.getItem('role');
-    const excludedTitles =
-      role === 'institute'
-        ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
-          'Career', 'Review', 'Reviews', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots', 'Queries',
-          'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars'] // Titles to exclude for 'institute'
-        : role === 'counsellor'
-          ? [
-            'Institutes',
-            'Users',
-            'Sales',
-            'Earnings',
-            'Queries',
-            'Promotions',
-            'Refer and Earn',
-            'FAQs',
-            'News',
-            'Reviews',
-            'Streams',
-            'Media',
-            'Online counselling',
-            'Subscription',
-            'Courses',
-            'Streams',
-            'Recruiter',
-            'Manage Pages',
-            'Counselors',
-            'Users',
-            'Students',
-            'Email Templates',
-            'SMS Templates',
-            'Media',
-            'Promotions',
-            'Blogs',
-            'Career',
-            'Subscriptions',
-            'Bulk Institute Upload',
-            'Online counselling list',
-            'Webinars',
-            'Coupons',
-            'Webinar',
-            'Banner',
-            'Help And Support'
-          ] // Titles to exclude for 'counsellor'
-          : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar", "SMS Templates"]; // Default: no exclusions
 
-    const filteredItems = navItems.filter(
-      (item) => !excludedTitles.includes(item.title)
-    );
+  const excludedTitles =
+    role === 'institute'
+      ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
+        'Career', 'Review', 'Reviews', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots', 'Queries',
+        'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars']
+      : role === 'counsellor'
+        ? [
+          'Institutes',
+          'Users',
+          'Sales',
+          'Earnings',
+          'Queries',
+          'Promotions',
+          'Refer and Earn',
+          'FAQs',
+          'News',
+          'Reviews',
+          'Streams',
+          'Media',
+          'Online counselling',
+          'Subscription',
+          'Courses',
+          'Streams',
+          'Recruiter',
+          'Manage Pages',
+          'Counselors',
+          'Users',
+          'Students',
+          'Email Templates',
+          'SMS Templates',
+          'Media',
+          'Promotions',
+          'Blogs',
+          'Career',
+          'Subscriptions',
+          'Bulk Institute Upload',
+          'Online counselling list',
+          'Webinars',
+          'Coupons',
+          'Webinar',
+          'Banner',
+          'Help And Support'
+        ]
+        : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar", "SMS Templates"];
 
-    setFilteredNavItems(filteredItems);
-  }, []);
+  const computedFilteredNavItems = navItems.filter(
+    (item) => !excludedTitles.includes(item.title)
+  );
+
+  const [filteredNavItems, setFilteredNavItems] = React.useState(computedFilteredNavItems);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const { data: subscription } = useQuery({
@@ -132,6 +129,37 @@ export default function AppSidebar({
       );
     }
   }, [subscription]); // Depend on subscription
+
+  useEffect(() => setMounted(true), []);
+
+  // Prevent direct access to nav routes that are filtered out — immediate redirect to avoid flash
+  if (typeof window !== 'undefined' && pathname) {
+    const flattenUrls = (items: any[]) =>
+      items.flatMap((item) =>
+        item?.items && item.items.length > 0
+          ? [item.url, ...item.items.map((s: any) => s.url)]
+          : [item.url]
+      );
+
+    const allowedUrls = new Set(flattenUrls(computedFilteredNavItems).filter(Boolean));
+    const allUrls = new Set(flattenUrls(navItems).filter(Boolean));
+
+    const matchesAny = (set: Set<string>) =>
+      Array.from(set).some((url) => url && pathname.startsWith(url));
+
+    const isNavUrl = matchesAny(allUrls);
+    const isAllowed = matchesAny(allowedUrls);
+
+    const adminOnlyUrls = ['/dashboard/counselor-verification', '/dashboard/counselor-question-sets'];
+    const isAdminOnly = adminOnlyUrls.some((u) => pathname.startsWith(u));
+
+    if ((isNavUrl && !isAllowed) || (isAdminOnly && role !== 'SUPER_ADMIN')) {
+      if (window.location.pathname !== '/dashboard') {
+        window.location.replace('/dashboard');
+      }
+      return null;
+    }
+  }
 
   if (!mounted) {
     return null; // Render nothing or a skeleton until mounted
