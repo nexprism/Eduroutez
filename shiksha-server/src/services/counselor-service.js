@@ -141,11 +141,16 @@ class CounselorService {
       if(user) {
         
         // create counselor with all required info from the user record
+        const fullName = (user.name || '').trim();
+        const parts = fullName.split(/\s+/);
+        const firstname = parts.shift() || '';
+        const lastname = parts.join(' ') || user.lastname || '';
+
         const counselor = await this.create({
           _id: user._id, 
           email: user.email, 
-          firstname: user.name, 
-          lastname: user.lastname || '',
+          firstname,
+          lastname,
           contactno: user.contact_number || '0000000000'
         });
       }
@@ -203,11 +208,16 @@ class CounselorService {
       if (user) {
 
         // create counselor with all required info from the user record
+        const fullName = (user.name || '').trim();
+        const parts = fullName.split(/\s+/);
+        const firstname = parts.shift() || '';
+        const lastname = parts.join(' ') || user.lastname || '';
+
         const counselor = await this.create({
           _id: user._id, 
           email: user.email, 
-          firstname: user.name, 
-          lastname: user.lastname || '',
+          firstname,
+          lastname,
           contactno: user.contact_number || '0000000000'
         });
       }

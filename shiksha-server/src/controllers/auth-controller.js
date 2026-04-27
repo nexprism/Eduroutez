@@ -482,9 +482,14 @@ export const signup = async (req, res) => {
 
     if (req.body.role === 'counsellor') {
 
+      const fullName = (req.body.name || '').trim();
+      const nameParts = fullName.split(/\s+/);
+      const firstname = nameParts.shift() || '';
+      const lastname = nameParts.join(' ') || '';
+
       const counsellorpayload = {
-        firstname: req.body.name,
-        lastname: req.body.name,
+        firstname,
+        lastname,
         email: req.body.email,
         contactno: contact_number,
         _id: userId,
