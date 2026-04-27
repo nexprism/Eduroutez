@@ -32,16 +32,16 @@ import {
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  totalItems: number;
+  columns?: ColumnDef<TData, TValue>[];
+  data?: TData[];
+  totalItems?: number;
   pageSizeOptions?: number[];
 }
 
 export function DataTable<TData, TValue>({
-  columns,
-  data,
-  totalItems,
+  columns = [],
+  data = [],
+  totalItems = 0,
   pageSizeOptions = [10, 20, 30, 40, 50]
 }: DataTableProps<TData, TValue>) {
   const { page, setPage, limit, setLimit } = usePagination();
@@ -68,8 +68,8 @@ export function DataTable<TData, TValue>({
   };
 
   const table = useReactTable({
-    data,
-    columns,
+    data: data ?? [],
+    columns: columns ?? [],
     pageCount: pageCount,
     state: {
       pagination: paginationState
