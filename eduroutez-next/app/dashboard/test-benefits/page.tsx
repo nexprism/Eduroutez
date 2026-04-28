@@ -52,6 +52,41 @@ const benefits = [
 const BenefitsPage: React.FC = () => {
   const router = useRouter();
 
+  React.useEffect(() => {
+    // Prevent direct access via URL if user is not eligible
+    try {
+      const role = localStorage.getItem('role');
+      const status = localStorage.getItem('verificationStatus');
+      const sd = localStorage.getItem('scheduledTestDate');
+      const ss = localStorage.getItem('scheduledTestSlot');
+
+      if (role !== 'counsellor') {
+        router.replace('/dashboard/overview');
+        return;
+      }
+
+      if (status === 'test_pending') return; // allowed
+
+      if (status === 'test_scheduled' && sd) {
+        const date = new Date(sd);
+        if (ss && ss.includes(':')) {
+          const [h, m] = ss.split(':').map(Number);
+          date.setHours(h, m, 0, 0);
+        }
+        const now = Date.now();
+        const msPerDay = 1000 * 60 * 60 * 24;
+        const daysPast = (now - date.getTime()) / msPerDay;
+        // allow only if portal is open (now >= date) and not expired >3 days
+        if (now >= date.getTime() && daysPast <= 3) return;
+      }
+
+      // otherwise redirect to overview
+      router.replace('/dashboard/overview');
+    } catch (err) {
+      router.replace('/dashboard/overview');
+    }
+  }, [router]);
+
   return (
     <div className="min-h-[calc(100vh-100px)] flex items-center justify-center p-4">
       <motion.div 
