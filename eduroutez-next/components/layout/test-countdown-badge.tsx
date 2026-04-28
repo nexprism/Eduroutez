@@ -13,6 +13,7 @@ export default function TestCountdownBadge() {
   const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
   const [isTestTime, setIsTestTime] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isExpired, setIsExpired] = useState(false);
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,16 +66,33 @@ export default function TestCountdownBadge() {
       const now = new Date();
       const diff = testTime.getTime() - now.getTime();
 
+      // Always compute how many whole days have passed since the scheduled date
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const daysPast = (now.getTime() - testTime.getTime()) / msPerDay;
+
+      // If more than 3 days have passed since scheduled date, mark expired
+      if (daysPast > 3) {
+        setIsExpired(true);
+        setIsTestTime(false);
+        setTimeLeft(null);
+        return;
+      }
+
+      // Not expired — ensure flag is cleared
+      setIsExpired(false);
+
+      // If the scheduled test is in the past or now, allow starting
       if (diff <= 0) {
-        // Test time has passed (or is now)
         setIsTestTime(true);
         setTimeLeft(null);
         return;
       }
 
-      // Within 10 minutes of test, we allow starting?
+      // Within 10 minutes of test, allow starting
       if (diff < 10 * 60 * 1000) {
         setIsTestTime(true);
+      } else {
+        setIsTestTime(false);
       }
 
       const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -148,7 +166,7 @@ export default function TestCountdownBadge() {
           </div>
 
           <div className="shrink-0 w-full md:w-auto flex items-center gap-3">
-            {isTestTime && (
+            {isTestTime && !isExpired && !timeLeft && (
               <Button 
                 className="flex-1 md:flex-none bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-5 md:py-2 rounded-xl shadow-lg shadow-red-200 dark:shadow-none transition-all active:scale-95 flex items-center justify-center gap-2 group/btn"
                 onClick={() => router.push('/dashboard/test-benefits')}
@@ -157,7 +175,21 @@ export default function TestCountdownBadge() {
                 <span className="inline-block transform transition-transform group-hover/btn:translate-x-1">→</span>
               </Button>
             )}
-            
+
+            {isExpired && (
+              <div className="flex items-center gap-3">
+                <div className="px-3 py-2 bg-yellow-50 dark:bg-yellow-900/30 rounded-md text-sm font-bold text-yellow-800 dark:text-yellow-300">
+                  Your scheduled date has expired. Please pay and reschedule.
+                </div>
+                <Button
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-payment', { detail: { action: 'schedule' } }))}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl"
+                >
+                  Pay & Reschedule
+                </Button>
+              </div>
+            )}
+
             <button 
               onClick={() => setIsVisible(false)}
               className="text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400 transition-colors p-2 md:absolute md:top-1 md:right-1"

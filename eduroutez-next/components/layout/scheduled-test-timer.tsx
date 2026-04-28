@@ -10,9 +10,11 @@ import { cn } from '@/lib/utils';
 interface ScheduledTestTimerProps {
   date: string;
   slot?: string;
+  onPay?: () => void;
+  onSchedule?: () => void;
 }
 
-export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerProps) {
+export default function ScheduledTestTimer({ date, slot, onPay, onSchedule }: ScheduledTestTimerProps) {
   const router = useRouter();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -25,7 +27,6 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
   useEffect(() => {
     setIsClient(true);
     let target = new Date(date).getTime();
-    
     if (slot && slot.includes(':')) {
       const [hours, minutes] = slot.split(':').map(Number);
       const testDate = new Date(date);
@@ -58,7 +59,15 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
   if (!isClient) return null;
 
   const testDate = new Date(date);
-  const isExpired = new Date().getTime() > testDate.getTime();
+  if (slot && slot.includes(':')) {
+    const [hours, minutes] = slot.split(':').map(Number);
+    testDate.setHours(hours, minutes, 0, 0);
+  }
+
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const daysPast = (new Date().getTime() - testDate.getTime()) / msPerDay;
+  const isExpiredLong = daysPast > 3; // more than 3 days past
+  const isNowOrPast = new Date().getTime() >= testDate.getTime();
 
   return (
     <div className="w-full mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
@@ -97,7 +106,31 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
           </div>
 
           <div className="w-full lg:w-auto flex flex-col items-center gap-6">
-            {isExpired ? (
+            {isExpiredLong ? (
+              <div className="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-[1.25rem] text-center min-w-[320px] flex flex-col items-center gap-4 border border-yellow-200 dark:border-yellow-700">
+                <div className="p-3 bg-yellow-100 dark:bg-yellow-800 rounded-full">
+                  <Timer className="w-8 h-8 text-yellow-800 dark:text-yellow-200" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-lg font-bold">Scheduled assessment expired</p>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">Your scheduled date has passed more than 3 days ago. Please pay and reschedule.</p>
+                </div>
+                <div className="w-full">
+                  <Button
+                    onClick={() => {
+                      if (onSchedule) {
+                        onSchedule();
+                        return;
+                      }
+                      router.push('/dashboard/test-benefits');
+                    }}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-black h-12 rounded-xl shadow-md border-none"
+                  >
+                    Pay & Reschedule
+                  </Button>
+                </div>
+              </div>
+            ) : isNowOrPast ? (
               <div className="bg-gradient-to-b from-red-600 to-red-700 p-8 rounded-[2rem] text-center min-w-[320px] flex flex-col items-center gap-6 shadow-2xl shadow-red-500/30 border border-red-400/30 animate-pulse">
                 <div className="p-4 bg-white/10 rounded-full">
                   <Timer className="w-12 h-12 text-white" />
@@ -106,13 +139,15 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
                   <p className="text-3xl font-black uppercase tracking-tighter">Portal Open</p>
                   <p className="text-red-100/80 text-sm font-bold">Your assessment window is active.</p>
                 </div>
-                <Button 
-                   onClick={() => router.push('/dashboard/test-benefits')}
-                   className="w-full bg-white text-red-600 hover:bg-slate-50 font-black h-14 rounded-2xl shadow-xl shadow-black/10 transition-all hover:scale-105 active:scale-95 border-none text-lg group/btn"
-                 >
-                   Start Assessment Now
-                   <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
-                 </Button>
+                {!isExpiredLong && (
+                  <Button 
+                    onClick={() => router.push('/dashboard/test-benefits')}
+                    className="w-full bg-white text-red-600 hover:bg-slate-50 font-black h-14 rounded-2xl shadow-xl shadow-black/10 transition-all hover:scale-105 active:scale-95 border-none text-lg group/btn"
+                  >
+                    Start Assessment Now
+                    <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center gap-6">
@@ -122,13 +157,13 @@ export default function ScheduledTestTimer({ date, slot }: ScheduledTestTimerPro
                   <TimeUnit value={timeLeft.minutes} label="Mins" />
                   <TimeUnit value={timeLeft.seconds} label="Secs" />
                 </div>
-                <Button 
-                   onClick={() => router.push('/dashboard/test-benefits')}
-                   className="w-full bg-red-600 hover:bg-red-700 text-white font-black h-14 px-8 rounded-2xl shadow-xl shadow-red-900/20 transition-all hover:scale-105 active:scale-95 border-none text-lg group/btn"
-                 >
-                   Start Assessment Now
-                   <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
-                 </Button>
+                  {!isExpiredLong && (
+                    <div className="w-full">
+                      <div className="text-center text-sm text-slate-500 px-4 py-3 bg-white/5 rounded-lg">
+                        Start will be available when the portal opens.
+                      </div>
+                    </div>
+                  )}
               </div>
             )}
           </div>

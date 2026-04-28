@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 import ScheduledTestTimer from '@/components/layout/scheduled-test-timer';
 import {
@@ -283,6 +284,7 @@ const Dashboard = () => {
 
   // Payment integration for both flows
 
+    
   const payAnd = async (afterPay: 'test' | 'schedule') => {
     setLoading(true);
     const res = await loadRazorpayScript();
@@ -345,11 +347,29 @@ const Dashboard = () => {
       localStorage.setItem('scheduledTestSlot', slot);
       setShowTest(false);
       setShowScheduleModal(false);
+      // Refresh router so UI picks up new schedule immediately
+      try {
+        router.refresh();
+      } catch (err) {
+        // Fallback to full reload
+        window.location.reload();
+      }
     } catch (err) {
       alert('Failed to schedule test.');
     }
     setLoading(false);
   };
+
+  // Listen for payment events from small components (e.g., TestCountdownBadge)
+  React.useEffect(() => {
+    const paymentListener = (e: any) => {
+      const action = e?.detail?.action;
+      if (action === 'test') handlePay();
+      if (action === 'schedule') handleSchedule();
+    };
+    window.addEventListener('open-payment', paymentListener as EventListener);
+    return () => window.removeEventListener('open-payment', paymentListener as EventListener);
+  }, [handlePay, handleSchedule]);
 
   if (role === 'counsellor') {
     if (isLoading) {
@@ -367,7 +387,9 @@ const Dashboard = () => {
         {verificationStatus === 'test_scheduled' && (counselorData?.scheduledTestDate || (typeof window !== 'undefined' && localStorage.getItem('scheduledTestDate'))) && (
           <ScheduledTestTimer 
             date={counselorData?.scheduledTestDate || localStorage.getItem('scheduledTestDate') || ''} 
-            slot={counselorData?.scheduledTestSlot || localStorage.getItem('scheduledTestSlot') || undefined} 
+            slot={counselorData?.scheduledTestSlot || localStorage.getItem('scheduledTestSlot') || undefined}
+            onPay={handlePay}
+            onSchedule={handleSchedule}
           />
         )}
         <CounsellorTrustCard 

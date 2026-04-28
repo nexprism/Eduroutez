@@ -35,7 +35,7 @@ const Banner: React.FC<BannerProps> = ({ status: propStatus, onPay, onSchedule, 
   const displaySlot = scheduledTestSlot || (typeof window !== 'undefined' ? localStorage.getItem('scheduledTestSlot') : null);
 
   if (status === 'test_scheduled' && displayDate) {
-    return <ScheduledTestTimer date={displayDate} slot={displaySlot || undefined} />;
+    return <ScheduledTestTimer date={displayDate} slot={displaySlot || undefined} onPay={onPay} onSchedule={onSchedule} />;
   }
 
   const showPayButtons = !verifiedBadge && !['test_pending', 'test_scheduled', 'verification_in_progress', 'rejected'].includes(status);

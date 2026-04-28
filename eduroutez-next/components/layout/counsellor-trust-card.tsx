@@ -63,7 +63,20 @@ const CounsellorTrustCard: React.FC<CounsellorTrustCardProps> = ({
   }, [status, scheduledTestDate, scheduledTestSlot]);
 
   const showInitialButtons = !verifiedBadge && !['test_pending', 'test_scheduled', 'verification_in_progress', 'rejected'].includes(status);
-  const isExpired = isClient && status === 'test_scheduled' && scheduledTestDate && (new Date().getTime() > new Date(scheduledTestDate).getTime());
+
+  // compute long-expiry (more than 3 days past scheduled date)
+  const msPerDay = 1000 * 60 * 60 * 24;
+  let scheduledTestDateObj: Date | null = null;
+  if (scheduledTestDate) {
+    scheduledTestDateObj = new Date(scheduledTestDate);
+    if (scheduledTestSlot && scheduledTestSlot.includes(':')) {
+      const [h, m] = scheduledTestSlot.split(':').map(Number);
+      scheduledTestDateObj.setHours(h, m, 0, 0);
+    }
+  }
+  const daysPast = scheduledTestDateObj ? (Date.now() - scheduledTestDateObj.getTime()) / msPerDay : 0;
+  const isExpiredLong = isClient && status === 'test_scheduled' && scheduledTestDateObj && daysPast > 3;
+  const isNowOrPast = scheduledTestDateObj ? Date.now() >= scheduledTestDateObj.getTime() : false;
 
   return (
     <motion.div
@@ -171,16 +184,40 @@ const CounsellorTrustCard: React.FC<CounsellorTrustCardProps> = ({
                     </Button>
                   </div>
                 )}
-
                 {status === 'test_scheduled' && !verifiedBadge && (
                   <div className="pt-2">
-                    <Button
-                      onClick={() => router.push('/dashboard/test-benefits')}
-                      className="bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-200 border-none transition-all hover:translate-y-[-4px] h-14 px-10 rounded-2xl font-black text-lg group/btn"
-                    >
-                      Start Assessment Now
-                      <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
-                    </Button>
+                    {isExpiredLong ? (
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Button
+                          onClick={onPay}
+                          className="bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-200 border-none transition-all h-14 px-8 rounded-2xl font-black text-lg"
+                        >
+                          Pay & Give Test Now
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="border-red-200 text-red-600 hover:bg-red-50 transition-all font-black h-14 px-8 rounded-2xl border-2"
+                          onClick={onSchedule}
+                        >
+                          Pay & Schedule
+                        </Button>
+                      </div>
+                    ) : (
+                      // If scheduled but not yet due, hide/disable Start until time arrives
+                      isNowOrPast ? (
+                        <Button
+                          onClick={() => router.push('/dashboard/test-benefits')}
+                          className="bg-red-600 hover:bg-red-700 text-white shadow-xl shadow-red-200 border-none transition-all hover:translate-y-[-4px] h-14 px-10 rounded-2xl font-black text-lg group/btn"
+                        >
+                          Start Assessment Now
+                          <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover/btn:translate-x-1" />
+                        </Button>
+                      ) : (
+                        <div className="px-4 py-3 bg-white/5 rounded-lg text-sm font-semibold text-slate-600">
+                          Your assessment is scheduled for {scheduledTestDateObj ? scheduledTestDateObj.toLocaleString() : 'the selected time'}. Start will be available when the portal opens.
+                        </div>
+                      )
+                    )}
                   </div>
                 )}
 
