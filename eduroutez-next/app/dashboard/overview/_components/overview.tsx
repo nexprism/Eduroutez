@@ -21,9 +21,11 @@ import Link from 'next/link';
 import Banner from '@/components/layout/counsellor-verification-banner';
 import CounsellorTrustCard from '@/components/layout/counsellor-trust-card';
 import ScheduleTestModal from '@/components/layout/schedule-test-modal';
+import ErrorBoundary from '@/components/error-boundary';
 import loadRazorpayScript from '@/lib/razorpay';
 const Dashboard = () => {
   const [role, setRole] = useState('');
+  const router = useRouter();
 
   interface AdminData {
     totalEarning: number;
@@ -237,6 +239,90 @@ const Dashboard = () => {
     </Card>
   );
 
+  // Payment integration for both flows
+  const payAnd = async (afterPay: 'test' | 'schedule') => {
+    setLoading(true);
+    const res = await loadRazorpayScript();
+    if (!res) {
+      alert('Razorpay SDK failed to load.');
+      setLoading(false);
+      return;
+    }
+    try {
+      const options = {
+        key: 'rzp_test_SPTvNCnEWS87X0',
+        amount: 9900,
+        currency: 'INR',
+        name: 'Guidance Y',
+        description: 'Counsellor Verification Demo Payment',
+        handler: async function (response: any) {
+          try {
+            await axiosInstance.post(`${apiUrl}/counselor-test/record-payment`, {
+              amount: 99,
+              transactionId: response.razorpay_payment_id || 'demo_payment_id',
+              status: 'success',
+            });
+            if (afterPay === 'test') {
+              const canGiveRes = await axiosInstance.get(`${apiUrl}/counselor-test/can-give`);
+              if (canGiveRes.data?.data?.eligible) {
+                setVerificationStatus('test_pending');
+                localStorage.setItem('verificationStatus', 'test_pending');
+              }
+            } else if (afterPay === 'schedule') {
+              setShowScheduleModal(true);
+            }
+          } catch (err) {
+            console.error('Payment processing failed:', err);
+            if (afterPay === 'schedule') setShowScheduleModal(true);
+          }
+        },
+        prefill: {},
+        theme: { color: '#6366f1' },
+      };
+      // @ts-ignore
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      alert('Payment initiation failed.');
+    }
+    setLoading(false);
+  };
+
+  const handlePay = () => payAnd('test');
+  const handleSchedule = () => payAnd('schedule');
+
+  const handleScheduleSubmit = async (date: string, slot: string) => {
+    setLoading(true);
+    try {
+      await axiosInstance.post('/counselor/schedule-test', { date, slot });
+      setVerificationStatus('test_scheduled');
+      localStorage.setItem('verificationStatus', 'test_scheduled');
+      localStorage.setItem('scheduledTestDate', date);
+      localStorage.setItem('scheduledTestSlot', slot);
+      setShowTest(false);
+      setShowScheduleModal(false);
+      try {
+        router.refresh();
+      } catch (err) {
+        window.location.reload();
+      }
+    } catch (err) {
+      alert('Failed to schedule test.');
+    }
+    setLoading(false);
+  };
+
+  // Listen for payment events from small components (e.g., TestCountdownBadge)
+  React.useEffect(() => {
+    const paymentListener = (e: any) => {
+      const action = e?.detail?.action;
+      if (action === 'test') handlePay();
+      if (action === 'schedule') handleSchedule();
+    };
+    window.addEventListener('open-payment', paymentListener as EventListener);
+    return () => window.removeEventListener('open-payment', paymentListener as EventListener);
+  }, [handlePay, handleSchedule]);
+
   if (role === 'institute') {
 
     return (
@@ -282,95 +368,6 @@ const Dashboard = () => {
 
   // Banner action handlers
 
-  // Payment integration for both flows
-
-    
-  const payAnd = async (afterPay: 'test' | 'schedule') => {
-    setLoading(true);
-    const res = await loadRazorpayScript();
-    if (!res) {
-      alert('Razorpay SDK failed to load.');
-      setLoading(false);
-      return;
-    }
-    try {
-      const options = {
-        key: 'rzp_test_SPTvNCnEWS87X0',
-        amount: 9900,
-        currency: 'INR',
-        name: 'Guidance Y',
-        description: 'Counsellor Verification Demo Payment',
-        handler: async function (response: any) {
-          try {
-            await axiosInstance.post(`${apiUrl}/counselor-test/record-payment`, {
-              amount: 99,
-              transactionId: response.razorpay_payment_id || 'demo_payment_id',
-              status: 'success',
-            });
-            if (afterPay === 'test') {
-              const canGiveRes = await axiosInstance.get(`${apiUrl}/counselor-test/can-give`);
-              if (canGiveRes.data?.data?.eligible) {
-                setVerificationStatus('test_pending');
-                localStorage.setItem('verificationStatus', 'test_pending');
-              }
-            } else if (afterPay === 'schedule') {
-              setShowScheduleModal(true);
-            }
-          } catch (err) {
-            console.error('Payment processing failed:', err);
-            // Fallback: show modal anyway if they paid
-            if (afterPay === 'schedule') setShowScheduleModal(true);
-          }
-        },
-        prefill: {},
-        theme: { color: '#6366f1' },
-      };
-      // @ts-ignore
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (err) {
-      alert('Payment initiation failed.');
-    }
-    setLoading(false);
-  };
-
-  const handlePay = () => payAnd('test');
-  const handleSchedule = () => payAnd('schedule');
-
-  const handleScheduleSubmit = async (date: string, slot: string) => {
-    setLoading(true);
-    try {
-      await axiosInstance.post('/counselor/schedule-test', { date, slot });
-      setVerificationStatus('test_scheduled');
-      localStorage.setItem('verificationStatus', 'test_scheduled');
-      localStorage.setItem('scheduledTestDate', date);
-      localStorage.setItem('scheduledTestSlot', slot);
-      setShowTest(false);
-      setShowScheduleModal(false);
-      // Refresh router so UI picks up new schedule immediately
-      try {
-        router.refresh();
-      } catch (err) {
-        // Fallback to full reload
-        window.location.reload();
-      }
-    } catch (err) {
-      alert('Failed to schedule test.');
-    }
-    setLoading(false);
-  };
-
-  // Listen for payment events from small components (e.g., TestCountdownBadge)
-  React.useEffect(() => {
-    const paymentListener = (e: any) => {
-      const action = e?.detail?.action;
-      if (action === 'test') handlePay();
-      if (action === 'schedule') handleSchedule();
-    };
-    window.addEventListener('open-payment', paymentListener as EventListener);
-    return () => window.removeEventListener('open-payment', paymentListener as EventListener);
-  }, [handlePay, handleSchedule]);
-
   if (role === 'counsellor') {
     if (isLoading) {
       return <div className="p-8 text-center text-lg">Loading...</div>;
@@ -384,23 +381,31 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {verificationStatus === 'test_scheduled' && (counselorData?.scheduledTestDate || (typeof window !== 'undefined' && localStorage.getItem('scheduledTestDate'))) && (
-          <ScheduledTestTimer 
-            date={counselorData?.scheduledTestDate || localStorage.getItem('scheduledTestDate') || ''} 
-            slot={counselorData?.scheduledTestSlot || localStorage.getItem('scheduledTestSlot') || undefined}
-            onPay={handlePay}
-            onSchedule={handleSchedule}
+        <ErrorBoundary name="ScheduledTestTimer">
+          {verificationStatus === 'test_scheduled' && (counselorData?.scheduledTestDate || (typeof window !== 'undefined' && localStorage.getItem('scheduledTestDate'))) && (
+            <ScheduledTestTimer 
+              date={counselorData?.scheduledTestDate || localStorage.getItem('scheduledTestDate') || ''} 
+              slot={counselorData?.scheduledTestSlot || localStorage.getItem('scheduledTestSlot') || undefined}
+              onPay={handlePay}
+              onSchedule={handleSchedule}
+            />
+          )}
+        </ErrorBoundary>
+
+        <ErrorBoundary name="CounsellorTrustCard">
+          <CounsellorTrustCard 
+            onPay={handlePay} 
+            onSchedule={handleSchedule} 
+            status={verificationStatus}
+            scheduledTestDate={counselorData?.scheduledTestDate}
+            scheduledTestSlot={counselorData?.scheduledTestSlot}
+            verifiedBadge={verifiedBadge}
           />
-        )}
-        <CounsellorTrustCard 
-          onPay={handlePay} 
-          onSchedule={handleSchedule} 
-          status={verificationStatus}
-          scheduledTestDate={counselorData?.scheduledTestDate}
-          scheduledTestSlot={counselorData?.scheduledTestSlot}
-          verifiedBadge={verifiedBadge}
-        />
-        <ScheduleTestModal open={showScheduleModal} onClose={() => setShowScheduleModal(false)} onSchedule={handleScheduleSubmit} />
+        </ErrorBoundary>
+
+        <ErrorBoundary name="ScheduleTestModal">
+          <ScheduleTestModal open={showScheduleModal} onClose={() => setShowScheduleModal(false)} onSchedule={handleScheduleSubmit} />
+        </ErrorBoundary>
         {/* Test and guidance are now on separate pages. No inline rendering here. */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
