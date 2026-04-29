@@ -285,6 +285,11 @@ export const getStateCityById = async (req, res) => {
 
 
 export const signup = async (req, res) => {
+  // Accept multiple referral field variants from client (spelling/format differences)
+  if (!req.body.referal_Code) {
+    req.body.referal_Code = req.body.referal_Code || req.body.referralCode || req.body.referral_code || req.body.referalCode || req.query?.ref || req.query?.referralCode;
+  }
+
   console.log(req.body);
     const contact_number = req.body.contact_number || req.body.phoneNo || req.body.phone || req.body.phone_number;
   //req parms refercode
