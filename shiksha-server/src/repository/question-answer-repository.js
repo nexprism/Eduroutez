@@ -8,14 +8,7 @@ class QuestionAnswerRepository extends CrudRepository {
   async getbyInstituteEmail(email) {
     try {
   console.log('email',email);
-      var result = await this.model.find({ instituteEmail: email });
-     
-
-      if (result.askedBy) {
-        var result = await this.model.findById(result._id).populate("askedBy");
-      }
-
-      
+      const result = await this.model.find({ instituteEmail: email });
       return result;
     } catch (error) {
       throw error;
@@ -50,7 +43,7 @@ class QuestionAnswerRepository extends CrudRepository {
   async getQuestion(id) {
     try {
       console.log('hello',id);
-      let result = await this.model.findById(id).populate("askedBy");
+      let result = await this.model.findById(id);
       return result;
     } catch (error) {
       throw error;

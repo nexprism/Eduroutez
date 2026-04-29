@@ -23,7 +23,8 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/question-answers`, {
         params: {
-          searchFields: JSON.stringify({}),
+          // send both question and askedBy so backend can search by question text or asker name
+          searchFields: JSON.stringify({ question: searchQuery || '', askedBy: searchQuery || '' }),
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,
           limit: limit

@@ -60,6 +60,73 @@ class questionAnswerService {
       // Execute query with dynamic filters, sorting, and pagination
       const questionAnswers = await this.questionAnswerRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
 
+      // Attach asker name to each question-answer when possible
+      if (questionAnswers && Array.isArray(questionAnswers.result)) {
+        const resultsWithNames = await Promise.all(
+          questionAnswers.result.map(async (qa) => {
+            try {
+              // Enrich askedBy
+              const askedByEmail = qa.askedBy;
+              let askedByObj = null;
+              if (askedByEmail) {
+                const user = await this.userRepository.get(askedByEmail);
+                askedByObj = {
+                  email: askedByEmail,
+                  name: user && user.name ? user.name : null,
+                };
+              }
+
+              // Enrich top-level answeredBy if present
+              let answeredByObj = null;
+              if (qa.answeredBy) {
+                try {
+                  const answeredUser = await this.userRepository.get(qa.answeredBy);
+                  answeredByObj = {
+                    email: qa.answeredBy,
+                    name: answeredUser && answeredUser.name ? answeredUser.name : null,
+                  };
+                } catch (err) {
+                  answeredByObj = null;
+                }
+              }
+
+              // Enrich each item in answers array
+              let enrichedAnswers = qa.answers;
+              if (Array.isArray(qa.answers) && qa.answers.length > 0) {
+                enrichedAnswers = await Promise.all(
+                  qa.answers.map(async (ans) => {
+                    try {
+                      if (!ans || !ans.answeredBy) return ans;
+                      const userAns = await this.userRepository.get(ans.answeredBy);
+                      return {
+                        ...ans,
+                        answeredBy: {
+                          email: ans.answeredBy,
+                          name: userAns && userAns.name ? userAns.name : null,
+                        },
+                      };
+                    } catch (err) {
+                      return ans;
+                    }
+                  })
+                );
+              }
+
+              return {
+                ...qa,
+                askedBy: askedByObj || qa.askedBy,
+                answeredBy: answeredByObj || qa.answeredBy,
+                answers: enrichedAnswers,
+              };
+            } catch (err) {
+              return qa;
+            }
+          })
+        );
+
+        questionAnswers.result = resultsWithNames;
+      }
+
       return questionAnswers;
     } catch (error) {
       console.log('error on course', error.message);
