@@ -57,6 +57,13 @@ class questionAnswerService {
         sortConditions[field] = direction === "asc" ? 1 : -1;
       }
 
+      // If caller requests only items with answers (user=true), add a filter
+      // usage: /question-answers?user=true
+      if (query.user === "true" || query.user === true) {
+        filterConditions.$and = filterConditions.$and || [];
+        filterConditions.$and.push({ $or: [{ answer: { $ne: null } }, { 'answers.0': { $exists: true } }] });
+      }
+
       // Execute query with dynamic filters, sorting, and pagination
       const questionAnswers = await this.questionAnswerRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
 
