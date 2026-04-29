@@ -235,16 +235,28 @@ escapeRegex(str) {
     if (search) {
       searchConditions.push({ instituteName: { $regex: this.escapeRegex(search), $options: "i" } });
     }
-    for (const [field, term] of Object.entries(parsedSearchFields)) {
-      const escapedTerm = this.escapeRegex(term);
+    for (const [field, rawTerm] of Object.entries(parsedSearchFields)) {
+      const term = typeof rawTerm === 'string' ? rawTerm.trim().replace(/\s+/g, ' ') : rawTerm;
+      if (!term) continue;
+
+      // Helper to build regex condition(s) for a field path
+      const buildConditionsForPath = (path) => {
+        if (typeof term === 'string' && term.includes(' ')) {
+          const words = term.split(' ').filter(Boolean);
+          const andGroup = words.map((w) => ({ [path]: { $regex: this.escapeRegex(w), $options: 'i' } }));
+          return { $and: andGroup };
+        }
+        return { [path]: { $regex: this.escapeRegex(term), $options: 'i' } };
+      };
+
       if (field === 'courseTitle') {
-        searchConditions.push({ 'courses.courseTitle': { $regex: escapedTerm, $options: "i" } });
+        searchConditions.push(buildConditionsForPath('courses.courseTitle'));
       } else if (field === 'state') {
-        searchConditions.push({ 'state.name': { $regex: escapedTerm, $options: "i" } });
+        searchConditions.push(buildConditionsForPath('state.name'));
       } else if (field === 'city') {
-        searchConditions.push({ 'city.name': { $regex: escapedTerm, $options: "i" } });
+        searchConditions.push(buildConditionsForPath('city.name'));
       } else {
-        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
+        searchConditions.push(buildConditionsForPath(field));
       }
     }
 
