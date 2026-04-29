@@ -63,6 +63,11 @@ export default function UserAuthForm({ setToggle, toggle }: any) {
     },
     onSuccess: (data) => {
       console.log(data?.data?.user)
+      const returnedRole = String(data?.data?.user?.role || '').toLowerCase();
+      if (returnedRole === 'student' || returnedRole === 'user') {
+        toast.error('Login not allowed for student or user roles.');
+        return;
+      }
       setuser(data?.data?.user);
       console.log(user);
       toast.success('Signed In Successfully!');
