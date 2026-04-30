@@ -46,6 +46,19 @@ const updateUploader = FileUpload.upload.fields([
     name: "file",
     maxCount: 1,
   },
+  // Aliases for better compatibility with different frontend forms
+  {
+    name: "logo",
+    maxCount: 1,
+  },
+  {
+    name: "cover",
+    maxCount: 1,
+  },
+  {
+    name: "thumbnail",
+    maxCount: 1,
+  },
 ]);
 
 // Uploader that includes gallery (for create endpoint and other operations)
@@ -426,95 +439,144 @@ export async function updateInstitute(req, res) {
 
     try {
       const instituteId = req.params.id;
-      const payload = req.body;
-      let oldImagePath;
-      // console.log('hjkl',req.files);
-      // console.log(req.file);
-      // Check if a new title is provided
-      // if (req.body.title) {
-      //   payload.title = req.body.title;
-      // }
+      const payload = { ...req.body };
+      
+      console.log('Updating institute:', instituteId);
+      
+      // Sanitize payload: convert "null" and "undefined" strings to actual null
+      // FormData often converts null/undefined to these strings
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === "null" || payload[key] === "undefined" || payload[key] === "") {
+          payload[key] = null;
+        }
+      });
 
-      // console.log('hi')
-      // Check if a new image is uploaded
-      // if (req.file) {
-      //   const institute = await instituteService.get(instituteId);
+      // Explicitly handle Number fields to prevent "Cast to Number failed"
+      const numberFields = ['establishedYear', 'minFees', 'maxFees', 'highestPackage', 'rank'];
+      numberFields.forEach(field => {
+        if (payload[field] !== undefined && payload[field] !== null) {
+          const num = Number(payload[field]);
+          if (isNaN(num)) {
+            delete payload[field]; // Remove if not a valid number
+          } else {
+            payload[field] = num;
+          }
+        }
+      });
 
-      //   console.log(institute);
-      //   // Record the old image path if it exists
-      //   if (institute.image) {
-      //     oldImagePath = path.join("uploads", institute.image);
-      //   }
+      // Fetch the existing institute first
+      const institute = await instituteService.get(instituteId);
+      if (!institute) {
+        return res.status(StatusCodes.NOT_FOUND).json({ 
+          error: "Not Found", 
+          message: `Institute with ID ${instituteId} not found` 
+        });
+      }
 
-      //   // Set the new image filename in payload
-      //   payload.image = req.file.filename;
-      // }
-
-
-      // Only process specific file fields - explicitly ignore gallery files here
-      // Gallery files should be handled by the addGallery endpoint only
+      let oldImagePaths = [];
       
       // First, check if gallery files are present and warn/remove them
       if (req.files && req.files["gallery"]) {
         console.warn("Gallery files detected in updateInstitute - ignoring. Use addGallery endpoint instead.");
-        // Remove gallery files from req.files to prevent any accidental processing
         delete req.files["gallery"];
       }
       
-      // Only process explicitly named fields - be strict about field names
-      if (req.files && req.files["instituteLogo"] && Array.isArray(req.files["instituteLogo"]) && req.files["instituteLogo"].length > 0) {
-        payload.instituteLogo = req.files["instituteLogo"][0].filename;
-        console.log('Processing instituteLogo:', payload.instituteLogo);
-      }
-      if (req.files && req.files["coverImage"] && Array.isArray(req.files["coverImage"]) && req.files["coverImage"].length > 0) {
-        payload.coverImage = req.files["coverImage"][0].filename;
-        console.log('Processing coverImage:', payload.coverImage);
-      }
-      if (req.files && req.files["thumbnailImage"] && Array.isArray(req.files["thumbnailImage"]) && req.files["thumbnailImage"].length > 0) {
-        payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
-        console.log('Processing thumbnailImage:', payload.thumbnailImage);
-      }
-      if (req.files && req.files["brochure"] && Array.isArray(req.files["brochure"]) && req.files["brochure"].length > 0) {
-        payload.brochure = req.files["brochure"][0].filename;
-        console.log('Processing brochure:', payload.brochure);
-      }
-      
-      // Log all received files for debugging
+      // Process file fields and their aliases
       if (req.files) {
-        console.log('All files received in updateInstitute:', Object.keys(req.files));
-        Object.keys(req.files).forEach(key => {
-          if (key !== "gallery") {
-            console.log(`File field "${key}":`, req.files[key].map(f => f.filename));
-          }
-        });
+        // Logo
+        if (req.files["instituteLogo"]?.[0]) {
+          if (institute.instituteLogo) oldImagePaths.push(path.join("uploads", institute.instituteLogo));
+          payload.instituteLogo = req.files["instituteLogo"][0].filename;
+        } else if (req.files["logo"]?.[0]) {
+          if (institute.instituteLogo) oldImagePaths.push(path.join("uploads", institute.instituteLogo));
+          payload.instituteLogo = req.files["logo"][0].filename;
+        }
+
+        // Cover
+        if (req.files["coverImage"]?.[0]) {
+          if (institute.coverImage) oldImagePaths.push(path.join("uploads", institute.coverImage));
+          payload.coverImage = req.files["coverImage"][0].filename;
+        } else if (req.files["cover"]?.[0]) {
+          if (institute.coverImage) oldImagePaths.push(path.join("uploads", institute.coverImage));
+          payload.coverImage = req.files["cover"][0].filename;
+        }
+
+        // Thumbnail
+        if (req.files["thumbnailImage"]?.[0]) {
+          if (institute.thumbnailImage) oldImagePaths.push(path.join("uploads", institute.thumbnailImage));
+          payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
+        } else if (req.files["thumbnail"]?.[0]) {
+          if (institute.thumbnailImage) oldImagePaths.push(path.join("uploads", institute.thumbnailImage));
+          payload.thumbnailImage = req.files["thumbnail"][0].filename;
+        }
+
+        // Others
+        if (req.files["brochure"]?.[0]) {
+          if (institute.brochure) oldImagePaths.push(path.join("uploads", institute.brochure));
+          payload.brochure = req.files["brochure"][0].filename;
+        }
+        if (req.files["image"]?.[0]) payload.image = req.files["image"][0].filename;
+        if (req.files["file"]?.[0]) payload.file = req.files["file"][0].filename;
       }
 
-      if (payload.instituteName) {
+      // Reconstruct nested objects from flat FormData keys (e.g., country[name])
+      if (payload["country[name]"]) {
+        payload.country = {
+          name: payload["country[name]"],
+          iso2: payload["country[iso2]"] || ""
+        };
+        delete payload["country[name]"];
+        delete payload["country[iso2]"];
+      }
+      if (payload["state[name]"]) {
+        payload.state = {
+          name: payload["state[name]"],
+          iso2: payload["state[iso2]"] || ""
+        };
+        delete payload["state[name]"];
+        delete payload["state[iso2]"];
+      }
+      if (payload["city[name]"]) {
+        payload.city = {
+          name: payload["city[name]"]
+        };
+        delete payload["city[name]"];
+      }
+
+      // Defensive split for array fields sent as comma-separated strings
+      if (payload.streams && typeof payload.streams === 'string') {
+        payload.streams = payload.streams.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      if (payload.specialization && typeof payload.specialization === 'string') {
+        payload.specialization = payload.specialization.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      if (payload.instituteName && payload.instituteName !== institute.instituteName) {
         payload.slug = payload.instituteName.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
 
       // Update the institute with new data
-      // console.log(payload);
       const response = await instituteService.update(instituteId, payload);
-      // console.log(response);
 
-      // Delete the old image only if the update is successful and old image exists
-      if (oldImagePath) {
+      // Delete old images if they exist and update was successful
+      for (const oldPath of oldImagePaths) {
         try {
-          fs.unlink(oldImagePath);
-        } catch (unlinkError) {
-          console.error("Error deleting old image:", unlinkError);
+          await fs.unlink(oldPath);
+        } catch (err) {
+          console.error("Error deleting old image:", err.message);
         }
       }
 
-      // Return success response
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully updated the institute";
       return res.status(StatusCodes.OK).json(SuccessResponse);
     } catch (error) {
       console.error("Update institute error:", error);
-      ErrorResponse.error = error;
-      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: "Internal Server Error",
+        message: error.message,
+        details: error
+      });
     }
   });
 }

@@ -69,7 +69,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             {data ? (
               <QuestionAnswerTable
                 data={Array.isArray(data) ? data : (data?.result || [])}
-                totalData={data?.totalDocuments || (Array.isArray(data) ? data.length : 0)}
+                totalData={Number(data?.totalDocuments || (Array.isArray(data) ? data.length : 0))}
               />
             ) : (
               <div>No Frequently Asked Questions found.</div>

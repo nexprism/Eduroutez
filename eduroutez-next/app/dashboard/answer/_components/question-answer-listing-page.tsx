@@ -45,7 +45,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Question And Answer (${data?.data?.totalDocuments ?? 0})`}
+                title={`Question And Answer (${typeof data?.data?.totalDocuments === 'number' ? data.data.totalDocuments : (data?.data?.totalDocuments ? 0 : 0)})`}
                 description="All question and answers are listed here."
               />
               <Button asChild className="w-fit whitespace-nowrap px-2">
@@ -57,7 +57,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             <Separator />
             <QuestionAnswerTable
               data={data?.data?.result ?? []}
-              totalData={data?.data?.totalDocuments ?? 0}
+              totalData={Number(data?.data?.totalDocuments ?? 0)}
               currentPage={page}
               pageSize={limit}
             />

@@ -79,14 +79,8 @@ export default function UserAuthForm({ setToggle, toggle }: any) {
         'instituteId',
         data?.data?.user?._id
       );
-      localStorage.setItem(
-        'role',
-        data?.data?.user?.role
-      );
-      localStorage.setItem(
-        'email',
-        data?.data?.user?.email
-      );      
+      localStorage.setItem('role', String(data?.data?.user?.role || ''));
+      localStorage.setItem('email', String(data?.data?.user?.email || ''));
       localStorage.setItem(
         'refreshToken',
         JSON.stringify(data.data.refreshToken)

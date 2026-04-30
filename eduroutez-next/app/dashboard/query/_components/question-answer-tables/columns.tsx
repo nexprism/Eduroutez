@@ -14,37 +14,37 @@ export const columns: ColumnDef<Query>[] = [
   {
     header: 'Name',
     accessorKey: 'name',
-    cell: ({ row }) => <div>{row.original.name}</div>,
+    cell: ({ row }) => <div>{typeof row.original.name === 'object' ? JSON.stringify(row.original.name) : String(row.original.name || '')}</div>,
   },
   {
     header: 'Email',
     accessorKey: 'email',
-    cell: ({ row }) => <div>{row.original.email}</div>,
+    cell: ({ row }) => <div>{typeof row.original.email === 'object' ? JSON.stringify(row.original.email) : String(row.original.email || '')}</div>,
   },
   {
     header: 'Phone No',
     accessorKey: 'phoneNo',
-    cell: ({ row }) => <div>{row.original.phoneNo}</div>,
+    cell: ({ row }) => <div>{typeof row.original.phoneNo === 'object' ? JSON.stringify(row.original.phoneNo) : String(row.original.phoneNo || '')}</div>,
   },
   {
     header: 'City',
     accessorKey: 'city',
-    cell: ({ row }) => <div>{row.original.city}</div>,
+    cell: ({ row }) => <div>{typeof row.original.city === 'object' ? (row.original.city as any)?.name : row.original.city}</div>,
   },
   {
     header: 'Query Related To',
     accessorKey: 'queryRelatedTo',
-    cell: ({ row }) => <div>{row.original.queryRelatedTo}</div>,
+    cell: ({ row }) => <div>{String(row.original.queryRelatedTo || '')}</div>,
   },
   {
     header: 'Query',
     accessorKey: 'query',
-    cell: ({ row }) => <div>{row.original.query}</div>,
+    cell: ({ row }) => <div>{String(row.original.query || '')}</div>,
   },
   {
     header: 'Status',
-    accessorKey: 'query',
-    cell: ({ row }) => <div>{row.original.status || row.original.status}</div>,
+    accessorKey: 'status',
+    cell: ({ row }) => <div>{String(row.original.status || '')}</div>,
   },
   {
     header: 'Created At',
