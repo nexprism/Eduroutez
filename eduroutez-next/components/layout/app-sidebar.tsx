@@ -100,7 +100,7 @@ export default function AppSidebar({
           'Banner',
           'Help And Support'
         ]
-        : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar", "SMS Templates"];
+        : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar", "SMS Templates",'Test Result'];
 
   const computedFilteredNavItems = navItems.filter(
     (item) => !excludedTitles.includes(item.title)
