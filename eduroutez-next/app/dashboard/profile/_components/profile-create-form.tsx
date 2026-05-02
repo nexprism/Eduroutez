@@ -608,18 +608,12 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       // Append files - only append if new files are selected or if existing files are removed
       if (values.panCard instanceof File) {
         formData.append('panCard', values.panCard);
-      } else if (values.panCard == null || values.panCard == undefined) {
-        formData.append('panCard', '');
       }
       if (values.adharCard instanceof File) {
         formData.append('adharCard', values.adharCard);
-      } else if (values.adharCard == null || values.adharCard == undefined) {
-        formData.append('adharCard', '');
       }
       if (values.profilePhoto instanceof File) {
         formData.append('profilePhoto', values.profilePhoto);
-      } else if (values.profilePhoto == null || values.profilePhoto === undefined) {
-        formData.append('profilePhoto', '');
       }
 
       const docFields = [
