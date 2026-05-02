@@ -120,7 +120,9 @@ function TestResultContent() {
                   variants={itemVariants}
                   className="mx-auto lg:mx-0 mb-8 w-20 h-20 rounded-[1.5rem] bg-white dark:bg-slate-800 flex items-center justify-center shadow-xl shadow-red-200/20 border border-red-50"
                 >
-                  {isPass ? (
+                  {testResult.adminVerified ? (
+                    <ShieldCheck className="h-10 w-10 text-emerald-600" />
+                  ) : isPass ? (
                     <Trophy className="h-10 w-10 text-red-600" />
                   ) : (
                     <AlertCircle className="h-10 w-10 text-red-600" />
@@ -128,16 +130,20 @@ function TestResultContent() {
                 </motion.div>
                 
                 <motion.div variants={itemVariants}>
-                  <span className={`text-[10px] font-black uppercase tracking-[0.4em] ${isPass ? 'text-red-600' : 'text-slate-400'} mb-3 block`}>
-                    Assessment Completed
+                  <span className={`text-[10px] font-black uppercase tracking-[0.4em] ${testResult.adminVerified ? 'text-emerald-600' : isPass ? 'text-red-600' : 'text-slate-400'} mb-3 block`}>
+                    {testResult.adminVerified ? 'Verification Processed' : 'Assessment Completed'}
                   </span>
                   <h1 className="text-3xl md:text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-6">
-                    {isPass ? 'Certification Success!' : 'Review in Progress'}
+                    {testResult.adminVerified 
+                      ? 'Verification Complete!' 
+                      : (isPass ? 'Certification Success!' : 'Review in Progress')}
                   </h1>
                   <p className="text-sm md:text-base font-semibold text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed mb-8">
-                    {isPass 
-                      ? 'Congratulations! You have successfully met the performance benchmarks for verified counselor status.'
-                      : 'You have completed the assessment. Our team will review your performance shortly.'}
+                    {testResult.adminVerified
+                      ? 'Your verification has been processed by our admin team. Please check your registered email for the official update and further instructions.'
+                      : (isPass 
+                          ? 'Congratulations! You have passed the test. Your profile is now being reviewed by our administration for final verification.'
+                          : 'You have completed the assessment. Our team will review your performance and documents shortly.')}
                   </p>
                 </motion.div>
               </div>

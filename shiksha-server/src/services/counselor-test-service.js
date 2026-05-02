@@ -199,6 +199,14 @@ class CounselorTestService {
                 setRoleCounsellor: true,
             });
 
+            // Update test result verification status
+            if (testResult) {
+                await this.testResultRepository.update(testResult._id, { 
+                    adminVerified: true, 
+                    verifiedAt: new Date() 
+                });
+            }
+
             // Send email to counselor about the result and verification status
             if (updatedCounselor.email) {
                 const subject = "Verification Successful - Eduroutez";
@@ -254,6 +262,15 @@ class CounselorTestService {
                 isVerified: false,
                 verifiedBadge: false,
             });
+
+            // Update test result verification status (marking it as reviewed/verified by admin even if rejected)
+            const testResult = await this.testResultRepository.getByCounselor(counselorId);
+            if (testResult) {
+                await this.testResultRepository.update(testResult._id, { 
+                    adminVerified: true, 
+                    verifiedAt: new Date() 
+                });
+            }
 
             // Send email to counselor about rejection
             if (updatedCounselor.email) {
