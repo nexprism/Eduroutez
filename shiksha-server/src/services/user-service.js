@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import axios from "axios";
 import randomstring from "randomstring";
 import NodeCache from "node-cache";
+import EmailVerification from "../models/EmailVerification.js";
 const otpCache = new NodeCache({ stdTTL: 90 }); // OTP expires in 90 seconds
 
 
@@ -298,44 +299,45 @@ class UserService {
 
     // Check if email doesn't exists
     if (!existingUser) {
-      return res.status(404).json({ status: "failed", message: "Email doesn't exists" });
+      throw new AppError("Email doesn't exist", StatusCodes.NOT_FOUND);
     }
 
     // Check if email is already verified
     if (existingUser.is_verified) {
-      return res.status(400).json({ status: "failed", message: "Email is already verified" });
+      throw new AppError("Email is already verified", StatusCodes.BAD_REQUEST);
     }
 
     // Check if there is a matching email verification OTP
-    const emailVerification = await this.emailVerificationRepository.findBy({ userId: existingUser._id, otp });
-    // const emailVerification = await EmailVerification.findOne({ userId: existingUser._id, otp });
-    if (!emailVerification) {
-      if (!existingUser.is_verified) {
-        const otp = Math.floor(100000 + Math.random() * 900000);
-        await this.emailVerificationRepository.create({ userId: existingUser._id, otp });
+    const emailVerification = await this.emailVerificationRepository.findBy({ 
+      userId: existingUser._id, 
+      otp: otp.toString() 
+    });
 
-        await sendEmailVerificationOTP(req, existingUser);
-        return res.status(400).json({ status: "failed", message: "Invalid OTP, new OTP sent to your email" });
-      }
-      return res.status(400).json({ status: "failed", message: "Invalid OTP" });
+    if (!emailVerification) {
+      // If OTP not found, send a new one
+      await sendEmailVerificationOTP(null, existingUser);
+      throw new AppError("Invalid OTP, a new OTP has been sent to your email", StatusCodes.BAD_REQUEST);
     }
 
     // Check if OTP is expired
     const currentTime = new Date();
-    // 15 * 60 * 1000 calculates the expiration period in milliseconds(15 minutes).
-    const expirationTime = new Date(emailVerification.createdAt.getTime() + 15 * 60 * 1000);
+    // 90 * 1000 calculates the expiration period in milliseconds (90 seconds).
+    const expirationTime = new Date(emailVerification.createdAt.getTime() + 90 * 1000);
+    
     if (currentTime > expirationTime) {
       // OTP expired, send new OTP
-      await sendEmailVerificationOTP(req, existingUser);
-      return res.status(400).json({ status: "failed", message: "OTP expired, new OTP sent to your email" });
+      await sendEmailVerificationOTP(null, existingUser);
+      throw new AppError("OTP expired, a new OTP has been sent to your email", StatusCodes.BAD_REQUEST);
     }
 
     // OTP is valid and not expired, mark email as verified
     existingUser.is_verified = true;
     await existingUser.save();
 
-    // Delete email verification document
+    // Delete all email verification documents for this user
     await EmailVerification.deleteMany({ userId: existingUser._id });
+    
+    return true;
   }
 
   async signin(data, res) {
