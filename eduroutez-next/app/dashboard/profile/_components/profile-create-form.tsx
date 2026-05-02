@@ -27,7 +27,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // import { m } from 'framer-motion';
 import { AlertTriangleIcon, Trash, Trash2Icon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -645,6 +645,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   }
 
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
     mutationFn: async (formData: any) => {
@@ -661,14 +662,51 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
       return response.data;
     },
 
-    onSuccess: () => {
+    onSuccess: (res) => {
       const message = isEdit
         ? 'Profile updated successfully'
         : 'Profile created successfully';
       toast.success(message);
+
+      // Reset form state
       form.reset();
 
+      // Try to update cache immediately so UI shows latest data without waiting for refetch
+      try {
+        const returned = res?.data ?? res;
+        const updated = returned?.data ?? returned;
+        if (updated) {
+          queryClient.setQueryData(['counselor-profile', counselorId], updated);
+          
+          // Also update localStorage for Navbar consistency if data is available
+          if (typeof window !== 'undefined') {
+            const fullName = `${updated.firstname || ''} ${updated.lastname || ''}`.trim();
+            if (fullName) localStorage.setItem('name', fullName);
+            
+            if (updated.profilePhoto) {
+              const photoUrl = `${IMAGE_URL}/${updated.profilePhoto.replace(/^.*[\\\/]/, '')}`;
+              localStorage.setItem('image', photoUrl);
+            }
+          }
+        }
+      } catch (e) {
+        console.debug('setQueryData or localStorage sync failed', e);
+      }
+
+      // Invalidate and refresh as a fallback
+      try {
+        queryClient.invalidateQueries(['counselor-profile', counselorId]);
+        queryClient.invalidateQueries(['sidebar-counselor', counselorId]);
+      } catch (e) {
+        console.debug('invalidateQueries failed', e);
+      }
+
       router.push('/dashboard/profile');
+      
+      // Give a small delay for the toast to be seen, then reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     },
     onError: () => {
       toast.error('Something went wrong');
