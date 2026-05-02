@@ -18,18 +18,18 @@ export const columns: ColumnDef<Answer>[] = [
   },
   {
     header: 'Grade',
-    accessorKey: 'answer', // Added accessorKey for consistency
-    cell: ({ row }) => <div>{row.original.grade}</div> ,
+    accessorKey: 'grade',
+    cell: ({ row }) => <div>{typeof row.original.grade === 'object' ? JSON.stringify(row.original.grade) : String(row.original.grade || '')}</div> ,
   },
   {
-    header: 'label',
-    accessorKey: 'answer', // Added accessorKey for consistency
-    cell: ({ row }) => <div>{row.original.label}</div> ,
+    header: 'Label',
+    accessorKey: 'label',
+    cell: ({ row }) => <div>{typeof row.original.label === 'object' ? JSON.stringify(row.original.label) : String(row.original.label || '')}</div> ,
   },
   {
-    header: 'AskedBy',
-    accessorKey: 'answer', // Added accessorKey for consistency
-    cell: ({ row }) => <div>{row.original.askedBy}</div> ,
+    header: 'Asked By',
+    accessorKey: 'askedBy',
+    cell: ({ row }) => <div>{typeof row.original.askedBy === 'object' ? (row.original.askedBy as any)?.name : String(row.original.askedBy || '')}</div> ,
   },
   {
     id: 'actions',

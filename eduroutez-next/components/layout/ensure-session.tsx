@@ -22,12 +22,12 @@ export default function EnsureSession() {
           const res = await axiosInstance.get(`${apiUrl}/user`);
           const user = res?.data?.data || res?.data;
           if (user) {
-            if (user.instituteId) localStorage.setItem('instituteId', user.instituteId);
-            if (user.role) localStorage.setItem('role', user.role);
-            if (user.name) localStorage.setItem('name', user.name);
-            if (user.email) localStorage.setItem('email', user.email);
-            if (user.image) localStorage.setItem('image', user.image);
-            if (user.plan) localStorage.setItem('plan', user.plan);
+            if (user.instituteId) localStorage.setItem('instituteId', String(user.instituteId));
+            if (user.role) localStorage.setItem('role', String(user.role));
+            if (user.name && typeof user.name === 'string') localStorage.setItem('name', user.name);
+            if (user.email && typeof user.email === 'string') localStorage.setItem('email', user.email);
+            if (user.image && typeof user.image === 'string') localStorage.setItem('image', user.image);
+            if (user.plan) localStorage.setItem('plan', typeof user.plan === 'string' ? user.plan : JSON.stringify(user.plan));
           }
         } catch (err) {
           // user may be unauthenticated; ignore

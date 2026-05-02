@@ -68,7 +68,10 @@ export function UserNav() {
             {image ? (
               <AvatarImage src={image} alt={name || email || 'User'} />
             ) : (
-              <AvatarFallback>{(name || email ? (name || email).charAt(0).toUpperCase() : 'U')}</AvatarFallback>
+              <AvatarFallback>
+                {typeof name === 'string' && name ? name.charAt(0).toUpperCase() : 
+                 typeof email === 'string' && email ? email.charAt(0).toUpperCase() : 'U'}
+              </AvatarFallback>
             )}
           </Avatar>
         </Button>
@@ -76,8 +79,12 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">
+              {typeof name === 'string' ? name : 'User'}
+            </p>
             <p className="text-xs leading-none text-muted-foreground">
-{email}            </p>
+              {typeof email === 'string' ? email : ''}
+            </p>
           </div>
         </DropdownMenuLabel>
         {/* <DropdownMenuSeparator /> */}

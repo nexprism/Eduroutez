@@ -5,7 +5,8 @@ import UserAuthForm from './user-auth-form';
 import UserSignUpForm from './user-signup-form';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Authentication',
@@ -14,6 +15,14 @@ export const metadata: Metadata = {
 
 export default function SignInViewPage() {
   const [toggle, setToggle] = useState(true);
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      router.replace('/dashboard/overview');
+    }
+  }, [router]);
 
   return (
     <div className="relative min-h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0 overflow-y-auto">

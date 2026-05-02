@@ -36,10 +36,10 @@ export default function ClientBootstrap({ children }: Props) {
           // (for counsellors/institutes), so fall back to `_id` when `instituteId` isn't present
           const instId = user.instituteId || user._id || user.id;
           if (instId) localStorage.setItem("instituteId", instId);
-          if (user.role) localStorage.setItem("role", user.role);
-          if (user.name) localStorage.setItem("name", user.name);
-          if (user.email) localStorage.setItem("email", user.email);
-          if (user.image) localStorage.setItem("image", user.image);
+          if (user.role) localStorage.setItem("role", String(user.role));
+          if (user.name && typeof user.name === 'string') localStorage.setItem("name", user.name);
+          if (user.email && typeof user.email === 'string') localStorage.setItem("email", user.email);
+          if (user.image && typeof user.image === 'string') localStorage.setItem("image", user.image);
           // store `plan` as an id string when possible to match other components
           try {
             const planValue = typeof user.plan === 'string' ? user.plan : (user.plan?._id || user.plan?.id);

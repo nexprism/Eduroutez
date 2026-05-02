@@ -13,8 +13,8 @@ export const columns: ColumnDef<QuestionAnswer>[] = [
   },
   {
     header: 'Question',
-    accessorKey: 'question', // Simplified with accessorKey
-    cell: ({ row }) => <div>{row.original.question}</div>,
+    accessorKey: 'question',
+    cell: ({ row }) => <div>{typeof row.original.question === 'object' ? (row.original.question as any)?.name : String(row.original.question || '')}</div>,
   },
   {
     header: 'Answer',

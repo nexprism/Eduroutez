@@ -74,13 +74,14 @@ export default function QueryStatusForm() {
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/query/${queryId}`);
       return response.data;
-    },
-    onSuccess: (data) => {
-      if (data?.data?.status) {
-        form.reset({ status: data.data.status });
-      }
     }
   });
+
+  React.useEffect(() => {
+    if (queryData.data?.data?.status) {
+      form.reset({ status: queryData.data.data.status });
+    }
+  }, [queryData.data, form]);
 
   function onSubmit(values: z.infer<typeof statusSchema>) {
     mutate(values);
@@ -96,7 +97,7 @@ export default function QueryStatusForm() {
           <div className="space-y-2">
             <label className="text-sm font-medium">Question</label>
             <Input 
-              value={queryData.data?.data.query || ''} 
+              value={queryData.data?.data?.query || ''} 
               readOnly 
               className="bg-gray-50"
             />
@@ -105,7 +106,7 @@ export default function QueryStatusForm() {
           <div className="space-y-2">
             <label className="text-sm font-medium">Query Related To</label>
             <Input 
-              value={queryData.data?.data.queryRelatedTo || ''} 
+              value={queryData.data?.data?.queryRelatedTo || ''} 
               readOnly 
               className="bg-gray-50"
             />
@@ -123,7 +124,7 @@ export default function QueryStatusForm() {
                     <FormLabel>Status</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select status" />

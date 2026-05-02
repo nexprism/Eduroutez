@@ -368,37 +368,22 @@ console.log('Error updating institute:', error.message); }
   
     try {
       console.log('FormData:', formData);
-      const response = await axiosInstance.post(`/addGallery/${id}`, formData, {
+      const response = await axiosInstance.post(`${apiUrl}/addGallery/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
         withCredentials: true,
       });
   
       console.log('Response:', response.data);
       if (response.data.data) {
-        // Get file names from backend response
-        const fileNames = response.data.data.gallery;
-  
-        // Fetch image URLs using the file names
-        const imageUrls = await Promise.all(
-          fileNames.map(async (fileName: string) => {
-            try {
-              const response = await axios.get(`/uploads/${fileName}`);
-              return response.data.url;
-            } catch (error) {
-              console.error(`Error fetching image URL for ${fileName}:`, error);
-              return null;
-            }
-          })
-        );
-        
+        // Just refresh the data to get updated gallery
         fetchInstituteData();  
-        // Update the state with the new image URLs
-        setPreviewUrls((prev) => [...prev, ...imageUrls]);
-  
         toast.success('Images added successfully!');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading images:', error);
-      toast.error('Failed to upload images');
+      toast.error(error.response?.data?.error || 'Failed to upload images');
     }
   };
   

@@ -115,7 +115,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             <Separator />
             <QuestionAnswerTable
               data={data?.data ?? []}
-              totalData={data?.totalData ?? 0}
+              totalData={Number(data?.totalData ?? 0)}
               currentPage={data?.currentPage ?? 1}
               totalPages={data?.totalPages ?? 1}
               isLoading={isLoading}
