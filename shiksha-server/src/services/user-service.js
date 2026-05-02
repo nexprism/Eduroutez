@@ -133,7 +133,10 @@ class UserService {
   async saveOtp(otp, phone) {
     try {
       //save otp in node cache
-      otpCache.set(phone, otp);
+      // normalize key and set explicit TTL to avoid relying solely on global default
+      const key = phone?.toString().trim();
+      const ttlSeconds = 90; // keep in sync with otpCache default
+      otpCache.set(key, otp, ttlSeconds);
       return otp;
     } catch (error) {
       throw error;
@@ -153,11 +156,28 @@ class UserService {
   //verifyOtp
   async verifyOtp(otp, phone) {
     try {
-      const cache_Otp = otpCache.get(phone);
+      const key = phone?.toString().trim();
+      const cache_Otp = otpCache.get(key);
 
-      console.log('Verifying OTP - Provided:', otp, 'Cached:', cache_Otp, 'Phone:', phone);
+      console.log('Verifying OTP - Provided:', otp, 'Cached:', cache_Otp, 'Phone:', key);
 
-      if (cache_Otp && otp.toString() === cache_Otp.toString()) {
+      // If there's no cached OTP the value is expired or never set
+      if (!cache_Otp) {
+        console.log('OTP not found or expired for', key);
+        return false;
+      }
+
+      // Check TTL explicitly (defensive) and reject if expired
+      const ttl = otpCache.getTtl(key); // returns timestamp in ms or undefined
+      if (!ttl || Date.now() > ttl) {
+        otpCache.del(key);
+        console.log('OTP expired for', key);
+        return false;
+      }
+
+      // Match and consume OTP to prevent reuse
+      if (otp.toString() === cache_Otp.toString()) {
+        otpCache.del(key);
         return true;
       }
       return false;
@@ -175,24 +195,19 @@ class UserService {
 
       // 1. Send SMS if phone is available
       if (phone) {
-        if (phone == "7014628523") {
+        var sender_id = 'Edurtz';
+        var message = '179135';
+        var variables_values = otp;
+        var route = 'dlt';
+        var numbers = phone;
+        var schedule_time = "";
+        var url = 'https://www.fast2sms.com/dev/bulkV2?authorization=' + process.env.FAST2SMS_API_KEY + '&route=' + route + '&sender_id=' + sender_id + '&message=' + message + '&variables_values=' + variables_values + '&numbers=' + numbers + '&schedule_time=' + schedule_time;
+        
+        const response = await axios.get(url);
+        smsResponse = response;
+        if (response.data.return === true) {
           this.saveOtp(otp, phone);
-          smsResponse = { data: { return: true, message: "Static OTP bypassed SMS gateway successfully" } };
-        } else {
-          var sender_id = 'Edurtz';
-          var message = '179135';
-          var variables_values = otp;
-          var route = 'dlt';
-          var numbers = phone;
-          var schedule_time = "";
-          var url = 'https://www.fast2sms.com/dev/bulkV2?authorization=' + process.env.FAST2SMS_API_KEY + '&route=' + route + '&sender_id=' + sender_id + '&message=' + message + '&variables_values=' + variables_values + '&numbers=' + numbers + '&schedule_time=' + schedule_time;
-          
-          const response = await axios.get(url);
-          smsResponse = response;
-          if (response.data.return === true) {
-            this.saveOtp(otp, phone);
-            console.log('OTP sent successfully via SMS', otp);
-          }
+          console.log('OTP sent successfully via SMS', otp);
         }
       }
 

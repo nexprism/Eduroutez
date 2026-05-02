@@ -187,9 +187,6 @@ export async function sendOtp(req, res) {
     }
 
     var otp = Math.floor(100000 + Math.random() * 900000);
-    if (final_contact_number == "7014628523") {
-      otp = 123456;
-    }
     const response = await userService.sendOtp(otp, final_contact_number, req.body.email);
     if (!response.data.return)
       return res.status(400).json({
