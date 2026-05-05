@@ -170,6 +170,15 @@ class CounselorTestService {
                 path: "testResult",
                 populate: { path: "questionSetId" }
             });
+
+            // Sort so that the most recently created test results appear first
+            // Counselors without a testResult will appear at the end
+            counselors.sort((a, b) => {
+                const aTime = a.testResult && a.testResult.createdAt ? new Date(a.testResult.createdAt).getTime() : 0;
+                const bTime = b.testResult && b.testResult.createdAt ? new Date(b.testResult.createdAt).getTime() : 0;
+                return bTime - aTime;
+            });
+
             return counselors;
         } catch (error) {
             throw error;
