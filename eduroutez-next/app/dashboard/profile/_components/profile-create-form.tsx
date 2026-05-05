@@ -1333,7 +1333,7 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Category">
-                              {field.value || "Select Category"}
+                              {field.value || (counselorData?.data?.[0]?.category) || "Select Category"}
                             </SelectValue>
                           </SelectTrigger>
                         </FormControl>
