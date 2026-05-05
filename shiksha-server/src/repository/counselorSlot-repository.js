@@ -117,12 +117,29 @@ class CounselorSlotRepository extends CrudRepository {
   //updateScheduleSlot
   async updateScheduleSlot(id,data) {
     try {
+    // Build update query so we can unset the meeting link when slot is marked completed
+    const updateQuery = {};
+    const setFields = { ...data };
+
+    // If status is completed, remove the meeting link from the document
+    if (data && data.status === 'completed') {
+      // Ensure link is not set when marking completed
+      if (setFields.hasOwnProperty('link')) {
+        delete setFields.link;
+      }
+      updateQuery.$unset = { link: "" };
+    }
+
+    if (Object.keys(setFields).length > 0) {
+      updateQuery.$set = setFields;
+    }
+
     const result = await ScheduleSlot.findOneAndUpdate(
       { _id: id },
-      data,
+      updateQuery,
       { new: true }
     );
-        
+
       return result;
     } catch (error) {
       throw error;
