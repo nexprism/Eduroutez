@@ -136,6 +136,7 @@ export const CellAction = ({ data }) => {
                                 >
                                     <option value="">Select status</option>
                                     <option value="completed">Completed</option>
+                                    <option value="ongoing">Ongoing</option>
                                     <option value="cancelled">Cancelled</option>
                                 </select>
                             </div>

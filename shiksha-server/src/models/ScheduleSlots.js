@@ -27,14 +27,14 @@ const ScheduleSlotSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['scheduled', 'completed', 'cancelled'],
+        enum: ['scheduled', 'ongoing', 'completed', 'cancelled'],
         default: 'scheduled'
     },
     paymentId: {
         type: String,
         required: true
     },
-});
+}, { timestamps: true });
 
 const ScheduleSlot = mongoose.model("ScheduleSlot", ScheduleSlotSchema);
 applySoftDelete(ScheduleSlotSchema);

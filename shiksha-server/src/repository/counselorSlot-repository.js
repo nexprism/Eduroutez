@@ -20,7 +20,7 @@ class CounselorSlotRepository extends CrudRepository {
         const scheduledSlots = await ScheduleSlot.find({
           counselorId: counselor._id,
           status: 'scheduled'
-        });
+        }).sort({ _id: -1 });
 
         // Convert result to a plain JavaScript object if it's a Mongoose document
         const resultObject = result.toObject ? result.toObject() : result;
@@ -56,7 +56,7 @@ class CounselorSlotRepository extends CrudRepository {
           var populateFields = ['counselorId'];
         }
 
-        const result = await model.find(filter).populate(populateFields).sort({createdAt: -1})
+        const result = await model.find(filter).populate(populateFields).sort({_id: -1})
         .skip((page - 1) * limit)
         .limit(limit)
         .collation({ locale: 'en', strength: 2 });
@@ -81,7 +81,7 @@ class CounselorSlotRepository extends CrudRepository {
   async getAllScheduleSlots(query) {
     try {
       const { page, limit } = query;
-      const result = await ScheduleSlot.find().populate('counselorId').populate('studentId').sort({createdAt: -1})
+      const result = await ScheduleSlot.find().populate('counselorId').populate('studentId').sort({_id: -1})
       .skip((page - 1) * limit)
       .limit(limit)
       .collation({ locale: 'en', strength: 2 });

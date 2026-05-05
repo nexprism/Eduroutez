@@ -64,6 +64,8 @@ export default function ScheduledSlotsPage() {
         return 'bg-green-100 text-green-700';
       case 'scheduled':
         return 'bg-blue-100 text-blue-700';
+      case 'ongoing':
+        return 'bg-yellow-100 text-yellow-800';
       case 'cancelled':
         return 'bg-red-100 text-red-700';
       default:
