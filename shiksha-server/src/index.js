@@ -23,7 +23,7 @@ const corsOptions = {
     const allowedOrigins = [
       "http://localhost:3000",
       "http://localhost:5173",
-      "http://localhost:5174",
+      "http://localhost:5175",
       "https://admin.eduroutez.com",
       "https://www.admin.eduroutez.com",
       "https://eduroutez.com",

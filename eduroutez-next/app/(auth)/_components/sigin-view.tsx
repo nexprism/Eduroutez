@@ -8,11 +8,6 @@ import { cn } from '@/lib/utils';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'Authentication',
-  description: 'Authentication forms built using the components.'
-};
-
 export default function SignInViewPage() {
   const [toggle, setToggle] = useState(true);
   const router = useRouter();
