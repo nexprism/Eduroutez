@@ -189,7 +189,7 @@ function TestResultContent() {
                   </div>
                   <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{stat.label}</p>
                   <p className="text-2xl font-black text-slate-900">{stat.value}</p>
-                  <p className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">OUT OF {testResult.totalQuestions}</p>
+                  
                 </div>
               ))}
             </div>
@@ -206,7 +206,7 @@ function TestResultContent() {
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 mb-1">Total Score</p>
                 <div className="flex items-baseline justify-center md:justify-start gap-2">
                   <span className="text-5xl font-black text-slate-900 tracking-tighter">{testResult.score}</span>
-                  <span className="text-slate-400 font-bold uppercase text-xs">Out of {testResult.totalQuestions}</span>
+                  
                 </div>
               </div>
 
