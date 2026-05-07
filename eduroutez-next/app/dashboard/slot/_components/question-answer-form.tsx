@@ -110,7 +110,7 @@ export default function CounselorWeeklySlotsPage() {
     },
     onSuccess: (response) => {
       if (response?.success) {
-        toast.success( 'Weekly slots saved successfully');
+        toast.success('Weekly slots saved successfully. Students will be able to schedule counseling sessions from these slots after your verification is approved by Eduroutez.');
         queryClient.invalidateQueries({ queryKey: ['counselorWeeklySlots', email] });
       } else {
         toast.error(response?.message || 'Failed to save slots');
@@ -161,9 +161,9 @@ export default function CounselorWeeklySlotsPage() {
     <div className="max-w-4xl mx-auto p-4">
       <Card>
         <CardHeader>
-          <CardTitle>
-            {isEditMode ? 'Edit Weekly Counseling Slots' : 'Set Weekly Counseling Slots'}
-          </CardTitle>
+            <CardTitle>
+              {isEditMode ? 'Edit Weekly Counseling Slots' : 'Set Weekly Counseling Slots'}
+            </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">

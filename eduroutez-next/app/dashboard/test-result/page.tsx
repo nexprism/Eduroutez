@@ -69,7 +69,7 @@ function TestResultContent() {
   if (loading) {
     return (
       <div className="flex flex-col h-[80dvh] items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-red-600" />
+        <Loader2 className="h-10 w-10 animate-spin text-[#FF2D55]" />
         <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Loading Assessment Results...</p>
       </div>
     );
@@ -84,7 +84,7 @@ function TestResultContent() {
         <h1 className="text-3xl font-black mb-4 text-slate-900 leading-tight">No Results Found</h1>
         <p className="text-slate-500 text-lg mb-10 font-medium max-w-md mx-auto leading-relaxed">{error}</p>
         <Link href="/dashboard/test-benefits">
-          <Button className="h-14 px-10 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black shadow-xl">GO TO ASSESSMENT PORTAL</Button>
+          <Button className="h-14 px-10 rounded-2xl bg-[#FF2D55] hover:bg-[#e0204a] text-white font-black shadow-xl">GO TO ASSESSMENT PORTAL</Button>
         </Link>
       </div>
     );
@@ -158,7 +158,7 @@ function TestResultContent() {
 
             <div className="mt-12 space-y-4 w-full">
               {isPass && (
-                <Button className="w-full h-14 rounded-2xl bg-[#E11D48] hover:bg-red-700 text-white font-black shadow-lg shadow-red-200 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3">
+                <Button className="w-full h-14 rounded-2xl bg-[#FF2D55] hover:bg-[#e0204a] text-white font-black shadow-lg shadow-red-200 transition-all hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3">
                   DOWNLOAD CERTIFICATE
                   <Download className="h-5 w-5" />
                 </Button>
@@ -267,7 +267,7 @@ export default function TestResultPage() {
   return (
     <Suspense fallback={
       <div className="flex flex-col h-[80dvh] items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-red-600" />
+        <Loader2 className="h-10 w-10 animate-spin text-[#FF2D55]" />
         <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Loading Router Context...</p>
       </div>
     }>
