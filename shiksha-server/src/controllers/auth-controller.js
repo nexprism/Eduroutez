@@ -335,7 +335,8 @@ export const signup = async (req, res) => {
       });
     }
 
-    if (req.body.role !== 'counsellor') {
+    // Require OTP verification for all roles except 'institute'
+    if (req.body.role !== 'institute') {
       if (!req.body.otp || req.body.otp.toString().length !== 6) {
 
         return res.status(400).json({
