@@ -38,7 +38,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       return response;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['promotions'] });
+      queryClient.invalidateQueries({ queryKey: ['Promotions'] });
       router.push('/dashboard/promotion');
     },
     onSettled: () => {
