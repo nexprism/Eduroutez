@@ -31,7 +31,7 @@ class NewsRepository extends CrudRepository {
     async getAllSuperAdminNews() {
 
         try {
-            const news = await News.find({ institute: null });
+            const news = await News.find();
             return news;
         }
         catch (error) {
