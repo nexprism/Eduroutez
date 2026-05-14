@@ -43,6 +43,10 @@ import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, up
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ, getFAQsByInstitute } from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage, getPageByStreamLevel } from "../../controllers/customPage-controller.js";
 import { createQuestionSet, getAllQuestionSets, getRandomTestSet, submitTestResult, getPendingVerifications, verifyCounselor, rejectCounselor, recordPayment, getLatestTestResult } from "../../controllers/counselor-test-controller.js";
+import { createWebinarPackage, getWebinarPackage, getWebinarPackages, getActiveWebinarPackages, updateWebinarPackage, deleteWebinarPackage } from "../../controllers/webinar-package-controller.js";
+import { purchaseWebinarPackage, getPurchaseDetails, getAllPurchases, getInstitutePurchases, getMyPurchases, updatePurchase, deletePurchase, useWebinar, confirmPayment, getPurchaseStatistics, checkWebinarAvailability } from "../../controllers/purchased-webinar-package-controller.js";
+import { requireAdmin, requireInstitute, verifyOwnershipOrAdmin } from "../../middlewares/role-based-auth.js";
+import { createRazorpayOrder, verifyRazorpayPayment, getRazorpayPayment, refundRazorpayPayment } from "../../controllers/razorpay-controller.js";
 
 import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
@@ -562,6 +566,166 @@ router.get("/page/:stream/:level", getPageByStreamLevel);
 router.patch("/page/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updatePage);
 router.delete("/page/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deletePage);
 
+/**
+ * webinar-package routes (Admin operations)
+ */
+router.post(
+  "/webinar-package",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  requireAdmin,
+  createWebinarPackage
+);
+router.get("/webinar-packages", getWebinarPackages);
+router.get("/webinar-packages/active", getActiveWebinarPackages);
+router.get("/webinar-package/:id", getWebinarPackage);
+router.patch(
+  "/webinar-package/:id",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  requireAdmin,
+  updateWebinarPackage
+);
+router.delete(
+  "/webinar-package/:id",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  requireAdmin,
+  deleteWebinarPackage
+);
 
+/**
+ * purchased-webinar-package routes (Institute purchase operations)
+ */
+// Purchase a package
+router.post(
+  "/webinar-package/purchase",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  requireInstitute,
+  purchaseWebinarPackage
+);
+
+// Check webinar availability
+router.post(
+  "/webinar-purchase/check-availability",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  requireInstitute,
+  checkWebinarAvailability
+);
+
+// Get my purchases
+router.get(
+  "/my-webinar-purchases",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  requireInstitute,
+  getMyPurchases
+);
+
+// Get all purchases (Admin only)
+router.get(
+  "/webinar-purchases",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  requireAdmin,
+  getAllPurchases
+);
+
+// Get purchase statistics (Admin only)
+router.get(
+  "/webinar-purchases/stats",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  requireAdmin,
+  getPurchaseStatistics
+);
+
+// Get institute's purchases (Admin can view any, Institute can view own)
+router.get(
+  "/webinar-purchases/institute/:instituteId",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  verifyOwnershipOrAdmin("instituteId"),
+  getInstitutePurchases
+);
+
+// Get single purchase
+router.get(
+  "/webinar-purchase/:id",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  getPurchaseDetails
+);
+
+// Update purchase
+router.patch(
+  "/webinar-purchase/:id",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  updatePurchase
+);
+
+// Delete purchase
+router.delete(
+  "/webinar-purchase/:id",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  deletePurchase
+);
+
+// Use webinar
+router.post(
+  "/webinar-purchase/:purchaseId/use-webinar",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  useWebinar
+);
+
+// Confirm payment
+router.post(
+  "/webinar-purchase/:purchaseId/confirm-payment",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  confirmPayment
+);
+
+
+
+/**
+ * razorpay payment routes
+ */
+// Create Razorpay order
+router.post(
+  "/razorpay/create-order",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  createRazorpayOrder
+);
+
+// Verify payment signature
+router.post(
+  "/razorpay/verify-payment",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  verifyRazorpayPayment
+);
+
+// Get payment details
+router.get(
+  "/razorpay/payment/:paymentId",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  getRazorpayPayment
+);
+
+// Create refund
+router.post(
+  "/razorpay/refund/:paymentId",
+  accessTokenAutoRefresh,
+  passport.authenticate("jwt", { session: false }),
+  refundRazorpayPayment
+);
 
 export default router;

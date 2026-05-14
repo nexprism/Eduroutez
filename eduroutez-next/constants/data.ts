@@ -269,6 +269,20 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Webinar Purchases',
+    url: '/dashboard/webinar-packages/admin/purchases',
+    icon: 'creditCard',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'My Purchases',
+    url: '/dashboard/webinar-packages/my-purchases',
+    icon: 'product',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
     title: 'FAQs',
     url: '/dashboard/question-answer',
     icon: 'message-circle-question',

@@ -23,7 +23,7 @@ import {
   SidebarTrigger
 } from '@/components/ui/sidebar';
 import { navItems } from '@/constants/data';
-import { ChevronRight, GalleryVerticalEnd } from 'lucide-react';
+import { ChevronRight, GalleryVerticalEnd, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
@@ -56,12 +56,14 @@ export default function AppSidebar({
 
   // Read role synchronously on client and compute filtered nav items immediately
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+  const canCreateWebinarPackage = role === 'SUPER_ADMIN' || role === 'admin' || role === 'superadmin';
+  const canBrowseWebinarPackages = role === 'institute';
 
   const excludedTitles =
     role === 'institute'
       ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
         'Career', 'Review', 'Reviews', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots', 'Queries',
-        'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars']
+        'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars', 'Webinar Purchases']
       : role === 'counsellor'
         ? [
           'Institutes',
@@ -98,7 +100,8 @@ export default function AppSidebar({
           'Coupons',
           'Webinar',
           'Banner',
-          'Help And Support'
+          'Help And Support',
+          'Webinar Purchases'
         ]
         : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar", "SMS Templates",'Test Result'];
 
@@ -144,16 +147,25 @@ export default function AppSidebar({
     const allowedUrls = new Set(flattenUrls(computedFilteredNavItems).filter(Boolean));
     const allUrls = new Set(flattenUrls(navItems).filter(Boolean));
 
+    const isWebinarRouteAllowed =
+      (role === 'SUPER_ADMIN' || role === 'admin' || role === 'superadmin') &&
+      (pathname.startsWith('/dashboard/webinar-package') || pathname.startsWith('/dashboard/webinar-packages/admin')) ||
+      (role === 'institute' && (
+        pathname === '/dashboard/webinar-packages' ||
+        pathname.startsWith('/dashboard/webinar-packages/my-purchases') ||
+        pathname.startsWith('/dashboard/webinar-packages/purchase')
+      ));
+
     const matchesAny = (set: Set<string>) =>
       Array.from(set).some((url) => url && pathname.startsWith(url));
 
     const isNavUrl = matchesAny(allUrls);
-    const isAllowed = matchesAny(allowedUrls);
+    const isAllowed = matchesAny(allowedUrls) || isWebinarRouteAllowed;
 
     const adminOnlyUrls = ['/dashboard/counselor-verification', '/dashboard/counselor-question-sets'];
     const isAdminOnly = adminOnlyUrls.some((u) => pathname.startsWith(u));
 
-    if ((isNavUrl && !isAllowed) || (isAdminOnly && role !== 'SUPER_ADMIN')) {
+    if ((isNavUrl && !isAllowed) || (isAdminOnly && role !== 'SUPER_ADMIN' && role !== 'admin' && role !== 'superadmin')) {
       if (window.location.pathname !== '/dashboard') {
         window.location.replace('/dashboard');
       }
@@ -180,6 +192,26 @@ export default function AppSidebar({
               <span className="truncate text-xs">{company.plan}</span> */}
             </div>
           </div>
+          {canCreateWebinarPackage && (
+            <div className="px-2 pb-2">
+              <Button asChild className="w-full justify-start gap-2">
+                <Link href="/dashboard/webinar-package/create">
+                  <Plus className="h-4 w-4" />
+                  <span>Add Webinar Package</span>
+                </Link>
+              </Button>
+            </div>
+          )}
+          {canBrowseWebinarPackages && (
+            <div className="px-2 pb-2">
+              <Button asChild variant="outline" className="w-full justify-start gap-2">
+                <Link href="/dashboard/webinar-packages">
+                  <Plus className="h-4 w-4" />
+                  <span>Browse Webinar Packages</span>
+                </Link>
+              </Button>
+            </div>
+          )}
         </SidebarHeader>
         <SidebarContent className="overflow-x-hidden no-scrollbar">
           <SidebarGroup>
@@ -239,7 +271,7 @@ export default function AppSidebar({
                 );
               })}
               {/* Super-admin only links */}
-              {role === 'SUPER_ADMIN' && (
+              {(role === 'SUPER_ADMIN' || role === 'superadmin') && (
                 <>
                   <SidebarMenuItem key="Counselor Verification">
                     <SidebarMenuButton asChild tooltip="Counselor Verification">
