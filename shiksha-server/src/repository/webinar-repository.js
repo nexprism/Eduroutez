@@ -64,9 +64,7 @@ class WebinarRepository extends CrudRepository {
 
 
       if (!webinars || webinars.length === 0) {
-        const error = new Error("No webinars found for this user");
-        error.statusCode = 404;
-        throw error;
+        return [{ _id: null, count: 0 }];
       }
 
       return webinars;

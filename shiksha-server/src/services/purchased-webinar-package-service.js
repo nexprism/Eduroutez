@@ -325,6 +325,31 @@ class PurchasedWebinarPackageService {
       );
     }
   }
+
+  async useAnyAvailableWebinar(instituteId, count = 1) {
+    try {
+      const activePurchases = await this.purchasedRepository.getActivePurchases(instituteId);
+      const purchase = activePurchases.find((item) => item.remainingWebinars >= count);
+
+      if (!purchase) {
+        throw new AppError(
+          "No purchased webinar package has remaining webinars",
+          StatusCodes.BAD_REQUEST
+        );
+      }
+
+      return await this.purchasedRepository.decrementWebinars(purchase._id, count);
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new AppError(
+        error.message || "Error consuming webinar package",
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }
 
 export default PurchasedWebinarPackageService;

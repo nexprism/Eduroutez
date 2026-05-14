@@ -3,11 +3,15 @@ import path from "path";
 import { StatusCodes } from "http-status-codes";
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
+import AppError from "../utils/errors/app-error.js";
 import WebinarService from "../services/webinar-service.js";
 import UserService from "../services/user-service.js";
+import PurchasedWebinarPackageService from "../services/purchased-webinar-package-service.js";
+import Institute from "../models/Institute.js";
 const singleUploader = FileUpload.upload.single("image");
 const webinarService = new WebinarService();
 const usersevice = new UserService();
+const purchasedWebinarPackageService = new PurchasedWebinarPackageService();
 
 /**
  * POST : /webinar
@@ -22,6 +26,28 @@ export const createWebinar = async (req, res) => {
 
       const payload = { ...req.body };
       payload.image = req.file.filename;
+
+      const currentUser = req.user;
+      if (currentUser?.role === "institute") {
+        const institute = await Institute.findById(currentUser._id).populate("plan");
+        const webinarFeature = institute?.plan?.features?.find((feature) => feature.key === "Webinar");
+        const webinarLimit = parseInt(webinarFeature?.value || "0", 10) || 0;
+
+        const monthlyWebinarCountResponse = await webinarService.getMonthlyWebinarCount(currentUser);
+        const monthlyWebinarCount = monthlyWebinarCountResponse?.[0]?.count || 0;
+        const subscriptionRemaining = Math.max(webinarLimit - monthlyWebinarCount, 0);
+
+        if (subscriptionRemaining <= 0) {
+          try {
+            await purchasedWebinarPackageService.useAnyAvailableWebinar(currentUser._id, 1);
+          } catch (packageError) {
+            throw new AppError(
+              "Your webinar quota is exhausted. Please buy a webinar package to create more webinars.",
+              StatusCodes.PAYMENT_REQUIRED
+            );
+          }
+        }
+      }
 
       const response = await webinarService.create(payload);
 

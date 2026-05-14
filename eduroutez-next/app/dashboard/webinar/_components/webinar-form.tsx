@@ -6,6 +6,7 @@ import * as z from 'zod';
 import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import axiosInstance from '@/lib/axios';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
@@ -18,7 +19,7 @@ import {
 } from '@/components/ui/form';
 
 import { Input } from '@/components/ui/input';
-import { X, Plus, Rocket, Lock } from 'lucide-react';
+import { X, Plus, Rocket, Lock, Loader } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -83,9 +84,8 @@ export default function WebinarForm() {
   const pathname = usePathname();
   const segments = pathname.split('/');
   const [isEdit, setIsEdit] = React.useState(false);
-  const [isWebinarEnabled, setIsWebinarEnabled] = useState(false);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const [role, setRole] = useState<string | null>(null);
+  const [instituteId, setInstituteId] = useState<string | null>(null);
 
 
   React.useEffect(() => {
@@ -219,42 +219,69 @@ export default function WebinarForm() {
   }, [category, form]);
   useEffect(() => {
     const storedRole = localStorage.getItem('role');
+    const storedInstituteId = localStorage.getItem('instituteId');
     setRole(storedRole);
+    setInstituteId(storedInstituteId);
   }, []);
 
-  // Fetch institute data and check webinar feature only for institute role
-  useEffect(() => {
-    if (role !== 'institute') return;
+  const { data: instituteData, isLoading: isInstituteLoading } = useQuery({
+    queryKey: ['webinar-form-institute', instituteId],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/institute/${instituteId}`);
+      return response.data.data;
+    },
+    enabled: role === 'institute' && !!instituteId,
+  });
 
-    const fetchInstituteData = async () => {
-      const id = localStorage.getItem('instituteId');
-      try {
-        const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
-        const instituteData = response.data.data;
-  
-        const plan = instituteData.plan;
-        const webinarFeature = plan.features.find(
-          (feature: any) => feature.key === 'Webinar'
-        );
-  
-        // Enable form only if webinar feature value is "Yes"
-        setIsWebinarEnabled(webinarFeature?.value !== "0");
-      } catch (error) {
-        console.log("Error fetching institute data:", error);
-        setIsWebinarEnabled(false);
-      }
-    };
-  
-    fetchInstituteData();
-  }, [role]);
+  const { data: monthlyWebinarCount, isLoading: isMonthlyWebinarCountLoading } = useQuery({
+    queryKey: ['monthly-webinar-count', instituteId],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/monthly-webinar-count/${instituteId}`);
+      return response.data?.data?.[0]?.count || 0;
+    },
+    enabled: role === 'institute' && !!instituteId,
+  });
 
-  if (role === 'institute' && !isWebinarEnabled) {
+  const { data: activePurchases, isLoading: isActivePurchasesLoading } = useQuery({
+    queryKey: ['active-webinar-purchases', instituteId],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/my-webinar-purchases', {
+        params: { onlyActive: true }
+      });
+      return response.data?.data || [];
+    },
+    enabled: role === 'institute' && !!instituteId,
+  });
+
+  const webinarFeature = instituteData?.plan?.features?.find(
+    (feature: any) => feature.key === 'Webinar'
+  );
+  const webinarLimit = Number(webinarFeature?.value || 0);
+  const monthlyCount = Number(monthlyWebinarCount || 0);
+  const subscriptionRemaining = Math.max(webinarLimit - monthlyCount, 0);
+  const packageRemaining = (activePurchases || []).reduce(
+    (sum: number, purchase: any) => sum + (purchase.remainingWebinars || 0),
+    0
+  );
+  const canCreateWebinar = role !== 'institute' || subscriptionRemaining > 0 || packageRemaining > 0;
+  const shouldPromptPurchase = role === 'institute' && subscriptionRemaining <= 0 && packageRemaining <= 0;
+  const isQuotaLoading = role === 'institute' && (isInstituteLoading || isMonthlyWebinarCountLoading || isActivePurchasesLoading);
+
+  if (isQuotaLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (shouldPromptPurchase) {
     return (
       <div className="container mx-auto py-12">
         <Card className="max-w-md mx-auto text-center">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-gray-800">
-              Webinar Feature Locked
+              Webinar Quota Reached
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -262,17 +289,17 @@ export default function WebinarForm() {
               <Lock className="text-yellow-500 w-16 h-16" />
             </div>
             <p className="text-gray-600">
-              Webinar creation is not available in your current plan.
+              Your subscription webinar limit is exhausted and you do not have any active webinar package left.
             </p>
             <div className="flex items-center">
               <Rocket className="mr-2 text-purple-500" size={20} />
-              Unlock advanced features with a plan upgrade
+              Buy a webinar package to continue creating webinars
             </div>
-            <Button 
-              onClick={() => window.location.href = '/dashboard/subscription'}
+            <Button
+              asChild
               className="w-full bg-blue-600 hover:bg-blue-700"
             >
-              Upgrade Plan
+              <Link href="/dashboard/webinar-packages">Buy Webinar Package</Link>
             </Button>
           </CardContent>
         </Card>
@@ -284,6 +311,25 @@ export default function WebinarForm() {
 
   return (
     <div className="container mx-auto space-y-6 py-6">
+      {role === 'institute' && (
+        <Card className="mx-auto w-full border-dashed">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Webinar quota status</p>
+              <p className="text-sm">
+                Subscription remaining: <span className="font-semibold">{subscriptionRemaining}</span>
+                {webinarLimit > 0 ? ` / ${webinarLimit}` : ''}
+                {' '}| Package balance: <span className="font-semibold">{packageRemaining}</span>
+              </p>
+            </div>
+            {subscriptionRemaining <= 0 && (
+              <Button asChild variant="outline">
+                <Link href="/dashboard/webinar-packages">Buy Webinar Package</Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
       <Card className="mx-auto w-full">
         <CardHeader>
           <CardTitle className="text-left text-2xl font-bold">
@@ -436,7 +482,7 @@ export default function WebinarForm() {
               </div>
 
               <div className="flex justify-end">
-                <Button type="submit" disabled={isPending}>
+                <Button type="submit" disabled={isPending || !canCreateWebinar}>
                   {isEdit ? 'Update' : 'Create'}
                 </Button>
               </div>
