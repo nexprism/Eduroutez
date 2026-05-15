@@ -60,7 +60,7 @@ export default function AppSidebar({
   const excludedTitles =
     role === 'institute'
       ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
-        'Career', 'Review', 'Reviews', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots', 'Queries',
+        'Career', 'Review', 'Reviews', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots',
         'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars']
       : role === 'counsellor'
         ? [
@@ -100,7 +100,7 @@ export default function AppSidebar({
           'Banner',
           'Help And Support'
         ]
-        : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar", "SMS Templates",'Test Result'];
+        : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Banner", "Webinar", "SMS Templates", 'Test Result'];
 
   const computedFilteredNavItems = navItems.filter(
     (item) => !excludedTitles.includes(item.title)

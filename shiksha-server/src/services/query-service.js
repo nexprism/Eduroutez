@@ -18,7 +18,7 @@ class questionAnswerService {
         data.instituteIds = [data.instituteId];
         delete data.instituteId;
       }
-      
+
       const questionAnswer = await this.queryRepository.create(data);
       return questionAnswer;
     } catch (error) {
@@ -27,10 +27,10 @@ class questionAnswerService {
   }
   async getAll(query) {
     try {
-      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}", select = "{}",groupBy = "{}" } = query;
+      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}", select = "{}", groupBy = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
-      
+
       // Parse JSON strings from query parameters to objects
       const parsedFilters = JSON.parse(filters);
       const parsedSearchFields = JSON.parse(searchFields);
@@ -39,7 +39,7 @@ class questionAnswerService {
       const parsedGroupBy = JSON.parse(groupBy);
 
       // Build filter conditions for multiple fields
-    const filterConditions = { deletedAt: null };
+      const filterConditions = { deletedAt: null };
 
       for (const [key, value] of Object.entries(parsedFilters)) {
         filterConditions[key] = value;
@@ -63,17 +63,17 @@ class questionAnswerService {
       // Execute query with dynamic filters, sorting, and pagination
       const populateFields = ["instituteIds"];
 
-      if(parsedGroupBy && parsedGroupBy.length > 0){
+      if (parsedGroupBy && parsedGroupBy.length > 0) {
         const questionAnswers = await this.queryRepository.getTrendingStreams(filterConditions, sortConditions, pageNum, limitNum, populateFields, parsedSelect, parsedGroupBy);
         return questionAnswers;
 
-      }else{
-         const questionAnswers = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
-         return questionAnswers;
+      } else {
+        const questionAnswers = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+        return questionAnswers;
       }
 
       // console.log("questionAnswers",questionAnswers);
-      
+
 
     } catch (error) {
       throw new AppError("Cannot fetch data of all the questionAnswers", StatusCodes.INTERNAL_SERVER_ERROR);
@@ -87,14 +87,14 @@ class questionAnswerService {
 
   //QueryAllocation
   async QueryAllocation(data) {
-    
-      const questionAnswer = await this.queryRepository.QueryAllocation(data);
-      return questionAnswer;
-    
+
+    const questionAnswer = await this.queryRepository.QueryAllocation(data);
+    return questionAnswer;
+
   }
 
   //getByInstitute
-  async getByInstitute(id,query) {
+  async getByInstitute(id, query) {
 
     console.log("req.params.id", id);
     console.log("req.query", query);
@@ -102,17 +102,14 @@ class questionAnswerService {
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
 
-    
-
     // Parse JSON strings from query parameters to objects
     const parsedFilters = JSON.parse(filters);
     const parsedSearchFields = JSON.parse(searchFields);
     const parsedSort = JSON.parse(sort);
 
-    parsedFilters.institute = id;
-
+    // Filter Query documents where instituteIds array contains this institute
     // Build filter conditions for multiple fields
-  const filterConditions = { deletedAt: null };
+    const filterConditions = { deletedAt: null, instituteIds: id };
 
     for (const [key, value] of Object.entries(parsedFilters)) {
       filterConditions[key] = value;
@@ -133,10 +130,10 @@ class questionAnswerService {
       sortConditions[field] = direction === "asc" ? 1 : -1;
     }
 
-    // Execute query with dynamic filters, sorting, and pagination
-    const populateFields = ["query"];
-    const questionAnswer = await this.queryAllocationRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
-    return questionAnswer
+    // Query the Query collection directly (instituteIds is stored on Query docs)
+    const populateFields = ["instituteIds"];
+    const questionAnswer = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+    return questionAnswer;
   }
 
   async update(id, data) {
