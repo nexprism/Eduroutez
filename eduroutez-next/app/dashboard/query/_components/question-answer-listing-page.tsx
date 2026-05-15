@@ -70,19 +70,18 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
         };
       } else {
         const transformedData = (response.data?.data?.result || []).map((item: any) => {
-          const queryData = item.query || item;
           return {
-            id: queryData._id,
-            name: queryData.name,
-            email: queryData.email,
-            phoneNo: queryData.phoneNo,
-            city: queryData.city,
-            queryRelatedTo: queryData.queryRelatedTo,
-            query: queryData.query,
+            id: item._id,
+            name: item.name,
+            email: item.email,
+            phoneNo: item.phoneNo,
+            city: item.city,
+            queryRelatedTo: item.queryRelatedTo,
+            query: item.query,
             status: item.status,
-            createdAt: queryData.createdAt,
-            updatedAt: queryData.updatedAt,
-            instituteIds: queryData.instituteIds || queryData.instituteId || []
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+            instituteIds: item.instituteIds || []
           };
         });
 
