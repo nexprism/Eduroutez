@@ -94,7 +94,7 @@ class questionAnswerService {
   }
 
   //getByInstitute
-  async getByInstitute(id,query) {
+  async getByInstitute(id, query) {
 
     console.log("req.params.id", id);
     console.log("req.query", query);
@@ -102,17 +102,14 @@ class questionAnswerService {
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
 
-    
-
     // Parse JSON strings from query parameters to objects
     const parsedFilters = JSON.parse(filters);
     const parsedSearchFields = JSON.parse(searchFields);
     const parsedSort = JSON.parse(sort);
 
-    parsedFilters.institute = id;
-
+    // Filter Query documents where instituteIds array contains this institute
     // Build filter conditions for multiple fields
-  const filterConditions = { deletedAt: null };
+    const filterConditions = { deletedAt: null, instituteIds: id };
 
     for (const [key, value] of Object.entries(parsedFilters)) {
       filterConditions[key] = value;
@@ -133,10 +130,10 @@ class questionAnswerService {
       sortConditions[field] = direction === "asc" ? 1 : -1;
     }
 
-    // Execute query with dynamic filters, sorting, and pagination
-    const populateFields = ["query"];
-    const questionAnswer = await this.queryAllocationRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
-    return questionAnswer
+    // Query the Query collection directly (instituteIds is stored on Query docs)
+    const populateFields = ["instituteIds"];
+    const questionAnswer = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+    return questionAnswer;
   }
 
   async update(id, data) {
