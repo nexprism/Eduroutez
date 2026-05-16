@@ -49,6 +49,16 @@ const formSchema = z.object({
   }),
   date: z.string().nonempty({
     message: 'Date is required.'
+  }).refine((val) => {
+    const [year, month, day] = val.split('-').map(Number);
+    const selectedDate = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minDate = new Date(today);
+    minDate.setDate(today.getDate() + 21);
+    return selectedDate >= minDate;
+  }, {
+    message: 'Webinar must be scheduled at least 21 days in advance.'
   }),
   duration: z.string().nonempty({
     message: 'Duration is required.'
@@ -134,8 +144,9 @@ export default function WebinarForm() {
       setPreviewImageUrl(null);
       router.push('/dashboard/webinar');
     },
-    onError: () => {
-      toast.error('Something went wrong');
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.error?.explanation || error.response?.data?.message || 'Something went wrong';
+      toast.error(errorMessage);
     }
   });
 

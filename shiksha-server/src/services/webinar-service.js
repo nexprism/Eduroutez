@@ -2,6 +2,8 @@ import { WebinarRepository } from "../repository/index.js";
 import { InstituteRepository } from "../repository/index.js";
 import User from "../models/User.js";
 import Institute from "../models/Institute.js";
+import { StatusCodes } from "http-status-codes";
+import AppError from "../utils/errors/app-error.js";
 
 class WebinarService {
   constructor() {
@@ -12,6 +14,18 @@ class WebinarService {
 
   async create(data) {
     try {
+      if (data.date) {
+        const webinarDate = new Date(data.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const minDate = new Date(today);
+        minDate.setDate(today.getDate() + 21);
+
+        if (webinarDate < minDate) {
+          throw new AppError("Webinar must be scheduled at least 21 days in advance", StatusCodes.BAD_REQUEST);
+        }
+      }
       const webinar = await this.webinarRepository.create(data);
       return webinar;
     } catch (error) {
@@ -133,6 +147,18 @@ class WebinarService {
   }
   async update(id, data) {
     try {
+      if (data.date) {
+        const webinarDate = new Date(data.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const minDate = new Date(today);
+        minDate.setDate(today.getDate() + 21);
+
+        if (webinarDate < minDate) {
+          throw new AppError("Webinar must be scheduled at least 21 days in advance", StatusCodes.BAD_REQUEST);
+        }
+      }
       const webinar = await this.webinarRepository.update(id, data);
       return webinar;
     } catch (error) {
