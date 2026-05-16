@@ -3,6 +3,10 @@ import { applySoftDelete } from "../middlewares/softDelete.js";
 
 const studentSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     name: {
       type: String,
       // required: true,
@@ -161,6 +165,10 @@ const studentSchema = new mongoose.Schema(
     },
     referralCode: {
       type: String,
+    },
+    walletBalance: {
+      type: Number,
+      default: 0,
     },
     status: {
       type: Boolean,

@@ -29,11 +29,11 @@ const userSchema = new mongoose.Schema(
     image: {
       type: String,
     },
-    plan:{
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Subscription",
-          default:"67921a8896ff8884c3a795a7"
-        },
+    plan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription",
+      default: "67921a8896ff8884c3a795a7"
+    },
     planName: {
       type: String,
       default: "Free Plan"
@@ -42,11 +42,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       //set defualt 1 motnth from now
       default: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-      
+
     },
     role: {
       type: String,
-      enum: ["admin", "SUPER_ADMIN","student","institute","counsellor"], // "STUDENT", "COUNSELOR", "INSTITUTE",  they have thier different tables
+      enum: ["admin", "SUPER_ADMIN", "student", "institute", "counsellor"], // "STUDENT", "COUNSELOR", "INSTITUTE",  they have thier different tables
       default: "student",
     },
     access: [
@@ -118,7 +118,7 @@ const userSchema = new mongoose.Schema(
           return null;
         }
       }
-      
+
     },
     commission: {
       type: Number,
@@ -128,7 +128,7 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-  about: {
+    about: {
       type: String,
     },
     // Scheduled test fields for counsellor role
@@ -166,7 +166,13 @@ const userSchema = new mongoose.Schema(
         ref: "Institute",
       },
     ],
-
+    earnedCoupons: [
+      {
+        code: String,
+        description: String,
+        earnedAt: { type: Date, default: Date.now }
+      }
+    ]
   },
   { timestamps: true }
 );

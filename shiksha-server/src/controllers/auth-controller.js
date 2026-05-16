@@ -451,6 +451,7 @@ export const signup = async (req, res) => {
         country: req.body.country,
         state: req.body.state,
         city: req.body.city,
+        referralCode: referalCode,
       };
 
       const studentResponse = await studentService.create(studentPayload);

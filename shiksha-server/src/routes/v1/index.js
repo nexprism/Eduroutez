@@ -43,6 +43,7 @@ import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, up
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ, getFAQsByInstitute } from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage, getPageByStreamLevel } from "../../controllers/customPage-controller.js";
 import { createQuestionSet, getAllQuestionSets, getRandomTestSet, submitTestResult, getPendingVerifications, verifyCounselor, rejectCounselor, recordPayment, getLatestTestResult } from "../../controllers/counselor-test-controller.js";
+import { setBankDetails, validateReferralCode, generateReferralCode, bookWebinar, markAttendanceAndCreditReferrer, redeemEarnings } from "../../controllers/student-flow-controller.js";
 import { createWebinarPackage, getWebinarPackage, getWebinarPackages, getActiveWebinarPackages, updateWebinarPackage, deleteWebinarPackage } from "../../controllers/webinar-package-controller.js";
 import { purchaseWebinarPackage, getPurchaseDetails, getAllPurchases, getInstitutePurchases, getMyPurchases, updatePurchase, deletePurchase, useWebinar, confirmPayment, getPurchaseStatistics, checkWebinarAvailability } from "../../controllers/purchased-webinar-package-controller.js";
 import { requireAdmin, requireInstitute, verifyOwnershipOrAdmin } from "../../middlewares/role-based-auth.js";
@@ -290,6 +291,16 @@ router.patch("/counselorslots/:id", accessTokenAutoRefresh, passport.authenticat
 router.delete("/counselorslot/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCounselorSlot);
 
 /**
+ * Student Webinar & Referral Flow
+ */
+router.patch("/student/bank-details", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), setBankDetails);
+router.post("/student/validate-referral", validateReferralCode);
+router.post("/student/generate-referral", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), generateReferralCode);
+router.post("/webinar/book", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), bookWebinar);
+router.post("/webinar/mark-attendance", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), markAttendanceAndCreditReferrer);
+router.post("/student/redeem", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), redeemEarnings);
+
+/**
  * student routes
  */
 router.post("/student", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createStudent);
@@ -470,6 +481,7 @@ router.get("/users", UserMiddleware.validateGetAllRequest, accessTokenAutoRefres
 //get my refferal api
 router.get("/counselors", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getCounselors);
 router.get("/my-refferal", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyRefferal);
+router.get("/my-referral", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyRefferal);
 router.get("/my-coupons", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyCoupons);
 router.get("/all-refferal", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getAllRefferal);
 //get-eaarning-reports

@@ -266,9 +266,11 @@ export async function getMyRefferal(req, res) {
   try {
     const userId = req.user._id;
     const response = await userService.getMyRefferal(userId);
-    SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully fetched the user";
-    return res.status(StatusCodes.OK).json(SuccessResponse);
+    return res.status(StatusCodes.OK).json({
+        success: true,
+        message: "Successfully fetched the referral history",
+        data: response
+    });
   } catch (error) {
     ErrorResponse.error = error;
     console.error('Error in getMyRefferal:', error.message);

@@ -203,7 +203,7 @@ class UserService {
         var numbers = phone;
         var schedule_time = "";
         var url = 'https://www.fast2sms.com/dev/bulkV2?authorization=' + process.env.FAST2SMS_API_KEY + '&route=' + route + '&sender_id=' + sender_id + '&message=' + message + '&variables_values=' + variables_values + '&numbers=' + numbers + '&schedule_time=' + schedule_time;
-        
+
         const response = await axios.get(url);
         smsResponse = response;
         if (response.data.return === true) {
@@ -216,8 +216,8 @@ class UserService {
       if (email) {
         try {
           // Also cache OTP by email so it can be verified either way
-          this.saveOtp(otp, email); 
-          
+          this.saveOtp(otp, email);
+
           const subject = "Your Eduroutez OTP";
           const html = `
             <div style="font-family: Arial, sans-serif; color: #333;">
@@ -237,13 +237,13 @@ class UserService {
 
       // Return success if either SMS or Email worked
       if (smsResponse.data.return || emailSent) {
-        return { 
-          data: { 
-            return: true, 
+        return {
+          data: {
+            return: true,
             message: "OTP sent successfully",
             smsSent: smsResponse.data.return,
             emailSent: emailSent
-          } 
+          }
         };
       }
 
@@ -259,7 +259,11 @@ class UserService {
   //getUserByReferalCode
   async getUserByReferalCode(referalCode) {
     try {
-      const user = await this.userRepository.findBy({ referalCode });
+      // Check both 'referalCode' (single r) and 'referralCode' (double r)
+      let user = await this.userRepository.findBy({ referalCode });
+      if (!user) {
+        user = await this.userRepository.findBy({ referralCode: referalCode });
+      }
       return user;
     } catch (error) {
       throw error;
@@ -308,9 +312,9 @@ class UserService {
     }
 
     // Check if there is a matching email verification OTP
-    const emailVerification = await this.emailVerificationRepository.findBy({ 
-      userId: existingUser._id, 
-      otp: otp.toString() 
+    const emailVerification = await this.emailVerificationRepository.findBy({
+      userId: existingUser._id,
+      otp: otp.toString()
     });
 
     if (!emailVerification) {
@@ -323,7 +327,7 @@ class UserService {
     const currentTime = new Date();
     // 90 * 1000 calculates the expiration period in milliseconds (90 seconds).
     const expirationTime = new Date(emailVerification.createdAt.getTime() + 90 * 1000);
-    
+
     if (currentTime > expirationTime) {
       // OTP expired, send new OTP
       await sendEmailVerificationOTP(null, existingUser);
@@ -336,7 +340,7 @@ class UserService {
 
     // Delete all email verification documents for this user
     await EmailVerification.deleteMany({ userId: existingUser._id });
-    
+
     return true;
   }
 
@@ -437,7 +441,7 @@ class UserService {
       }
 
       const decoded = Token.verifyResetToken(token);
-      
+
       // Security check: Verify the token belongs to the user
       if (decoded.userID && decoded.userID.toString() !== id.toString()) {
         throw new Error("Invalid token for this user");
@@ -447,11 +451,11 @@ class UserService {
 
       const hashedPassword = this.hashPassword(password);
       const updatedUser = await this.userRepository.update(id, { password: hashedPassword });
-      
+
       if (!updatedUser) {
         throw new Error("Failed to update password");
       }
-      
+
       console.log('Password successfully reset via token for user:', id);
     } catch (error) {
       console.error('Error in userPasswordReset:', error.message);
@@ -462,7 +466,7 @@ class UserService {
   async resetPasswordWithOtp(phoneOrEmail, otp, newPassword, email) {
     try {
       let query = {};
-      
+
       // 1. Identify the user first to get their registered phone number
       if (email) {
         query.email = email;
@@ -487,14 +491,14 @@ class UserService {
       }
 
       console.log('Resetting password for user:', user._id, 'Email:', user.email);
-      
+
       const hashedPassword = this.hashPassword(newPassword);
       const updatedUser = await this.userRepository.update(user._id, { password: hashedPassword });
-      
+
       if (!updatedUser) {
         throw new Error("Failed to update password in database");
       }
-      
+
       console.log('Password successfully updated for user:', updatedUser._id);
       return updatedUser;
     } catch (error) {
