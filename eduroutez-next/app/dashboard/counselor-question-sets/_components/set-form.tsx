@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,7 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trash2, Plus, ArrowLeft } from 'lucide-react';
+import { Trash2, Plus, ArrowLeft, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';
@@ -37,9 +38,15 @@ const formSchema = z.object({
     timeLimit: z.number().default(25)
 });
 
-export default function QuestionSetForm() {
+type QuestionSetFormProps = {
+    questionSetId?: string;
+};
+
+export default function QuestionSetForm({ questionSetId }: QuestionSetFormProps) {
     const router = useRouter();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const isEditMode = !!questionSetId;
+    const [isFetching, setIsFetching] = useState(isEditMode);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -67,16 +74,67 @@ export default function QuestionSetForm() {
         name: 'questions'
     });
 
+    // Fetch existing data in edit mode
+    useEffect(() => {
+        if (!isEditMode) return;
+        const fetchData = async () => {
+            try {
+                const res = await axiosInstance.get(`${apiUrl}/question-set/${questionSetId}`);
+                const data = res.data?.data;
+                if (data) {
+                    form.reset({
+                        setName: data.setName || '',
+                        totalQuestions: data.totalQuestions || 50,
+                        timeLimit: data.timeLimit || 25,
+                        questions: data.questions?.map((q: any) => ({
+                            questionText: q.questionText || '',
+                            explanation: q.explanation || '',
+                            options: q.options?.map((opt: any) => ({
+                                optionText: opt.optionText || '',
+                                isCorrect: opt.isCorrect || false
+                            })) || []
+                        })) || []
+                    });
+                }
+            } catch (error: any) {
+                toast.error('Failed to fetch question set data');
+                router.push('/dashboard/counselor-question-sets');
+            } finally {
+                setIsFetching(false);
+            }
+        };
+        fetchData();
+    }, [questionSetId, isEditMode]);
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            const response = await axiosInstance.post(`${apiUrl}/question-set`, values);
-            if (response.data.success) {
-                toast.success('Question set created successfully!');
-                router.push('/dashboard/counselor-question-sets');
+            if (isEditMode) {
+                const response = await axiosInstance.patch(`${apiUrl}/question-set/${questionSetId}`, values);
+                if (response.data.success) {
+                    toast.success('Question set updated successfully!');
+                    router.push('/dashboard/counselor-question-sets');
+                }
+            } else {
+                const response = await axiosInstance.post(`${apiUrl}/question-set`, values);
+                if (response.data.success) {
+                    toast.success('Question set created successfully!');
+                    router.push('/dashboard/counselor-question-sets');
+                }
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to create question set');
+            toast.error(error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} question set`);
         }
+    }
+
+    if (isFetching) {
+        return (
+            <PageContainer>
+                <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <span className="ml-2 text-muted-foreground">Loading question set...</span>
+                </div>
+            </PageContainer>
+        );
     }
 
     return (
@@ -86,7 +144,10 @@ export default function QuestionSetForm() {
                     <Button variant="outline" size="icon" onClick={() => router.back()}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <Heading title="Create Question Set" description="Add a new 50-question set for counselor certification." />
+                    <Heading
+                        title={isEditMode ? 'Edit Question Set' : 'Create Question Set'}
+                        description={isEditMode ? 'Modify the existing question set.' : 'Add a new 50-question set for counselor certification.'}
+                    />
                 </div>
                 <Separator />
 
@@ -165,7 +226,7 @@ export default function QuestionSetForm() {
                                 <Card key={field.id}>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                         <CardTitle className="text-sm font-medium">Question {index + 1}</CardTitle>
-                                        <Button variant="ghost" size="sm" onClick={() => removeQuestion(index)}>
+                                        <Button variant="ghost" size="sm" type="button" onClick={() => removeQuestion(index)}>
                                             <Trash2 className="h-4 w-4 text-destructive" />
                                         </Button>
                                     </CardHeader>
@@ -195,7 +256,6 @@ export default function QuestionSetForm() {
                                                                 type="radio"
                                                                 checked={field.value}
                                                                 onChange={() => {
-                                                                    // Set this option to correct and others to false
                                                                     const options = form.getValues(`questions.${index}.options`);
                                                                     options.forEach((_, i) => form.setValue(`questions.${index}.options.${i}.isCorrect`, i === optIndex));
                                                                 }}
@@ -236,7 +296,10 @@ export default function QuestionSetForm() {
                             ))}
                         </div>
 
-                        <Button type="submit" className="w-full">Create Question Set</Button>
+                        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isEditMode ? 'Update Question Set' : 'Create Question Set'}
+                        </Button>
                     </form>
                 </Form>
             </div>
