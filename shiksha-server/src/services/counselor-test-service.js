@@ -60,6 +60,46 @@ class CounselorTestService {
         }
     }
 
+    async getQuestionSetById(id) {
+        try {
+            const result = await this.questionSetRepository.model.findById(id);
+            if (!result) {
+                throw new AppError("Question set not found", StatusCodes.NOT_FOUND);
+            }
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateQuestionSet(id, data) {
+        try {
+            const result = await this.questionSetRepository.model.findByIdAndUpdate(
+                id,
+                { $set: data },
+                { new: true, runValidators: true }
+            );
+            if (!result) {
+                throw new AppError("Question set not found", StatusCodes.NOT_FOUND);
+            }
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async deleteQuestionSet(id) {
+        try {
+            const result = await this.questionSetRepository.model.findByIdAndDelete(id);
+            if (!result) {
+                throw new AppError("Question set not found", StatusCodes.NOT_FOUND);
+            }
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     // Counselor: Get random test set
     async getRandomTestSet() {
         try {
@@ -210,9 +250,9 @@ class CounselorTestService {
 
             // Update test result verification status
             if (testResult) {
-                await this.testResultRepository.update(testResult._id, { 
-                    adminVerified: true, 
-                    verifiedAt: new Date() 
+                await this.testResultRepository.update(testResult._id, {
+                    adminVerified: true,
+                    verifiedAt: new Date()
                 });
             }
 
@@ -275,9 +315,9 @@ class CounselorTestService {
             // Update test result verification status (marking it as reviewed/verified by admin even if rejected)
             const testResult = await this.testResultRepository.getByCounselor(counselorId);
             if (testResult) {
-                await this.testResultRepository.update(testResult._id, { 
-                    adminVerified: true, 
-                    verifiedAt: new Date() 
+                await this.testResultRepository.update(testResult._id, {
+                    adminVerified: true,
+                    verifiedAt: new Date()
                 });
             }
 

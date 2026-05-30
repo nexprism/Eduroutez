@@ -112,6 +112,45 @@ export const getAllQuestionSets = async (req, res) => {
     }
 };
 
+// Superadmin: Update Question Set
+export const updateQuestionSet = async (req, res) => {
+    try {
+        const response = await counselorTestService.updateQuestionSet(req.params.id, req.body);
+        SuccessResponse.data = response;
+        SuccessResponse.message = "Successfully updated question set";
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.status(error.statusCode || 500).json(ErrorResponse);
+    }
+};
+
+// Superadmin: Delete Question Set
+export const deleteQuestionSet = async (req, res) => {
+    try {
+        const response = await counselorTestService.deleteQuestionSet(req.params.id);
+        SuccessResponse.data = response;
+        SuccessResponse.message = "Successfully deleted question set";
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.status(error.statusCode || 500).json(ErrorResponse);
+    }
+};
+
+// Superadmin: Get Single Question Set by ID
+export const getQuestionSetById = async (req, res) => {
+    try {
+        const response = await counselorTestService.getQuestionSetById(req.params.id);
+        SuccessResponse.data = response;
+        SuccessResponse.message = "Successfully fetched question set";
+        return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+        ErrorResponse.error = error;
+        return res.status(error.statusCode || 500).json(ErrorResponse);
+    }
+};
+
 // Counselor: Get Random Question Set for Test
 export const getRandomTestSet = async (req, res) => {
     try {
