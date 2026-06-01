@@ -356,6 +356,16 @@ console.log('Error updating institute:', error.message); }
   const handleMultipleImageChange = async (event: any) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
+
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].size > 30 * 1024) {
+        toast.error(`Gallery image "${files[i].name}" exceeds the 30 KB limit.`);
+        if (multipleFileInputRef.current) {
+          multipleFileInputRef.current.value = '';
+        }
+        return;
+      }
+    }
   
     // Show temporary previews of selected images
     const previewArray = Array.from(files).map((file: any) => URL.createObjectURL(file));

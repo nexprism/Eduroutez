@@ -73,8 +73,8 @@ export const profileSchema = z.object({
   panCard: z
     .instanceof(File)
     .optional()
-    .refine((file) => !file || file.size <= 1024 * 1024, {
-      message: 'Image size must be less than 1 MB.'
+    .refine((file) => !file || file.size <= 3 * 1024, {
+      message: 'Image size must be less than 3 KB.'
     })
     .refine(
       (file) => !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
@@ -85,8 +85,8 @@ export const profileSchema = z.object({
   adharCard: z
     .instanceof(File)
     .optional()
-    .refine((file) => !file || file.size <= 1024 * 1024, {
-      message: 'Image size must be less than 1 MB.'
+    .refine((file) => !file || file.size <= 3 * 1024, {
+      message: 'Image size must be less than 3 KB.'
     })
     .refine(
       (file) => !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type),
@@ -97,8 +97,8 @@ export const profileSchema = z.object({
   profilePhoto: z
     .instanceof(File)
     .optional()
-    .refine((file) => !file || file.size <= 1024 * 1024, {
-      message: 'Image size must be less than 1 MB.'
+    .refine((file) => !file || file.size <= 3 * 1024, {
+      message: 'Image size must be less than 3 KB.'
     })
     .refine(
       (file) =>
@@ -107,14 +107,30 @@ export const profileSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
-  certificate: z.instanceof(File).optional(),
-  achievements: z.instanceof(File).optional(),
-  marksheet10th: z.instanceof(File).optional(),
-  marksheet12th: z.instanceof(File).optional(),
-  graduationCertificate: z.instanceof(File).optional(),
-  postGraduationCertificate: z.instanceof(File).optional(),
-  experienceLetter: z.instanceof(File).optional(),
-  eduRouteCertificate: z.instanceof(File, { message: 'Upload EduRoute Certificate' }).optional(),
+  certificate: z.instanceof(File).optional().refine((file) => !file || file.size <= 3 * 1024, {
+    message: 'File size must be less than 3 KB.'
+  }),
+  achievements: z.instanceof(File).optional().refine((file) => !file || file.size <= 3 * 1024, {
+    message: 'File size must be less than 3 KB.'
+  }),
+  marksheet10th: z.instanceof(File).optional().refine((file) => !file || file.size <= 3 * 1024, {
+    message: 'File size must be less than 3 KB.'
+  }),
+  marksheet12th: z.instanceof(File).optional().refine((file) => !file || file.size <= 3 * 1024, {
+    message: 'File size must be less than 3 KB.'
+  }),
+  graduationCertificate: z.instanceof(File).optional().refine((file) => !file || file.size <= 3 * 1024, {
+    message: 'File size must be less than 3 KB.'
+  }),
+  postGraduationCertificate: z.instanceof(File).optional().refine((file) => !file || file.size <= 3 * 1024, {
+    message: 'File size must be less than 3 KB.'
+  }),
+  experienceLetter: z.instanceof(File).optional().refine((file) => !file || file.size <= 3 * 1024, {
+    message: 'File size must be less than 3 KB.'
+  }),
+  eduRouteCertificate: z.instanceof(File, { message: 'Upload EduRoute Certificate' }).optional().refine((file) => !file || file.size <= 3 * 1024, {
+    message: 'File size must be less than 3 KB.'
+  }),
   about: z.string().optional(),
   experiences: z.array(
     z.object({
@@ -821,6 +837,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const handlePanCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 3 * 1024) {
+        toast.error('File size must be less than 3 KB.');
+        removePanCard();
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewPanCardUrl(reader.result as string);
@@ -848,6 +869,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const handleAdharCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 3 * 1024) {
+        toast.error('File size must be less than 3 KB.');
+        removeAdharCard();
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewAdharCardUrl(reader.result as string);
@@ -875,6 +901,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 3 * 1024) {
+        toast.error('File size must be less than 3 KB.');
+        removeProfilePhoto();
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewProfilePhotoUrl(reader.result as string);
@@ -902,6 +933,11 @@ const ProfileCreateForm: React.FC<ProfileFormType> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 3 * 1024) {
+        toast.error('File size must be less than 3 KB.');
+        removeFile(fieldName);
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviews(prev => ({ ...prev, [fieldName]: reader.result as string }));

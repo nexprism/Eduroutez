@@ -68,9 +68,24 @@ const formSchema = z.object({
   instituteName: z.string().min(2, {
     message: 'Title must be at least 2 characters.'
   }),
-  thumbnail: z.any().optional(),
-  cover: z.any().optional(),
-  logo: z.any().optional(),
+  thumbnail: z
+    .any()
+    .optional()
+    .refine((file) => !file || !(file instanceof File) || file.size <= 30 * 1024, {
+      message: 'Thumbnail size must be less than 30 KB.'
+    }),
+  cover: z
+    .any()
+    .optional()
+    .refine((file) => !file || !(file instanceof File) || file.size <= 30 * 1024, {
+      message: 'Cover image size must be less than 30 KB.'
+    }),
+  logo: z
+    .any()
+    .optional()
+    .refine((file) => !file || !(file instanceof File) || file.size <= 30 * 1024, {
+      message: 'Logo size must be less than 30 KB.'
+    }),
   maxFees: z.any().optional(),
   minFees: z.any().optional(),
   affiliation: z.any().optional(),
@@ -533,6 +548,15 @@ const GeneralInfo = () => {
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 30 * 1024) {
+        toast.error('Thumbnail size must be less than 30 KB.');
+        setPreviewThumbnailUrl(null);
+        form.setValue('thumbnail', undefined);
+        if (fileInputThumbnailRef.current) {
+          fileInputThumbnailRef.current.value = '';
+        }
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewThumbnailUrl(reader.result as string);
@@ -548,6 +572,15 @@ const GeneralInfo = () => {
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 30 * 1024) {
+        toast.error('Cover image size must be less than 30 KB.');
+        setPreviewCoverUrl(null);
+        form.setValue('cover', undefined);
+        if (fileInputCoverRef.current) {
+          fileInputCoverRef.current.value = '';
+        }
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewCoverUrl(reader.result as string);
@@ -563,6 +596,15 @@ const GeneralInfo = () => {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 30 * 1024) {
+        toast.error('Logo size must be less than 30 KB.');
+        setPreviewLogoUrl(null);
+        form.setValue('logo', undefined);
+        if (fileInputLogoRef.current) {
+          fileInputLogoRef.current.value = '';
+        }
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewLogoUrl(reader.result as string);

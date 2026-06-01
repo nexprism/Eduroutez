@@ -347,6 +347,16 @@ console.log('Error updating institute:', error.message); }
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].size > 30 * 1024) {
+        toast.error(`Gallery image "${files[i].name}" exceeds the 30 KB limit.`);
+        if (multipleFileInputRef.current) {
+          multipleFileInputRef.current.value = '';
+        }
+        return;
+      }
+    }
+
     const instituteData = await axiosInstance.get(`${apiUrl}/institute/${id}`);
     const plan = instituteData.data.data.plan;
     const mediaLimit = Array.isArray(plan.features) ? plan.features.find((feature: any) => feature.key === 'Media' || feature.key === 'Images')?.value : 0;
