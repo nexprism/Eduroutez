@@ -30,11 +30,13 @@ export const columns: ColumnDef<Counselor>[] = [
   {
     header: 'CREATED AT',
     cell: ({ row }) => {
-      const date = new Date('2024-12-12T05:29:55.480Z');
-      const formattedDate = `${String(date.getDate()).padStart(
-        2,
-        '0'
-      )}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+      const raw = row.original.createdAt || row.original.created_at || null;
+      if (!raw) return <div>-</div>;
+      const date = new Date(raw);
+      if (Number.isNaN(date.getTime())) return <div>-</div>;
+      const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(
+        date.getMonth() + 1
+      ).padStart(2, '0')}-${date.getFullYear()}`;
       return <div>{formattedDate}</div>;
     }
   },
