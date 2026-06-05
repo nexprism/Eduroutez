@@ -45,11 +45,11 @@ import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, up
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ, getFAQsByInstitute } from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage, getPageByStreamLevel } from "../../controllers/customPage-controller.js";
 import { createQuestionSet, getAllQuestionSets, getRandomTestSet, submitTestResult, getPendingVerifications, verifyCounselor, rejectCounselor, recordPayment, getLatestTestResult, updateQuestionSet, deleteQuestionSet, getQuestionSetById } from "../../controllers/counselor-test-controller.js";
-import { setBankDetails, validateReferralCode, generateReferralCode, bookWebinar, markAttendanceAndCreditReferrer, redeemEarnings } from "../../controllers/student-flow-controller.js";
-import { createWebinarPackage, getWebinarPackage, getWebinarPackages, getActiveWebinarPackages, updateWebinarPackage, deleteWebinarPackage } from "../../controllers/webinar-package-controller.js";
-import { purchaseWebinarPackage, getPurchaseDetails, getAllPurchases, getInstitutePurchases, getMyPurchases, updatePurchase, deletePurchase, useWebinar, confirmPayment, getPurchaseStatistics, checkWebinarAvailability } from "../../controllers/purchased-webinar-package-controller.js";
-import { requireAdmin, requireInstitute, verifyOwnershipOrAdmin } from "../../middlewares/role-based-auth.js";
-import { createRazorpayOrder, verifyRazorpayPayment, getRazorpayPayment, refundRazorpayPayment } from "../../controllers/razorpay-controller.js";
+// import { setBankDetails, validateReferralCode, generateReferralCode, bookWebinar, markAttendanceAndCreditReferrer, redeemEarnings } from "../../controllers/student-flow-controller.js";
+// import { createWebinarPackage, getWebinarPackage, getWebinarPackages, getActiveWebinarPackages, updateWebinarPackage, deleteWebinarPackage } from "../../controllers/webinar-package-controller.js";
+// import { purchaseWebinarPackage, getPurchaseDetails, getAllPurchases, getInstitutePurchases, getMyPurchases, updatePurchase, deletePurchase, useWebinar, confirmPayment, getPurchaseStatistics, checkWebinarAvailability } from "../../controllers/purchased-webinar-package-controller.js";
+// import { requireAdmin, requireInstitute, verifyOwnershipOrAdmin } from "../../middlewares/role-based-auth.js";
+// import { createRazorpayOrder, verifyRazorpayPayment, getRazorpayPayment, refundRazorpayPayment } from "../../controllers/razorpay-controller.js";
 
 import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
