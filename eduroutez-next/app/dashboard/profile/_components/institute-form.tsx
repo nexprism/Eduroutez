@@ -259,6 +259,15 @@ console.log('Error updating institute:', error.message); }
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 30 * 1024) {
+        toast.error('Thumbnail size must be less than 30 KB.');
+        setPreviewThumbnailUrl(null);
+        form.setValue('thumbnail', undefined);
+        if (fileInputThumbnailRef.current) {
+          fileInputThumbnailRef.current.value = '';
+        }
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewThumbnailUrl(reader.result as string);
@@ -274,6 +283,15 @@ console.log('Error updating institute:', error.message); }
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 50 * 1024) {
+        toast.error('Cover image size must be less than 50 KB.');
+        setPreviewCoverUrl(null);
+        form.setValue('cover', undefined);
+        if (fileInputCoverRef.current) {
+          fileInputCoverRef.current.value = '';
+        }
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewCoverUrl(reader.result as string);
@@ -289,6 +307,15 @@ console.log('Error updating institute:', error.message); }
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 20 * 1024) {
+        toast.error('Logo size must be less than 20 KB.');
+        setPreviewLogoUrl(null);
+        form.setValue('logo', undefined);
+        if (fileInputLogoRef.current) {
+          fileInputLogoRef.current.value = '';
+        }
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewLogoUrl(reader.result as string);
@@ -671,7 +698,7 @@ console.log('Error updating institute:', error.message); }
         <TabsContent value="gallery">
   <Card>
     <CardHeader>
-      <CardTitle>Gallery</CardTitle>
+      <CardTitle>Gallery (Max size: 30KB each)</CardTitle>
       <p className="text-sm text-gray-600">
         Add images to showcase your institute's gallery.
       </p>

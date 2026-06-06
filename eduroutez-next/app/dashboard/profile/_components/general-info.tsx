@@ -80,14 +80,14 @@ const formSchema = z.object({
   cover: z
     .any()
     .optional()
-    .refine((file) => !file || !(file instanceof File) || file.size <= 30 * 1024, {
-      message: 'Cover image size must be less than 30 KB.'
+    .refine((file) => !file || !(file instanceof File) || file.size <= 50 * 1024, {
+      message: 'Cover image size must be less than 50 KB.'
     }),
   logo: z
     .any()
     .optional()
-    .refine((file) => !file || !(file instanceof File) || file.size <= 30 * 1024, {
-      message: 'Logo size must be less than 30 KB.'
+    .refine((file) => !file || !(file instanceof File) || file.size <= 20 * 1024, {
+      message: 'Logo size must be less than 20 KB.'
     }),
   maxFees: z.any().optional(),
   minFees: z.any().optional(),
@@ -551,8 +551,8 @@ const [initialCityName, setInitialCityName] = useState("");
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 30 * 1024) {
-        toast.error('Cover image size must be less than 30 KB.');
+      if (file.size > 50 * 1024) {
+        toast.error('Cover image size must be less than 50 KB.');
         setPreviewCoverUrl(null);
         form.setValue('cover', undefined);
         if (fileInputCoverRef.current) {
@@ -575,8 +575,8 @@ const [initialCityName, setInitialCityName] = useState("");
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 30 * 1024) {
-        toast.error('Logo size must be less than 30 KB.');
+      if (file.size > 20 * 1024) {
+        toast.error('Logo size must be less than 20 KB.');
         setPreviewLogoUrl(null);
         form.setValue('logo', undefined);
         if (fileInputLogoRef.current) {
@@ -1172,7 +1172,7 @@ const [initialCityName, setInitialCityName] = useState("");
                 name="logo"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Logo Image</FormLabel>
+                    <FormLabel>Logo Image (Max size: 20KB)</FormLabel>
                     <FormControl>
                       <div className="space-y-4">
                         <Input
@@ -1222,7 +1222,7 @@ const [initialCityName, setInitialCityName] = useState("");
                 name="thumbnail"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Thumbnail Image</FormLabel>
+                    <FormLabel>Thumbnail Image (Max size: 30KB)</FormLabel>
                     <FormControl>
                       <div className="space-y-4">
                         <Input
@@ -1272,7 +1272,7 @@ const [initialCityName, setInitialCityName] = useState("");
                 name="cover"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cover Image</FormLabel>
+                    <FormLabel>Cover Image (Max size: 50KB)</FormLabel>
                     <FormControl>
                       <div className="space-y-4">
                         <Input

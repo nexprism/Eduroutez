@@ -27,7 +27,7 @@ import Image from 'next/image';
 import { Plus, X } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 
 const formSchema = z.object({
@@ -76,6 +76,7 @@ export default function CounselorForm() {
   const thumbnailInputRef = React.useRef<HTMLInputElement | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Memoize default form values
   const defaultFormValues = React.useMemo(() => ({
@@ -298,7 +299,8 @@ export default function CounselorForm() {
         previewImageUrl: null,
         thumbnail: null
       }));
-      router.push('/dashboard/career');
+      const queryString = searchParams.toString();
+      router.push(`/dashboard/career${queryString ? `?${queryString}` : ''}`);
     },
     onError: () => {
       toast.error('Something went wrong');

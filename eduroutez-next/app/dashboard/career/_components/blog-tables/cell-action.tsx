@@ -11,7 +11,7 @@ import {
 import axiosInstance from '@/lib/axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, MoreHorizontal, Trash } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Career } from '@/types';
 import { useState } from 'react';
 
@@ -24,6 +24,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const deleteBlogMutation = useMutation({
     mutationFn: async (blogId: string) => {
@@ -70,9 +71,10 @@ window.location.reload();    },
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
           <DropdownMenuItem
-            onClick={() =>
-              router.push(`/dashboard/career/update/${data._id}/`)
-            }
+            onClick={() => {
+              const queryString = searchParams.toString();
+              router.push(`/dashboard/career/update/${data._id}/${queryString ? `?${queryString}` : ''}`);
+            }}
           >
             <Edit className="mr-2 h-4 w-4" /> Update
           </DropdownMenuItem>

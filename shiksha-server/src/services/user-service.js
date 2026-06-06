@@ -505,12 +505,33 @@ class UserService {
 
   async googleLogin(idToken, res) {
     try {
-      const ticket = await this.googleClient.verifyIdToken({
-        idToken: idToken,
-        audience: ServerConfig.GOOGLE_CLIENT_ID,
-      });
-      const payload = ticket.getPayload();
-      const { email, name, picture } = payload;
+      let email, name, picture;
+
+      // Check if the idToken is a JWT (three parts separated by dots) or an Access Token
+      if (idToken && idToken.split('.').length === 3) {
+        const ticket = await this.googleClient.verifyIdToken({
+          idToken: idToken,
+          audience: ServerConfig.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        email = payload.email;
+        name = payload.name;
+        picture = payload.picture;
+      } else {
+        // Assume it is an access token, fetch user info from google endpoint
+        const response = await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`
+          }
+        });
+        email = response.data.email;
+        name = response.data.name;
+        picture = response.data.picture;
+      }
+
+      if (!email) {
+        throw new Error("Google account must have an email associated with it.");
+      }
 
       let user = await this.getUserByEmail(email);
 
@@ -536,6 +557,7 @@ class UserService {
       throw new Error("Google authentication failed");
     }
   }
+
 
   async facebookLogin(accessToken, res) {
     try {
