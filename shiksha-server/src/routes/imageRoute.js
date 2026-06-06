@@ -53,13 +53,14 @@ imagerouter.get("/:filename", async (req, res) => {
     }
 
     // Process image
+    const optimizedImage = sharp(filePath, { failOn: 'none' });
+
     try {
-      const image = sharp(filePath);
-      const metadata = await image.metadata();
+      const metadata = await optimizedImage.metadata();
 
       // Determine output format based on input
       const format = metadata.format;
-      const optimizedImage = image.resize(width, Math.round((metadata.height * width) / metadata.width), {
+      const optimizedStream = optimizedImage.resize(width, Math.round((metadata.height * width) / metadata.width), {
         fit: 'inside',
         withoutEnlargement: true
       });
@@ -68,19 +69,19 @@ imagerouter.get("/:filename", async (req, res) => {
       switch (format) {
         case 'jpeg':
         case 'jpg':
-          optimizedImage.jpeg({ quality });
+          optimizedStream.jpeg({ quality });
           res.type('image/jpeg');
           break;
         case 'png':
-          optimizedImage.png({ quality: Math.min(quality, 100) });
+          optimizedStream.png({ quality: Math.min(quality, 100) });
           res.type('image/png');
           break;
         case 'webp':
-          optimizedImage.webp({ quality });
+          optimizedStream.webp({ quality });
           res.type('image/webp');
           break;
         default:
-          optimizedImage.jpeg({ quality });
+          optimizedStream.jpeg({ quality });
           res.type('image/jpeg');
       }
 
@@ -88,34 +89,50 @@ imagerouter.get("/:filename", async (req, res) => {
       res.set('Cache-Control', 'public, max-age=31557600'); // Cache for 1 year
       res.set('Last-Modified', (new Date()).toUTCString());
 
+      // Handle stream errors to prevent process crash
+      optimizedStream.on('error', (sharpError) => {
+        console.error("Sharp stream error:", sharpError.message);
+        if (!res.headersSent) {
+          // Fallback to direct serve if we haven't started sending the response
+          serveDirectly(res, filename, filePath);
+        } else {
+          // If headers already sent, we can't do much but close
+          res.end();
+        }
+      });
+
       // Stream the optimized image
-      return optimizedImage.pipe(res);
+      return optimizedStream.pipe(res);
     } catch (sharpError) {
       console.error("Sharp processing failed, falling back to direct serve:", sharpError.message);
-
-      // Fallback: serve the file directly based on extension
-      const ext = path.extname(filename).toLowerCase();
-      if (ext === '.pdf') {
-        res.type('application/pdf');
-      } else if (['.jpg', '.jpeg', '.png', '.webp', '.jfif', '.avif', '.gif'].includes(ext)) {
-        const mimeType = (ext === '.jpg' || ext === '.jpeg' || ext === '.jfif') ? 'jpeg' : ext.replace('.', '');
-        res.type(`image/${mimeType}`);
-      } else {
-        res.type('application/octet-stream');
-      }
-
-      // Add caching headers for fallback too
-      res.set('Cache-Control', 'public, max-age=31557600');
-      return res.sendFile(filePath);
+      return serveDirectly(res, filename, filePath);
     }
-
   } catch (error) {
     console.error("Error in image route:", error);
-    res.status(500).json({
-      error: 'File serve error',
-      details: error.message
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: 'File serve error',
+        details: error.message
+      });
+    }
   }
 });
+
+// Helper function to serve file directly
+function serveDirectly(res, filename, filePath) {
+  const ext = path.extname(filename).toLowerCase();
+  if (ext === '.pdf') {
+    res.type('application/pdf');
+  } else if (['.jpg', '.jpeg', '.png', '.webp', '.jfif', '.avif', '.gif'].includes(ext)) {
+    const mimeType = (ext === '.jpg' || ext === '.jpeg' || ext === '.jfif') ? 'jpeg' : ext.replace('.', '');
+    res.type(`image/${mimeType}`);
+  } else {
+    res.type('application/octet-stream');
+  }
+
+  // Add caching headers for fallback too
+  res.set('Cache-Control', 'public, max-age=31557600');
+  return res.sendFile(filePath);
+}
 
 export default imagerouter;

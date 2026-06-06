@@ -31,6 +31,8 @@ import { createPayout, deletePayout, getPayout, getPayouts, updatePayout, getPay
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
 import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer, getQuestionAnswerByEmail } from "../../controllers/question-answer-controller.js";
 import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishlist } from "../../controllers/wishlist-controller.js";
+// import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount, getWebinarTracking } from "../../controllers/webinar-controller.js";
+
 import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount } from "../../controllers/webinar-controller.js";
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
@@ -42,7 +44,12 @@ import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../.
 import { createQuery, deleteQuery, getQueries, getQuery, getQueryByInstitute, updateQuery, QueryAllocation } from "../../controllers/query-controller.js";
 import { createFAQ, deleteFAQ, getFAQ, getFAQs, updateFAQ, getFAQsByInstitute } from "../../controllers/faq-controller.js";
 import { createPage, deletePage, getPage, getPages, getPagesByInstitute, updatePage, getPageByStreamLevel } from "../../controllers/customPage-controller.js";
-import { createQuestionSet, getAllQuestionSets, getRandomTestSet, submitTestResult, getPendingVerifications, verifyCounselor, rejectCounselor, recordPayment, getLatestTestResult } from "../../controllers/counselor-test-controller.js";
+import { createQuestionSet, getAllQuestionSets, getRandomTestSet, submitTestResult, getPendingVerifications, verifyCounselor, rejectCounselor, recordPayment, getLatestTestResult, updateQuestionSet, deleteQuestionSet, getQuestionSetById } from "../../controllers/counselor-test-controller.js";
+// import { setBankDetails, validateReferralCode, generateReferralCode, bookWebinar, markAttendanceAndCreditReferrer, redeemEarnings } from "../../controllers/student-flow-controller.js";
+// import { createWebinarPackage, getWebinarPackage, getWebinarPackages, getActiveWebinarPackages, updateWebinarPackage, deleteWebinarPackage } from "../../controllers/webinar-package-controller.js";
+// import { purchaseWebinarPackage, getPurchaseDetails, getAllPurchases, getInstitutePurchases, getMyPurchases, updatePurchase, deletePurchase, useWebinar, confirmPayment, getPurchaseStatistics, checkWebinarAvailability } from "../../controllers/purchased-webinar-package-controller.js";
+// import { requireAdmin, requireInstitute, verifyOwnershipOrAdmin } from "../../middlewares/role-based-auth.js";
+// import { createRazorpayOrder, verifyRazorpayPayment, getRazorpayPayment, refundRazorpayPayment } from "../../controllers/razorpay-controller.js";
 
 import { upload } from "../../middlewares/upload-middleware.js";
 const router = express.Router();
@@ -237,6 +244,9 @@ router.delete("/counselor/:id", accessTokenAutoRefresh, passport.authenticate("j
 // Superadmin only
 router.post("/question-set", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createQuestionSet);
 router.get("/question-sets", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getAllQuestionSets);
+router.get("/question-set/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getQuestionSetById);
+router.patch("/question-set/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateQuestionSet);
+router.delete("/question-set/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteQuestionSet);
 router.get("/counselor-test/pending-verifications", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getPendingVerifications);
 router.post("/counselor-test/verify/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), verifyCounselor);
 router.post("/counselor-test/reject/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), rejectCounselor);
@@ -436,6 +446,7 @@ router.post("/webinar", accessTokenAutoRefresh, passport.authenticate("jwt", { s
 router.get("/webinars", getWebinars);
 router.get("/webinars-by-institute/:instituteId", getWebinarsByInstitute);
 router.get("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinar);
+// router.get("/webinar-tracking/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinarTracking);
 router.patch("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateWebinar);
 router.delete("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteWebinar);
 
