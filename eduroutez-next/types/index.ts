@@ -61,6 +61,23 @@ export type Media = {
   createdAt?: string;
 };
 
+export type Counselor = {
+  _id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  contactno: string;
+  level?: string;
+  category?: string;
+  instituteId?: string;
+  createdAt?: string;
+  created_at?: string;
+  scheduledTestDate?: string;
+  scheduledTestSlot?: string;
+  scheduledTest?: { date?: string };
+  scheduledTestDateString?: string;
+};
+
 export interface NavItem {
   title: string;
   url: string;

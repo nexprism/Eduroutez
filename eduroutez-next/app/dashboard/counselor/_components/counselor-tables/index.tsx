@@ -17,6 +17,7 @@ export default function CounselorTable({
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredData = useMemo(() => {
+    if (!Array.isArray(data)) return [];
     const regex = new RegExp(searchQuery, 'i');
     return data.filter(counselor => regex.test(counselor.firstname));
   }, [searchQuery, data]);
