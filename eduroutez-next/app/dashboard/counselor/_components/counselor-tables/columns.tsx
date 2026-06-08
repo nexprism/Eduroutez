@@ -3,7 +3,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
-// import { Counselor } from '@/types';
+import { Counselor } from '@/types';
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 export const columns: ColumnDef<Counselor>[] = [
