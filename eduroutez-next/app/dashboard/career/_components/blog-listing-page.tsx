@@ -15,7 +15,7 @@ import { useEffect } from 'react';
 interface Career {
   _id: string;
   title: string;
-  image: string;
+  thumbnail: string;
   description: string;
   category: { _id: string; name: string };
   eligibility: string;
