@@ -37,7 +37,13 @@ export const columns: ColumnDef<Blog>[] = [
   },
   {
     header: 'Images',
-    cell: ({ row }) => <img className='w-[2.5rem] h-[2rem] rounded-full' src={`${IMAGE_URL}/${row.original.image}`} alt="Icon" />
+    cell: ({ row }) => (
+      <img
+        className="w-[2.5rem] h-[2rem] rounded-full object-cover"
+        src={row.original.thumbnail ? `${IMAGE_URL}/${row.original.thumbnail}` : ''}
+        alt="Thumbnail"
+      />
+    )
   },
   // {
   //   header: 'CATEGORY',

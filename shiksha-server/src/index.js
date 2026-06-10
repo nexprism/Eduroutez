@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import "./config/jwt-authenticate.js";
 
 import apiRoutes from "./routes/index.js";
+import ImageRoute from "./routes/imageRoute.js";
 
 import { ServerConfig } from "./config/index.js";
 import { DATABASE } from "./utils/database/index.js";
@@ -89,6 +90,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", apiRoutes);
+app.use("/uploads", ImageRoute);
 
 // Email route using centralized sendEmail utility
 app.post("/send-email", async (req, res) => {
