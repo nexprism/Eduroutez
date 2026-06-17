@@ -111,7 +111,7 @@ export default function BlogCatogeryForm() {
   } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/blog-category`);
+      const response = await axiosInstance.get(`${apiUrl}/blog-category?limit=200`);
       return response.data;
     }
   });

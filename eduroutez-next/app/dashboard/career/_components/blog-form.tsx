@@ -142,7 +142,7 @@ export default function CounselorForm() {
   const { data: categories } = useQuery({
     queryKey: ['career-categories'],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/career-category?page=0`);
+      const response = await axiosInstance.get(`${apiUrl}/career-category?page=0&limit=200`);
       return response.data;
     },
     refetchOnWindowFocus: false,
