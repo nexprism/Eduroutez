@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Blog } from '@/types';
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+const FALLBACK_IMAGE = '/placeholder-thumbnail.svg';
 
 export const columns: ColumnDef<Blog>[] = [
   // {
@@ -29,7 +30,7 @@ export const columns: ColumnDef<Blog>[] = [
   // },
   {
     header: 'ID',
-    cell: ({ row }) => <div>{`${row.index+1}`}</div>
+    cell: ({ row }) => <div>{`${row.index + 1}`}</div>
   },
   {
     header: 'TITLE',
@@ -40,7 +41,7 @@ export const columns: ColumnDef<Blog>[] = [
     cell: ({ row }) => (
       <img
         className="w-[2.5rem] h-[2rem] rounded-full object-cover"
-        src={row.original.thumbnail ? `${IMAGE_URL}/${row.original.thumbnail}` : ''}
+        src={row.original.thumbnail ? `${IMAGE_URL}/${row.original.thumbnail}` : FALLBACK_IMAGE}
         alt="Thumbnail"
       />
     )
@@ -50,11 +51,11 @@ export const columns: ColumnDef<Blog>[] = [
   //   cell: ({ row }) => <div>{`${row.original.category}`}</div>
   // },
 
- {
+  {
     header: 'CREATED AT',
     cell: ({ row }) => {
       const date = new Date(row.original.createdAt);
-      const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+      const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
       return <div>{formattedDate}</div>;
     }
   },

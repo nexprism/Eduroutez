@@ -12,27 +12,26 @@ import { useBlogTableFilters } from './blog-tables/use-blog-table-filters';
 import axiosInstance from '@/lib/axios';
 import { useEffect } from 'react';
 
-interface Career {
+interface CareerItem {
   _id: string;
   title: string;
   thumbnail?: string;
   description: string;
-  category: { _id: string; name: string };
+  category: string;
   eligibility: string;
   jobRoles: string;
   topColleges: string;
   instituteId: string;
   createdAt: string;
   updatedAt: string;
-  status: string; // Added status property
+  status?: boolean;
 }
 
-interface CareerResponse {
+interface CareerListResponse {
+  result: CareerItem[];
+  currentPage: number;
+  totalPages: number;
   totalDocuments: number;
-  success: boolean;
-  message: string;
-  data: Career[];
-  error: Record<string, any>;
 }
 
 type TCareerListingPage = {};
@@ -41,7 +40,7 @@ export default function CareerListingPage({}: TCareerListingPage) {
   const { searchQuery, page, limit, setPage } = useBlogTableFilters();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const { data, isLoading, isSuccess, refetch } = useQuery<CareerResponse>({
+  const { data, isLoading, isSuccess, refetch } = useQuery<CareerListResponse>({
     queryKey: ['career', searchQuery, page, limit],
     queryFn: async () => {
       const institute = localStorage.getItem('instituteId');
@@ -92,12 +91,16 @@ export default function CareerListingPage({}: TCareerListingPage) {
             <Separator />
             <BlogTable
               data={data?.result?.map(career => ({
-                ...career,
-                category: { _id: career.category._id, name: career.category.name }, // Assuming IBlogCategory has '_id' and 'name' properties
-                status: career.status === 'true' // Convert status to boolean
+                _id: career._id,
+                title: career.title,
+                thumbnail: career.thumbnail,
+                description: career.description,
+                category: career.category,
+                status: career.status === undefined ? true : career.status,
+                createdAt: career.createdAt,
               }))}
               totalData={data?.totalDocuments}
-              onPageChange={setPage} // Assuming BlogTable has an onPageChange prop
+              onPageChange={setPage}
             />
           </div>
         )

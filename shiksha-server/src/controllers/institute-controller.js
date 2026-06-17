@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import { ServerConfig } from "../config/index.js";
 import path from "path";
 import { StatusCodes } from "http-status-codes";
+
 import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import InstituteService from "../services/institute-service.js";
@@ -9,6 +10,7 @@ import UserService from "../services/user-service.js";
 import { UserRepository } from "../repository/user-repository.js";
 import xlsx from "xlsx";
 import mongoose from "mongoose";
+
 import Institute from "../models/Institute.js";
 import User from "../models/User.js";
 import randomstring from "randomstring";
@@ -111,16 +113,16 @@ export const createInstitute = async (req, res) => {
     };
 
     const userResponse = await userService.signup(userPayload, res);
-    console.log('userResponse',userResponse);
+    console.log('userResponse', userResponse);
     const userId = userResponse.user._id;
- const slug = req.body.instituteName.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
+    const slug = req.body.instituteName.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
     const institutePayload = {
       ...req.body,
       _id: userId,
       is_verified: true,
       slug,
     };
-    console.log('institutePayload',institutePayload);
+    console.log('institutePayload', institutePayload);
     const instituteResponse = await instituteService.create(institutePayload);
 
     SuccessResponse.data = {
@@ -129,7 +131,7 @@ export const createInstitute = async (req, res) => {
     };
     SuccessResponse.message = "Successfully created an institute";
 
-    
+
 
     return res.status(StatusCodes.CREATED).json(SuccessResponse);
   } catch (error) {
@@ -148,13 +150,13 @@ export const createInstitute = async (req, res) => {
 
 export const upgradeInstitute = async (req, res) => {
   try {
-      const payload = { ...req.body };
-      const response = await instituteService.Upgrade(req.params.email, payload);
+    const payload = { ...req.body };
+    const response = await instituteService.Upgrade(req.params.email, payload);
 
-      SuccessResponse.data = response;
-      SuccessResponse.message = "Successfully upgraded the institute";
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully upgraded the institute";
 
-      return res.status(StatusCodes.OK).json(SuccessResponse);
+    return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
 
@@ -170,31 +172,31 @@ export const makeInstitute = async (req, res) => {
         return res.status(500).json({ error: err });
       }
       // console.log('hi2')
-    const payload = { ...req.body };
-    // console.log(payload);
+      const payload = { ...req.body };
+      // console.log(payload);
 
-    if (req.files["instituteLogo"]) {
-      payload.instituteLogo = req.files["instituteLogo"][0].filename;
-    }
-    if (req.files["coverImage"]) {
-      payload.coverImage = req.files["coverImage"][0].filename;
-    }
-    if (req.files["thumbnailImage"]) {
-      payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
-    }
-    if (req.files["brochure"]) {
-      payload.brochure = req.files["brochure"][0].filename;
-    }
-    if (req.files["gallery"]) {
-      payload.gallery = req.files["gallery"].map((file) => file.filename);
-    }
+      if (req.files["instituteLogo"]) {
+        payload.instituteLogo = req.files["instituteLogo"][0].filename;
+      }
+      if (req.files["coverImage"]) {
+        payload.coverImage = req.files["coverImage"][0].filename;
+      }
+      if (req.files["thumbnailImage"]) {
+        payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
+      }
+      if (req.files["brochure"]) {
+        payload.brochure = req.files["brochure"][0].filename;
+      }
+      if (req.files["gallery"]) {
+        payload.gallery = req.files["gallery"].map((file) => file.filename);
+      }
 
-    const response = await instituteService.make(req.params.email,payload);
+      const response = await instituteService.make(req.params.email, payload);
 
-    SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully created an institute";
+      SuccessResponse.data = response;
+      SuccessResponse.message = "Successfully created an institute";
 
-    return res.status(StatusCodes.CREATED).json(SuccessResponse);
+      return res.status(StatusCodes.CREATED).json(SuccessResponse);
     });
   } catch (error) {
     ErrorResponse.error = error;
@@ -213,7 +215,7 @@ export const makeInstitute = async (req, res) => {
 export async function getInstitutes(req, res) {
   try {
     const browserUrl = req.get('Referer') || req.get('Origin');
-    console.log('browserUrl',browserUrl);
+    console.log('browserUrl', browserUrl);
     const response = await instituteService.getAll(req.query, browserUrl);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched institutes";
@@ -312,9 +314,9 @@ export const bulkAddInstitutes = async (req, res) => {
 
         const userId = new mongoose.Types.ObjectId();
         var password = row.password;
-         const salt = bcrypt.genSaltSync(+ServerConfig.SALT);
-            const hashedPassword = bcrypt.hashSync(password, salt);
-             
+        const salt = bcrypt.genSaltSync(+ServerConfig.SALT);
+        const hashedPassword = bcrypt.hashSync(password, salt);
+
 
         users.push({
           _id: userId,
@@ -401,20 +403,20 @@ export async function getInstitute(req, res) {
     }
     // console.log('hello',req.params.id);
     const response = await instituteService.get(id, field);
-    console.log('response in getInstitute',response);
+    console.log('response in getInstitute', response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the institute";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
-    console.error("Get institute errorcvb:", error.message); 
+    console.error("Get institute errorcvb:", error.message);
     ErrorResponse.error = error;
-    return res.status(error.statusCode||500).json(ErrorResponse);
+    return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 }
 
 export async function getInstituteByEmail(req, res) {
   try {
-    console.log('hello',req.params.email);
+    console.log('hello', req.params.email);
     const response = await instituteService.getbyemail(req.params.email);
     console.log(response);
     SuccessResponse.data = response;
@@ -440,9 +442,9 @@ export async function updateInstitute(req, res) {
     try {
       const instituteId = req.params.id;
       const payload = { ...req.body };
-      
+
       console.log('Updating institute:', instituteId);
-      
+
       // Sanitize payload: convert "null" and "undefined" strings to actual null
       // FormData often converts null/undefined to these strings
       Object.keys(payload).forEach(key => {
@@ -467,20 +469,20 @@ export async function updateInstitute(req, res) {
       // Fetch the existing institute first
       const institute = await instituteService.get(instituteId);
       if (!institute) {
-        return res.status(StatusCodes.NOT_FOUND).json({ 
-          error: "Not Found", 
-          message: `Institute with ID ${instituteId} not found` 
+        return res.status(StatusCodes.NOT_FOUND).json({
+          error: "Not Found",
+          message: `Institute with ID ${instituteId} not found`
         });
       }
 
       let oldImagePaths = [];
-      
+
       // First, check if gallery files are present and warn/remove them
       if (req.files && req.files["gallery"]) {
         console.warn("Gallery files detected in updateInstitute - ignoring. Use addGallery endpoint instead.");
         delete req.files["gallery"];
       }
-      
+
       // Process file fields and their aliases
       if (req.files) {
         // Logo
@@ -592,7 +594,7 @@ export async function addFacility(req, res) {
     const response = await instituteService.addFacility(instituteId, payload);
 
     SuccessResponse.data = response;
-    console.log('response',response);
+    console.log('response', response);
     SuccessResponse.message = "Successfully added facility to the institute";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
@@ -636,7 +638,7 @@ export async function deleteGallery(req, res) {
 
 
 
-  
+
 
 
 
@@ -644,21 +646,21 @@ export async function deleteGallery(req, res) {
 export const submitIssue = async (req, res) => {
   try {
     const instituteId = req.user;
-    console.log('instituteId',instituteId);
+    console.log('instituteId', instituteId);
     multiUploader(req, res, async function (err) {
       if (err) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
       }
 
-      console.log('file',req.files);
+      console.log('file', req.files);
 
       const payload = { ...req.body };
 
       if (req.files && req.files["image"]) {
         payload.image = req.files["image"][0].filename;
       }
-      
-    const response = await instituteService.submitIssue(instituteId, payload);
+
+      const response = await instituteService.submitIssue(instituteId, payload);
 
       SuccessResponse.data = response;
       SuccessResponse.message = "Successfully submitted issue to the admin";
@@ -682,7 +684,7 @@ export async function updateIssue(req, res) {
       payload.status = payload.status
     }
 
-    console.log('payload',payload);
+    console.log('payload', payload);
 
     const response = await instituteService.updateIssue(issueId, payload);
 
@@ -691,7 +693,7 @@ export async function updateIssue(req, res) {
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
-    console.log('error in updateIssue',error.message);
+    console.log('error in updateIssue', error.message);
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
 }
@@ -705,10 +707,10 @@ export async function downloadBruchure(req, res) {
     // console.log('brochure',brochure);
 
     // console.log('filePath',ServerConfig.UPLOAD_DIR);
-    
+
     const filePath = path.join('uploads', brochure);
 
-    console.log('test filePath',filePath);
+    console.log('test filePath', filePath);
 
 
     res.download(filePath, brochure, (err) => {
@@ -719,7 +721,7 @@ export async function downloadBruchure(req, res) {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
       }
 
-      
+
     });
 
     StatusCodes.message = "Successfully downloaded brochure";
@@ -729,7 +731,7 @@ export async function downloadBruchure(req, res) {
 
 
 
-    
+
   } catch (error) {
     console.error("Download test watch brochure error:", error.message);
     ErrorResponse.error = error;
@@ -769,7 +771,7 @@ export async function getHelpList(req, res) {
 //     if (req.files && req.files["image"]) {
 //       payload.image = req.files["image"][0].filename;
 //     }
-  
+
 //     const response = await instituteService.submitIssue(instituteId, payload);
 
 //     SuccessResponse.data = response;
@@ -809,7 +811,7 @@ export const addGallery = async (req, res) => {
         console.log('Gallery files processed:', payload.gallery);
       } else {
         console.warn('No gallery files found in request');
-        return res.status(StatusCodes.BAD_REQUEST).json({ 
+        return res.status(StatusCodes.BAD_REQUEST).json({
           error: "No gallery images provided",
           message: "Please upload images with the 'gallery' field name"
         });
@@ -830,7 +832,7 @@ export const addGallery = async (req, res) => {
 };
 
 
-      
+
 
 
 
