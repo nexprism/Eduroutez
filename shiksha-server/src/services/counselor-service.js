@@ -53,7 +53,11 @@ class CounselorService {
 
       for (const [key, value] of Object.entries(parsedFilters)) {
         if (parsedFilters.category !== "by-category") {
-          filterConditions[key] = value;
+          if ((key === 'state' || key === 'city') && typeof value === 'string') {
+            filterConditions[`${key}.name`] = value;
+          } else {
+            filterConditions[key] = value;
+          }
         }
       }
 

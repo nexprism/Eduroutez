@@ -7,11 +7,13 @@ import InstituteService from "../services/institute-service.js";
 import StudentService from "../services/student-service.js";
 import CounselorService from "../services/counselor-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
+import ActivityService from "../services/activity-service.js";
 const singleUploader = FileUpload.upload.single("image");
 const userService = new UserService();
 const instituteService = new InstituteService();
 const counselorService = new CounselorService();
 const studentService = new StudentService();
+const activityService = new ActivityService();
 
 /**
  * GET : /user
@@ -436,11 +438,19 @@ export async function likeDislike(req, res) {
     const like = req.body.like;
     const type = req.body.type;
     const response = await userService.likeDislike(userId, courseId, like, type);
+    const itemName = response?.courseTitle || response?.title || response?.name || "";
     SuccessResponse.data = response;
     if(like == 1){
       SuccessResponse.message = "Successfully Liked";
+      const activityType = `like_${type?.toLowerCase()}`;
+      const targetModel = type?.toLowerCase() === "blog" ? "Blog" : type?.toLowerCase() === "career" ? "Career" : "Course";
+      const meta = type?.toLowerCase() === "course" ? { fee: response?.coursePrice } : {};
+      activityService.logActivity(userId, activityType, targetModel, courseId, itemName, meta);
     }else{
       SuccessResponse.message = "Successfully Disliked";
+      const activityType = `unlike_${type?.toLowerCase()}`;
+      const targetModel = type?.toLowerCase() === "blog" ? "Blog" : type?.toLowerCase() === "career" ? "Career" : "Course";
+      activityService.logActivity(userId, activityType, targetModel, courseId, itemName);
     }
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
@@ -462,6 +472,9 @@ export async function submitReview(req, res) {
     const response = await userService.submitReview(itemId, reviewpayload, type);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully submitted the review";
+    const targetModel = type?.toLowerCase() === "blog" ? "Blog" : type?.toLowerCase() === "career" ? "Career" : type?.toLowerCase() === "counselor" ? "Counselor" : "Institute";
+    const reviewName = response?.instituteName || response?.courseTitle || response?.title || response?.name || "";
+    activityService.logActivity(studentId, "review_submitted", targetModel, itemId, reviewName, { rating, comment: comment?.slice(0, 100) });
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;

@@ -166,7 +166,7 @@ export const getCounselorsByInstitute = async (req, res) => {
   } catch (error) {
     console.error("Error in getCounselorsByInstitute:", error.message);
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
 };
 
@@ -180,7 +180,7 @@ export async function getCounselors(req, res) {
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
 }
 

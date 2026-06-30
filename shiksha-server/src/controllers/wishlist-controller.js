@@ -3,12 +3,14 @@ import WishlistService from "../services/wishlist-service.js";
 import UserService from "../services/user-service.js";
 import InstituteService from "../services/institute-service.js";
 import CourseService from "../services/course-service.js";
+import ActivityService from "../services/activity-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import AppError from "../utils/errors/app-error.js";
 const wishlistService = new WishlistService();
 const userService = new UserService();
 const instituteService = new InstituteService();
 const courseService = new CourseService();
+const activityService = new ActivityService();
 
 
 /**
@@ -29,74 +31,67 @@ export const createWishlist = async (req, res) => {
     
     // Function to update wishlist
     const updateWishlist = async (wishlistField, itemId, addMessage, removeMessage) => {
-      // Check if the wishlist field is valid and user has the property
       if (!Array.isArray(user[wishlistField])) {
-        user[wishlistField] = []; // Initialize as empty array if doesn't exist
+        user[wishlistField] = [];
       }
      
-      // Check if item is already in the wishlist - using ObjectId string comparison
       const itemIndex = user[wishlistField].findIndex(id => id.toString() === itemId.toString());
      
+      // Fetch the item name for activity logging
+      let targetName = "";
+      try {
+        if (wishlistField === 'college_wishlist') {
+          const c = await instituteService.get(itemId);
+          if (c) targetName = c.instituteName || "";
+        } else {
+          const c = await courseService.get(itemId);
+          if (c) targetName = c.courseTitle || "";
+        }
+      } catch {}
+     
       if (itemIndex > -1) {
-        // Item exists, remove it from user's wishlist
         user[wishlistField].splice(itemIndex, 1);
         await userService.update(studentId, { [wishlistField]: user[wishlistField] });
-        console.log(`Removed ${itemId} from user ${studentId}'s ${wishlistField}`);
        
         if (wishlistField === 'college_wishlist') {
-          const college = await instituteService.get(itemId);
-          if (!college) {
-            throw new AppError("College not found", StatusCodes.NOT_FOUND);
-          }
-         
-          // Check if college has a wishlist array
-          if (!Array.isArray(college.wishlist)) {
-            college.wishlist = [];
-          }
-         
-          // Find the index of studentId in college's wishlist
-          const studentIndex = college.wishlist.findIndex(
-            id => id.toString() === studentId.toString()
-          );
-         
-          // If student exists in college wishlist, remove them
-          if (studentIndex > -1) {
-            college.wishlist.splice(studentIndex, 1);
-            await instituteService.update(itemId, { wishlist: college.wishlist });
-            console.log(`Removed student ${studentId} from college ${college.instituteName} wishlist`);
-          }
+          try {
+            const college = await instituteService.get(itemId);
+            if (college) {
+              if (!Array.isArray(college.wishlist)) college.wishlist = [];
+              const studentIndex = college.wishlist.findIndex(id => id.toString() === studentId.toString());
+              if (studentIndex > -1) {
+                college.wishlist.splice(studentIndex, 1);
+                await instituteService.update(itemId, { wishlist: college.wishlist });
+              }
+            }
+          } catch {}
         }
+       
+        const activityType = wishlistField === 'college_wishlist' ? "unwishlist_institute" : "unwishlist_course";
+        const targetType = wishlistField === 'college_wishlist' ? "Institute" : "Course";
+        activityService.logActivity(studentId, activityType, targetType, itemId, targetName);
        
         return res.status(StatusCodes.OK).json({ message: removeMessage });
       } else {
-        // Item doesn't exist in user's wishlist, add it
         user[wishlistField].push(itemId);
         await userService.update(studentId, { [wishlistField]: user[wishlistField] });
-        console.log(`Added ${itemId} to user ${studentId}'s ${wishlistField}`);
        
         if (wishlistField === 'college_wishlist') {
-          const college = await instituteService.get(itemId);
-          if (!college) {
-            throw new AppError("College not found", StatusCodes.NOT_FOUND);
-          }
-         
-          // Check if college has a wishlist array
-          if (!Array.isArray(college.wishlist)) {
-            college.wishlist = [];
-          }
-         
-          // Check if student is already in college wishlist
-          const studentExists = college.wishlist.some(
-            id => id.toString() === studentId.toString()
-          );
-         
-          // Only add student if they're not already in the college wishlist
-          if (!studentExists) {
-            college.wishlist.push(studentId);
-            await instituteService.update(itemId, { wishlist: college.wishlist });
-            console.log(`Added student ${studentId} to college ${college.instituteName} wishlist`);
-          }
+          try {
+            const college = await instituteService.get(itemId);
+            if (college) {
+              if (!Array.isArray(college.wishlist)) college.wishlist = [];
+              if (!college.wishlist.some(id => id.toString() === studentId.toString())) {
+                college.wishlist.push(studentId);
+                await instituteService.update(itemId, { wishlist: college.wishlist });
+              }
+            }
+          } catch {}
         }
+       
+        const activityType = wishlistField === 'college_wishlist' ? "wishlist_institute" : "wishlist_course";
+        const targetType = wishlistField === 'college_wishlist' ? "Institute" : "Course";
+        activityService.logActivity(studentId, activityType, targetType, itemId, targetName);
        
         return res.status(StatusCodes.CREATED).json({ message: addMessage });
       }
@@ -179,11 +174,21 @@ export async function getWishlists(req, res) {
     
 
     if(user.course_wishlist.length > 0){
+    const courseList = [];
     for (const courseId of user.course_wishlist) {
       const course = await courseService.get(courseId);
-      //push in course_wishlist
-      response['course_wishlist'] = course;
+      if (course) {
+        courseList.push({
+          _id: course._id,
+          courseTitle: course.courseTitle,
+          coursePrice: course.coursePrice,
+          shortDescription: course.shortDescription,
+          coursePreviewThumbnail: course.coursePreviewThumbnail,
+          slug: course.slug,
+        });
+      }
     }
+    response['course_wishlist'] = courseList;
   }
 
     // const response = { college_wishlist, course_wishlist };

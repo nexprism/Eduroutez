@@ -77,7 +77,8 @@ console.log('updatesInstitute',updatesInstitute);
   }
 
 escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex special characters
+  if (typeof str !== 'string') return '';
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
   async getAll(query, browserUrl) {
@@ -155,7 +156,7 @@ escapeRegex(str) {
 
         if (key === 'streams' || key === 'specialization') {
           if (Array.isArray(value)) {
-            const regexPattern = value.map(this.escapeRegex).join('|');
+            const regexPattern = value.map(v => this.escapeRegex(v)).join('|');
             streamSpecFilters.push({ [key]: { $regex: regexPattern, $options: 'i' } });
           } else {
             streamSpecFilters.push({ [key]: createRegex(value) });
@@ -163,14 +164,14 @@ escapeRegex(str) {
         } else if (key === 'state' || key === 'city') {
           const path = `${key}.name`;
           if (Array.isArray(value)) {
-            const regexPattern = value.map(this.escapeRegex).join('|');
+            const regexPattern = value.map(v => this.escapeRegex(v)).join('|');
             locationFilters.push({ [path]: { $regex: regexPattern, $options: 'i' } });
           } else {
             locationFilters.push({ [path]: createRegex(value) });
           }
         } else if (key === 'organisationType') {
           if (Array.isArray(value)) {
-            const regexPattern = value.map(this.escapeRegex).join('|');
+            const regexPattern = value.map(v => this.escapeRegex(v)).join('|');
             otherFilters.push({ [key]: { $regex: regexPattern, $options: 'i' } });
           } else {
             otherFilters.push({ [key]: createRegex(value) });

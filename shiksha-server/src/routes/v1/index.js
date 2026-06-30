@@ -38,6 +38,7 @@ import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../.
 import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia, uploadEditorFile } from "../../controllers/media-controller.js";
 import { createBanner, deleteBanner, getBanner, getBanners, updateBanner } from "../../controllers/banner-controller.js";
+import { getUserActivity, getRecentActivity, getActivityStats } from "../../controllers/activity-controller.js";
 import { createPromotion, deletePromotion, getPromotion, getPromotions, updatePromotion } from "../../controllers/promotion-controller.js";
 import { createCounselorSlots, getCounselorSlot, updateCounselorSlot, deleteCounselorSlot, getScheduleSlots, updateScheduleSlot, getAllScheduleSlots, getScheduleSlotbyId } from "../../controllers/counselorSlot-controller.js";
 import { createEmail, deleteEmail, getEmail, getEmails, updateEmail } from "../../controllers/email.js";
@@ -496,6 +497,11 @@ router.get("/redeem-history", accessTokenAutoRefresh, passport.authenticate("jwt
 
 //razorpay create order
 router.post("/purchase-plan", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), purchasePlan);
+
+//activity routes
+router.get("/activity", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getUserActivity);
+router.get("/activity/recent", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getRecentActivity);
+router.get("/activity/stats", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getActivityStats);
 
 //submit-counsellor-feedback
 router.post("/submit-counsellor-review", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), submitcounsellorReview);

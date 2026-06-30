@@ -33,3 +33,4 @@ export { AdminRepository } from "./admin-repository.js";
 export { MediaRepository } from "./media-repository.js";
 export { PromotionRepository } from "./promotion-repository.js";
 export { BannerRepository } from "./banner-repository.js";
+export { ActivityRepository } from "./activity-repository.js";

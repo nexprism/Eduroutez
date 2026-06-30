@@ -97,6 +97,13 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
+    title: 'Recommendations',
+    url: '/dashboard/recommendation',
+    icon: 'chart-no-axes-combined',
+    isActive: false,
+    items: []
+  },
+  {
     title: 'Email Templates',
     url: '/dashboard/email',
     icon: 'mail',
