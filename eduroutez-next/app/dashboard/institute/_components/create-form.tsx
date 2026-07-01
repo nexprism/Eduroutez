@@ -70,6 +70,7 @@ const formSchema = z.object({
     ),
   isBestRatedUniversity: z.boolean().optional(),
   isBestRatedCollege: z.boolean().optional(),
+  admissionOpen: z.boolean().optional(),
 
 });
 
@@ -85,6 +86,7 @@ export default function InstituteCreateForm() {
       password: '',
       isBestRatedUniversity: false,
       isBestRatedCollege: false,
+      admissionOpen: false,
 
     },
   });
@@ -98,6 +100,7 @@ export default function InstituteCreateForm() {
       organization: values.organization,
       isBestRatedUniversity: values.isBestRatedUniversity,
       isBestRatedCollege: values.isBestRatedCollege,
+      admissionOpen: values.admissionOpen,
 
     };
     mutate(instituteData);
@@ -297,6 +300,23 @@ export default function InstituteCreateForm() {
                   )}
                 />
               )}
+              <FormField
+                control={form.control}
+                name="admissionOpen"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2 space-y-0 border border-green-200 rounded-lg px-3 py-2 bg-green-50/30">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value ?? false}
+                        onChange={e => field.onChange(e.target.checked)}
+                        className="accent-green-500"
+                      />
+                    </FormControl>
+                    <FormLabel className="mb-0 text-green-700 font-semibold cursor-pointer">Admission Open</FormLabel>
+                  </FormItem>
+                )}
+              />
               <div className="flex justify-end">
                 <Button type="submit" disabled={isPending}>
                   {isPending ? 'Creating...' : 'Create'}

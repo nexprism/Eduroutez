@@ -140,6 +140,7 @@ const formSchema = z.object({
   isBestRatedUniversity: z.boolean().optional(),
   isBestRatedCollege: z.boolean().optional(),
   isBestRatedInstitute: z.boolean().optional(),
+  admissionOpen: z.boolean().optional(),
 
 });
 
@@ -280,6 +281,7 @@ const GeneralInfo = () => {
         isBestRatedUniversity: instituteData.isBestRatedUniversity || false,
         isBestRatedCollege: instituteData.isBestRatedCollege || false,
         isBestRatedInstitute: instituteData.isBestRatedInstitute || false,
+        admissionOpen: instituteData.admissionOpen || false,
 
       });
 
@@ -327,6 +329,7 @@ const GeneralInfo = () => {
       isBestRatedUniversity: false,
       isBestRatedCollege: false,
       isBestRatedInstitute: false,
+      admissionOpen: false,
 
     }
   });
@@ -407,8 +410,9 @@ const GeneralInfo = () => {
     if (typeof values.isBestRatedInstitute === 'boolean') {
       formData.append('isBestRatedInstitute', String(values.isBestRatedInstitute));
     }
-
-
+    if (typeof values.admissionOpen === 'boolean') {
+      formData.append('admissionOpen', String(values.admissionOpen));
+    }
 
     mutate(formData);
   }
@@ -1023,6 +1027,23 @@ const GeneralInfo = () => {
                   )}
                 </>
               )}
+              <FormField
+                control={form.control}
+                name="admissionOpen"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2 space-y-0 border border-green-200 rounded-lg px-3 py-2 bg-green-50/30">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value ?? false}
+                        onChange={e => field.onChange(e.target.checked)}
+                        className="accent-green-500"
+                      />
+                    </FormControl>
+                    <FormLabel className="mb-0 text-green-700 font-semibold cursor-pointer">Admission Open</FormLabel>
+                  </FormItem>
+                )}
+              />
             </div>
             <FormField
               control={form.control}

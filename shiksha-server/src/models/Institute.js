@@ -116,6 +116,10 @@ const instituteSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    admissionOpen: {
+      type: Boolean,
+      default: false,
+    },
     courseInfo: {
       type: String,
     },
