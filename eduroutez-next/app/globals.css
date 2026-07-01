@@ -212,6 +212,53 @@
   width: 100%;
 }
 
+.ck-content ul {
+  list-style-type: disc !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.ck-content ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.ck-content li {
+  margin-bottom: 0.25rem !important;
+}
+
+.ck-content ul ul {
+  list-style-type: circle !important;
+}
+
+.ck-content ul ul ul {
+  list-style-type: square !important;
+}
+
+.ck-content table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  border: 2px solid #94a3b8 !important; /* Thicker outer boundary */
+}
+
+.ck-content table th,
+.ck-content table td {
+  border: 1px solid #cbd5e1 !important; /* Inner cell borders */
+  padding: 10px 12px !important;
+  text-align: left !important;
+}
+
+.ck-content table th {
+  background-color: #f8fafc !important;
+  font-weight: bold !important;
+  border-bottom: 2px solid #94a3b8 !important; /* Distinct header boundary */
+}
+
 .editor-container_classic-editor .editor-container__editor {
   width: 100%;
 }
@@ -219,4 +266,15 @@
 .ck-editor__editable_inline {
   min-height: 200px;
   height: auto;
+}
+
+@media screen and (max-width: 768px) {
+  .ck-content {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .ck-content table {
+    min-width: 650px !important; /* Force a minimum width on mobile to enable horizontal sliding/scrolling */
+  }
 }
