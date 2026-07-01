@@ -147,7 +147,6 @@ export async function getPopularCourses(req, res) {
   }
 }
 
-
 /**
  * GET : /course/:id
  * req.body {}

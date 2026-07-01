@@ -17,35 +17,29 @@ type TCourseListingPage = {};
 
 export default function CourseListingPage({}: TCourseListingPage) {
   const { searchQuery, page, limit } = useCourseTableFilters();
-  const [content, setContent] = useState([]);
   const [popularCourseFeature, setPopularCourseFeature] = useState<number | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const [enabled, setEnabled] = useState(false);
-  const [email, setEmail] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
+  const [instituteId, setInstituteId] = useState<string | null>(null);
 
   useEffect(() => {
     const storedRole = localStorage.getItem('role');
-    const emailFromStorage = localStorage.getItem('email');
-    
-    if (storedRole && emailFromStorage) {
-      setRole(storedRole);
-      setEmail(emailFromStorage);
-      setEnabled(storedRole === 'institute');
+    setRole(storedRole);
+    if (storedRole === 'institute') {
+      setInstituteId(localStorage.getItem('instituteId'));
     }
   }, []);
 
   useEffect(() => {
     const fetchInstituteData = async () => {
-      if (role !== 'institute' || !email) return;
+      if (role !== 'institute' || !instituteId) return;
 
-      const id = localStorage.getItem('instituteId');
       try {
-        const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
+        const response = await axiosInstance.get(`${apiUrl}/institute/${instituteId}`);
         const instituteData = response.data.data;
-        
+
         const plan = instituteData.plan;
         const feature = plan.features.find(
           (feature: any) => feature.key === 'Courses Listing'
@@ -59,57 +53,30 @@ export default function CourseListingPage({}: TCourseListingPage) {
     };
 
     fetchInstituteData();
-  }, [role, email]);
+  }, [role, instituteId]);
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['courses', searchQuery, page, limit],
+    queryKey: ['courses', searchQuery, page, limit, role, instituteId],
     queryFn: async () => {
+      const filters: Record<string, any> = {};
+      if (role === 'institute' && instituteId) {
+        filters.instituteCategory = instituteId;
+      }
       const response = await axiosInstance.get(`${apiUrl}/courses`, {
         params: {
-          searchFields: JSON.stringify({}),
+          filters: Object.keys(filters).length > 0 ? JSON.stringify(filters) : undefined,
+          search: searchQuery || undefined,
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,
           limit: limit
         }
       });
       return response.data;
-    },
-    enabled: !enabled
+    }
   });
 
-  useEffect(() => {
-    if (isSuccess && data?.data?.result) {
-      setContent(data.data.result);
-    }
-  }, [isSuccess, data]);
-
-  const data1 = useQuery({
-    queryKey: ['institute', searchQuery, page, limit],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/institutes/${email}`, {
-        params: {
-          searchFields: JSON.stringify({}),
-          sort: JSON.stringify({ createdAt: 'desc' }),
-          page: page,
-          limit: limit
-        }
-      });
-      return response.data;
-    },
-    enabled
-  });
-
-  useEffect(() => {
-    if (data1?.data?.data?.courses) {
-      setContent(data1.data.data.courses);
-    }
-  }, [data1]);
-
-  // Calculate total courses and courses shown
-  const totalCourses = content?.length || 0;
-  const coursesShown = role === 'institute' && popularCourseFeature !== null 
-    ? Math.min(totalCourses, popularCourseFeature)
-    : totalCourses;
+  const totalCourses = data?.data?.totalDocuments ?? 0;
+  const coursesData = data?.data?.result ?? [];
 
   return (
     <PageContainer scrollable>
@@ -143,9 +110,9 @@ export default function CourseListingPage({}: TCourseListingPage) {
             
             <CourseTable 
               data={role === 'institute' && popularCourseFeature !== null 
-                ? content.slice(0, popularCourseFeature) 
-                : content} 
-              totalData={data?.data?.totalDocuments || 0} 
+                ? coursesData.slice(0, popularCourseFeature) 
+                : coursesData} 
+              totalData={totalCourses} 
             />
           </div>
         )

@@ -8,6 +8,11 @@ class CourseService {
     this.studentRepository = new StudentRepository();
   }
 
+  escapeRegex(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   async create(data) {
     try {
       const course = await this.courseRepository.create(data);
@@ -44,13 +49,19 @@ class CourseService {
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
       
-      // Add top-level search parameter support for courseTitle
+      // Add top-level search parameter support - search across multiple fields
       if (search) {
-        searchConditions.push({ courseTitle: { $regex: search, $options: "i" } });
+        const escapedSearch = this.escapeRegex(search);
+        searchConditions.push(
+          { courseTitle: { $regex: escapedSearch, $options: "i" } },
+          { shortDescription: { $regex: escapedSearch, $options: "i" } },
+          { slug: { $regex: escapedSearch, $options: "i" } }
+        );
       }
 
       for (const [field, term] of Object.entries(parsedSearchFields)) {
-        searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+        const escapedTerm = this.escapeRegex(term);
+        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
       }
       if (searchConditions.length > 0) {
         filterConditions.$or = searchConditions;
@@ -126,7 +137,7 @@ class CourseService {
 
             try {
               // console.log("Fetching stud  ent:", review.studentId);
-              const student = await await this.studentRepository.get(review.studentId);
+              const student = await this.studentRepository.get(review.studentId);
               // console.log("Student drftyguhj:", student);
               return {
                 _id: review._id,

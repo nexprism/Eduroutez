@@ -8,6 +8,11 @@ class StudentService {
     this.userRepository = new UserRepository();
   }
 
+  escapeRegex(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   async create(data) {
     try {
       console.log('data',data)
@@ -30,7 +35,7 @@ class StudentService {
 
   async getAll(query) {
     try {
-      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}", search = "" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -50,8 +55,20 @@ class StudentService {
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
+
+      // Add top-level search parameter support - search across multiple fields
+      if (search) {
+        const escapedSearch = this.escapeRegex(search);
+        searchConditions.push(
+          { name: { $regex: escapedSearch, $options: "i" } },
+          { email: { $regex: escapedSearch, $options: "i" } },
+          { phone: { $regex: escapedSearch, $options: "i" } }
+        );
+      }
+
       for (const [field, term] of Object.entries(parsedSearchFields)) {
-        searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+        const escapedTerm = this.escapeRegex(term);
+        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
       }
       if (searchConditions.length > 0) {
         filterConditions.$or = searchConditions;

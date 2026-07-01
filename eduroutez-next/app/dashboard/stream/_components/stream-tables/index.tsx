@@ -14,22 +14,16 @@ export default function UserTable({
   totalData: number;
 }) {
   const { searchQuery, setPage, setSearchQuery } = useStreamTableFilters();
-  console.log(data)
+
   return (
     <div className="space-y-4 ">
       <div className="flex flex-wrap items-center gap-4">
-    
-        {/* <DataTableFilterBox
-          filterKey="role"
-          title="Role"
-          options={ROLE_OPTIONS}
-          setFilterValue={setRoleFilter}
-          filterValue={roleFilter}
+        <DataTableSearch
+          searchKey="name"
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setPage={setPage}
         />
-        <DataTableResetFilter
-          isFilterActive={isAnyFilterActive}
-          onReset={resetFilters}
-        /> */}
       </div>
       <DataTable columns={columns} data={data} totalItems={totalData} />
     </div>

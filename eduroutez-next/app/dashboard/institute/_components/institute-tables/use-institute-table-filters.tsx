@@ -13,13 +13,13 @@ export function useInstituteTableFilters() {
   const [searchQuery, setSearchQuery] = useQueryState(
     'name',
     searchParams.name
-      .withOptions({ shallow: false, throttleMs: 1000 })
+      .withOptions({ shallow: false })
       .withDefault('')
   );
 
-  const [roleFilter, setRoleFilter] = useQueryState(
-    'roles',
-    searchParams.roles.withOptions({ shallow: false }).withDefault('')
+  const [organizationFilter, setOrganizationFilter] = useQueryState(
+    'organization',
+    searchParams.organization.withDefault('')
   );
 
   const [page, setPage] = useQueryState(
@@ -33,20 +33,20 @@ export function useInstituteTableFilters() {
   );
   const resetFilters = useCallback(() => {
     setSearchQuery(null);
-    setRoleFilter(null);
+    setOrganizationFilter(null);
 
     setPage(1);
-  }, [setSearchQuery, setRoleFilter, setPage]);
+  }, [setSearchQuery, setOrganizationFilter, setPage]);
 
   const isAnyFilterActive = useMemo(() => {
-    return !!searchQuery || !!roleFilter;
-  }, [searchQuery, roleFilter]);
+    return !!searchQuery || !!organizationFilter;
+  }, [searchQuery, organizationFilter]);
 
   return {
     searchQuery,
     setSearchQuery,
-    roleFilter,
-    setRoleFilter,
+    organizationFilter,
+    setOrganizationFilter,
     page,
     setPage,
     limit,

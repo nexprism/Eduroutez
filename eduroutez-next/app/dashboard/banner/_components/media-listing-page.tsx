@@ -20,11 +20,11 @@ export default function MediaListingPage({}: TMediaListingPage) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['banner', searchQuery],
+    queryKey: ['banner', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/banners`, {
         params: {
-          searchFields: JSON.stringify({}),
+          search: searchQuery || undefined,
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,
           limit: limit

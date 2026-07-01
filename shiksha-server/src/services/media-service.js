@@ -4,6 +4,11 @@ class MediaService {
     this.mediaRepository = new MediaRepository();
   }
 
+  escapeRegex(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   async create(data) {
     try {
       const Media = await this.mediaRepository.create(data);
@@ -14,7 +19,7 @@ class MediaService {
   }
   async getAll(query) {
     try {
-      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}", search = "" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -32,8 +37,18 @@ class MediaService {
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
+
+      if (search) {
+        const escapedSearch = this.escapeRegex(search);
+        searchConditions.push(
+          { name: { $regex: escapedSearch, $options: "i" } },
+          { altText: { $regex: escapedSearch, $options: "i" } }
+        );
+      }
+
       for (const [field, term] of Object.entries(parsedSearchFields)) {
-        searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+        const escapedTerm = this.escapeRegex(term);
+        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
       }
       if (searchConditions.length > 0) {
         filterConditions.$or = searchConditions;

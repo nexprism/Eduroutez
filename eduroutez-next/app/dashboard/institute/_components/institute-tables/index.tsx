@@ -1,36 +1,45 @@
 'use client';
 
-import { useState, useMemo } from 'react';
 import { DataTable } from '@/components/ui/table/data-table';
+import { DataTableSearch } from '@/components/ui/table/data-table-search';
 import { columns } from './columns';
+import { useInstituteTableFilters } from './use-institute-table-filters';
 import { Institute } from '@/types';
 
-export default function UserTable({
+export default function InstituteTable({
   data,
   totalData
 }: {
   data: Institute[];
   totalData: number;
 }) {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredData = useMemo(() => {
-    const regex = new RegExp(searchQuery, 'i');
-    return data.filter(institute => regex.test(institute.instituteName));
-  }, [searchQuery, data]);
+  const { searchQuery, setSearchQuery, setPage, organizationFilter, setOrganizationFilter } = useInstituteTableFilters();
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4">
-        <input
-          type="text"
-          placeholder="Search by name"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="border p-2 rounded"
+        <DataTableSearch
+          searchKey="name"
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setPage={setPage}
         />
+        <select
+          value={organizationFilter}
+          onChange={(e) => {
+            setOrganizationFilter(e.target.value || null);
+            setPage(1);
+          }}
+          className="border p-2 rounded"
+        >
+          <option value="">All Types</option>
+          <option value="University">University</option>
+          <option value="College">College</option>
+          <option value="Institute">Institute</option>
+          <option value="Polytechnic">Polytechnic</option>
+        </select>
       </div>
-      <DataTable columns={columns} data={filteredData} totalItems={totalData} />
+      <DataTable columns={columns} data={data} totalItems={totalData} />
     </div>
   );
 }

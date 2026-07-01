@@ -22,11 +22,11 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
   const plan = typeof window !== 'undefined' ? localStorage.getItem('plan') : null;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['emails', searchQuery],
+    queryKey: ['emails', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/create-Emails`, {
         params: {
-          searchFields: JSON.stringify({}),
+          search: searchQuery || undefined,
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,
           limit: limit

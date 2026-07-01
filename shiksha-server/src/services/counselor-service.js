@@ -15,6 +15,11 @@ class CounselorService {
     this.counselorSlotRepository = new CounselorSlotRepository();
   }
 
+  escapeRegex(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   hashPassword(password) {
     const salt = bcrypt.genSaltSync(+ServerConfig.SALT);
     const hashedPassword = bcrypt.hashSync(password, salt);
@@ -64,14 +69,20 @@ class CounselorService {
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
       
-      // Add top-level search parameter support
+      // Add top-level search parameter support - search across multiple fields
       if (search) {
-        searchConditions.push({ firstname: { $regex: search, $options: "i" } });
-        searchConditions.push({ lastname: { $regex: search, $options: "i" } });
+        const escapedSearch = this.escapeRegex(search);
+        searchConditions.push(
+          { firstname: { $regex: escapedSearch, $options: "i" } },
+          { lastname: { $regex: escapedSearch, $options: "i" } },
+          { email: { $regex: escapedSearch, $options: "i" } },
+          { contactno: { $regex: escapedSearch, $options: "i" } }
+        );
       }
 
       for (const [field, term] of Object.entries(parsedSearchFields)) {
-        searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+        const escapedTerm = this.escapeRegex(term);
+        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
       }
       if (searchConditions.length > 0) {
         filterConditions.$or = searchConditions;
@@ -342,7 +353,8 @@ class CounselorService {
         // Build search conditions for multiple fields with partial matching
         const searchConditions = [];
         for (const [field, term] of Object.entries(parsedSearchFields)) {
-          searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+          const escapedTerm = this.escapeRegex(term);
+          searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
         }
         if (searchConditions.length > 0) {
           filterConditions.$or = searchConditions;

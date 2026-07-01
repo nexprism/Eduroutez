@@ -13,7 +13,7 @@ export function useUserTableFilters() {
   const [searchQuery, setSearchQuery] = useQueryState(
     'name',
     searchParams.name
-      .withOptions({ shallow: false, throttleMs: 1000 })
+      .withOptions({ shallow: false })
       .withDefault('')
   );
 

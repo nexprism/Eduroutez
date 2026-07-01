@@ -169,7 +169,7 @@ escapeRegex(str) {
           } else {
             locationFilters.push({ [path]: createRegex(value) });
           }
-        } else if (key === 'organisationType') {
+        } else if (key === 'organisationType' || key === 'organization') {
           if (Array.isArray(value)) {
             const regexPattern = value.map(v => this.escapeRegex(v)).join('|');
             otherFilters.push({ [key]: { $regex: regexPattern, $options: 'i' } });
@@ -221,20 +221,21 @@ escapeRegex(str) {
     if (examFilters.length > 0) finalFilters.push({ $or: examFilters });
     if (otherFilters.length > 0) otherFilters.forEach(filter => finalFilters.push(filter));
 
-    if (finalFilters.length > 0) {
-      if (streamSpecFilters.length > 0 && locationFilters.length > 0) {
-        filterConditions.$and = finalFilters;
-      } else {
-        filterConditions.$or = finalFilters;
-      }
-    }
-
     // 🔧 Escape regex in search conditions
     const searchConditions = [];
 
-    // Add top-level search parameter support
+    // Add top-level search parameter support - search across multiple fields
     if (search) {
-      searchConditions.push({ instituteName: { $regex: this.escapeRegex(search), $options: "i" } });
+      const escapedSearch = this.escapeRegex(search);
+      searchConditions.push(
+        { instituteName: { $regex: escapedSearch, $options: "i" } },
+        { email: { $regex: escapedSearch, $options: "i" } },
+        { address: { $regex: escapedSearch, $options: "i" } },
+        { institutePhone: { $regex: escapedSearch, $options: "i" } },
+        { slug: { $regex: escapedSearch, $options: "i" } },
+        { "city.name": { $regex: escapedSearch, $options: "i" } },
+        { "state.name": { $regex: escapedSearch, $options: "i" } }
+      );
     }
     for (const [field, rawTerm] of Object.entries(parsedSearchFields)) {
       const term = typeof rawTerm === 'string' ? rawTerm.trim().replace(/\s+/g, ' ') : rawTerm;
@@ -261,7 +262,15 @@ escapeRegex(str) {
       }
     }
 
-    if (searchConditions.length > 0) {
+    if (finalFilters.length > 0 && searchConditions.length > 0) {
+      filterConditions.$and = [...finalFilters, { $or: searchConditions }];
+    } else if (finalFilters.length > 0) {
+      if (streamSpecFilters.length > 0 && locationFilters.length > 0) {
+        filterConditions.$and = finalFilters;
+      } else {
+        filterConditions.$or = finalFilters;
+      }
+    } else if (searchConditions.length > 0) {
       filterConditions.$or = searchConditions;
     }
 

@@ -5,6 +5,11 @@ class StreamService {
     this.streamRepository = new StreamRepository();
   }
 
+  escapeRegex(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   async create(data) {
     try {
       const stream = await this.streamRepository.create(data);
@@ -15,7 +20,7 @@ class StreamService {
   }
   async getAll(query) {
     try {
-      const { page = 1, limit = 100, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 100, filters = "{}", searchFields = "{}", sort = "{}", search = "" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -38,11 +43,24 @@ class StreamService {
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
+
+      if (search) {
+        const escapedSearch = this.escapeRegex(search);
+        searchConditions.push(
+          { name: { $regex: escapedSearch, $options: "i" } }
+        );
+      }
+
       for (const [field, term] of Object.entries(parsedSearchFields)) {
-        searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+        const escapedTerm = this.escapeRegex(term);
+        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
       }
       if (searchConditions.length > 0) {
-        filterConditions.$or = searchConditions;
+        filterConditions.$and = [
+          { $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] },
+          { $or: searchConditions }
+        ];
+        delete filterConditions.$or;
       }
 
       // Build sort conditions

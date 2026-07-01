@@ -16,17 +16,21 @@ type TInstituteListingPage = {};
 export default function InstituteListingPage({}: TInstituteListingPage) {
   // const queryClient = useQueryClient()
 
-  //checking automation
-  const { searchQuery, page, limit } = useInstituteTableFilters();
+  const { searchQuery, page, limit, organizationFilter, setOrganizationFilter } = useInstituteTableFilters();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['institutes', searchQuery, page, limit],
+    queryKey: ['institutes', searchQuery, page, limit, organizationFilter],
     queryFn: async () => {
+      const filters: Record<string, any> = {};
+      if (organizationFilter) {
+        filters.organization = organizationFilter;
+      }
       const response = await axiosInstance.get(`${apiUrl}/institutes`, {
         params: {
-          searchFields: JSON.stringify({}),
+          filters: Object.keys(filters).length > 0 ? JSON.stringify(filters) : undefined,
+          search: searchQuery || undefined,
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,
           limit: limit
@@ -35,7 +39,6 @@ export default function InstituteListingPage({}: TInstituteListingPage) {
       return response.data;
     }
   });
-  console.log(data?.data);
   return (
     <PageContainer scrollable>
       {isLoading ? (

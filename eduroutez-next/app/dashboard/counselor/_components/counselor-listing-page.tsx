@@ -9,20 +9,28 @@ import CounselorTable from './counselor-tables';
 import { useQuery } from '@tanstack/react-query';
 import { useCounselorTableFilters } from './counselor-tables/use-counselor-table-filters';
 import axiosInstance from '@/lib/axios';
+import { useEffect, useState } from 'react';
 
 type TCounselorListingPage = {};
 
 export default function CounselorListingPage({}: TCounselorListingPage) {
   const { searchQuery, page, limit } = useCounselorTableFilters();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
-  const instituteId = typeof window !== 'undefined' ? localStorage.getItem('instituteId') : null;
+  const [role, setRole] = useState<string | null>(null);
+  const [instituteId, setInstituteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedRole = localStorage.getItem('role');
+    const storedInstituteId = localStorage.getItem('instituteId');
+    setRole(storedRole);
+    setInstituteId(storedInstituteId);
+  }, []);
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['counselors', searchQuery, page, limit, role],
+    queryKey: ['counselors', searchQuery, page, limit, role, instituteId],
     queryFn: async () => {
       const params = {
-        searchFields: JSON.stringify({}),
+        search: searchQuery || undefined,
         sort: JSON.stringify({ createdAt: 'desc' }),
         page,
         limit
@@ -35,12 +43,13 @@ export default function CounselorListingPage({}: TCounselorListingPage) {
         { params }
       );
 
-
-      return role === 'SUPER_ADMIN' ? response.data?.data : response.data;
-
+      return response.data;
     },
-    enabled: !!role && (role === 'SUPER_ADMIN' || !!instituteId)
+    enabled: !!role
   });
+
+  const result = data?.data?.result ?? [];
+  const totalDocuments = data?.data?.totalDocuments ?? 0;
 
   return (
     <PageContainer scrollable>
@@ -50,7 +59,7 @@ export default function CounselorListingPage({}: TCounselorListingPage) {
         <div className="space-y-4">
           <div className="flex items-start justify-between">
             <Heading
-            title={`Counselor (${role === 'SUPER_ADMIN' ? data?.result?.length ?? 0 : data?.data?.result?.length ?? 0})`}
+            title={`Counselor (${totalDocuments})`}
             description="All counselors online and offline are listed here."
             />
             <Button asChild className="w-fit whitespace-nowrap px-2">
@@ -61,8 +70,8 @@ export default function CounselorListingPage({}: TCounselorListingPage) {
           </div>
           <Separator />
           <CounselorTable
-            data={role === 'SUPER_ADMIN' ? (data?.result ?? []) : (data?.data?.result ?? [])}
-            totalData={role === 'SUPER_ADMIN' ? (data?.totalDocuments ?? 0) : (data?.data?.totalDocuments ?? 0)}
+            data={result}
+            totalData={totalDocuments}
           />
         </div>
       )}

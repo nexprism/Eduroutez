@@ -60,7 +60,7 @@ export async function getRecruitersByInstitute(req, res) {
             query.filters = JSON.stringify({ institute });
         } else {
             const filters = JSON.parse(query.filters);
-            filters.institute = instituteId;
+            filters.institute = institute;
             query.filters = JSON.stringify(filters);
         }
         console.log("Query:", query);

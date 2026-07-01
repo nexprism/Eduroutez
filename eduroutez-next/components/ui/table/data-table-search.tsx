@@ -1,9 +1,11 @@
 'use client';
 
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Options } from 'nuqs';
-import { useTransition } from 'react';
+import { useTransition, useState, useEffect, useCallback } from 'react';
 
 interface DataTableSearchProps {
   searchKey: string;
@@ -25,18 +27,60 @@ export function DataTableSearch({
   setPage
 }: DataTableSearchProps) {
   const [isLoading, startTransition] = useTransition();
+  const [inputValue, setInputValue] = useState(searchQuery ?? '');
 
-  const handleSearch = (value: string) => {
-    setSearchQuery(value, { startTransition });
-    setPage(1); // Reset page to 1 when search changes
+  useEffect(() => {
+    setInputValue(searchQuery ?? '');
+  }, [searchQuery]);
+
+  const handleSearch = useCallback((value: string) => {
+    setSearchQuery(value || null, { startTransition });
+    setPage(1);
+  }, [setSearchQuery, setPage]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch(inputValue);
+    }
   };
 
+  const handleClear = useCallback(() => {
+    setInputValue('');
+    setSearchQuery(null, { startTransition });
+    setPage(1);
+  }, [setSearchQuery, setPage]);
+
   return (
-    <Input
-      placeholder={`Search ${searchKey}...`}
-      value={searchQuery ?? ''}
-      onChange={(e) => handleSearch(e.target.value)}
-      className={cn('w-full md:max-w-sm', isLoading && 'animate-pulse')}
-    />
+    <div className="flex w-full items-center gap-2 md:max-w-sm">
+      <div className="relative w-full">
+        <Input
+          placeholder={`Search ${searchKey}...`}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className={cn('w-full pr-8', isLoading && 'animate-pulse')}
+        />
+        {inputValue && (
+          <button
+            onClick={handleClear}
+            className="absolute inset-y-0 right-0 flex items-center pr-2 text-muted-foreground hover:text-foreground"
+            type="button"
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        )}
+      </div>
+      <Button
+        type="button"
+        size="icon"
+        variant="secondary"
+        onClick={() => handleSearch(inputValue)}
+        disabled={isLoading}
+        aria-label="Search"
+      >
+        <Search className="h-4 w-4" />
+      </Button>
+    </div>
   );
 }

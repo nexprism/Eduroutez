@@ -21,7 +21,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
   const email = localStorage.getItem('email');
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['reviews', searchQuery, role, email],
+    queryKey: ['reviews', searchQuery, role, email, page, limit],
     queryFn: async () => {
       if (role === 'counsellor') {
         // Fetch counselor-specific reviews
@@ -44,7 +44,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
         // Fetch all reviews for other roles
         const response = await axiosInstance.get(`${apiUrl}/review`, {
           params: {
-            searchFields: JSON.stringify({}),
+            search: searchQuery || undefined,
             sort: JSON.stringify({ createdAt: 'desc' }),
             page: page,
             limit: limit

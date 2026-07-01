@@ -32,18 +32,17 @@ export default function RecruiterListingPage({}: TRecruiterListingPage) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { data, isLoading, isSuccess, error } = useQuery<RecruiterResponse>({
-    queryKey: ['recruiters', searchQuery, page],
+    queryKey: ['recruiters', searchQuery, page, limit],
     queryFn: async () => {
       try {
         const instituteId = localStorage.getItem('instituteId');
-        console.log('InstituteId from localStorage:', instituteId);
         
         if (!instituteId) {
           throw new Error('Institute ID not found in localStorage');
         }
 
         const response = await axiosInstance.get(`${apiUrl}/recruiters-by-institute/${instituteId}`, {
-          params: { page, limit }
+          params: { search: searchQuery || undefined, page, limit }
         });
         return response.data;
       } catch (error) {

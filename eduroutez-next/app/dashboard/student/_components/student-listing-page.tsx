@@ -24,7 +24,7 @@ export default function StudentListingPage({}: TStudentListingPage) {
     queryFn: async () => {
       const response = await axiosInstance.get(`${apiUrl}/students`, {
         params: {
-          searchFields: JSON.stringify({}),
+          search: searchQuery || undefined,
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,
           limit: limit
