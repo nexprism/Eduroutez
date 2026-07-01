@@ -85,6 +85,11 @@ export const columns: ColumnDef<any>[] = [
         header: 'SET NAME'
     },
     {
+        accessorKey: 'stream',
+        header: 'STREAM',
+        cell: ({ row }) => row.original.stream || 'General'
+    },
+    {
         accessorKey: 'totalQuestions',
         header: 'TOTAL QUESTIONS'
     },

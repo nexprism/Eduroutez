@@ -101,13 +101,21 @@ class CounselorTestService {
     }
 
     // Counselor: Get random test set
-    async getRandomTestSet() {
+    async getRandomTestSet(counselorId) {
         try {
-            const result = await this.questionSetRepository.getRandomSet();
+            const counselor = await this.counselorRepository.getByid(counselorId);
+            const stream = counselor?.category || "";
+            const result = await this.questionSetRepository.getRandomSet(stream);
             if (!result) {
-                throw new AppError("No test sets found in the system", StatusCodes.NOT_FOUND);
+                throw new AppError("No test sets found for your category", StatusCodes.NOT_FOUND);
             }
-            return result;
+
+            const sanitized = result.toObject ? result.toObject() : { ...result };
+            sanitized.questions = sanitized.questions.map(q => ({
+                ...q,
+                options: q.options.map(({ isCorrect, ...opt }) => opt)
+            }));
+            return sanitized;
         } catch (error) {
             throw error;
         }

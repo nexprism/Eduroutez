@@ -495,6 +495,7 @@ export const signup = async (req, res) => {
         lastname,
         email: req.body.email,
         contactno: contact_number,
+        category: req.body.category || '',
         _id: userId,
         country: req.body.country,
         state: req.body.state,

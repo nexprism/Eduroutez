@@ -32,6 +32,10 @@ const counselorQuestionSetSchema = new mongoose.Schema(
             type: Number,
             default: 25, // in minutes
         },
+        stream: {
+            type: String,
+            default: "",
+        },
     },
     { timestamps: true }
 );

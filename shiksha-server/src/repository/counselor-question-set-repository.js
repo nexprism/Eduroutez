@@ -6,11 +6,13 @@ class CounselorQuestionSetRepository extends CrudRepository {
         super(CounselorQuestionSet);
     }
 
-    async getRandomSet() {
+    async getRandomSet(stream) {
         try {
-            const count = await this.model.countDocuments();
+            const filter = stream ? { stream } : {};
+            const count = await this.model.countDocuments(filter);
+            if (count === 0) return null;
             const random = Math.floor(Math.random() * count);
-            const result = await this.model.findOne().skip(random);
+            const result = await this.model.findOne(filter).skip(random);
             return result;
         } catch (error) {
             throw error;

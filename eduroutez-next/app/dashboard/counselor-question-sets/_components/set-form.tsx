@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Plus, ArrowLeft, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
@@ -35,7 +36,8 @@ const formSchema = z.object({
     setName: z.string().min(1, 'Set name is required'),
     questions: z.array(questionSchema).min(1, 'At least one question is required'),
     totalQuestions: z.number().default(50),
-    timeLimit: z.number().default(25)
+    timeLimit: z.number().default(25),
+    stream: z.string().optional()
 });
 
 type QuestionSetFormProps = {
@@ -47,6 +49,7 @@ export default function QuestionSetForm({ questionSetId }: QuestionSetFormProps)
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const isEditMode = !!questionSetId;
     const [isFetching, setIsFetching] = useState(isEditMode);
+    const [streams, setStreams] = useState<any[]>([]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -65,7 +68,8 @@ export default function QuestionSetForm({ questionSetId }: QuestionSetFormProps)
                 }
             ],
             totalQuestions: 50,
-            timeLimit: 25
+            timeLimit: 25,
+            stream: ''
         }
     });
 
@@ -73,6 +77,25 @@ export default function QuestionSetForm({ questionSetId }: QuestionSetFormProps)
         control: form.control,
         name: 'questions'
     });
+
+    // Fetch counsellor streams
+    useEffect(() => {
+        const fetchStreams = async () => {
+            try {
+                const res = await axiosInstance.get(`${apiUrl}/streams`, {
+                    params: {
+                        page: 0,
+                        limit: 200,
+                        filters: JSON.stringify({ isCounsellorStream: true })
+                    }
+                });
+                setStreams(res.data?.data?.result || []);
+            } catch (error) {
+                console.error('Failed to fetch streams', error);
+            }
+        };
+        fetchStreams();
+    }, [apiUrl]);
 
     // Fetch existing data in edit mode
     useEffect(() => {
@@ -86,6 +109,7 @@ export default function QuestionSetForm({ questionSetId }: QuestionSetFormProps)
                         setName: data.setName || '',
                         totalQuestions: data.totalQuestions || 50,
                         timeLimit: data.timeLimit || 25,
+                        stream: data.stream || '',
                         questions: data.questions?.map((q: any) => ({
                             questionText: q.questionText || '',
                             explanation: q.explanation || '',
@@ -193,6 +217,29 @@ export default function QuestionSetForm({ questionSetId }: QuestionSetFormProps)
                                             <FormControl>
                                                 <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
                                             </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="stream"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Stream / Category</FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value || ''}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="All Streams (General)" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="">All Streams (General)</SelectItem>
+                                                    {streams.map((s: any) => (
+                                                        <SelectItem key={s._id} value={s.name}>{s.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
                                             <FormMessage />
                                         </FormItem>
                                     )}

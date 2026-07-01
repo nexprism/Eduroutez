@@ -154,7 +154,8 @@ export const getQuestionSetById = async (req, res) => {
 // Counselor: Get Random Question Set for Test
 export const getRandomTestSet = async (req, res) => {
     try {
-        const response = await counselorTestService.getRandomTestSet();
+        const counselorId = req.user._id;
+        const response = await counselorTestService.getRandomTestSet(counselorId);
         SuccessResponse.data = response;
         SuccessResponse.message = "Successfully fetched random test set";
         return res.status(StatusCodes.OK).json(SuccessResponse);
