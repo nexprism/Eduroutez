@@ -30,6 +30,10 @@ const newsSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        isPublished: {
+            type: Boolean,
+            default: true,
+        },
     },
     {
         timestamps: true,

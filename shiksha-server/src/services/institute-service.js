@@ -134,6 +134,7 @@ escapeRegex(str) {
 
     if (browserUrl !== undefined && !browserUrl.includes('admin')) {
       filterConditions.onhold = false;
+      filterConditions.status = { $ne: false };
     }
 
     let ratingFilter = 0;
@@ -145,6 +146,10 @@ escapeRegex(str) {
     const otherFilters = [];
 
     for (let [key, value] of Object.entries(parsedFilters)) {
+      if (value === '') {
+        delete filterConditions[key];
+        continue;
+      }
       if (key === 'Exam') key = "examAccepted";
 
       if (value === "true") {

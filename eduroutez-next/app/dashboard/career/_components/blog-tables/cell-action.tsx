@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import axiosInstance from '@/lib/axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { Edit, Eye, EyeOff, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Career } from '@/types';
 import { useState } from 'react';
@@ -47,6 +47,21 @@ window.location.reload();    },
     }
   });
 
+  const togglePublishMutation = useMutation({
+    mutationFn: async () => {
+      const newValue = !data.isPublished;
+      await axiosInstance({
+        url: `${apiUrl}/career/${data._id}`,
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        data: { isPublished: newValue }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['career'] });
+    }
+  });
+
   const onConfirm = async () => {
     setLoading(true);
     deleteBlogMutation.mutate(data._id);
@@ -77,6 +92,14 @@ window.location.reload();    },
             }}
           >
             <Edit className="mr-2 h-4 w-4" /> Update
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => togglePublishMutation.mutate()}>
+            {data.isPublished ? (
+              <EyeOff className="mr-2 h-4 w-4" />
+            ) : (
+              <Eye className="mr-2 h-4 w-4" />
+            )}
+            {data.isPublished ? 'Unpublish' : 'Publish'}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="mr-2 h-4 w-4" /> Delete

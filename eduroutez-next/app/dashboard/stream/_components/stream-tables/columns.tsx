@@ -1,9 +1,9 @@
 'use client';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
 import { Stream } from '@/types';
+import { ToggleStatus } from '@/components/ui/toggle-status';
 
 export const columns: ColumnDef<Stream>[] = [
     {
@@ -48,17 +48,15 @@ export const columns: ColumnDef<Stream>[] = [
   },
 
   {
-    accessorKey: 'status',
-    header: 'STATUS',
+    header: 'ACTIVE',
     cell: ({ row }) => (
-      <div className="flex w-32 space-x-1">
-        <Badge
-          variant={!row.original.status ? 'secondary' : 'default'}
-          className="text-xs "
-        >
-          {row.original.status ? 'Active' : 'Inactive'}
-        </Badge>
-      </div>
+      <ToggleStatus
+        checked={row.original.status ?? true}
+        id={row.original._id}
+        apiPath="stream"
+        field="status"
+        queryKey="streams"
+      />
     )
   },
 

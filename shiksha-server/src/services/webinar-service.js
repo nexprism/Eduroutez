@@ -78,8 +78,17 @@ class WebinarService {
       // Build filter conditions for multiple fields
     const filterConditions = { deletedAt: null };
 
+      // Apply default filter for active content (webinar uses `status` boolean)
+      if (!parsedFilters.hasOwnProperty('status')) {
+        filterConditions.status = { $ne: false };
+      }
+
       for (const [key, value] of Object.entries(parsedFilters)) {
-        filterConditions[key] = value;
+        if (value === '') {
+          delete filterConditions[key];
+        } else {
+          filterConditions[key] = value;
+        }
       }
 
       // Build search conditions for multiple fields with partial matching

@@ -1,9 +1,8 @@
 'use client';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
-import { Badge } from '@/components/ui/badge';
 import { Blog } from '@/types';
+import { ToggleStatus } from '@/components/ui/toggle-status';
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 const FALLBACK_IMAGE = '/placeholder-thumbnail.svg';
@@ -49,7 +48,18 @@ export const columns: ColumnDef<Blog>[] = [
   // {
   //   header: 'CATEGORY',
   //   cell: ({ row }) => <div>{`${row.original.category}`}</div>
-  // }
+  // },
+  {
+    header: 'PUBLISHED',
+    cell: ({ row }) => (
+      <ToggleStatus
+        checked={row.original.isPublished ?? true}
+        id={row.original._id}
+        apiPath="blog"
+        queryKey="blogs"
+      />
+    )
+  },
   {
     header: 'CREATED AT',
     cell: ({ row }) => {

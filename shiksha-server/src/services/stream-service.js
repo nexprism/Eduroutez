@@ -38,7 +38,11 @@ class StreamService {
       };
 
       for (const [key, value] of Object.entries(parsedFilters)) {
-        filterConditions[key] = value;
+        if (value === '') {
+          delete filterConditions[key];
+        } else {
+          filterConditions[key] = value;
+        }
       }
 
       // Build search conditions for multiple fields with partial matching

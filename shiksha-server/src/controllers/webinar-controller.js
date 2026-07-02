@@ -155,6 +155,9 @@ export async function updateWebinar(req, res) {
         payload.duration = req.body.duration;
       }
 
+      if (typeof req.body.status !== 'undefined') {
+        payload.status = req.body.status;
+      }
 
       // Check if a new image is uploaded
       if (req.file) {

@@ -169,6 +169,13 @@ export async function updateBlog(req, res) {
         payload.stream = req.body.stream;
       }
 
+      if (typeof req.body.isPublished !== 'undefined') {
+        payload.isPublished = req.body.isPublished;
+      }
+      if (typeof req.body.isActive !== 'undefined') {
+        payload.isActive = req.body.isActive;
+      }
+
       // Check if a new image is uploaded
       console.log("req.file", req.file);
       if (req.files && req.files["images"]) {

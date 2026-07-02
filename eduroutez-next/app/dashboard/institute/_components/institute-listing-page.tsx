@@ -23,13 +23,13 @@ export default function InstituteListingPage({}: TInstituteListingPage) {
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['institutes', searchQuery, page, limit, organizationFilter],
     queryFn: async () => {
-      const filters: Record<string, any> = {};
+      const filters: Record<string, any> = { status: '' };
       if (organizationFilter) {
         filters.organization = organizationFilter;
       }
       const response = await axiosInstance.get(`${apiUrl}/institutes`, {
         params: {
-          filters: Object.keys(filters).length > 0 ? JSON.stringify(filters) : undefined,
+          filters: JSON.stringify(filters),
           search: searchQuery || undefined,
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,

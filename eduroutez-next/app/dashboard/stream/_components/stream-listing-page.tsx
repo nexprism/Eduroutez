@@ -26,7 +26,8 @@ export default function StreamListingPage({}: TStreamListingPage) {
           search: searchQuery || undefined,
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,
-          limit: limit
+          limit: limit,
+          filters: JSON.stringify({ status: '' })
         }
       });
       return response.data;

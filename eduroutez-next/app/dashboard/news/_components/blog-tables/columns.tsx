@@ -1,32 +1,12 @@
 'use client';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
-import { Badge } from '@/components/ui/badge';
 import { News } from '@/types';
+import { ToggleStatus } from '@/components/ui/toggle-status';
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 
 export const columns: ColumnDef<News>[] = [
-  // {
-  //   id: 'select',
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={table.getIsAllPageRowsSelected()}
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false
-  // },
   {
     header: 'ID',
     cell: ({ row }) => <div>{`${row.index+1}`}</div>
@@ -39,11 +19,6 @@ export const columns: ColumnDef<News>[] = [
     header: 'Images',
     cell: ({ row }) => <img className='w-[2.5rem] h-[2rem] rounded-full' src={`${IMAGE_URL}/${row.original.image}`} alt="Icon" />
   },
-  // {
-  //   header: 'CATEGORY',
-  //   cell: ({ row }) => <div>{`${row.original.category}`}</div>
-  // },
-
   {
     header: 'Created By',
     cell: ({ row }) => {
@@ -51,7 +26,17 @@ export const columns: ColumnDef<News>[] = [
       return <div>{role === 'SUPER_ADMIN' ? row.original?.instituteName || 'Admin created' : 'Me'}</div>;
     }
   },
-
+  {
+    header: 'PUBLISHED',
+    cell: ({ row }) => (
+      <ToggleStatus
+        checked={row.original.isPublished ?? true}
+        id={row.original._id}
+        apiPath="update-news"
+        queryKey="news"
+      />
+    )
+  },
  {
     header: 'CREATED AT',
     cell: ({ row }) => {
@@ -60,7 +45,6 @@ export const columns: ColumnDef<News>[] = [
       return <div>{formattedDate}</div>;
     }
   },
-
   {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />

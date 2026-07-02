@@ -1,33 +1,13 @@
 'use client';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
-import { Badge } from '@/components/ui/badge';
 import { Blog } from '@/types';
+import { ToggleStatus } from '@/components/ui/toggle-status';
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 const FALLBACK_IMAGE = '/placeholder-thumbnail.svg';
 
 export const columns: ColumnDef<Blog>[] = [
-  // {
-  //   id: 'select',
-  //   header: ({ table }) => (
-  //     <Checkbox
-  //       checked={table.getIsAllPageRowsSelected()}
-  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-  //       aria-label="Select all"
-  //     />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Checkbox
-  //       checked={row.getIsSelected()}
-  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-  //       aria-label="Select row"
-  //     />
-  //   ),
-  //   enableSorting: false,
-  //   enableHiding: false
-  // },
   {
     header: 'ID',
     cell: ({ row }) => <div>{`${row.index + 1}`}</div>
@@ -46,11 +26,17 @@ export const columns: ColumnDef<Blog>[] = [
       />
     )
   },
-  // {
-  //   header: 'CATEGORY',
-  //   cell: ({ row }) => <div>{`${row.original.category}`}</div>
-  // },
-
+  {
+    header: 'PUBLISHED',
+    cell: ({ row }) => (
+      <ToggleStatus
+        checked={row.original.isPublished ?? true}
+        id={row.original._id}
+        apiPath="career"
+        queryKey="career"
+      />
+    )
+  },
   {
     header: 'CREATED AT',
     cell: ({ row }) => {
@@ -59,7 +45,6 @@ export const columns: ColumnDef<Blog>[] = [
       return <div>{formattedDate}</div>;
     }
   },
-
   {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />

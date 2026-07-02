@@ -9,14 +9,14 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import axiosInstance from '@/lib/axios';
-import { Blog } from '@/types';
+import { News } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { Edit, Eye, EyeOff, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface CellActionProps {
-  data: Blog;
+  data: News;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
@@ -43,6 +43,21 @@ window.location.reload();    },
     onSettled: () => {
       setOpen(false);
       setLoading(false);
+    }
+  });
+
+  const togglePublishMutation = useMutation({
+    mutationFn: async () => {
+      const newValue = !data.isPublished;
+      await axiosInstance({
+        url: `${apiUrl}/update-news/${data._id}`,
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        data: { isPublished: newValue }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['news'] });
     }
   });
 
@@ -75,6 +90,14 @@ window.location.reload();    },
             }
           >
             <Edit className="mr-2 h-4 w-4" /> Update
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => togglePublishMutation.mutate()}>
+            {data.isPublished ? (
+              <EyeOff className="mr-2 h-4 w-4" />
+            ) : (
+              <Eye className="mr-2 h-4 w-4" />
+            )}
+            {data.isPublished ? 'Unpublish' : 'Publish'}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="mr-2 h-4 w-4" /> Delete

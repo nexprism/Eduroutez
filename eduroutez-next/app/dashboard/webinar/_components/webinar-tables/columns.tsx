@@ -1,9 +1,9 @@
 'use client';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
 import { Webinar } from '@/types';
+import { ToggleStatus } from '@/components/ui/toggle-status';
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 export const columns: ColumnDef<Webinar>[] = [
@@ -39,17 +39,15 @@ export const columns: ColumnDef<Webinar>[] = [
     cell: ({ row }) => <img className='w-[2.5rem] h-[2rem] rounded-full' src={`${IMAGE_URL}/${row.original.image}`} alt="Icon" />
   },
   {
-    accessorKey: 'status',
-    header: 'STATUS',
+    header: 'ACTIVE',
     cell: ({ row }) => (
-      <div className="flex w-32 space-x-1">
-        <Badge
-          variant={!row.original.status ? 'secondary' : 'default'}
-          className="text-xs"
-        >
-          {row.original.status ? 'Active' : 'Inactive'}
-        </Badge>
-      </div>
+      <ToggleStatus
+        checked={row.original.status ?? true}
+        id={row.original._id}
+        apiPath="webinar"
+        field="status"
+        queryKey="webinars"
+      />
     )
   },
   {

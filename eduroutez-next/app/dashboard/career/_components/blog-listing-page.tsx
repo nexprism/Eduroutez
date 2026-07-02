@@ -24,7 +24,7 @@ interface CareerItem {
   instituteId: string;
   createdAt: string;
   updatedAt: string;
-  status?: boolean;
+  isPublished?: boolean;
 }
 
 interface CareerListResponse {
@@ -51,7 +51,8 @@ export default function CareerListingPage({}: TCareerListingPage) {
         params: {
           search: searchQuery,
           page,
-          limit
+          limit,
+          filters: JSON.stringify({ isPublished: '', isActive: '' })
         }
       });
       console.log('fghjk',response.data);
@@ -96,7 +97,7 @@ export default function CareerListingPage({}: TCareerListingPage) {
                 thumbnail: career.thumbnail,
                 description: career.description,
                 category: career.category,
-                status: career.status === undefined ? true : career.status,
+                isPublished: career.isPublished === undefined ? true : career.isPublished,
                 createdAt: career.createdAt,
               }))}
               totalData={data?.totalDocuments}

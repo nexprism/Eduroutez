@@ -58,13 +58,13 @@ export default function CourseListingPage({}: TCourseListingPage) {
   const { data, isLoading, isSuccess } = useQuery({
     queryKey: ['courses', searchQuery, page, limit, role, instituteId],
     queryFn: async () => {
-      const filters: Record<string, any> = {};
+      const filters: Record<string, any> = { isPublished: '', isActive: '' };
       if (role === 'institute' && instituteId) {
         filters.instituteCategory = instituteId;
       }
       const response = await axiosInstance.get(`${apiUrl}/courses`, {
         params: {
-          filters: Object.keys(filters).length > 0 ? JSON.stringify(filters) : undefined,
+          filters: JSON.stringify(filters),
           search: searchQuery || undefined,
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,

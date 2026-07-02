@@ -1,10 +1,36 @@
+export type Blog = {
+  _id: string;
+  title: string;
+  thumbnail?: string;
+  description: string;
+  category?: string;
+  isPublished: boolean;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Course = {
+  _id: string;
+  courseTitle: string;
+  category?: string;
+  coursePrice?: number;
+  courseType?: string;
+  status?: string;
+  isPublished: boolean;
+  isActive: boolean;
+  thumbnail?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type News = {
   instituteName: string;
   title: string;
   image: string;
   createdAt: string;
   category?: string;
-  status: boolean;
+  isPublished: boolean;
   _id: string;
 };
 
@@ -15,8 +41,11 @@ export type Career = {
   location: string;
   salary?: number;
   createdAt: string;
-  status: boolean;
+  isPublished: boolean;
+  isActive: boolean;
   _id: string;
+  thumbnail?: string;
+  category?: string;
 };
 
 export type Institute = {
@@ -25,6 +54,7 @@ export type Institute = {
   address: string;
   established: string;
   status: boolean;
+  onhold?: boolean;
   _id: string;
 };
 
@@ -51,6 +81,28 @@ export type ReviewResponse = {
 };
 
 // Ensure data is typed as ReviewResponse where used
+
+export type Webinar = {
+  _id: string;
+  title: string;
+  image?: string;
+  description?: string;
+  status: boolean;
+  time?: string;
+  duration?: string;
+  date?: string;
+  webinarLink?: string;
+  createdAt: string;
+};
+
+export type Stream = {
+  _id: string;
+  name: string;
+  status: boolean;
+  isCourseStream?: boolean;
+  isCounsellorStream?: boolean;
+  createdAt: string;
+};
 
 export type Media = {
   _id: string;

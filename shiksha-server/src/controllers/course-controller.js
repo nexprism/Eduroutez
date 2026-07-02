@@ -42,13 +42,13 @@ export const createCourse = async (req, res) => {
 
 
 
-      if (req.files["coursePreviewThumbnail"]) {
+      if (req.files && req.files["coursePreviewThumbnail"]) {
         payload.coursePreviewThumbnail = req.files["coursePreviewThumbnail"][0].filename;
       }
-      if (req.files["coursePreviewCover"]) {
+      if (req.files && req.files["coursePreviewCover"]) {
         payload.coursePreviewCover = req.files["coursePreviewCover"][0].filename;
       }
-      if (req.files["metaImage"]) {
+      if (req.files && req.files["metaImage"]) {
         payload.metaImage = req.files["metaImage"][0].filename;
       }
 
@@ -202,21 +202,21 @@ export async function updateCourse(req, res) {
       console.log(req.files);
       console.log(req.body);
       const course = await courseService.get(courseId);
-      if (req.files["coursePreviewThumbnail"]) {
+      if (req.files && req.files["coursePreviewThumbnail"]) {
         if (course.coursePreviewThumbnail) {
           oldImagePaths.coursePreviewThumbnail = path.join("uploads", course.coursePreviewThumbnail);
         }
         payload.coursePreviewThumbnail = req.files["coursePreviewThumbnail"][0].filename;
       }
 
-      if (req.files["coursePreviewCover"]) {
+      if (req.files && req.files["coursePreviewCover"]) {
         if (course.coursePreviewCover) {
           oldImagePaths.coursePreviewCover = path.join("uploads", course.coursePreviewCover);
         }
         payload.coursePreviewCover = req.files["coursePreviewCover"][0].filename;
       }
 
-      if (req.files["metaImage"]) {
+      if (req.files && req.files["metaImage"]) {
         if (course.metaImage) {
           oldImagePaths.metaImage = path.join("uploads", course.metaImage);
         }
@@ -228,7 +228,9 @@ export async function updateCourse(req, res) {
       }
 
       const response = await courseService.update(courseId, payload);
-      const resp = await instituteService.updateCourses(payload.instituteCategory, courseId, response);
+      if (payload.instituteCategory) {
+        const resp = await instituteService.updateCourses(payload.instituteCategory, courseId, response);
+      }
 
       //update courses in institute
       

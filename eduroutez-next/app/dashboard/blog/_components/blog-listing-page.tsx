@@ -49,15 +49,14 @@ export default function BlogListingPage({}: TBlogListingPage) {
 
         if (userRole === 'SUPER_ADMIN') {
           response = await axiosInstance.get(`${apiUrl}/blogs`, {
-            params: { search: searchQuery, page, limit ,          sort: JSON.stringify({ createdAt: 'desc' }),
-          }
+            params: { search: searchQuery, page, limit, sort: JSON.stringify({ createdAt: 'desc' }), filters: JSON.stringify({ isPublished: '', isActive: '' }) }
           });
         } else {
           if (!instituteId) {
             throw new Error('Institute ID not found in localStorage');
           }
           response = await axiosInstance.get(`${apiUrl}/blogs-by-institute/${instituteId}`, {
-            params: { search: searchQuery, page, limit }
+            params: { search: searchQuery, page, limit, filters: JSON.stringify({ isPublished: '', isActive: '' }) }
           });
         }
 

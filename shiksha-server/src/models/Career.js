@@ -77,6 +77,14 @@ const careerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institute",
     },
+    isPublished: {
+      type: Boolean,
+      default: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
 
   { timestamps: true }

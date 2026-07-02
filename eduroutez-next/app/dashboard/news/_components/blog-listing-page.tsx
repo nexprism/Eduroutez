@@ -20,7 +20,7 @@ type News = {
   institute: string;
   date: string;
   viewCount: number;
-  status: string;
+  isPublished: boolean;
   createdAt: string;
   updatedAt: string;
   __v: number;
@@ -69,11 +69,12 @@ export default function NewsListingPage({}: TNewsListingPage) {
           endpoint = `${apiUrl}/news/${instituteId}`;
         }
 
-        // Add pagination and search parameters
+        // Add pagination, search and filters parameters
         const params = new URLSearchParams();
         if (searchQuery) params.append('search', searchQuery);
         if (page) params.append('page', page.toString());
         if (limit) params.append('limit', limit.toString());
+        params.append('filters', JSON.stringify({ isPublished: '' }));
 
         const queryString = params.toString();
         if (queryString) {

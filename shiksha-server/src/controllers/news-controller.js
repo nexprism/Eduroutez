@@ -183,7 +183,13 @@ export async function updateNews(req, res) {
             payload.image = req.files["image"][0].filename;
       }
 
-      payload.institute = instituteId;
+      if (typeof req.body.isPublished !== 'undefined') {
+        payload.isPublished = req.body.isPublished;
+      }
+
+      if (req.body.title || req.body.description) {
+        payload.institute = instituteId;
+      }
 
         const news = await newsService.update(newsId, payload);
 

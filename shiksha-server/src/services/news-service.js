@@ -32,8 +32,17 @@ class NewsService {
       // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
 
+      // Apply default filter for published content
+      if (!parsedFilters.hasOwnProperty('isPublished')) {
+        filterConditions.isPublished = { $ne: false };
+      }
+
       for (const [key, value] of Object.entries(parsedFilters)) {
-        filterConditions[key] = value;
+        if (value === '') {
+          delete filterConditions[key];
+        } else {
+          filterConditions[key] = value;
+        }
       }
 
       // Build search conditions for multiple fields with partial matching

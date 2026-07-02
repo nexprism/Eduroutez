@@ -189,6 +189,13 @@ export async function updateCareer(req, res) {
         payload.instituteId = req.body.instituteId;
       }
 
+      if (typeof req.body.isPublished !== 'undefined') {
+        payload.isPublished = req.body.isPublished;
+      }
+      if (typeof req.body.isActive !== 'undefined') {
+        payload.isActive = req.body.isActive;
+      }
+
       console.log("Payload:", payload);
 
       const response = await careerService.update(careerId, payload);

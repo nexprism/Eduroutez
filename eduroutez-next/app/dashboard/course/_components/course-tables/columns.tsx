@@ -1,9 +1,9 @@
 'use client';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
 import { Course } from '@/types';
+import { ToggleStatus } from '@/components/ui/toggle-status';
 
 export const columns: ColumnDef<Course>[] = [
   // {
@@ -61,17 +61,14 @@ export const columns: ColumnDef<Course>[] = [
     )
   },
   {
-    accessorKey: 'status',
-    header: 'STATUS',
+    header: 'PUBLISHED',
     cell: ({ row }) => (
-      <div className="flex w-32 space-x-1">
-        <Badge
-          variant={!row.original.status ? 'secondary' : 'default'}
-          className="text-xs "
-        >
-          {row.original.status ? 'Active' : 'Inactive'}
-        </Badge>
-      </div>
+      <ToggleStatus
+        checked={row.original.isPublished ?? true}
+        id={row.original._id}
+        apiPath="course"
+        queryKey="courses"
+      />
     )
   },
 

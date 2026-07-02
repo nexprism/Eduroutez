@@ -77,6 +77,14 @@ const blogSchema = new mongoose.Schema(
     metaImage: {
       type: String,
     },
+    isPublished: {
+      type: Boolean,
+      default: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

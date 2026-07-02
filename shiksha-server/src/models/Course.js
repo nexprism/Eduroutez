@@ -149,16 +149,6 @@ const courseSchema = new mongoose.Schema(
     status: {
       type: String,
     },
-    views: {
-      type: Number,
-      default: 0,
-    },
-    likes: [
-      {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Student",
-      },
-    ],
     reviews: [
       {
         studentId: {
@@ -173,12 +163,30 @@ const courseSchema = new mongoose.Schema(
           type: String,
           // required: true,
         },
-        reviewedAt: {
+        reviewedAt:       {
           type: Date,
           default: Date.now,
       },
     },
-  ],
+    ],
+    views: {
+      type: Number,
+      default: 0,
+    },
+    likes: [
+      {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Student",
+      },
+    ],
+    isPublished: {
+      type: Boolean,
+      default: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

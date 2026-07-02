@@ -82,7 +82,7 @@ export default function WebinarListingPage({}: TWebinarListingPage) {
       }
       
       const response = await axiosInstance.get<WebinarResponse>(getApiEndpoint(), {
-        params: { search: searchQuery, page, limit },
+        params: { search: searchQuery, page, limit, filters: JSON.stringify({ status: '' }) },
       });
       return response.data;
     },

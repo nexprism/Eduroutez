@@ -24,10 +24,10 @@ export const createMedia = async (req, res) => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Something went wrong. Please try again later." });
       }
       const payload = { ...req.body };
-      if (req.files["images"]) {
+      if (req.files && req.files["images"]) {
         payload.images = req.files["images"].map((file) => file.filename);
       }
-      if (req.files["video"]) {
+      if (req.files && req.files["video"]) {
         payload.video = req.files["video"][0].filename;
       }
       const response = await mediaService.create(payload);
