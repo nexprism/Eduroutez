@@ -11,7 +11,7 @@ import {
 import axiosInstance from '@/lib/axios';
 import { QuestionAnswer } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { Edit, Eye, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -26,23 +26,19 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const deleteQuestionAnswerMutation = useMutation({
-    mutationFn: async (questionAnswerId: string) => {
-      console.log('questionAnswerId', questionAnswerId);
-      const response = await axiosInstance({
-        url: `${apiUrl}//faq/${questionAnswerId}`,
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await axiosInstance({
+        url: `${apiUrl}/question-answer/${id}`,
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
       return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['question-answers'] });
-      toast.success('FAQ deleted successfully');
-      router.push('/dashboard/question-answer');
+      toast.success('Question deleted successfully');
     },
     onSettled: () => {
       setOpen(false);
@@ -51,9 +47,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   });
 
   const onConfirm = async () => {
-      setLoading(true);
-      await deleteQuestionAnswerMutation.mutateAsync(data._id);
-    };
+    setLoading(true);
+    await deleteMutation.mutateAsync(data._id);
+  };
 
   return (
     <>
@@ -66,19 +62,24 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
           <DropdownMenuItem
             onClick={() =>
-              router.push(`/dashboard/question-answer/update/${data._id}/`)
+              router.push(`/dashboard/question-answer/answers/${data._id}`)
             }
           >
-            <Edit className="mr-2 h-4 w-4" /> Update
+            <Eye className="mr-2 h-4 w-4" /> View / Edit Answers
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() =>
+              router.push(`/dashboard/question-answer/update/${data._id}`)
+            }
+          >
+            <Edit className="mr-2 h-4 w-4" /> Edit Question
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="mr-2 h-4 w-4" /> Delete

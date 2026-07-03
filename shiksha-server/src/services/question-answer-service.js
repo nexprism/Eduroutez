@@ -1,5 +1,7 @@
 import { QuestionAnswerRepository } from "../repository/question-answer-repository.js";
 import { UserRepository } from "../repository/user-repository.js";
+import AppError from "../utils/errors/app-error.js";
+import { StatusCodes } from "http-status-codes";
 
 class questionAnswerService {
   constructor() {
@@ -16,33 +18,28 @@ class questionAnswerService {
     }
   }
 
-
-  
   async getAll(query) {
     try {
       const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
-      // Parse JSON strings from query parameters to objects
       const parsedFilters = JSON.parse(filters);
       const parsedSearchFields = JSON.parse(searchFields);
       const parsedSort = JSON.parse(sort);
 
-      // Build filter conditions for multiple fields
-    const filterConditions = { deletedAt: null };
+      const filterConditions = { deletedAt: null };
 
       for (const [key, value] of Object.entries(parsedFilters)) {
-         if (Array.isArray(value)) {
-              const regexPattern = value.join('|'); // Convert array to regex pattern
-              filterConditions.$and = filterConditions.$and || [];
-              filterConditions.$and.push({ [key]: { $regex: regexPattern, $options: 'i' } });
-            }else{
-              filterConditions[key] = value;
-            }
+        if (Array.isArray(value)) {
+          const regexPattern = value.join('|');
+          filterConditions.$and = filterConditions.$and || [];
+          filterConditions.$and.push({ [key]: { $regex: regexPattern, $options: 'i' } });
+        } else {
+          filterConditions[key] = value;
+        }
       }
 
-      // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
       for (const [field, term] of Object.entries(parsedSearchFields)) {
         searchConditions.push({ [field]: { $regex: term, $options: "i" } });
@@ -51,28 +48,22 @@ class questionAnswerService {
         filterConditions.$or = searchConditions;
       }
 
-      // Build sort conditions
       const sortConditions = {};
       for (const [field, direction] of Object.entries(parsedSort)) {
         sortConditions[field] = direction === "asc" ? 1 : -1;
       }
 
-      // If caller requests only items with answers (user=true), add a filter
-      // usage: /question-answers?user=true
       if (query.user === "true" || query.user === true) {
         filterConditions.$and = filterConditions.$and || [];
         filterConditions.$and.push({ $or: [{ answer: { $ne: null } }, { 'answers.0': { $exists: true } }] });
       }
 
-      // Execute query with dynamic filters, sorting, and pagination
       const questionAnswers = await this.questionAnswerRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
 
-      // Attach asker name to each question-answer when possible
       if (questionAnswers && Array.isArray(questionAnswers.result)) {
         const resultsWithNames = await Promise.all(
           questionAnswers.result.map(async (qa) => {
             try {
-              // Enrich askedBy
               const askedByEmail = qa.askedBy;
               let askedByObj = null;
               if (askedByEmail) {
@@ -83,7 +74,6 @@ class questionAnswerService {
                 };
               }
 
-              // Enrich top-level answeredBy if present
               let answeredByObj = null;
               if (qa.answeredBy) {
                 try {
@@ -97,7 +87,6 @@ class questionAnswerService {
                 }
               }
 
-              // Enrich each item in answers array
               let enrichedAnswers = qa.answers;
               if (Array.isArray(qa.answers) && qa.answers.length > 0) {
                 enrichedAnswers = await Promise.all(
@@ -105,25 +94,33 @@ class questionAnswerService {
                     try {
                       if (!ans || !ans.answeredBy) return ans;
                       const userAns = await this.userRepository.get(ans.answeredBy);
+                      const upvotes = ans.likes ? ans.likes.filter(l => l.type === 'upvote').length : 0;
+                      const downvotes = ans.likes ? ans.likes.filter(l => l.type === 'downvote').length : 0;
                       return {
-                        ...ans,
+                        ...ans.toObject ? ans.toObject() : ans,
                         answeredBy: {
                           email: ans.answeredBy,
                           name: userAns && userAns.name ? userAns.name : null,
                         },
+                        voteScore: upvotes - downvotes,
                       };
                     } catch (err) {
                       return ans;
                     }
                   })
                 );
+                enrichedAnswers.sort((a, b) => (b.voteScore || 0) - (a.voteScore || 0));
               }
 
+              const questionUpvotes = qa.questionLikes ? qa.questionLikes.filter(l => l.type === 'upvote').length : 0;
+              const questionDownvotes = qa.questionLikes ? qa.questionLikes.filter(l => l.type === 'downvote').length : 0;
+
               return {
-                ...qa,
+                ...qa.toObject ? qa.toObject() : qa,
                 askedBy: askedByObj || qa.askedBy,
                 answeredBy: answeredByObj || qa.answeredBy,
                 answers: enrichedAnswers,
+                voteScore: questionUpvotes - questionDownvotes,
               };
             } catch (err) {
               return qa;
@@ -147,31 +144,50 @@ class questionAnswerService {
   }
 
   async getbyEmail(email) {
-    try{
-    const questionAnswer = await this.questionAnswerRepository.getbyInstituteEmail(email);
-    return questionAnswer;
-    }
-    catch (error) {
+    try {
+      const questionAnswers = await this.questionAnswerRepository.getbyInstituteEmail(email);
+      if (Array.isArray(questionAnswers)) {
+        questionAnswers.forEach(qa => {
+          if (Array.isArray(qa.answers) && qa.answers.length > 0) {
+            const enriched = qa.answers.map(ans => {
+              const upvotes = ans.likes ? ans.likes.filter(l => l.type === 'upvote').length : 0;
+              const downvotes = ans.likes ? ans.likes.filter(l => l.type === 'downvote').length : 0;
+              return { ans, voteScore: upvotes - downvotes };
+            });
+            enriched.sort((a, b) => b.voteScore - a.voteScore);
+            qa.answers = enriched.map(e => e.ans);
+          }
+        });
+      }
+      return questionAnswers;
+    } catch (error) {
       console.log(error.message);
-
       throw error;
     }
   }
 
   async update(id, data) {
     try {
+      const existing = await this.questionAnswerRepository.getQuestion(id);
+      if (!existing) {
+        throw new AppError("Question not found", StatusCodes.NOT_FOUND);
+      }
+
+      if (data.answeredBy) {
+        const alreadyAnswered = await this.questionAnswerRepository.hasExistingAnswer(id, data.answeredBy);
+        if (alreadyAnswered) {
+          throw new AppError("You have already answered this question", StatusCodes.BAD_REQUEST);
+        }
+      }
+
       const questionAnswer = await this.questionAnswerRepository.submitAnswer(id, data);
 
       const existingUser = await this.userRepository.get(data.answeredBy);
-
-      // Check if email doesn't exists
       if (!existingUser) {
-        return res.status(404).json({ status: "failed", message: "Email doesn't exists" });
+        throw new AppError("Email doesn't exists", StatusCodes.NOT_FOUND);
       }
 
-      //increment points of user
       const userPayload = { points: existingUser.points + 50 };
-      console.log('userPayload',userPayload);
       let level;
       let commission;
 
@@ -194,14 +210,21 @@ class questionAnswerService {
 
       userPayload.level = level;
       userPayload.commission = commission;
-      const userResponse = await this.userRepository.update(existingUser.id, userPayload);
-
-      
-      // console.log('userResponse',userResponse);
+      await this.userRepository.update(existingUser.id, userPayload);
 
       return questionAnswer;
     } catch (error) {
+      if (error instanceof AppError) throw error;
       throw new AppError("Cannot update the questionAnswer ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async updateMetadata(id, data) {
+    try {
+      const questionAnswer = await this.questionAnswerRepository.update(id, data);
+      return questionAnswer;
+    } catch (error) {
+      throw new AppError("Cannot update the question", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -214,6 +237,40 @@ class questionAnswerService {
         throw new AppError("The questionAnswer you requested to delete is not present", error.statusCode);
       }
       throw new AppError("Cannot delete the questionAnswer ", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async likeQuestion(questionId, userId, type) {
+    try {
+      const result = await this.questionAnswerRepository.likeQuestion(questionId, userId, type);
+      return result;
+    } catch (error) {
+      throw new AppError("Cannot like the question", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async likeAnswer(questionId, answerId, userId, type, answeredBy) {
+    try {
+      const result = await this.questionAnswerRepository.likeAnswer(questionId, answerId, userId, type, answeredBy);
+      return result;
+    } catch (error) {
+      throw new AppError("Cannot like the answer", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async editAnswer(questionId, userId, newAnswer) {
+    try {
+      const doc = await this.questionAnswerRepository.getQuestion(questionId);
+      if (!doc) throw new AppError("Question not found", StatusCodes.NOT_FOUND);
+
+      const answer = doc.answers.find(a => a.answeredBy === userId);
+      if (!answer) throw new AppError("Answer not found", StatusCodes.NOT_FOUND);
+
+      const result = await this.questionAnswerRepository.editAnswer(questionId, userId, newAnswer);
+      return result;
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("Cannot edit the answer", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 }

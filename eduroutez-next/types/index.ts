@@ -130,6 +130,38 @@ export type Counselor = {
   scheduledTestDateString?: string;
 };
 
+export type QuestionAnswer = {
+  _id: string;
+  question: string;
+  answer?: string;
+  answers?: Answer[];
+  grade?: string;
+  label?: string;
+  askedBy?: string | { email: string; name: string | null };
+  answeredBy?: string | { email: string; name: string | null };
+  instituteEmail?: string;
+  questionLikes?: Like[];
+  voteScore?: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Answer = {
+  _id: string;
+  answer: string;
+  answeredBy: string | { email: string; name: string | null };
+  answeredAt: string;
+  editedAt?: string;
+  isEdited?: boolean;
+  likes?: Like[];
+  voteScore?: number;
+};
+
+export type Like = {
+  userId: string;
+  type: 'upvote' | 'downvote';
+};
+
 export interface NavItem {
   title: string;
   url: string;
