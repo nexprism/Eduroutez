@@ -35,7 +35,7 @@ import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishli
 
 import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount } from "../../controllers/webinar-controller.js";
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
-import { createAdmin, getAdmins } from "../../controllers/admin-controller.js";
+import { createAdmin, getAdmins, loginAsInstitute } from "../../controllers/admin-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia, uploadEditorFile } from "../../controllers/media-controller.js";
 import { createBanner, deleteBanner, getBanner, getBanners, updateBanner } from "../../controllers/banner-controller.js";
 import { getUserActivity, getRecentActivity, getActivityStats } from "../../controllers/activity-controller.js";
@@ -61,6 +61,7 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/admin", createAdmin);
 router.get("/admins", getAdmins);
+router.post("/admin/login-as-institute/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), loginAsInstitute);
 router.post("/verify-email", verifyEmail);
 router.post("/login", login);
 router.post("/allow", allowUser);
@@ -583,6 +584,21 @@ router.get("/page/:stream/:level", getPageByStreamLevel);
 router.patch("/page/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updatePage);
 router.delete("/page/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deletePage);
 
+/**
+ * AI Chatbot / Counselor routes  – 24×7 admission support
+ * POST   /chatbot/chat              → send a message (public, session-based)
+ * GET    /chatbot/history/:sid      → get message history for a session
+ * DELETE /chatbot/session/:sid      → clear a session
+ * GET    /chatbot/sessions          → list all sessions (admin only)
+ */
+import { chatWithBot, getChatHistory, deleteChatSession, listChatSessions } from "../../controllers/chatbot-controller.js";
 
+// Public endpoints (no auth required – sessions identified by sessionId UUID)
+router.post("/chatbot/chat", chatWithBot);
+router.get("/chatbot/history/:sessionId", getChatHistory);
+router.delete("/chatbot/session/:sessionId", deleteChatSession);
+
+// Admin-only: list all chat sessions
+router.get("/chatbot/sessions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), listChatSessions);
 
 export default router;

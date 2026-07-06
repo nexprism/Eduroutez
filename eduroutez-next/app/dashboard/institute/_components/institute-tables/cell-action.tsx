@@ -11,9 +11,10 @@ import {
 import axiosInstance from '@/lib/axios';
 import { Institute } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Edit, Eye, EyeOff, MoreHorizontal, Trash } from 'lucide-react';
+import { Edit, Eye, EyeOff, LogIn, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface CellActionProps {
   data: Institute;
@@ -61,6 +62,30 @@ window.location.reload();    },
     }
   });
 
+  const loginAsInstituteMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance({
+        url: `${apiUrl}/admin/login-as-institute/${data._id}`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return response.data;
+    },
+    onSuccess: (response) => {
+      const tokens = response.data;
+      localStorage.setItem('accessToken', JSON.stringify(tokens.accessToken));
+      localStorage.setItem('refreshToken', JSON.stringify(tokens.refreshToken));
+      localStorage.setItem('instituteId', tokens.user?._id);
+      localStorage.setItem('role', tokens.user?.role || '');
+      localStorage.setItem('email', tokens.user?.email || '');
+      toast.success(`Logged in as ${tokens.user?.name || tokens.user?.email}`);
+      window.location.href = '/dashboard/overview';
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to login as institute');
+    }
+  });
+
   const onConfirm = async () => {
     setLoading(true);
     deleteInstituteMutation.mutate(data._id);
@@ -84,6 +109,9 @@ window.location.reload();    },
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
+          <DropdownMenuItem onClick={() => loginAsInstituteMutation.mutate()}>
+            <LogIn className="mr-2 h-4 w-4" /> Login as Institute
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
               router.push(`/dashboard/institute/update/${data._id}/`)
