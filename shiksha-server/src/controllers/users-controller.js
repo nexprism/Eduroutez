@@ -386,7 +386,9 @@ export async function dashboard(req, res) {
 //instituteDashboard
 export async function instituteDashboard(req, res) {
   try {
-    const userId = req.user._id;
+    const userId = req.user.role === 'institute_staff' && req.user.instituteId
+      ? req.user.instituteId
+      : req.user._id;
     const response = await userService.instituteDashboard(userId);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully fetched the dashboard details";

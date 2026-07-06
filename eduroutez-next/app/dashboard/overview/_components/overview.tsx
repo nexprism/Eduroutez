@@ -103,7 +103,7 @@ const Dashboard = () => {
 
     if (userRole === 'SUPER_ADMIN') {
       fetchAdminData();
-    } else if (userRole === 'institute') {
+    } else if (userRole === 'institute' || userRole === 'institute_staff') {
       fetchInstituteData();
       fetchInstitute();
     }
@@ -323,7 +323,7 @@ const Dashboard = () => {
     return () => window.removeEventListener('open-payment', paymentListener as EventListener);
   }, [handlePay, handleSchedule]);
 
-  if (role === 'institute') {
+  if (role === 'institute' || role === 'institute_staff') {
 
     return (
       <div className="flex flex-col gap-4 p-4 bg-background">

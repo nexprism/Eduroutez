@@ -334,5 +334,12 @@ export const navItems: NavItem[] = [
     icon: 'award',
     isActive: false,
     items: []
+  },
+  {
+    title: 'Team',
+    url: '/dashboard/team',
+    icon: 'users',
+    isActive: false,
+    items: []
   }
 ];

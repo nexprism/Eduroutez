@@ -8,7 +8,7 @@ import passport from "passport";
 import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from "../../controllers/coupon-controller.js";
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
-import { CategoryMiddleware, UserMiddleware } from "../../middlewares/index.js";
+import { CategoryMiddleware, UserMiddleware, requireAuth } from "../../middlewares/index.js";
 import { getUsers, updateUser, allowUser, denyUser, holdUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike, submitReview, updateAllSlugs, getMyCoupons } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory, getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, trendingStreams, updateStream } from "../../controllers/stream-controller.js";
@@ -36,6 +36,7 @@ import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishli
 import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount } from "../../controllers/webinar-controller.js";
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
 import { createAdmin, getAdmins, loginAsInstitute } from "../../controllers/admin-controller.js";
+import { createStaff, getStaff, updateStaff, deleteStaff, getStaffPermissions, getInstituteStaffPermissions, updateInstituteStaffPermissions } from "../../controllers/staff-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia, uploadEditorFile } from "../../controllers/media-controller.js";
 import { createBanner, deleteBanner, getBanner, getBanners, updateBanner } from "../../controllers/banner-controller.js";
 import { getUserActivity, getRecentActivity, getActivityStats } from "../../controllers/activity-controller.js";
@@ -122,12 +123,12 @@ router.post("/like-dislike", accessTokenAutoRefresh, passport.authenticate("jwt"
 /**
  * course routes
  */
-router.post("/course", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createCourse);
+router.post("/course", ...requireAuth, createCourse);
 router.get("/courses", getCourses);
 router.get("/popular-courses", getPopularCourses);
 router.get("/course/:id", getCourse);
-router.patch("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateCourse);
-router.delete("/course/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteCourse);
+router.patch("/course/:id", ...requireAuth, updateCourse);
+router.delete("/course/:id", ...requireAuth, deleteCourse);
 router.get("/course-by-institute/:id", getCourseByInstitute);
 //monthly webinar count
 router.get("/monthly-webinar-count/:id", getMonthlyWebinarCount);
@@ -160,11 +161,23 @@ router.post("/cities-by-state", getCitiesByState);
 router.get("/state-cities", getStatesCities);
 
 /**
+ * institute staff routes (must be BEFORE /institute/:email and /institute/:id to avoid "staff" matching as param)
+ */
+router.post("/institute/staff", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createStaff);
+router.get("/institute/staff", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getStaff);
+router.patch("/institute/staff/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateStaff);
+router.delete("/institute/staff/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteStaff);
+router.get("/staff/permissions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getStaffPermissions);
+router.get("/institute/staff-permissions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getInstituteStaffPermissions);
+router.patch("/institute/staff-permissions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateInstituteStaffPermissions);
+
+/**
  * institute routes
  */
 router.post("/institute", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createInstitute);
 router.post("/instituteUpgrade/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), upgradeInstitute);
 router.post("/institute/:email", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), makeInstitute);
+
 router.get("/institutes", getInstitutes);
 router.get("/institute/:id", getInstitute);
 router.post("/bulkAddInstitutes", bulkAddInstitutes);
@@ -184,6 +197,7 @@ router.get("/download-bruchure/:id", downloadBruchure);
 //addGallery
 router.post("/addGallery/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), addGallery);
 router.post("/deleteGallery/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteGallery);
+
 
 
 //submitIssue
@@ -448,13 +462,12 @@ router.delete("/wishlist/:id", accessTokenAutoRefresh, passport.authenticate("jw
 /**
  * webinar routes
  */
-router.post("/webinar", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createWebinar);
+router.post("/webinar", ...requireAuth, createWebinar);
 router.get("/webinars", getWebinars);
 router.get("/webinars-by-institute/:instituteId", getWebinarsByInstitute);
-router.get("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinar);
-// router.get("/webinar-tracking/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getWebinarTracking);
-router.patch("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), updateWebinar);
-router.delete("/webinar/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteWebinar);
+router.get("/webinar/:id", ...requireAuth, getWebinar);
+router.patch("/webinar/:id", ...requireAuth, updateWebinar);
+router.delete("/webinar/:id", ...requireAuth, deleteWebinar);
 
 /**
  * level routes

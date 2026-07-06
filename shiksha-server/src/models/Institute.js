@@ -242,6 +242,16 @@ const instituteSchema = new mongoose.Schema(
         ref: "Issue",
       },
     ],
+    staffPermissions: {
+      type: Map,
+      of: [String],
+      default: {
+        admin: ['dashboard', 'profile', 'courses', 'course-category', 'queries', 'recommendations', 'news', 'faqs', 'question-answer', 'subscription', 'webinar', 'blog', 'career', 'recruiter'],
+        admissions: ['dashboard', 'profile', 'courses', 'course-category', 'queries', 'recommendations', 'question-answer'],
+        marketing: ['dashboard', 'profile', 'news', 'blog', 'webinar', 'promotions', 'question-answer'],
+        hod: ['dashboard', 'profile', 'courses', 'course-category', 'queries', 'faqs', 'question-answer', 'recommendations', 'career', 'recruiter'],
+      },
+    },
   },
   { timestamps: true }
 );

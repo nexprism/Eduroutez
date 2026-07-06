@@ -77,9 +77,10 @@ export default function UserAuthForm({ setToggle, toggle }: any) {
       );
       localStorage.setItem(
         'instituteId',
-        data?.data?.user?._id
+        data?.data?.user?.instituteId || data?.data?.user?._id
       );
       localStorage.setItem('role', String(data?.data?.user?.role || ''));
+      localStorage.setItem('subRole', String(data?.data?.user?.subRole || ''));
       localStorage.setItem('email', String(data?.data?.user?.email || ''));
       localStorage.setItem(
         'refreshToken',

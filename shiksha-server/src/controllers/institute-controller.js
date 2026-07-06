@@ -175,19 +175,19 @@ export const makeInstitute = async (req, res) => {
       const payload = { ...req.body };
       // console.log(payload);
 
-      if (req.files["instituteLogo"]) {
+      if (req.files?.["instituteLogo"]) {
         payload.instituteLogo = req.files["instituteLogo"][0].filename;
       }
-      if (req.files["coverImage"]) {
+      if (req.files?.["coverImage"]) {
         payload.coverImage = req.files["coverImage"][0].filename;
       }
-      if (req.files["thumbnailImage"]) {
+      if (req.files?.["thumbnailImage"]) {
         payload.thumbnailImage = req.files["thumbnailImage"][0].filename;
       }
-      if (req.files["brochure"]) {
+      if (req.files?.["brochure"]) {
         payload.brochure = req.files["brochure"][0].filename;
       }
-      if (req.files["gallery"]) {
+      if (req.files?.["gallery"]) {
         payload.gallery = req.files["gallery"].map((file) => file.filename);
       }
 

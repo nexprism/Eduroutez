@@ -75,8 +75,9 @@ window.location.reload();    },
       const tokens = response.data;
       localStorage.setItem('accessToken', JSON.stringify(tokens.accessToken));
       localStorage.setItem('refreshToken', JSON.stringify(tokens.refreshToken));
-      localStorage.setItem('instituteId', tokens.user?._id);
+      localStorage.setItem('instituteId', tokens.user?.instituteId || tokens.user?._id);
       localStorage.setItem('role', tokens.user?.role || '');
+      localStorage.setItem('subRole', tokens.user?.subRole || '');
       localStorage.setItem('email', tokens.user?.email || '');
       toast.success(`Logged in as ${tokens.user?.name || tokens.user?.email}`);
       window.location.href = '/dashboard/overview';

@@ -56,55 +56,101 @@ export default function AppSidebar({
 
   // Read role synchronously on client and compute filtered nav items immediately
   const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+  const subRole = typeof window !== 'undefined' ? localStorage.getItem('subRole') : null;
+
+  const isStaff = role === 'institute_staff';
 
   const excludedTitles =
-    role === 'institute'
-      ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
-        'Career', 'Review', 'Reviews', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots',
-        'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars']
-      : role === 'counsellor'
-        ? [
-          'Institutes',
-          'Users',
-          'Sales',
-          'Earnings',
-          'Queries',
-          'Promotions',
-          'Refer and Earn',
-          'FAQs',
-          'News',
-          'Reviews',
-          'Streams',
-          'Media',
-          'Online counselling',
-          'Subscription',
-          'Courses',
-          'Streams',
-          'Recruiter',
-          'Manage Pages',
-          'Counselors',
-          'Users',
-          'Students',
-          'Email Templates',
-          'SMS Templates',
-          'Media',
-          'Promotions',
-          'Blogs',
-          'Career',
-          'Subscriptions',
-          'Bulk Institute Upload',
-          'Online counselling list',
-          'Webinars',
-          'Coupons',
-          'Webinar',
-          'Banner',
-          'Help And Support'
-        ]
-        : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Webinar", "SMS Templates", 'Test Result'];
+    isStaff
+      ? [] // handled by subRole-based filtering below
+      : role === 'institute'
+        ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
+          'Career', 'Review', 'Reviews', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots',
+          'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars']
+        : role === 'counsellor'
+          ? [
+            'Institutes',
+            'Users',
+            'Sales',
+            'Earnings',
+            'Queries',
+            'Promotions',
+            'Refer and Earn',
+            'FAQs',
+            'News',
+            'Reviews',
+            'Streams',
+            'Media',
+            'Online counselling',
+            'Subscription',
+            'Courses',
+            'Streams',
+            'Recruiter',
+            'Manage Pages',
+            'Counselors',
+            'Users',
+            'Students',
+            'Email Templates',
+            'SMS Templates',
+            'Media',
+            'Promotions',
+            'Blogs',
+            'Career',
+            'Subscriptions',
+            'Bulk Institute Upload',
+            'Online counselling list',
+            'Webinars',
+            'Coupons',
+            'Webinar',
+            'Banner',
+            'Help And Support'
+          ]
+          : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Webinar", "SMS Templates", 'Test Result'];
 
-  const computedFilteredNavItems = navItems.filter(
+  let computedFilteredNavItems = navItems.filter(
     (item) => !excludedTitles.includes(item.title)
   );
+
+  // Fetch custom permissions for staff from the backend
+  const { data: staffPerms } = useQuery({
+    queryKey: ['staff-permissions'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/staff/permissions`);
+      return response.data.data;
+    },
+    enabled: isStaff,
+  });
+
+  const moduleToNavTitle: Record<string, string> = {
+    'dashboard': 'Dashboard',
+    'profile': 'Profile',
+    'courses': 'Courses',
+    'course-category': 'Category',
+    'queries': 'Queries',
+    'recommendations': 'Recommendations',
+    'news': 'News',
+    'faqs': 'FAQs',
+    'question-answer': 'Questions and Answers',
+    'subscription': 'Subscription',
+    'webinar': 'Webinars',
+    'blog': 'Blogs',
+    'career': 'Career',
+    'recruiter': 'Recruiter',
+    'promotions': 'Promotions',
+    'team': 'Team',
+  };
+
+  // Apply subRole filtering for staff using custom permissions from backend
+  if (isStaff && staffPerms?.allowedModules) {
+    const allowedTitles = staffPerms.allowedModules
+      .map((mod: string) => moduleToNavTitle[mod])
+      .filter(Boolean);
+    allowedTitles.push('Dashboard');
+    const uniqueTitles = [...new Set(allowedTitles)];
+    computedFilteredNavItems = computedFilteredNavItems.filter(
+      (item) => uniqueTitles.includes(item.title)
+    );
+  }
 
   const [filteredNavItems, setFilteredNavItems] = React.useState(computedFilteredNavItems);
 

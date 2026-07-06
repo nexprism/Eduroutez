@@ -24,6 +24,7 @@ export default function EnsureSession() {
           if (user) {
             if (user.instituteId) localStorage.setItem('instituteId', String(user.instituteId));
             if (user.role) localStorage.setItem('role', String(user.role));
+            if (user.subRole) localStorage.setItem('subRole', String(user.subRole));
             if (user.name && typeof user.name === 'string') localStorage.setItem('name', user.name);
             if (user.email && typeof user.email === 'string') localStorage.setItem('email', user.email);
             if (user.image && typeof user.image === 'string') localStorage.setItem('image', user.image);

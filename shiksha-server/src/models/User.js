@@ -46,8 +46,18 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "SUPER_ADMIN","student","institute","counsellor"], // "STUDENT", "COUNSELOR", "INSTITUTE",  they have thier different tables
+      enum: ["admin", "SUPER_ADMIN","student","institute","counsellor","institute_staff"],
       default: "student",
+    },
+    subRole: {
+      type: String,
+      enum: ["admin", "admissions", "marketing", "hod", null],
+      default: null,
+    },
+    instituteId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
     },
     access: [
       {

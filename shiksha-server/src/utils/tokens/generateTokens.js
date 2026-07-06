@@ -4,7 +4,7 @@ import { ServerConfig } from "../../config/index.js";
 
 const generateTokens = async (user) => {
   try {
-    const payload = { _id: user._id, roles: user.role };
+    const payload = { _id: user._id, roles: user.role, subRole: user.subRole || null, instituteId: user.instituteId || null };
     console.log('payload',payload)
 
     // Generate access token with expiration time

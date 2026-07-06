@@ -17,7 +17,7 @@ export default function ProfileViewPage() {
     <PageContainer>
       <div className="space-y-4">
         {role === 'counsellor' && <ProfileCreateForm categories={[]} initialData={null} />}
-        {role === 'institute' && <InstituteForm />}
+        {(role === 'institute' || role === 'institute_staff') && <InstituteForm />}
       </div>
     </PageContainer>
   );
