@@ -56,6 +56,7 @@ export type Institute = {
   status: boolean;
   onhold?: boolean;
   _id: string;
+  rank?: number;
 };
 
 export type CourseCategory = {

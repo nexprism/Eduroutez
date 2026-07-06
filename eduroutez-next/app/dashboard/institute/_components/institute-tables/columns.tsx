@@ -19,6 +19,12 @@ export const columns: ColumnDef<Institute>[] = [
     cell: ({ row }) => <div>{`${row.original.courses ? row.original.courses.length : 0}`}</div>
   },
   {
+    header: 'NIRF RANK',
+    cell: ({ row }) => (
+      <div className="font-medium">{row.original.rank ?? '—'}</div>
+    )
+  },
+  {
     header: 'ACTIVE',
     cell: ({ row }) => (
       <ToggleStatus
