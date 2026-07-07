@@ -4,12 +4,23 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
-import { Query, QuestionAnswer } from '@/types';
+import { Query } from '@/types';
 
 export const columns: ColumnDef<Query>[] = [
   {
     header: 'ID',
     cell: ({ row }) => <div>{row.index + 1}</div>,
+  },
+  {
+    header: 'Type',
+    accessorKey: 'type',
+    cell: ({ row }) => {
+      const type = row.original.type;
+      if (type === 'application') {
+        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Application</Badge>;
+      }
+      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Query</Badge>;
+    },
   },
   {
     header: 'Name',

@@ -39,6 +39,11 @@ const querySchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        type: {
+            type: String,
+            enum: ["query", "application"],
+            default: "query",
+        },
         status: {
             type: String,
             enum: ["Pending", "Open", "Closed"],

@@ -99,6 +99,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   <h2 className="text-lg font-semibold mb-4">Query Details</h2>
   <div className="space-y-4 max-h-[400px] overflow-y-auto p-2">
     {[
+      { label: "Type", value: detailsData?.type === "application" ? "Application" : "Query" },
       { label: "Query Related To", value: detailsData?.queryRelatedTo },
       { label: "Query", value: detailsData?.query },
       { label: "Name", value: detailsData?.name },

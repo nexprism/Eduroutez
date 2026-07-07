@@ -131,6 +131,22 @@ export type Counselor = {
   scheduledTestDateString?: string;
 };
 
+export type Query = {
+  _id: string;
+  id: string;
+  name: string;
+  email: string;
+  phoneNo: string;
+  city: string;
+  queryRelatedTo: string;
+  query: string;
+  status: string;
+  type: "query" | "application";
+  instituteIds?: any[];
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type QuestionAnswer = {
   _id: string;
   question: string;

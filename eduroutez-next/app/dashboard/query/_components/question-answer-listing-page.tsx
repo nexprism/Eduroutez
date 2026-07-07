@@ -8,11 +8,13 @@ import { useQuery } from '@tanstack/react-query';
 import QuestionAnswerTable from './question-answer-tables';
 import { useQuestionAnswerTableFilters } from './question-answer-tables/use-question-answer-table-filters';
 import axiosInstance from '@/lib/axios';
+import { Button } from '@/components/ui/button';
 
 type TQuestionAnswerListingPage = {};
 
 export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage) {
   const { searchQuery, page, limit, setPage } = useQuestionAnswerTableFilters();
+  const [typeFilter, setTypeFilter] = useState<string>('all');
   
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const id = typeof window !== 'undefined' ? localStorage.getItem('instituteId') : null;
@@ -57,6 +59,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           queryRelatedTo: item.queryRelatedTo,
           query: item.query,
           status: item.status,
+          type: item.type || 'query',
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
           instituteIds: item.instituteIds || item.instituteId || []
@@ -79,6 +82,7 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             queryRelatedTo: item.queryRelatedTo,
             query: item.query,
             status: item.status,
+            type: item.type || 'query',
             createdAt: item.createdAt,
             updatedAt: item.updatedAt,
             instituteIds: item.instituteIds || []
@@ -98,6 +102,12 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
 
   const totalCount = data?.totalData ?? 0;
 
+  const filteredData = typeFilter === 'all'
+    ? (data?.data ?? [])
+    : (data?.data ?? []).filter((item: any) => item.type === typeFilter);
+
+  const filteredTotal = typeFilter === 'all' ? totalCount : filteredData.length;
+
   return (
     <PageContainer scrollable>
       {isLoading ? (
@@ -107,16 +117,39 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <Heading
-                title={`Queries (${totalCount})`}
-                description="All question and answers are listed here."
+                title={`Queries (${filteredTotal})`}
+                description="All inquiries and applications are listed here."
               />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant={typeFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter('all')}
+              >
+                All
+              </Button>
+              <Button
+                variant={typeFilter === 'query' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter('query')}
+              >
+                Queries
+              </Button>
+              <Button
+                variant={typeFilter === 'application' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setTypeFilter('application')}
+              >
+                Applications
+              </Button>
             </div>
             <Separator />
             <QuestionAnswerTable
-              data={data?.data ?? []}
-              totalData={Number(data?.totalData ?? 0)}
+              data={filteredData}
+              totalData={filteredTotal}
               currentPage={data?.currentPage ?? 1}
-              totalPages={data?.totalPages ?? 1}
+              totalPages={Math.ceil(filteredData.length / limit) || 1}
               isLoading={isLoading}
               onPageChange={setPage}
             />
