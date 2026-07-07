@@ -106,6 +106,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       { label: "Email", value: detailsData?.email },
       { label: "Phone Number", value: detailsData?.phoneNo },
       { label: "City", value: detailsData?.city },
+      { label: "Specialization", value: detailsData?.specialization },
       { label: "Created At", value: new Date(detailsData?.createdAt).toLocaleString() },
       { label: "Status", value: detailsData?.status },
     ].map((item, index) => (

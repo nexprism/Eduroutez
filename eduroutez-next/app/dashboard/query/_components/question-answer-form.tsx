@@ -111,6 +111,15 @@ export default function QueryStatusForm() {
               className="bg-gray-50"
             />
           </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Specialization</label>
+            <Input 
+              value={queryData.data?.data?.specialization || ''} 
+              readOnly 
+              className="bg-gray-50"
+            />
+          </div>
         </div>
 
         <div className="border-t pt-4">

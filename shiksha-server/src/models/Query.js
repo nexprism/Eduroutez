@@ -39,6 +39,9 @@ const querySchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        specialization: {
+            type: String,
+        },
         type: {
             type: String,
             enum: ["query", "application"],
