@@ -76,8 +76,13 @@ const counselorSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      // ref: "Category",
     },
+    streams: [{
+      type: String,
+    }],
+    examAccepted: [{
+      type: String,
+    }],
     language: {
       type: String,
       // ref: "Category",

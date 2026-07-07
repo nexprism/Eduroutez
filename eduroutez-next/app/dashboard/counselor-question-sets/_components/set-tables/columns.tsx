@@ -1,6 +1,7 @@
 'use client';
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
@@ -86,8 +87,21 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: 'stream',
-        header: 'STREAM',
-        cell: ({ row }) => row.original.stream || 'General'
+        header: 'STREAMS',
+        cell: ({ row }) => {
+            const streamVal = row.original.stream;
+            const streamsVal = row.original.streams;
+            if (streamsVal && Array.isArray(streamsVal) && streamsVal.length > 0) {
+                return (
+                    <div className="flex flex-wrap gap-1">
+                        {streamsVal.map((s: string) => (
+                            <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+                        ))}
+                    </div>
+                );
+            }
+            return <Badge variant="outline" className="text-xs">{streamVal || 'General'}</Badge>;
+        }
     },
     {
         accessorKey: 'totalQuestions',

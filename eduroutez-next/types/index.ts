@@ -122,6 +122,8 @@ export type Counselor = {
   contactno: string;
   level?: string;
   category?: string;
+  streams?: string[];
+  examAccepted?: string[];
   instituteId?: string;
   createdAt?: string;
   created_at?: string;

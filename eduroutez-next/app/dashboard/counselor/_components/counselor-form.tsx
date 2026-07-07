@@ -20,12 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { usePathname, useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 import PasswordStrength from '@/components/password-strength';
+import { X, Plus } from 'lucide-react';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -47,6 +49,8 @@ const getFormSchema = (isEdit: boolean) => {
     category: z.string().min(1, {
       message: 'Category is required.'
     }),
+    streams: z.array(z.string()).optional(),
+    examAccepted: z.array(z.string()).optional(),
     instituteId: z.string().min(1, {
       message: 'Institute ID is required.'
     })
@@ -81,6 +85,9 @@ export default function CounselorForm() {
   }
   const counselorId = derivedCounselorId;
   const [selectedCategoryName, setSelectedCategoryName] = React.useState<string>('');
+  const [selectedStreams, setSelectedStreams] = React.useState<string[]>([]);
+  const [examAcceptedList, setExamAcceptedList] = React.useState<string[]>([]);
+  const [examInput, setExamInput] = React.useState<string>('');
 
   React.useEffect(() => {
     setIsEdit(segments[3] === 'update');
@@ -180,15 +187,21 @@ export default function CounselorForm() {
   // Set initial form values and find category name when counselor data is fetched
   React.useEffect(() => {
     if (counselorData) {
+      const counselorStreams = counselorData.streams || [];
+      const counselorExams = counselorData.examAccepted || [];
       const formData = {
         firstname: counselorData.firstname || '',
         lastname: counselorData.lastname || '',
         contactno: counselorData.contactno || '',
         email: counselorData.email || '',
         category: counselorData.category || '',
+        streams: counselorStreams,
+        examAccepted: counselorExams,
         instituteId: counselorData.instituteId || ''
       };
       form.reset(formData);
+      setSelectedStreams(counselorStreams);
+      setExamAcceptedList(counselorExams);
 
       // Find and set the category name
       if (Array.isArray(categories)) {
@@ -219,6 +232,15 @@ export default function CounselorForm() {
     }
     formData.append('category', values.category);
     formData.append('instituteId', values.instituteId);
+    // Append streams as JSON array
+    const streamsVal = values.streams || selectedStreams;
+    if (streamsVal.length > 0) {
+      formData.append('streams', JSON.stringify(streamsVal));
+    }
+    const examsVal = values.examAccepted || examAcceptedList;
+    if (examsVal.length > 0) {
+      formData.append('examAccepted', JSON.stringify(examsVal));
+    }
     mutate(formData);
   }
 
@@ -413,6 +435,156 @@ export default function CounselorForm() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Streams Multi-Select (readonly in edit) */}
+              <FormField
+                control={form.control}
+                name="streams"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Streams (multi-select)</FormLabel>
+                    <FormControl>
+                      {isEdit ? (
+                        <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-gray-50 min-h-[42px]">
+                          {(field.value || []).length > 0 ? (
+                            (field.value as string[]).map((s) => (
+                              <Badge key={s} variant="secondary">{s}</Badge>
+                            ))
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No streams assigned</span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <Select
+                            onValueChange={(value) => {
+                              const current = field.value || [];
+                              if (!current.includes(value)) {
+                                const updated = [...current, value];
+                                field.onChange(updated);
+                                setSelectedStreams(updated);
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select streams" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-60 overflow-y-auto">
+                              {Array.isArray(categories) && categories.map((cat: any) => (
+                                <SelectItem
+                                  key={cat?.name || 'default'}
+                                  value={cat?.name || ''}
+                                  disabled={(field.value || []).includes(cat?.name || '')}
+                                >
+                                  {cat?.name || 'Unnamed Category'}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {(field.value || []).map((s: string) => (
+                              <div key={s} className="flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1">
+                                <span className="text-sm">{s}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = (field.value || []).filter((v: string) => v !== s);
+                                    field.onChange(updated);
+                                    setSelectedStreams(updated);
+                                  }}
+                                  className="ml-1 text-red-500 hover:text-red-700"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Exams Accepted (readonly in edit) */}
+              <FormField
+                control={form.control}
+                name="examAccepted"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Exams Accepted</FormLabel>
+                    <FormControl>
+                      {isEdit ? (
+                        <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-gray-50 min-h-[42px]">
+                          {(field.value || []).length > 0 ? (
+                            (field.value as string[]).map((exam) => (
+                              <Badge key={exam} variant="secondary">{exam}</Badge>
+                            ))
+                          ) : (
+                            <span className="text-sm text-muted-foreground">No exams assigned</span>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Type exam name and press Add"
+                              value={examInput}
+                              onChange={(e) => setExamInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const val = examInput.trim();
+                                  if (val && !examAcceptedList.includes(val)) {
+                                    const updated = [...examAcceptedList, val];
+                                    setExamAcceptedList(updated);
+                                    field.onChange(updated);
+                                    setExamInput('');
+                                  }
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => {
+                                const val = examInput.trim();
+                                if (val && !examAcceptedList.includes(val)) {
+                                  const updated = [...examAcceptedList, val];
+                                  setExamAcceptedList(updated);
+                                  field.onChange(updated);
+                                  setExamInput('');
+                                }
+                              }}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {(field.value || []).map((exam: string) => (
+                              <div key={exam} className="flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1">
+                                <span className="text-sm">{exam}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = (field.value || []).filter((v: string) => v !== exam);
+                                    field.onChange(updated);
+                                    setExamAcceptedList(updated);
+                                  }}
+                                  className="ml-1 text-red-500 hover:text-red-700"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

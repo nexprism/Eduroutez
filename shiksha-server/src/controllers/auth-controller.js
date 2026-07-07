@@ -496,6 +496,7 @@ export const signup = async (req, res) => {
         email: req.body.email,
         contactno: contact_number,
         category: req.body.category || '',
+        streams: Array.isArray(req.body.streams) ? req.body.streams : [],
         _id: userId,
         country: req.body.country,
         state: req.body.state,

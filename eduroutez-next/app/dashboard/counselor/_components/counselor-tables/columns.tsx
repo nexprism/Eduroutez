@@ -27,6 +27,38 @@ export const columns: ColumnDef<Counselor>[] = [
       header: 'Level',
       cell: ({ row }) => <div>{row.original.level}</div>
     },
+    {
+      header: 'Streams',
+      cell: ({ row }) => {
+        const streams = row.original.streams;
+        if (streams && Array.isArray(streams) && streams.length > 0) {
+          return (
+            <div className="flex flex-wrap gap-1 max-w-[200px]">
+              {streams.map((s: string) => (
+                <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+              ))}
+            </div>
+          );
+        }
+        return <span className="text-muted-foreground text-sm">-</span>;
+      }
+    },
+    {
+      header: 'Exams',
+      cell: ({ row }) => {
+        const exams = row.original.examAccepted;
+        if (exams && Array.isArray(exams) && exams.length > 0) {
+          return (
+            <div className="flex flex-wrap gap-1 max-w-[200px]">
+              {exams.map((e: string) => (
+                <Badge key={e} variant="outline" className="text-xs">{e}</Badge>
+              ))}
+            </div>
+          );
+        }
+        return <span className="text-muted-foreground text-sm">-</span>;
+      }
+    },
   {
     header: 'CREATED AT',
     cell: ({ row }) => {

@@ -100,6 +100,13 @@ export const createCounselor = async (req, res) => {
       contactno: req.body.contactno || (existingUser ? existingUser.contact_number : '')
     };
 
+    // Parse JSON string arrays for streams and examAccepted
+    if (typeof counselorpayload.streams === 'string') {
+      try { counselorpayload.streams = JSON.parse(counselorpayload.streams); } catch { counselorpayload.streams = counselorpayload.streams.split(',').map(s => s.trim()).filter(Boolean); }
+    }
+    if (typeof counselorpayload.examAccepted === 'string') {
+      try { counselorpayload.examAccepted = JSON.parse(counselorpayload.examAccepted); } catch { counselorpayload.examAccepted = counselorpayload.examAccepted.split(',').map(s => s.trim()).filter(Boolean); }
+    }
 
     // create counselor
     console.debug('[createCounselor] final payload before creation:', {
@@ -270,6 +277,14 @@ export const updateCounselor = async (req, res) => {
           ? null
           : exp.endDate || null,
       }));
+    }
+
+    // Parse JSON string arrays for streams and examAccepted
+    if (typeof payload.streams === 'string') {
+      try { payload.streams = JSON.parse(payload.streams); } catch { payload.streams = payload.streams.split(',').map(s => s.trim()).filter(Boolean); }
+    }
+    if (typeof payload.examAccepted === 'string') {
+      try { payload.examAccepted = JSON.parse(payload.examAccepted); } catch { payload.examAccepted = payload.examAccepted.split(',').map(s => s.trim()).filter(Boolean); }
     }
 
     console.log("update counselor Payload:", payload);

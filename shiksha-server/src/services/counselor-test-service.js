@@ -104,8 +104,10 @@ class CounselorTestService {
     async getRandomTestSet(counselorId) {
         try {
             const counselor = await this.counselorRepository.getByid(counselorId);
-            const stream = counselor?.category || "";
-            const result = await this.questionSetRepository.getRandomSet(stream);
+            const streams = counselor?.streams || (counselor?.category ? [counselor.category] : []);
+            const result = streams.length > 0
+                ? await this.questionSetRepository.getRandomSetByStreams(streams)
+                : await this.questionSetRepository.getRandomSet("");
             if (!result) {
                 throw new AppError("No test sets found for your category", StatusCodes.NOT_FOUND);
             }

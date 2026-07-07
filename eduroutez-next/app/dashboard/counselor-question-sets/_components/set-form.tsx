@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trash2, Plus, ArrowLeft, Loader2 } from 'lucide-react';
+import { Trash2, Plus, ArrowLeft, Loader2, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';
@@ -37,7 +37,8 @@ const formSchema = z.object({
     questions: z.array(questionSchema).min(1, 'At least one question is required'),
     totalQuestions: z.number().default(50),
     timeLimit: z.number().default(25),
-    stream: z.string().optional()
+    stream: z.string().optional(),
+    streams: z.array(z.string()).optional()
 });
 
 type QuestionSetFormProps = {
@@ -69,7 +70,8 @@ export default function QuestionSetForm({ questionSetId }: QuestionSetFormProps)
             ],
             totalQuestions: 50,
             timeLimit: 25,
-            stream: ''
+            stream: '',
+            streams: []
         }
     });
 
@@ -110,6 +112,7 @@ export default function QuestionSetForm({ questionSetId }: QuestionSetFormProps)
                         totalQuestions: data.totalQuestions || 50,
                         timeLimit: data.timeLimit || 25,
                         stream: data.stream || '',
+                        streams: data.streams || [],
                         questions: data.questions?.map((q: any) => ({
                             questionText: q.questionText || '',
                             explanation: q.explanation || '',
@@ -223,23 +226,55 @@ export default function QuestionSetForm({ questionSetId }: QuestionSetFormProps)
                                 />
                                 <FormField
                                     control={form.control}
-                                    name="stream"
+                                    name="streams"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Stream / Category</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value || ''}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="All Streams (General)" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="">All Streams (General)</SelectItem>
-                                                    {streams.map((s: any) => (
-                                                        <SelectItem key={s._id} value={s.name}>{s.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <FormLabel>Streams / Categories (multi-select)</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Select
+                                                        onValueChange={(value) => {
+                                                            const current = field.value || [];
+                                                            if (!current.includes(value)) {
+                                                                field.onChange([...current, value]);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <SelectTrigger className="w-full">
+                                                            <SelectValue placeholder="Select streams" />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="max-h-60 overflow-y-auto">
+                                                            <SelectItem value="">General (All Streams)</SelectItem>
+                                                            {streams.map((s: any) => (
+                                                                <SelectItem
+                                                                    key={s._id}
+                                                                    value={s.name}
+                                                                    disabled={(field.value || []).includes(s.name)}
+                                                                >
+                                                                    {s.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <div className="mt-2 flex flex-wrap gap-2">
+                                                        {(field.value || []).map((s: string) => (
+                                                            <div key={s} className="flex items-center gap-1 rounded-md bg-primary/10 px-2 py-1">
+                                                                <span className="text-sm">{s}</span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const updated = (field.value || []).filter((v: string) => v !== s);
+                                                                        field.onChange(updated);
+                                                                    }}
+                                                                    className="ml-1 text-red-500 hover:text-red-700"
+                                                                >
+                                                                    <X className="h-3 w-3" />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
