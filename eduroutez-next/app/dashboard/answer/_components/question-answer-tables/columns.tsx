@@ -14,7 +14,10 @@ export const columns: ColumnDef<Answer>[] = [
   {
     header: 'Question',
     accessorKey: 'question', // Simplified with accessorKey
-    cell: ({ row }) => <div>{row.original.question}</div>,
+    cell: ({ row }) => {
+      const stripped = row.original.question?.replace(/<[^>]*>/g, '') || '';
+      return <div>{stripped}</div>;
+    },
   },
   {
     header: 'Grade',

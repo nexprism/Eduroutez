@@ -5,9 +5,11 @@ const questionAnswerService = new QuestionAnswerService();
 
 export const createQuestionAnswer = async (req, res) => {
   try {
-    const payload = req.body;
+    const payload = {
+      ...req.body,
+      userId: req.user?._id,
+    };
     const response = await questionAnswerService.create(payload);
-    console.log(response);
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully created a question and answer";
 
@@ -16,7 +18,7 @@ export const createQuestionAnswer = async (req, res) => {
     console.error("Error creating question and answer:", error);
     ErrorResponse.error = error;
 
-    return res.status(error.statusCode).json(ErrorResponse);
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }
 };
 
@@ -77,9 +79,15 @@ export async function updateQuestionAnswer(req, res) {
     }
 
     const payload = {};
-    if (req.body.question) payload.question = req.body.question;
-    if (req.body.grade) payload.grade = req.body.grade;
-    if (req.body.label) payload.label = req.body.label;
+    if (req.body.question !== undefined) payload.question = req.body.question;
+    if (req.body.grade !== undefined) payload.grade = req.body.grade;
+    if (req.body.label !== undefined) payload.label = req.body.label;
+    if (req.body.tags !== undefined) payload.tags = req.body.tags;
+    if (req.body.isAnonymous !== undefined) payload.isAnonymous = req.body.isAnonymous;
+    if (req.body.status !== undefined) payload.status = req.body.status;
+    if (req.body.visibility !== undefined) payload.visibility = req.body.visibility;
+    payload.editedAt = new Date();
+    payload.isEdited = true;
 
     const response = await questionAnswerService.updateMetadata(questionAnswerId, payload);
     SuccessResponse.data = response;
@@ -220,6 +228,47 @@ export async function editAnswer(req, res) {
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     console.error("Edit answer error:", error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+}
+
+export async function getMyQuestions(req, res) {
+  try {
+    const userId = req.user?._id;
+    const status = req.query.status || "published";
+    const response = await questionAnswerService.getByUser(userId, status);
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully fetched user questions";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+  }
+}
+
+export async function replyToAnswer(req, res) {
+  try {
+    const questionId = req.params.id;
+    const answerId = req.params.answerId;
+    const { answer, repliedBy } = req.body;
+
+    if (!answer || !repliedBy) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        ...ErrorResponse,
+        error: { message: "Reply text and repliedBy are required" },
+      });
+    }
+
+    const response = await questionAnswerService.replyToAnswer(questionId, answerId, {
+      answer,
+      repliedBy,
+      repliedAt: new Date(),
+    });
+    SuccessResponse.data = response;
+    SuccessResponse.message = "Successfully replied to answer";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
     ErrorResponse.error = error;
     return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
   }

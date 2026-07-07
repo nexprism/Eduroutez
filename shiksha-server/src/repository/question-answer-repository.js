@@ -135,6 +135,30 @@ class QuestionAnswerRepository extends CrudRepository {
       throw error;
     }
   }
+
+  async getByUserId(userId, status) {
+    try {
+      const docs = await this.model.find({ userId, status, deletedAt: null }).sort({ createdAt: -1 });
+      return docs;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async replyToAnswer(questionId, answerId, replyData) {
+    try {
+      const doc = await this.model.findById(questionId);
+      if (!doc) throw new Error("Question not found");
+
+      const answer = doc.answers.id(answerId);
+      if (!answer) throw new Error("Answer not found");
+
+      answer.replies.push(replyData);
+      return await doc.save();
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export { QuestionAnswerRepository };

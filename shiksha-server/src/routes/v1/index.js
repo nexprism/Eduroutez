@@ -29,7 +29,7 @@ import { createBlog, deleteBlog, getBlog, getBlogs, updateBlog, getBlogsByInstit
 import { createNews, deleteNews, getNews, getNewsById, getNewsByInstitute, getNewsBySuperAdmin, updateNews } from "../../controllers/news-controller.js";
 import { createPayout, deletePayout, getPayout, getPayouts, updatePayout, getPayoutsByUser } from "../../controllers/payout-controller.js";
 import { createFeedback, deleteFeedback, getFeedback, getFeedbacks, updateFeedback } from "../../controllers/feedback-controller.js";
-import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer, getQuestionAnswerByEmail, submitAnswer, likeQuestionAnswer, likeAnswer, editAnswer } from "../../controllers/question-answer-controller.js";
+import { createQuestionAnswer, deleteQuestionAnswer, getQuestionAnswer, getQuestionAnswers, updateQuestionAnswer, getQuestionAnswerByEmail, submitAnswer, likeQuestionAnswer, likeAnswer, editAnswer, getMyQuestions, replyToAnswer } from "../../controllers/question-answer-controller.js";
 import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishlist } from "../../controllers/wishlist-controller.js";
 // import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount, getWebinarTracking } from "../../controllers/webinar-controller.js";
 
@@ -439,6 +439,8 @@ router.post("/question-answer/:id/answer", accessTokenAutoRefresh, passport.auth
 router.post("/question-answer/:id/like", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), likeQuestionAnswer);
 router.post("/question-answer/:id/answer/:answerId/like", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), likeAnswer);
 router.patch("/question-answer/:id/answer/:answerId", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), editAnswer);
+router.post("/question-answer/:id/answer/:answerId/reply", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), replyToAnswer);
+router.get("/my-questions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyQuestions);
 
 /**
  * FAQs routes

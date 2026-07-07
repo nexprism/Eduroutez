@@ -96,12 +96,46 @@ export default function QuestionAnswerForm() {
             <>
               <div>
                 <h3 className="font-semibold mb-1">Question</h3>
-                <p className="text-muted-foreground">{qaData.question}</p>
+                <div className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: qaData.question }} />
                 <div className="flex gap-2 mt-2">
                   {qaData.grade && <Badge variant="outline">{qaData.grade}</Badge>}
                   {qaData.label && <Badge>{qaData.label}</Badge>}
                 </div>
               </div>
+
+              {qaData.answers && qaData.answers.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <h3 className="font-semibold mb-2">Existing Answers ({qaData.answers.length})</h3>
+                    <div className="space-y-3">
+                      {qaData.answers.map((ans: any) => (
+                        <div key={ans._id} className="p-3 bg-gray-50 rounded-lg border">
+                          <div dangerouslySetInnerHTML={{ __html: ans.answer }} className="text-sm mb-2" />
+                          <div className="text-xs text-gray-500 flex items-center gap-2">
+                            <span>By: {ans.answeredBy?.name || ans.answeredBy?.email || ans.answeredBy || "Unknown"}</span>
+                            <span>•</span>
+                            <span>{new Date(ans.answeredAt).toLocaleDateString()}</span>
+                          </div>
+                          {ans.replies && ans.replies.length > 0 && (
+                            <div className="ml-4 mt-2 space-y-1.5">
+                              {ans.replies.map((rep: any) => (
+                                <div key={rep._id} className="p-2 bg-white rounded border-l-2 border-gray-300">
+                                  <div dangerouslySetInnerHTML={{ __html: rep.answer }} className="text-xs mb-1" />
+                                  <div className="text-xs text-gray-400">
+                                    {rep.repliedBy?.name || rep.repliedBy?.email || rep.repliedBy || "Unknown"}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
               <Separator />
               <div>
                 <label className="text-sm font-medium mb-1 block">Your Answer</label>

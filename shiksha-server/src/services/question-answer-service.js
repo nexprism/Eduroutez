@@ -28,7 +28,20 @@ class questionAnswerService {
       const parsedSearchFields = JSON.parse(searchFields);
       const parsedSort = JSON.parse(sort);
 
-      const filterConditions = { deletedAt: null };
+      const filterConditions = { deletedAt: null, status: "published" };
+
+      // If visibility filter is "public" and a userId is provided,
+      // also include the user's own private questions
+      if (parsedFilters.visibility === "public" && query.userId) {
+        delete parsedFilters.visibility;
+        filterConditions.$and = filterConditions.$and || [];
+        filterConditions.$and.push({
+          $or: [
+            { visibility: "public" },
+            { visibility: "private", userId: query.userId },
+          ],
+        });
+      }
 
       for (const [key, value] of Object.entries(parsedFilters)) {
         if (Array.isArray(value)) {
@@ -54,9 +67,13 @@ class questionAnswerService {
       }
 
       if (query.user === "true" || query.user === true) {
-        filterConditions.$and = filterConditions.$and || [];
-        filterConditions.$and.push({ $or: [{ answer: { $ne: null } }, { 'answers.0': { $exists: true } }] });
-      }
+            filterConditions.$and = filterConditions.$and || [];
+            filterConditions.$and.push({ $or: [{ answer: { $ne: null } }, { 'answers.0': { $exists: true } }] });
+          }
+
+          if (query.status) {
+            filterConditions.status = query.status;
+          }
 
       const questionAnswers = await this.questionAnswerRepository.getAll(filterConditions, sortConditions, pageNum, limitNum);
 
@@ -271,6 +288,24 @@ class questionAnswerService {
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError("Cannot edit the answer", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getByUser(userId, status = "published") {
+    try {
+      const questions = await this.questionAnswerRepository.getByUserId(userId, status);
+      return questions;
+    } catch (error) {
+      throw new AppError("Cannot fetch user questions", StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async replyToAnswer(questionId, answerId, replyData) {
+    try {
+      const result = await this.questionAnswerRepository.replyToAnswer(questionId, answerId, replyData);
+      return result;
+    } catch (error) {
+      throw new AppError("Cannot reply to answer", StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
 }
