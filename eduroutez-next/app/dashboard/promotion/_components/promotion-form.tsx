@@ -185,7 +185,8 @@ const formSchema = z.object({
   }),
   endDate: z.date({
     required_error: 'End date is required.'
-  })
+  }),
+  showTitle: z.boolean().default(true)
 }).refine((data) => data.startDate <= data.endDate, {
   message: "End date must be after start date",
   path: ["endDate"]
@@ -215,9 +216,41 @@ export default function PromotionForm() {
       link: '',
       startDate: new Date(),
       endDate: new Date(),
-      image: undefined
+      image: undefined,
+      showTitle: true
     }
   });
+
+  // Populate form when editing
+  const { data: promotionData, isLoading } = useQuery({
+    queryKey: ['promotion', promotionId],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`${apiUrl}/promotion/${promotionId}`);
+      return response.data.data ?? response.data;
+    },
+    enabled: isEdit,
+  });
+
+  React.useEffect(() => {
+    if (isEdit && promotionData) {
+      const p = promotionData;
+      form.reset({
+        title: p.title || '',
+        location: p.location,
+        link: p.link || '',
+        startDate: p.startDate ? new Date(p.startDate) : new Date(),
+        endDate: p.endDate ? new Date(p.endDate) : new Date(),
+        image: undefined,
+        showTitle: p.showTitle ?? true
+      });
+      if (p.location && PROMOTION_LOCATIONS[p.location as keyof typeof PROMOTION_LOCATIONS]) {
+        setSelectedLocation(p.location as keyof typeof PROMOTION_LOCATIONS);
+      }
+      if (p.image) {
+        setPreviewUrl(`${apiUrl}/uploads/${p.image}`);
+      }
+    }
+  }, [isEdit, promotionData, form]);
 
   React.useEffect(() => {
     const script = document.createElement("script");
@@ -265,15 +298,6 @@ export default function PromotionForm() {
     return () => subscription.unsubscribe();
   }, [form.watch]);
 
-  const { isLoading } = useQuery({
-    queryKey: ['promotion', promotionId],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/promotion/${promotionId}`);
-      return response.data;
-    },
-    enabled: isEdit,
-  });
-
   const { mutate, isPending } = useMutation({
     mutationFn: async (formData: FormData) => {
       const endpoint = isEdit
@@ -309,31 +333,8 @@ export default function PromotionForm() {
     };
   };
 
-  const handlePayment = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-  
+  const handlePayment = async (formData: FormData) => {
     try {
-      // Get form values directly from React Hook Form
-      const values = form.getValues();
-  
-      // Create FormData with all form values
-      const formData = new FormData();
-      formData.append('title', values.title);
-      formData.append('location', values.location);
-      if (values.link) {
-        formData.append('link', values.link);
-      }
-      const startDate = new Date(values.startDate);
-      const endDate = new Date(values.endDate);
-  
-      formData.append('startDate', startDate.toISOString());
-      formData.append('endDate', endDate.toISOString());
-  
-      // Correctly append the image if it exists
-      if (values.image instanceof File) {
-        formData.append('image', values.image);
-      }
-  
       // Check if the role is SUPER_ADMIN
       const role = localStorage.getItem('role');
       if (role === 'SUPER_ADMIN') {
@@ -434,6 +435,7 @@ export default function PromotionForm() {
     if (values.link) {
       formData.append('link', values.link);
     }
+    formData.append('showTitle', String(values.showTitle));
     formData.append('startDate', values.startDate.toISOString());
     formData.append('endDate', values.endDate.toISOString());
     console.log('values',values)
@@ -465,7 +467,7 @@ export default function PromotionForm() {
             </p>
           </div>
 
-          <form onSubmit={handlePayment} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             {/* Pricing Information */}
             {!isEdit && selectedLocation && (
               <div className="bg-blue-50 p-6 rounded-lg mb-6">
@@ -532,6 +534,35 @@ export default function PromotionForm() {
                 <p className="mt-1 text-xs text-gray-500">
                   Enter the URL where users will be directed when they click on your promotion
                 </p>
+              </div>
+
+              {/* Show Title On Image Toggle */}
+              <div className="flex items-center justify-between rounded-lg border border-gray-300 p-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Show title on image
+                  </label>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Display the promotion title as an overlay on the image
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.watch('showTitle')}
+                  onClick={() =>
+                    form.setValue('showTitle', !form.watch('showTitle'))
+                  }
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    form.watch('showTitle') ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      form.watch('showTitle') ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
               </div>
 
               {/* Location Select */}

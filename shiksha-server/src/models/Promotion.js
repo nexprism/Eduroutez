@@ -45,6 +45,10 @@ const promotionSchema = new mongoose.Schema(
     link: {
       type: String,
     },
+    showTitle: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

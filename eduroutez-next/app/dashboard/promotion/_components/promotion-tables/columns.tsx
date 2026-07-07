@@ -4,6 +4,9 @@ import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
 import { Promotion } from '@/types';
+import axiosInstance from '@/lib/axios';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 export const columns: ColumnDef<Promotion>[] = [
   {
@@ -43,6 +46,48 @@ export const columns: ColumnDef<Promotion>[] = [
         </Badge>
       </div>
     )
+  },
+
+  {
+    header: 'SHOW TITLE',
+    cell: ({ row }) => {
+      const queryClient = useQueryClient();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const mutation = useMutation({
+        mutationFn: async () => {
+          const response = await axiosInstance({
+            url: `${apiUrl}/promotion/${row.original._id}`,
+            method: 'PATCH',
+            data: { showTitle: !row.original.showTitle },
+            headers: { 'Content-Type': 'application/json' }
+          });
+          return response.data;
+        },
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['Promotions'] });
+          toast.success('Updated successfully');
+        },
+        onError: () => toast.error('Failed to update')
+      });
+
+      return (
+        <button
+          type="button"
+          role="switch"
+          aria-checked={row.original.showTitle}
+          onClick={() => mutation.mutate()}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+            row.original.showTitle ? 'bg-blue-600' : 'bg-gray-300'
+          }`}
+        >
+          <span
+            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              row.original.showTitle ? 'translate-x-6' : 'translate-x-1'
+            }`}
+          />
+        </button>
+      );
+    }
   },
 
   {

@@ -181,6 +181,22 @@ export type Like = {
   type: 'upvote' | 'downvote';
 };
 
+export type Promotion = {
+  _id: string;
+  title: string;
+  image: string;
+  description?: string;
+  status: string;
+  location?: string;
+  startDate: string;
+  endDate: string;
+  isLive: boolean;
+  link?: string;
+  showTitle: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export interface NavItem {
   title: string;
   url: string;

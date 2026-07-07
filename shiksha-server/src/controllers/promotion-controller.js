@@ -116,6 +116,11 @@ export async function updatePromotion(req, res) {
         payload.link = req.body.link;
       }
 
+      // Show title on image toggle
+      if (req.body.showTitle !== undefined) {
+        payload.showTitle = req.body.showTitle === 'true' || req.body.showTitle === true;
+      }
+
       // Check if a new image is uploaded
       if (req.file) {
         const promotion = await promotionService.get(promotionId);
