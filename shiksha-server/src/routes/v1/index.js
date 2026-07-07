@@ -8,7 +8,7 @@ import passport from "passport";
 import { createCoupon, deleteCoupon, getCoupon, getCoupons, updateCoupon } from "../../controllers/coupon-controller.js";
 import { createTransaction, getTransactions } from "../../controllers/transaction-controller.js";
 import { createTemplate, deleteTemplate, getTemplate, getTemplates, updateTemplate } from "../../controllers/template-controller.js";
-import { CategoryMiddleware, UserMiddleware, requireAuth } from "../../middlewares/index.js";
+import { CategoryMiddleware, UserMiddleware, requireAuth, QueryMiddleware } from "../../middlewares/index.js";
 import { getUsers, updateUser, allowUser, denyUser, holdUser, getMyRefferal, redeemPoints, getRedeemHistory, getAllRefferal, earningReports, dashboard, instituteDashboard, counselorDashboard, likeDislike, submitReview, updateAllSlugs, getMyCoupons } from "../../controllers/users-controller.js";
 import { createCategory, deleteCategory, getCategory, updateCategory } from "../../controllers/category-controller.js";
 import { createStream, deleteStream, getStream, getStreams, trendingStreams, updateStream } from "../../controllers/stream-controller.js";
@@ -136,7 +136,7 @@ router.get("/monthly-webinar-count/:id", getMonthlyWebinarCount);
 /**
  * query routes
  */
-router.post("/query", createQuery);
+router.post("/query", QueryMiddleware.validateCreateQuery, createQuery);
 router.get("/queries", getQueries);
 router.get("/query/:id", getQuery);
 router.get("/query-by-institute/:id", getQueryByInstitute);
