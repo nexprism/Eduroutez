@@ -37,10 +37,10 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   // Query for fetching details
   const { data: detailsData, isLoading: detailsLoading } = useQuery({
-    
+
     queryKey: ['question-answer-details', data.id],
     queryFn: async () => {
-      console.log('h',data);
+      console.log('h', data);
       const response = await axiosInstance({
         url: `${apiUrl}/query/${data.id}`,
         method: 'GET',
@@ -60,7 +60,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           'Content-Type': 'application/json'
         }
       });
-      
+
       return response;
     },
     onSuccess: () => {
@@ -75,7 +75,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onConfirm = async () => {
     setLoading(true);
-    deleteQuestionAnswerMutation.mutate(data._id);
+    deleteQuestionAnswerMutation.mutate(data.id);
   };
 
   return (
@@ -96,46 +96,46 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
             <div className="p-4 text-center">Loading...</div>
           ) : (
             <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-  <h2 className="text-lg font-semibold mb-4">Query Details</h2>
-  <div className="space-y-4 max-h-[400px] overflow-y-auto p-2">
-    {[
-      { label: "Type", value: detailsData?.type === "application" ? "Application" : "Query" },
-      { label: "Query Related To", value: detailsData?.queryRelatedTo },
-      { label: "Query", value: detailsData?.query },
-      { label: "Name", value: detailsData?.name },
-      { label: "Email", value: detailsData?.email },
-      { label: "Phone Number", value: detailsData?.phoneNo },
-      { label: "City", value: detailsData?.city },
-      { label: "Specialization", value: detailsData?.specialization },
-      { label: "Created At", value: new Date(detailsData?.createdAt).toLocaleString() },
-      { label: "Status", value: detailsData?.status },
-    ].map((item, index) => (
-      <div key={index} className="border-b pb-2">
-        <h3 className="font-medium text-gray-700">{item.label}:</h3>
-        <p className="text-gray-900">{item.value || "N/A"}</p>
-      </div>
-    ))}
+              <h2 className="text-lg font-semibold mb-4">Query Details</h2>
+              <div className="space-y-4 max-h-[400px] overflow-y-auto p-2">
+                {[
+                  { label: "Type", value: detailsData?.type === "application" ? "Application" : "Query" },
+                  { label: "Query Related To", value: detailsData?.queryRelatedTo },
+                  { label: "Query", value: detailsData?.query },
+                  { label: "Name", value: detailsData?.name },
+                  { label: "Email", value: detailsData?.email },
+                  { label: "Phone Number", value: detailsData?.phoneNo },
+                  { label: "City", value: detailsData?.city },
+                  { label: "Specialization", value: detailsData?.specialization },
+                  { label: "Created At", value: new Date(detailsData?.createdAt).toLocaleString() },
+                  { label: "Status", value: detailsData?.status },
+                ].map((item, index) => (
+                  <div key={index} className="border-b pb-2">
+                    <h3 className="font-medium text-gray-700">{item.label}:</h3>
+                    <p className="text-gray-900">{item.value || "N/A"}</p>
+                  </div>
+                ))}
 
-    {/* Institute IDs Section */}
-    {detailsData?.instituteIds?.length > 0 && (
-      <div>
-        <h3 className="font-medium text-gray-700">Institute Query status Details:</h3>
-        <ul className="mt-2 space-y-2">
-          {detailsData.instituteIds.map((institute: any) => (
-            <li key={institute._id} className="p-2 border rounded-md bg-white shadow-sm">
-                            <p className="text-gray-900"><span className="font-medium">Name:</span> {institute.instituteName}</p>
+                {/* Institute IDs Section */}
+                {detailsData?.instituteIds?.length > 0 && (
+                  <div>
+                    <h3 className="font-medium text-gray-700">Institute Query status Details:</h3>
+                    <ul className="mt-2 space-y-2">
+                      {detailsData.instituteIds.map((institute: any) => (
+                        <li key={institute._id} className="p-2 border rounded-md bg-white shadow-sm">
+                          <p className="text-gray-900"><span className="font-medium">Name:</span> {institute.instituteName}</p>
 
-              <p className="text-gray-900"><span className="font-medium">Email:</span> {institute.email}</p>
-              <p className="text-gray-900">
-                <span className="font-medium">Status:</span> {institute.allocatedQueries.find((query: any) => query._id === data.id)?.status || "N/A"}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-  </div>
-</div>
+                          <p className="text-gray-900"><span className="font-medium">Email:</span> {institute.email}</p>
+                          <p className="text-gray-900">
+                            <span className="font-medium">Status:</span> {institute.allocatedQueries.find((query: any) => query._id === data.id)?.status || "N/A"}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
 
           )}
         </DialogContent>
@@ -150,13 +150,13 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          
+
           {role === 'SUPER_ADMIN' && (
             <DropdownMenuItem onClick={() => setDetailsOpen(true)}>
               <Eye className="mr-2 h-4 w-4" /> View Details
             </DropdownMenuItem>
           )}
-          
+
           {(role === 'institute' || role === 'counselor') && (
             <DropdownMenuItem
               onClick={() =>

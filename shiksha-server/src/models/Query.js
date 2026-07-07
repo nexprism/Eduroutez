@@ -24,7 +24,7 @@ const querySchema = new mongoose.Schema(
         },
         stream: {
             type: mongoose.Schema.Types.ObjectId,
-              ref: "Stream",
+            ref: "Stream",
         },
         level: {
             type: String,
@@ -56,6 +56,6 @@ const querySchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-const Query = mongoose.model("Query", querySchema);
 applySoftDelete(querySchema);
+const Query = mongoose.model("Query", querySchema);
 export default Query;
