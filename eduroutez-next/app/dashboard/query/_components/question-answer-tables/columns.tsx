@@ -48,6 +48,31 @@ export const columns: ColumnDef<Query>[] = [
     cell: ({ row }) => <div>{String(row.original.queryRelatedTo || '')}</div>,
   },
   {
+    header: 'Institute',
+    accessorKey: 'instituteIds',
+    cell: ({ row }) => {
+      const ids = row.original.instituteIds;
+      if (!ids || ids.length === 0) return <div className="text-gray-400">—</div>;
+      const names = ids.map((i: any) => (typeof i === 'object' ? i.instituteName : i)).join(', ');
+      return <div className="max-w-[200px] truncate" title={names}>{names}</div>;
+    },
+  },
+  {
+    header: 'Stream',
+    accessorKey: 'stream',
+    cell: ({ row }) => {
+      const s = row.original.stream;
+      if (!s) return <div className="text-gray-400">—</div>;
+      const name = typeof s === 'object' ? s.name : s;
+      return <div>{name}</div>;
+    },
+  },
+  {
+    header: 'Level',
+    accessorKey: 'level',
+    cell: ({ row }) => <div>{row.original.level || <span className="text-gray-400">—</span>}</div>,
+  },
+  {
     header: 'Query',
     accessorKey: 'query',
     cell: ({ row }) => <div>{String(row.original.query || '')}</div>,

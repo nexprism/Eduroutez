@@ -146,13 +146,6 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'Review',
-    url: '/dashboard/reviews',
-    icon: 'message-circle',
-    isActive: false,
-    items: [] // No child items
-  },
-  {
     title: 'Slots',
     url: '/dashboard/slot',
     icon: 'message-circle',

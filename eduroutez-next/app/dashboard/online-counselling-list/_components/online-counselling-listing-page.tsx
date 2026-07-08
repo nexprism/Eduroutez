@@ -22,7 +22,7 @@ export default function ScheduledSlotsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
-  
+
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const email = typeof window !== 'undefined' ? localStorage.getItem('email') : null;
 
@@ -48,7 +48,7 @@ export default function ScheduledSlotsPage() {
   };
 
   // Safe formatter for dates
-  const formatDate = (dateString:any) => {
+  const formatDate = (dateString: any) => {
     if (!dateString) return 'N/A';
     try {
       return format(new Date(dateString), 'MMM dd, yyyy');
@@ -58,7 +58,7 @@ export default function ScheduledSlotsPage() {
     }
   };
 
-  const getStatusBadgeClass = (status:any) => {
+  const getStatusBadgeClass = (status: any) => {
     switch (status?.toLowerCase()?.trim()) {
       case 'completed':
         return 'bg-green-100 text-green-700';
@@ -74,7 +74,7 @@ export default function ScheduledSlotsPage() {
   };
 
   // Safe accessor for nested objects
-  const getStudentInfo = (student:any) => {
+  const getStudentInfo = (student: any) => {
     if (!student) return { name: 'N/A', email: 'N/A' };
     return {
       name: student.name || 'Unnamed',
@@ -82,7 +82,7 @@ export default function ScheduledSlotsPage() {
     };
   };
 
-  const getCounselorInfo = (counselor:any) => {
+  const getCounselorInfo = (counselor: any) => {
     if (!counselor) return { name: 'N/A', email: 'N/A', category: 'N/A' };
     return {
       name: `${counselor.firstname || ''} ${counselor.lastname || ''}`.trim() || 'Unnamed',
@@ -99,15 +99,15 @@ export default function ScheduledSlotsPage() {
             title={`Scheduled Slots (${data?.data?.totalDocuments || 0})`}
             description="View and manage all counseling sessions"
           />
-          
+
           <form onSubmit={handleSearch} className="flex w-full md:w-auto">
             <div className="relative flex-1 md:w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
               <Input
-          placeholder="Search slots..."
-          className="pl-9 w-full"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search slots..."
+                className="pl-9 w-full"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Button type="submit" className="ml-2">
@@ -115,9 +115,9 @@ export default function ScheduledSlotsPage() {
             </Button>
           </form>
         </div>
-        
+
         <Separator className="my-6" />
-        
+
         {isLoading ? (
           <div className="flex justify-center items-center min-h-[400px]">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -139,13 +139,14 @@ export default function ScheduledSlotsPage() {
                     <TableHead>Category</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Payment ID</TableHead>
+                    <TableHead>Created At</TableHead>
                     <TableHead>Meeting Link</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {Array.isArray(slots) && slots.map((slot) => {
                     if (!slot) return null;
-                    
+
                     const studentInfo = getStudentInfo(slot.studentId);
                     const counselorInfo = getCounselorInfo(slot.counselorId);
 
@@ -181,6 +182,9 @@ export default function ScheduledSlotsPage() {
                           {slot.paymentId || 'N/A'}
                         </TableCell>
                         <TableCell>
+                          {slot.createdAt ? formatDate(slot.createdAt) : 'N/A'}
+                        </TableCell>
+                        <TableCell>
                           {slot.link ? (
                             <a
                               href={slot.link}
@@ -198,10 +202,10 @@ export default function ScheduledSlotsPage() {
                       </TableRow>
                     );
                   })}
-                  
+
                   {(!Array.isArray(slots) || slots.length === 0) && (
                     <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center">
+                      <TableCell colSpan={9} className="h-24 text-center">
                         No scheduled slots found.
                       </TableCell>
                     </TableRow>
@@ -209,7 +213,7 @@ export default function ScheduledSlotsPage() {
                 </TableBody>
               </Table>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-500">
                 Showing page {currentPage} of {totalPages}

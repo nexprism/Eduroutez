@@ -2,9 +2,9 @@ import { ServerConfig } from "../config/index.js";
 import { courseSchema } from "../models/Course.js";
 import { CounselorRepository } from "../repository/index.js";
 import { UserRepository } from "../repository/index.js";
-import  ScheduleSlot  from "../models/ScheduleSlots.js";
-import  User  from "../models/User.js";
-import  { CounselorSlotRepository }  from "../repository/counselorSlot-repository.js";
+import ScheduleSlot from "../models/ScheduleSlots.js";
+import User from "../models/User.js";
+import { CounselorSlotRepository } from "../repository/counselorSlot-repository.js";
 import bcrypt from "bcrypt";
 import Counselor from "../models/Counselor.js";
 
@@ -54,7 +54,7 @@ class CounselorService {
       const parsedSort = JSON.parse(sort);
 
       // Build filter conditions for multiple fields
-    const filterConditions = { deletedAt: null };
+      const filterConditions = { deletedAt: null };
 
       for (const [key, value] of Object.entries(parsedFilters)) {
         if (parsedFilters.category !== "by-category") {
@@ -68,7 +68,7 @@ class CounselorService {
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
-      
+
       // Add top-level search parameter support - search across multiple fields
       if (search) {
         const escapedSearch = this.escapeRegex(search);
@@ -109,31 +109,38 @@ class CounselorService {
         }
 
         //find in user by counselors.result[i]._id
-        console.log('counselors.result[i]._id',counselors.result[i]._id);
+        console.log('counselors.result[i]._id', counselors.result[i]._id);
         const user = await User.findOne({ _id: counselors.result[i]._id });
-        if(user) {
+        if (user) {
           counselors.result[i].level = user.level;
           counselors.result[i].points = user.points;
           counselors.result[i].balance = user.balance;
         }
-       
-        
+
+
 
         //get all schedules slots of counselor
-        const schedules = await ScheduleSlot.find({ counselorId:counselors.result[i]._id});
-        if(schedules) {
+        const schedules = await ScheduleSlot.find({ counselorId: counselors.result[i]._id });
+        if (schedules) {
           counselors.result[i].schedules = schedules.length;
-        }else{
+        } else {
           counselors.result[i].schedules = 0;
         }
 
         //get all slots from counselorSlot model
         const slots = await this.counselorSlotRepository.get(counselors.result[i].email);
-        console.log('slots',slots);
-        if(slots) {
+        console.log('slots', slots);
+        if (slots) {
           counselors.result[i].slots = slots;
         }
 
+        if (counselors.result[i].students && Array.isArray(counselors.result[i].students)) {
+          counselors.result[i].students.sort((a, b) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            return dateB - dateA;
+          });
+        }
 
       }
 
@@ -144,17 +151,17 @@ class CounselorService {
     }
   }
   async get(email) {
-    
+
     const counselor = await this.counselorRepository.get(email);
 
     // console.log('counselor',counselor);
 
-    if(!counselor) {
+    if (!counselor) {
       //find in user by email
       const user = await this.userRepository.get(email);
-      console.log('counselor user',user);
-      if(user) {
-        
+      console.log('counselor user', user);
+      if (user) {
+
         // create counselor with all required info from the user record
         const fullName = (user.name || '').trim();
         const parts = fullName.split(/\s+/);
@@ -162,8 +169,8 @@ class CounselorService {
         const lastname = parts.join(' ') || user.lastname || '';
 
         const counselor = await this.create({
-          _id: user._id, 
-          email: user.email, 
+          _id: user._id,
+          email: user.email,
           firstname,
           lastname,
           contactno: user.contact_number || '0000000000'
@@ -172,7 +179,7 @@ class CounselorService {
     }
 
     const userResponse = await this.userRepository.getById(counselor[0]._id);
-    if(userResponse) {
+    if (userResponse) {
       counselor[0].level = userResponse.level;
       counselor[0].points = userResponse.points;
     }
@@ -184,15 +191,23 @@ class CounselorService {
         // const totalRating = counselor[0].reviews.reduce((acc, review) => acc + review.rating, 0);
 
         //get student by email
-        const student =  this.userRepository.get(review.studentEmail);
-        console.log('review student',student);
+        const student = this.userRepository.get(review.studentEmail);
+        console.log('review student', student);
         review.student = student;
       });
 
-      
-      console.log('counselor[0].reviews',counselor[0].reviews);
-      
+
+      console.log('counselor[0].reviews', counselor[0].reviews);
+
       // counselor[0].avgrating = totalRating / counselor[0].reviews.length;
+    }
+
+    if (counselor[0] && Array.isArray(counselor[0].students)) {
+      counselor[0].students.sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA;
+      });
     }
 
     return counselor;
@@ -212,7 +227,7 @@ class CounselorService {
   }
 
   async getById(id) {
-    
+
     const counselor = await this.counselorRepository.getByid(id);
 
     console.log('counselor', counselor);
@@ -229,8 +244,8 @@ class CounselorService {
         const lastname = parts.join(' ') || user.lastname || '';
 
         const counselor = await this.create({
-          _id: user._id, 
-          email: user.email, 
+          _id: user._id,
+          email: user.email,
           firstname,
           lastname,
           contactno: user.contact_number || '0000000000'
@@ -243,7 +258,7 @@ class CounselorService {
 
   }
 
-  
+
   async getByEmail(email) {
     // console.log('email',email);
     const counselor = await this.counselorRepository.getByEmail(email);
@@ -315,14 +330,14 @@ class CounselorService {
     }
   }
 
-  async book(id,data) {
+  async book(id, data) {
     // console.log('hi',email,data);
-    try{
-    const questionAnswer = await this.counselorRepository.book(id,data);
-    
-    return questionAnswer;
-    }catch(error){
-      console.log('error ',error.message);
+    try {
+      const questionAnswer = await this.counselorRepository.book(id, data);
+
+      return questionAnswer;
+    } catch (error) {
+      console.log('error ', error.message);
       throw error;
     };
   }
@@ -330,46 +345,59 @@ class CounselorService {
   //getCounselorsByInstitute
   async getCounselorsByInstitute(instituteId, query) {
     try {
-      
-        const { page = 1, limit = 1000000, filters = "{}", searchFields = "{}", sort = "{}" } = query;
-        const pageNum = parseInt(page);
-        const limitNum = parseInt(limit);
 
-        // Parse JSON strings from query parameters to objects
-        const parsedFilters = JSON.parse(filters);
-        const parsedSearchFields = JSON.parse(searchFields);
-        const parsedSort = JSON.parse(sort);
+      const { page = 1, limit = 1000000, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const pageNum = parseInt(page);
+      const limitNum = parseInt(limit);
 
-        // Build filter conditions for multiple fields
+      // Parse JSON strings from query parameters to objects
+      const parsedFilters = JSON.parse(filters);
+      const parsedSearchFields = JSON.parse(searchFields);
+      const parsedSort = JSON.parse(sort);
+
+      // Build filter conditions for multiple fields
       const filterConditions = { deletedAt: null };
-        filterConditions.instituteId = instituteId;
+      filterConditions.instituteId = instituteId;
 
-        for (const [key, value] of Object.entries(parsedFilters)) {
-          if (parsedFilters.category !== "by-category") {
-            filterConditions[key] = value;
+      for (const [key, value] of Object.entries(parsedFilters)) {
+        if (parsedFilters.category !== "by-category") {
+          filterConditions[key] = value;
+        }
+      }
+
+      // Build search conditions for multiple fields with partial matching
+      const searchConditions = [];
+      for (const [field, term] of Object.entries(parsedSearchFields)) {
+        const escapedTerm = this.escapeRegex(term);
+        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
+      }
+      if (searchConditions.length > 0) {
+        filterConditions.$or = searchConditions;
+      }
+
+      // Build sort conditions
+      const sortConditions = {};
+      for (const [field, direction] of Object.entries(parsedSort)) {
+        sortConditions[field] = direction === "asc" ? 1 : -1;
+      }
+
+      // Execute query with dynamic filters, sorting, and pagination
+      const populateFields = [];
+      const counselors = await this.counselorRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
+
+      if (counselors && counselors.result && Array.isArray(counselors.result)) {
+        for (let i = 0; i < counselors.result.length; i++) {
+          if (counselors.result[i].students && Array.isArray(counselors.result[i].students)) {
+            counselors.result[i].students.sort((a, b) => {
+              const dateA = a.date ? new Date(a.date).getTime() : 0;
+              const dateB = b.date ? new Date(b.date).getTime() : 0;
+              return dateB - dateA;
+            });
           }
         }
+      }
 
-        // Build search conditions for multiple fields with partial matching
-        const searchConditions = [];
-        for (const [field, term] of Object.entries(parsedSearchFields)) {
-          const escapedTerm = this.escapeRegex(term);
-          searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
-        }
-        if (searchConditions.length > 0) {
-          filterConditions.$or = searchConditions;
-        }
-
-        // Build sort conditions
-        const sortConditions = {};
-        for (const [field, direction] of Object.entries(parsedSort)) {
-          sortConditions[field] = direction === "asc" ? 1 : -1;
-        }
-
-        // Execute query with dynamic filters, sorting, and pagination
-        const populateFields = [];
-        const counselors = await this.counselorRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
-        console.log('counselors',counselors);
+      console.log('counselors', counselors);
       return counselors;
     } catch (error) {
       throw error;
@@ -403,7 +431,7 @@ class CounselorService {
       //fetch counselor by id
       // console.log('id', id);
       // console.log('data', data);
-     
+
 
       const counselor = await this.counselorRepository.updateCounsellor(id, data);
       return counselor;
@@ -419,7 +447,7 @@ class CounselorService {
 
       //get counselor by email
       const counselor = await this.counselorRepository.getByid(id);
-      console.log('data',data);
+      console.log('data', data);
 
       //submit review
       const reviews = {
@@ -431,7 +459,7 @@ class CounselorService {
       }
 
       // console.log('reviews',reviews);
-      
+
       console.log('counselor', counselor);
 
       counselor.reviews.push(reviews);
@@ -440,8 +468,8 @@ class CounselorService {
 
 
       return counselor
-      
-      
+
+
     } catch (error) {
       throw error;
     }
@@ -450,7 +478,7 @@ class CounselorService {
   async delete(id) {
     try {
       const user = await this.userRepository.destroy(id);
-      
+
 
       const counselor = await this.counselorRepository.destroy(id);
       return counselor;

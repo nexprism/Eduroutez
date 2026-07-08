@@ -163,8 +163,24 @@ export async function getReviewByInstitute(req, res) {
     }
     const response = await reviewService.getAll(query);
 
-    // const response = await reviewService.getReviewsByInstitute(req.params.id);
+    // Compute ratings breakdown
+    const reviews = response?.result || [];
+    let ratings = [];
+    if (reviews.length > 0) {
+      const avg = (field) => {
+        const sum = reviews.reduce((s, r) => s + (Number(r[field]) || 0), 0);
+        return sum / reviews.length;
+      };
+      ratings = [
+        { category: "Placement", rating: avg("placementStars") },
+        { category: "Faculty", rating: avg("facultyStars") },
+        { category: "Campus Life", rating: avg("campusLifeStars") },
+        { category: "Suggestions", rating: avg("suggestionsStars") },
+      ];
+    }
+
     SuccessResponse.data = response;
+    SuccessResponse.ratings = ratings;
     SuccessResponse.message = "Successfully fetched reviews";
     return res.status(200).json(SuccessResponse);
   } catch (error) {

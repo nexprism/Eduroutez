@@ -24,10 +24,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
     queryKey: ['reviews', searchQuery, role, email],
     queryFn: async () => {
       if (role === 'counsellor') {
-        // Fetch counselor-specific reviews
         const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`);
-        
-        // Transform counselor data to match review format
         if (response.data?.success && response.data?.data?.[0]?.reviews) {
           return {
             success: true,
@@ -40,8 +37,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
           };
         }
         return { success: true, data: [], totalDocuments: 0 };
-      } else {
-        // Fetch all reviews for other roles
+      } else if (role === 'SUPER_ADMIN') {
         const response = await axiosInstance.get(`${apiUrl}/review`, {
           params: {
             searchFields: JSON.stringify({}),
@@ -51,6 +47,16 @@ export default function ReviewListingPage({}: TReviewListingPage) {
           }
         });
         return response.data;
+      } else {
+        const response = await axiosInstance.get(`${apiUrl}/reviews-by-user/${email}`);
+        if (response.data?.success && Array.isArray(response.data?.data)) {
+          return {
+            success: true,
+            data: { result: response.data.data, totalDocuments: response.data.data.length },
+            totalDocuments: response.data.data.length
+          };
+        }
+        return { success: true, data: { result: [], totalDocuments: 0 }, totalDocuments: 0 };
       }
     }
   });

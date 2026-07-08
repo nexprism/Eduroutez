@@ -61,7 +61,7 @@ class questionAnswerService {
       }
 
       // Execute query with dynamic filters, sorting, and pagination
-      const populateFields = ["instituteIds"];
+      const populateFields = ["instituteIds", "stream"];
 
       if (parsedGroupBy && parsedGroupBy.length > 0) {
         const questionAnswers = await this.queryRepository.getTrendingStreams(filterConditions, sortConditions, pageNum, limitNum, populateFields, parsedSelect, parsedGroupBy);
@@ -131,7 +131,7 @@ class questionAnswerService {
     }
 
     // Query the Query collection directly (instituteIds is stored on Query docs)
-    const populateFields = ["instituteIds"];
+    const populateFields = ["instituteIds", "stream"];
     const questionAnswer = await this.queryRepository.getAll(filterConditions, sortConditions, pageNum, limitNum, populateFields);
     return questionAnswer;
   }

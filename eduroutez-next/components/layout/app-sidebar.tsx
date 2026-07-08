@@ -65,7 +65,7 @@ export default function AppSidebar({
       ? [] // handled by subRole-based filtering below
       : role === 'institute'
         ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
-          'Career', 'Review', 'Reviews', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots',
+          'Career', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots',
           'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars']
         : role === 'counsellor'
           ? [
@@ -78,7 +78,6 @@ export default function AppSidebar({
             'Refer and Earn',
             'FAQs',
             'News',
-            'Reviews',
             'Streams',
             'Media',
             'Online counselling',
@@ -105,7 +104,7 @@ export default function AppSidebar({
             'Banner',
             'Help And Support'
           ]
-          : ['Online counselling', 'Slots', 'Subscription', 'Review', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Webinar", "SMS Templates", 'Test Result'];
+          : ['Online counselling', 'Slots', 'Subscription', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Webinar", "SMS Templates", 'Test Result'];
 
   let computedFilteredNavItems = navItems.filter(
     (item) => !excludedTitles.includes(item.title)

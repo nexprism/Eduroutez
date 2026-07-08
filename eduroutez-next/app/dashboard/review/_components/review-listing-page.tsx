@@ -25,10 +25,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
     queryKey: ['reviews', searchQuery, role, email, page, limit], // Include page and limit in the query key
     queryFn: async () => {
       if (role === 'institute') {
-        // Fetch counselor-specific reviews
         const response = await axiosInstance.get(`${apiUrl}/review-by-institute/${id}`);
-        
-        // Transform counselor data to match review format
         if (response.data?.success && response.data?.data) {
           return {
             success: true,
@@ -37,8 +34,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
           };
         }
         return { success: true, data: [], totalDocuments: 0 };
-      } else {
-        // Fetch all reviews for other roles
+      } else if (role === 'SUPER_ADMIN') {
         const response = await axiosInstance.get(`${apiUrl}/review`, {
           params: {
             searchFields: JSON.stringify({}),
@@ -48,23 +44,39 @@ export default function ReviewListingPage({}: TReviewListingPage) {
           }
         });
         return response.data;
+      } else {
+        const response = await axiosInstance.get(`${apiUrl}/reviews-by-user/${email}`);
+        if (response.data?.success && Array.isArray(response.data?.data)) {
+          return {
+            success: true,
+            data: { result: response.data.data, totalDocuments: response.data.data.length },
+            totalDocuments: response.data.data.length
+          };
+        }
+        return { success: true, data: { result: [], totalDocuments: 0 }, totalDocuments: 0 };
       }
     },
-    staleTime: 5000 // Avoid unnecessary API calls when transitioning between pages by keeping data fresh for 5 seconds
+    staleTime: 5000
   });
 
   const getTitle = () => {
-    if (role === 'counselor') {
-      return `My Reviews (${data?.data?.totalDocuments || 0})`;
+    if (role === 'institute') {
+      return `Institute Reviews (${data?.data?.totalDocuments || 0})`;
     }
-    return `Reviews (${data?.data?.totalDocuments || 0})`;
+    if (role === 'SUPER_ADMIN') {
+      return `All Reviews (${data?.data?.totalDocuments || 0})`;
+    }
+    return `My Reviews (${data?.totalDocuments || 0})`;
   };
 
   const getDescription = () => {
-    if (role === 'counselor') {
-      return "All reviews received for your counseling sessions.";
+    if (role === 'institute') {
+      return "Reviews submitted for your institute.";
     }
-    return "All reviews online and offline are listed here.";
+    if (role === 'SUPER_ADMIN') {
+      return "All reviews online and offline are listed here.";
+    }
+    return "Reviews you have submitted.";
   };
 
   return (

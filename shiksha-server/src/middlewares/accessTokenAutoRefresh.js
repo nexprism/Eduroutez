@@ -45,7 +45,7 @@ const accessTokenAutoRefresh = async (req, res, next) => {
       }
 
       // Refresh the access token using the refresh token
-      const { newAccessToken, newRefreshToken, newAccessTokenExp, newRefreshTokenExp } = await Token.refreshAccessToken(req, res);
+      const { newAccessToken, newRefreshToken, newAccessTokenExp, newRefreshTokenExp } = await Token.refreshAccessToken(refreshToken);
 
       // Set the new access and refresh tokens as HTTP-only cookies
       Token.setTokensCookies(res, newAccessToken, newRefreshToken, newAccessTokenExp, newRefreshTokenExp);

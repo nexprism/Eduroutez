@@ -16,14 +16,14 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import axiosInstance from '@/lib/axios';
-import { QuestionAnswer } from '@/types';
+import { Query } from '@/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Edit, Eye, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface CellActionProps {
-  data: QuestionAnswer;
+  data: Query;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
@@ -106,6 +106,8 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
                   { label: "Email", value: detailsData?.email },
                   { label: "Phone Number", value: detailsData?.phoneNo },
                   { label: "City", value: detailsData?.city },
+                  { label: "Stream", value: typeof detailsData?.stream === 'object' ? detailsData?.stream?.name : detailsData?.stream },
+                  { label: "Level", value: detailsData?.level },
                   { label: "Specialization", value: detailsData?.specialization },
                   { label: "Created At", value: new Date(detailsData?.createdAt).toLocaleString() },
                   { label: "Status", value: detailsData?.status },

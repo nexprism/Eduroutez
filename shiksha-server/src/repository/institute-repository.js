@@ -188,10 +188,11 @@ class InstituteRepository extends CrudRepository {
 
   async addReview(id, data) {
     try {
+      const reviewId = data._id || data;
       const result = await this.model.findByIdAndUpdate(
         id, 
-        { $push: { reviews: data } }, // Append new course data to the `courses` array
-        { new: true } // Return the updated document
+        { $push: { reviews: reviewId } }, // Push the review ObjectId reference
+        { new: true }
       );
       return result;
     } catch (error) {

@@ -1,289 +1,215 @@
 'use client';
-import * as React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import Image from 'next/image';
-import { CalendarIcon, Plus, X } from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { Textarea } from '@/components/ui/textarea';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
 import { usePathname, useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Star } from 'lucide-react';
+import Image from 'next/image';
+import { Review } from '@/types';
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.'
-  }),
-  // price: z.string().min(1, {
-  //   message: 'Discount is required.'
-  // }),
-  price: z.string().refine(
-    (value) => {
-      const price = Number(value);
-      return !isNaN(price) && price >= 1 && price <= 100;
-    },
-    {
-      message: 'Discount must be a number between 1 and 100.'
-    }
-  ),
-  startDate: z.date({
-    required_error: 'Please select a start date.'
-  }),
-  endDate: z.date({
-    required_error: 'Please select a end date.'
-  }),
-
-  category: z
-    .string()
-    .min(1, { message: 'Please select a category.' })
-    .refine(
-      (value) => {
-        const category = value;
-        return category !== 'Select a category';
-      },
-      {
-        message: 'Please select a category.'
-      }
-    ),
-  counselorType: z.string().optional(),
-
-  description: z.string().min(20, {
-    message: 'description must be at least 20 characters.'
-  })
-});
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
-export default function CounselorForm() {
-  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+export default function ReviewForm() {
   const pathname = usePathname();
   const segments = pathname.split('/');
-  const [isEdit, setIsEdit] = React.useState(false);
-
-  React.useEffect(() => {
-    if (segments.length === 5 && segments[3] === 'update') {
-      setIsEdit(true);
-    }
-  }, [segments]);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      category: '',
-      description: '',
-      // mode: undefined,
-      counselorType: ''
-    }
-  });
+  const reviewId = segments[segments.length - 1];
   const router = useRouter();
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Handle form submission here
-    const formData = new FormData();
-    formData.append('name', values.name);
-    formData.append('price', values.price);
-    formData.append('startDate', values.startDate.toISOString());
-    formData.append('category', values.category);
-    formData.append('description', values.description);
-    formData.append('mode', 'ONLINE');
-    formData.append('counselorType', values.counselorType ?? '');
-    mutate(formData);
-  }
-
-  const { mutate, isPending: isSubmitting } = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const endpoint = isEdit
-        ? `${apiUrl}/counselor/${segments[4]}`
-        : `${apiUrl}/counselor`;
-      const response = await axiosInstance({
-        url: `${endpoint}`,
-        method: isEdit ? 'patch' : 'post',
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      return response.data;
-    },
-
-    onSuccess: () => {
-      const message = isEdit
-        ? 'Counselor updated successfully'
-        : 'Counselor created successfully';
-      toast.success(message);
-      form.reset();
-      setPreviewUrl(null);
-      router.push('/dashboard/counselor');
-    },
-    onError: (error) => {
-      toast.error('Something went wrong');
-    }
-  });
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setPreviewUrl(null);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  // write code to get categories from serve by tanstack query
-  const {
-    data: categories,
-    isLoading,
-    isSuccess
-  } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/categories`);
-      return response.data;
-    }
-  });
 
-  const { data: counselor } = useQuery({
-    queryKey: ['counselor', segments[4]],
+  const { data, isLoading } = useQuery({
+    queryKey: ['review', reviewId],
     queryFn: async () => {
-      const response = await axiosInstance.get(
-        `${apiUrl}/counselor/${segments[4]}`
-      );
+      const response = await axiosInstance.get(`${apiUrl}/review/${reviewId}`);
       return response.data;
     },
-    enabled: isEdit // Only fetch when in edit mode
+    enabled: !!reviewId
   });
 
-  React.useEffect(() => {
-    if (counselor?.data) {
-      form.reset({
-        name: counselor.data.name,
-        price: counselor.data.price.toString(),
-        startDate: new Date(counselor.data.startDate),
-        endDate: new Date(counselor.data.endDate),
-        category: counselor.data.category[0],
-        description: counselor.data.description,
-        //  image: undefined // Handle image separately
-        counselorType: counselor?.data?.counselorType
-      });
+  const review: Review | undefined = data?.data;
 
-      // Set preview URL for existing image
-      if (counselor.data.image) {
-        setPreviewUrl(`${IMAGE_URL}/${counselor.data.image}`);
-      }
-    }
-  }, [counselor, form]);
+  if (isLoading) return <div className="p-8 text-center">Loading...</div>;
+  if (!review) return <div className="p-8 text-center">Review not found.</div>;
+
+  const renderStars = (count: number | undefined) => {
+    const n = count || 0;
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`h-4 w-4 ${i < n ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+      />
+    ));
+  };
+
+  const renderBooleanField = (label: string, value: boolean | undefined) => {
+    if (!value) return null;
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+        {label}
+      </span>
+    );
+  };
+
+  const booleanFields: [string, keyof Review][] = [
+    ['Guest Lecture', 'guestLectureByVisitor'],
+    ['Internship', 'intership'],
+    ['No Practical Exposure', 'noPracticalExposure'],
+    ['Research Project', 'researchProject'],
+    ['Coaching Provided', 'coachingProvided'],
+    ['No Coaching', 'noCoachingProvided'],
+    ['Sports Groups', 'multipleSportsGroups'],
+    ['No Sports', 'noSportsGroups'],
+    ['Uniform', 'isUniform'],
+    ['Flexible Dress Code', 'isFlexibleDressCode'],
+    ['No Dress Code', 'noDressCode'],
+    ['Healthy Food', 'healthyAndQualityFood'],
+    ['No Food Menu', 'noFoodMenuIsAvailable'],
+    ['Unhealthy Food', 'unHealthyFood'],
+    ['Nutritious Food', 'nutritiousFoodAvailable'],
+    ['Daily Menu', 'dailyWiseMenuIsAvailable'],
+    ['All Transport Available', 'allModesOfTransportationAvailable'],
+    ['Limited Transport', 'limitedModesOfTransportationAvailable'],
+  ];
 
   return (
-    <Card className="mx-auto w-full">
-      <CardHeader>
-        <CardTitle className="text-left text-2xl font-bold">
-          Counselor Information
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Counselor Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your counselor name"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your counselor price"
-                        {...field}
-                        type="number"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <div className="space-y-6">
+      <Button variant="ghost" onClick={() => router.back()} className="gap-2">
+        <ArrowLeft className="h-4 w-4" /> Back
+      </Button>
 
-              <FormField
-                control={form.control}
-                name="counselorType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Counselor Type (optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a counselor type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={'DEFAULT'}>Default</SelectItem>
-                        <SelectItem value={'POPULAR'}>Popular</SelectItem>
-                        <SelectItem value={'TRENDING'}>Trending</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Review Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <p className="text-sm text-muted-foreground">Full Name</p>
+              <p className="font-medium">{review.fullName}</p>
             </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Email</p>
+              <p className="font-medium">{review.email}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Contact Number</p>
+              <p className="font-medium">{review.contactNumber || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Gender</p>
+              <p className="font-medium">{review.gender || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Country</p>
+              <p className="font-medium">{review.country?.name || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Year of Graduation</p>
+              <p className="font-medium">{review.yearOfGraduation || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Review Title</p>
+              <p className="font-medium">{review.reviewTitle || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Recommendation</p>
+              <Badge variant={review.recommendation ? 'default' : 'secondary'}>
+                {review.recommendation ? 'Yes' : 'No'}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Status</p>
+              <Badge variant={review.status ? 'default' : 'secondary'}>
+                {review.status ? 'Active' : 'Inactive'}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Address</p>
+              <p className="font-medium">{review.address || 'N/A'}</p>
+            </div>
+          </div>
 
-            <Button type="submit" disabled={isSubmitting}>
-              Submit
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Placement</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-1 mb-2">{renderStars(review.placementStars)}</div>
+                <p className="text-sm text-muted-foreground">{review.placementDescription || 'No description'}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Faculty</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-1 mb-2">{renderStars(review.facultyStars)}</div>
+                <p className="text-sm text-muted-foreground">{review.facultyDescription || 'No description'}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Campus Life</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-1 mb-2">{renderStars(review.campusLifeStars)}</div>
+                <p className="text-sm text-muted-foreground">{review.campusLifeDescription || 'No description'}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Suggestions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-1 mb-2">{renderStars(review.suggestionsStars)}</div>
+                <p className="text-sm text-muted-foreground">{review.suggestionDescription || 'No description'}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {(review.studentIdImage || review.selfieImage) && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {review.studentIdImage && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Student ID Image</p>
+                  <Image
+                    src={`${IMAGE_URL}/${review.studentIdImage}`}
+                    alt="Student ID"
+                    width={300}
+                    height={200}
+                    className="rounded-lg object-cover border"
+                  />
+                </div>
+              )}
+              {review.selfieImage && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Selfie Image</p>
+                  <Image
+                    src={`${IMAGE_URL}/${review.selfieImage}`}
+                    alt="Selfie"
+                    width={300}
+                    height={200}
+                    className="rounded-lg object-cover border"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          <div>
+            <p className="text-sm text-muted-foreground mb-3">Features</p>
+            <div className="flex flex-wrap gap-2">
+              {booleanFields.map(([label, key]) => renderBooleanField(label, review[key]))}
+              {review.lectureAsPerSession && <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">Lectures as per session</span>}
+              {review.additionDoubtClass && <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">Additional Doubt Classes</span>}
+              {review.projectAssignmentWorkshopStudyTools && <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">Project/Workshop Tools</span>}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -24,10 +24,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
     queryKey: ['reviews', searchQuery, role, email, page, limit],
     queryFn: async () => {
       if (role === 'counsellor') {
-        // Fetch counselor-specific reviews
         const response = await axiosInstance.get(`${apiUrl}/counselor/${email}`);
-        
-        // Transform counselor data to match review format
         if (response.data?.success && response.data?.data?.[0]?.reviews) {
           return {
             success: true,
@@ -40,8 +37,7 @@ export default function ReviewListingPage({}: TReviewListingPage) {
           };
         }
         return { success: true, data: [], totalDocuments: 0 };
-      } else {
-        // Fetch all reviews for other roles
+      } else if (role === 'SUPER_ADMIN') {
         const response = await axiosInstance.get(`${apiUrl}/review`, {
           params: {
             search: searchQuery || undefined,
@@ -51,19 +47,33 @@ export default function ReviewListingPage({}: TReviewListingPage) {
           }
         });
         return response.data;
+      } else {
+        const response = await axiosInstance.get(`${apiUrl}/reviews-by-user/${email}`);
+        if (response.data?.success && Array.isArray(response.data?.data)) {
+          const mapped = response.data.data.map((r: any) => ({
+            ...r,
+            counselorName: r.instituteName || 'N/A',
+          }));
+          return {
+            success: true,
+            data: mapped,
+            totalDocuments: mapped.length
+          };
+        }
+        return { success: true, data: [], totalDocuments: 0 };
       }
     }
   });
 
   const getTitle = () => {
-    if (role === 'counselor') {
+    if (role === 'counsellor') {
       return `My Reviews (${data?.data?.length || 0})`;
     }
     return `Reviews (${data?.data?.length || 0})`;
   };
 
   const getDescription = () => {
-    if (role === 'counselor') {
+    if (role === 'counsellor') {
       return "All reviews received for your counseling sessions.";
     }
     return "All reviews online and offline are listed here.";

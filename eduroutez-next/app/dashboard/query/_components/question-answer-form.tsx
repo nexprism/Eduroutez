@@ -113,6 +113,24 @@ export default function QueryStatusForm() {
           </div>
 
           <div className="space-y-2">
+            <label className="text-sm font-medium">Stream</label>
+            <Input 
+              value={typeof queryData.data?.data?.stream === 'object' ? queryData.data?.data?.stream?.name || '' : queryData.data?.data?.stream || ''} 
+              readOnly 
+              className="bg-gray-50"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Level</label>
+            <Input 
+              value={queryData.data?.data?.level || ''} 
+              readOnly 
+              className="bg-gray-50"
+            />
+          </div>
+
+          <div className="space-y-2">
             <label className="text-sm font-medium">Specialization</label>
             <Input 
               value={queryData.data?.data?.specialization || ''} 

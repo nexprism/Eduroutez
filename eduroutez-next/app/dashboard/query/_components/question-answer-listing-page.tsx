@@ -61,6 +61,8 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
           status: item.status,
           type: item.type || 'query',
           specialization: item.specialization,
+          stream: item.stream,
+          level: item.level,
           createdAt: item.createdAt,
           updatedAt: item.updatedAt,
           instituteIds: item.instituteIds || item.instituteId || []
@@ -85,6 +87,8 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             status: item.status,
             type: item.type || 'query',
             specialization: item.specialization,
+            stream: item.stream,
+            level: item.level,
             createdAt: item.createdAt,
             updatedAt: item.updatedAt,
             instituteIds: item.instituteIds || []

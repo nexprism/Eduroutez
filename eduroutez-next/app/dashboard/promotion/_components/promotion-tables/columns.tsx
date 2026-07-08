@@ -91,6 +91,25 @@ export const columns: ColumnDef<Promotion>[] = [
   },
 
   {
+    header: 'URL',
+    accessorKey: 'link',
+    cell: ({ row }) => {
+      const url = row.original.link;
+      if (!url) return <div className="text-gray-400">—</div>;
+      return (
+        <a
+          href={url.startsWith('http') ? url : `https://${url}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline hover:text-blue-800 truncate block max-w-[200px]"
+          title={url}
+        >
+          {url}
+        </a>
+      );
+    },
+  },
+  {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />
   }

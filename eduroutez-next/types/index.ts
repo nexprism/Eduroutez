@@ -68,12 +68,32 @@ export type CourseCategory = {
 };
 
 export type Review = {
+  _id: string;
   fullName: string;
   email: string;
-  message: string;
-  createdAt: string;
+  message?: string;
+  gender?: string;
+  contactNumber?: string;
+  country?: { name: string; iso2: string };
+  institute?: string;
+  address?: string;
+  yearOfGraduation?: string;
+  reviewTitle?: string;
+  placementStars?: number;
+  placementDescription?: string;
+  facultyStars?: number;
+  facultyDescription?: string;
+  campusLifeStars?: number;
+  campusLifeDescription?: string;
+  suggestionsStars?: number;
+  suggestionDescription?: string;
+  recommendation?: boolean;
+  studentIdImage?: string;
+  selfieImage?: string;
   status: boolean;
-  _id: string;
+  createdAt: string;
+  updatedAt?: string;
+  [key: string]: any;
 };
 
 // If you are expecting a 'result' property, define it explicitly in a wrapper type
@@ -144,6 +164,9 @@ export type Query = {
   query: string;
   status: string;
   type: "query" | "application";
+  stream?: { _id: string; name: string } | string;
+  level?: string;
+  specialization?: string;
   instituteIds?: any[];
   createdAt: string;
   updatedAt: string;

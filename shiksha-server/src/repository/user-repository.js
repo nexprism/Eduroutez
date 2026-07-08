@@ -13,6 +13,7 @@ import Course from "../models/Course.js";
 import Counselor from "../models/Counselor.js";
 import Blog from "../models/Blog.js";
 import Career from "../models/Career.js";
+import Review from "../models/Review.js";
 import { response } from "express";
 import randomstring from "randomstring";
 import { InstituteRepository } from "./index.js";
@@ -259,6 +260,13 @@ class UserRepository extends CrudRepository {
       //Pending query count
       const newLeads = await Query.countDocuments({ status: 'Pending' });
 
+      // Review data
+      const totalReviews = await Review.countDocuments({ deletedAt: null });
+      const latestReviews = await Review.find({ deletedAt: null })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .populate('institute', 'instituteName');
+
 
       const response = {
         totalInstitutes: users.length,
@@ -270,7 +278,9 @@ class UserRepository extends CrudRepository {
         totalCounsellor: counsellor.length,
         renewSubscriptionCount,
         saparteEarning,
-        newLeads
+        newLeads,
+        totalReviews,
+        latestReviews
       };
 
       return response;
@@ -292,11 +302,24 @@ class UserRepository extends CrudRepository {
 
       const newQueries = await Query.find({ instituteId: instituteId, status: 'Pending' });
 
+      // Review data
+      const instituteReviews = await Review.find({ institute: instituteId, deletedAt: null });
+      const totalReviews = instituteReviews.length;
+      let averageRating = 0;
+      if (totalReviews > 0) {
+        const totalStars = instituteReviews.reduce((sum, r) => {
+          return sum + (r.placementStars || 0) + (r.facultyStars || 0) + (r.campusLifeStars || 0) + (r.suggestionsStars || 0);
+        }, 0);
+        averageRating = totalStars / (totalReviews * 4);
+      }
+
 
       const response = {
         totalCourses: courses.length,
         totalLeads: queries.length,
         newLeads: newQueries.length,
+        totalReviews,
+        averageRating
       };
 
       return response;
