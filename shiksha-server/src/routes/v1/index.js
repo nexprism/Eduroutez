@@ -607,6 +607,16 @@ router.delete("/page/:id", accessTokenAutoRefresh, passport.authenticate("jwt", 
  * GET    /chatbot/sessions          → list all sessions (admin only)
  */
 import { chatWithBot, getChatHistory, deleteChatSession, listChatSessions } from "../../controllers/chatbot-controller.js";
+import {
+    createAssessment,
+    getAssessments,
+    getAssessment,
+    deleteAssessment,
+    seedDefaultAssessment,
+    submitAssessment,
+    getAssessmentResult,
+    getMyResults,
+} from "../../controllers/assessment-controller.js";
 
 // Public endpoints (no auth required – sessions identified by sessionId UUID)
 router.post("/chatbot/chat", chatWithBot);
@@ -615,5 +625,22 @@ router.delete("/chatbot/session/:sessionId", deleteChatSession);
 
 // Admin-only: list all chat sessions
 router.get("/chatbot/sessions", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), listChatSessions);
+
+// ─────────────────────────────────────────────
+//  Assessment (Personality-to-College Fit)
+// ─────────────────────────────────────────────
+// List + fetch assessments are public; create/delete/seed require auth
+router.get("/assessments", getAssessments);
+router.post("/assessment/seed-default", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), seedDefaultAssessment);
+router.post("/assessment", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), createAssessment);
+router.get("/assessment/:id", getAssessment);
+router.delete("/assessment/:id", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), deleteAssessment);
+
+// Submit answers + get college-fit result (public so guests can try it)
+router.post("/assessment/:id/submit", submitAssessment);
+router.get("/assessment/result/:resultId", getAssessmentResult);
+
+// Authenticated user: list own results
+router.get("/assessment/results/me", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyResults);
 
 export default router;

@@ -19,6 +19,34 @@ const messageSchema = new mongoose.Schema(
     { _id: false }
 );
 
+const assessmentAnswerSchema = new mongoose.Schema(
+    {
+        questionId: { type: mongoose.Schema.Types.Mixed },
+        selectedOptionIndex: { type: Number, required: true },
+        dimension: { type: String },
+    },
+    { _id: false }
+);
+
+const assessmentStateSchema = new mongoose.Schema(
+    {
+        active: { type: Boolean, default: false },
+        assessmentId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Assessment",
+            default: null,
+        },
+        currentIndex: { type: Number, default: 0 },
+        answers: { type: [assessmentAnswerSchema], default: [] },
+        resultId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "AssessmentResult",
+            default: null,
+        },
+    },
+    { _id: false }
+);
+
 const chatSessionSchema = new mongoose.Schema(
     {
         sessionId: {
@@ -39,6 +67,16 @@ const chatSessionSchema = new mongoose.Schema(
         messages: {
             type: [messageSchema],
             default: [],
+        },
+        assessment: {
+            type: assessmentStateSchema,
+            default: () => ({
+                active: false,
+                assessmentId: null,
+                currentIndex: 0,
+                answers: [],
+                resultId: null,
+            }),
         },
         context: {
             // optional: last queried institute/course for follow-up questions

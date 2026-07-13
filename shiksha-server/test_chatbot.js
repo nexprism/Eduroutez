@@ -8,7 +8,7 @@ async function test() {
         const { ServerConfig } = await import("./src/config/index.js");
         const { DATABASE } = await import("./src/utils/database/index.js");
 
-        console.log("API Key present:", !!ServerConfig.CHAT_GPT_API_KEY);
+        console.log("Gemini API Key present:", !!ServerConfig.GEMINI_API_KEY);
 
         console.log("Connecting to DB...");
         await DATABASE.connect(ServerConfig.DATABASE_URL);
