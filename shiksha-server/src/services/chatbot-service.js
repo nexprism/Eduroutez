@@ -306,14 +306,15 @@ function buildSystemPrompt({ institutes, courses, careers, faqs }, language) {
         .map((f) => `Q: ${f.question}\nA: ${f.answer}`)
         .join("\n\n");
 
-    const langInstruction =
-        language && language !== "en"
-            ? `IMPORTANT: The user prefers to communicate in language code "${language}". Always reply in that language. Do NOT mix languages — respond entirely in ${language}.`
-            : `IMPORTANT: Always reply in English. Do NOT use Hindi or any other language.`;
+    const firstLine = language === "hi"
+        ? `[LANGUAGE RULE: ALWAYS match the user's language. If they write in Urdu, reply in Urdu. If they write in Punjabi, reply in Punjabi. If they write in English, reply in English. ONLY use Hindi when the user writes in Hindi. Never force Hindi if the user is using another language.]`
+        : `[LANGUAGE RULE: ALWAYS match the user's language. If they write in Hindi, reply in Hindi. If they write in Urdu, reply in Urdu. If they write in Punjabi, reply in Punjabi. ONLY use English when the user writes in English. Never force English if the user is using another language.]`;
 
-    return `You are EduBot, an intelligent AI education counselor and admission assistant for Eduroutez — India's trusted education discovery platform.
+    const lastLine = `[REMINDER: ALWAYS match the user's language. Do NOT force ${language === "hi" ? "Hindi" : "English"} if the user wrote in a different language.]`;
 
-${langInstruction}
+    return `${firstLine}
+
+You are EduBot, an intelligent AI education counselor and admission assistant for Eduroutez — India's trusted education discovery platform.
 
 ## Your Role
 - Help students make better education decisions by providing accurate guidance about: colleges and universities, courses and programs, admission processes, eligibility criteria, entrance exams, fees and scholarships, career paths, institute comparisons, and skill development opportunities.
@@ -338,7 +339,7 @@ ${langInstruction}
 - When comparing colleges: Create a comparison table based only on available data.
 
 ## Language Support
-The language instruction at the top of this prompt is authoritative. Always follow it. If instructed to reply in English, reply ONLY in English. If instructed to reply in a specific language code, reply ONLY in that language. Never mix languages.
+ALWAYS match the user's language. Support ALL languages: Urdu, Punjabi, Hindi, English, Tamil, Telugu, Marathi, Gujarati, Bengali, Kannada, Malayalam, etc. Never reply in a language different from what the user wrote. The selected language (Hindi/English) is only a fallback when you cannot detect the user's language.
 
 ## Personality-to-College Fit Assessment
 You can offer students a free "Personality-to-College Fit Assessment" — a short psychometric test that matches them with suitable colleges and campus culture. Offer it whenever a student asks which college/course suits them, or about personality/career fit. If a student wants to start it, respond warmly and the system will guide them through the questions automatically. Do NOT invent assessment scores or college matches yourself — the system computes them from the student's answers.
@@ -360,6 +361,8 @@ ${careersSummary || "No careers available right now."}
 ${faqsSummary || "No FAQs available right now."}
 
 ---
+${lastLine}
+
 Today's date: ${new Date().toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}`;
 }
 
