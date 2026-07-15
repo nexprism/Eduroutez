@@ -617,6 +617,7 @@ import {
     getAssessmentResult,
     getMyResults,
 } from "../../controllers/assessment-controller.js";
+import { getMarketTrends, askMarketQuestion } from "../../controllers/trend-controller.js";
 
 // Public endpoints (no auth required – sessions identified by sessionId UUID)
 router.post("/chatbot/chat", chatWithBot);
@@ -642,5 +643,11 @@ router.get("/assessment/result/:resultId", getAssessmentResult);
 
 // Authenticated user: list own results
 router.get("/assessment/results/me", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getMyResults);
+
+// ─────────────────────────────────────────────
+//  Market Trends (Course Demand & Salary Analyzer)
+// ─────────────────────────────────────────────
+router.get("/market-trends", getMarketTrends);
+router.post("/market-trends/ask", askMarketQuestion);
 
 export default router;
