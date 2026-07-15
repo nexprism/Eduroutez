@@ -618,6 +618,8 @@ import {
     getMyResults,
 } from "../../controllers/assessment-controller.js";
 import { getMarketTrends, askMarketQuestion } from "../../controllers/trend-controller.js";
+import { predictCareerOutcomeController } from "../../controllers/career-outcome-controller.js";
+import { recommendController } from "../../controllers/recommendation-controller.js";
 
 // Public endpoints (no auth required – sessions identified by sessionId UUID)
 router.post("/chatbot/chat", chatWithBot);
@@ -649,5 +651,15 @@ router.get("/assessment/results/me", accessTokenAutoRefresh, passport.authentica
 // ─────────────────────────────────────────────
 router.get("/market-trends", getMarketTrends);
 router.post("/market-trends/ask", askMarketQuestion);
+
+// ─────────────────────────────────────────────
+//  Career Outcome Predictor (salary / placement / growth / higher-study)
+// ─────────────────────────────────────────────
+router.post("/career-outcome/predict", predictCareerOutcomeController);
+
+// ─────────────────────────────────────────────
+//  AI College Matchmaking Engine (scores + budget + location + behavior)
+// ─────────────────────────────────────────────
+router.post("/recommendation", recommendController);
 
 export default router;

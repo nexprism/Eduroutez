@@ -1,0 +1,28 @@
+import { StatusCodes } from "http-status-codes";
+import { getRecommendations } from "../services/recommendation-service.js";
+
+export async function recommendController(req, res) {
+  try {
+    const { marks, exam, category, budget, preferredCourse, state, city, educationLevel, userId } = req.body || {};
+
+    // Optional authenticated user (behavior signals). Prefer token identity if present.
+    const behaviorUserId = req.user?._id || userId || null;
+
+    const data = await getRecommendations(
+      { marks, exam, category, budget, preferredCourse, state, city, educationLevel },
+      behaviorUserId
+    );
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      data,
+      message: "Recommendations generated successfully",
+    });
+  } catch (error) {
+    console.error("recommendController error:", error);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Failed to generate recommendations",
+    });
+  }
+}
