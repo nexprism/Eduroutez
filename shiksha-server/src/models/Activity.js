@@ -35,6 +35,7 @@ const activitySchema = new mongoose.Schema(
     },
     targetId: {
       type: mongoose.Schema.Types.ObjectId,
+      refPath: "targetType",
     },
     targetName: { type: String },
     metadata: { type: mongoose.Schema.Types.Mixed },

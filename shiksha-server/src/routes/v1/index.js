@@ -620,6 +620,8 @@ import {
 import { getMarketTrends, askMarketQuestion } from "../../controllers/trend-controller.js";
 import { predictCareerOutcomeController } from "../../controllers/career-outcome-controller.js";
 import { recommendController } from "../../controllers/recommendation-controller.js";
+import { relatedContentController } from "../../controllers/related-content-controller.js";
+import { geoDemandController } from "../../controllers/geo-demand-controller.js";
 
 // Public endpoints (no auth required – sessions identified by sessionId UUID)
 router.post("/chatbot/chat", chatWithBot);
@@ -661,5 +663,15 @@ router.post("/career-outcome/predict", predictCareerOutcomeController);
 //  AI College Matchmaking Engine (scores + budget + location + behavior)
 // ─────────────────────────────────────────────
 router.post("/recommendation", recommendController);
+
+// ─────────────────────────────────────
+//  Geo-Demand Intelligence (city / district / state demand heatmaps)
+// ─────────────────────────────────────
+router.get("/recommendation/geo-demand", geoDemandController);
+
+// ────────────────────────────────────────────────────────────
+//  Related Content Engine (blogs / careers / courses / institutes)
+// ────────────────────────────────────────────────────────────
+router.get("/related-content", relatedContentController);
 
 export default router;
