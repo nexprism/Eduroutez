@@ -124,23 +124,57 @@ export async function sendOtp(req, res) {
   try {
     const isForgotPassword = req.body.type === "forgot-password" || req.body.isForgotPassword;
     const contact_number = req.body.contact_number || req.body.phoneNo || req.body.phone || req.body.phone_number;
-    
-    let user = null;
-    if (req.body.email && contact_number && isForgotPassword) {
-      // For forgot password, if both are provided, ensure they belong to the same user
-      user = await userService.userRepository.findBy({ 
-        email: req.body.email, 
-        contact_number: contact_number.toString() 
-      });
-    } else if (req.body.email) {
-      user = await userService.getUserByEmail(req.body.email);
-    } else if (contact_number) {
-      user = await userService.userRepository.findBy({ contact_number: contact_number.toString() });
-    }
+    const role = req.body.role || "";
+
+    // Helper: check if a user with same role already exists
+    const findExistingUser = async () => {
+      if (req.body.email && contact_number && isForgotPassword) {
+        return await userService.userRepository.findBy({ 
+          email: req.body.email, 
+          contact_number: contact_number.toString() 
+        });
+      }
+      if (isForgotPassword) {
+        // For forgot-password we need the user to exist regardless of role
+        if (req.body.email) return await userService.getUserByEmail(req.body.email);
+        if (contact_number) return await userService.userRepository.findBy({ contact_number: contact_number.toString() });
+        return null;
+      }
+      // Normal signup — check for duplicate based on role
+      if (role === 'institute') {
+        // Institute must be fully unique — block if any user has this email or phone
+        if (req.body.email) {
+          const byEmail = await userService.getUserByEmail(req.body.email);
+          if (byEmail) return byEmail;
+        }
+        if (contact_number) {
+          return await userService.userRepository.findBy({ contact_number: contact_number.toString() });
+        }
+        return null;
+      }
+      // Student / Counsellor — only block if same role + same email/phone
+      if (req.body.email) {
+        const byEmail = await userService.userRepository.findBy({ email: req.body.email, role });
+        if (byEmail) return byEmail;
+      }
+      if (contact_number) {
+        const byPhone = await userService.userRepository.findBy({ contact_number: contact_number.toString(), role });
+        if (byPhone) return byPhone;
+      }
+      return null;
+    };
+
+    const user = await findExistingUser();
 
     if (!isForgotPassword && user) {
+      const field = user.contact_number?.toString() === contact_number?.toString()
+        ? 'Phone number'
+        : 'Email';
+      const msg = role === 'institute'
+        ? `${field} is already linked with an existing account`
+        : `${field} is already linked with a ${role} account`;
       return res.status(400).json({
-        message: "User already exists",
+        message: msg,
         data: {},
         success: false,
         err: {},
@@ -293,11 +327,39 @@ export const signup = async (req, res) => {
 
   try {
 
-    //check email already exists
-    const user = await userService.getUserByEmail(req.body.email);
-    if (user) {
+    // Dual Registration: allow same email/phone across student & counsellor roles
+    // but keep institute registration fully unique
+    const checkDuplicate = async () => {
+      const role = req.body.role;
+      const fieldLabel = (field) => field === 'email' ? 'Email' : 'Phone number';
+      if (role === 'institute') {
+        // Institute must be unique — no other user may share this email or phone
+        if (req.body.email) {
+          const byEmail = await userService.getUserByEmail(req.body.email);
+          if (byEmail) return `${fieldLabel('email')} is already linked with an existing account`;
+        }
+        if (contact_number) {
+          const byPhone = await userService.userRepository.findBy({ contact_number: contact_number.toString() });
+          if (byPhone) return `${fieldLabel('phone')} is already linked with an existing account`;
+        }
+        return null;
+      }
+      // Student / Counsellor — only block if same role + same email/phone
+      if (req.body.email) {
+        const byEmail = await userService.userRepository.findBy({ email: req.body.email, role });
+        if (byEmail) return `${fieldLabel('email')} is already linked with a ${role} account`;
+      }
+      if (contact_number) {
+        const byPhone = await userService.userRepository.findBy({ contact_number: contact_number.toString(), role });
+        if (byPhone) return `${fieldLabel('phone')} is already linked with a ${role} account`;
+      }
+      return null;
+    };
+
+    const duplicateErr = await checkDuplicate();
+    if (duplicateErr) {
       return res.status(400).json({
-        message: "Email already exists",
+        message: duplicateErr,
         data: {},
         success: false,
         err: {},
