@@ -148,7 +148,6 @@ export async function updateBlog(req, res) {
     try {
       const blogId = req.params.id;
       const payload = {};
-      let oldImagePath;
 
       // Check if a new title is provided
       if (req.body.title) {
@@ -176,51 +175,71 @@ export async function updateBlog(req, res) {
         payload.isActive = req.body.isActive;
       }
 
-      // Check if a new image is uploaded
-      console.log("req.file", req.file);
+      // Handle coverImages (images array)
       if (req.files && req.files["images"]) {
         const blog = await blogService.get(blogId);
 
-        // Record the old image path if it exists
-        if (blog.image) {
-          oldImagePath = path.join("uploads", blog.image);
+        // Existing images to preserve (sent as JSON string array from frontend)
+        let existingImages = [];
+        try {
+          existingImages = req.body.existingImages
+            ? JSON.parse(req.body.existingImages)
+            : [];
+        } catch (e) {
+          existingImages = [];
         }
 
-      console.log("oldImagePath", oldImagePath);
-        // Set the new image filename in payload
-        payload.image = req.files["images"][0].filename;
+        // Delete old cover images that are no longer referenced
+        if (blog.coverImages && blog.coverImages.length > 0) {
+          const imagesToDelete = blog.coverImages.filter(
+            (img) => !existingImages.includes(img)
+          );
+          for (const img of imagesToDelete) {
+            const imgPath = path.join("uploads", img);
+            try {
+              await fs.access(imgPath);
+              await fs.unlink(imgPath);
+            } catch (unlinkError) {
+              if (unlinkError.code !== 'ENOENT') {
+                console.error("Error deleting old cover image:", unlinkError);
+              }
+            }
+          }
+        }
+
+        // Set new coverImages: existing preserved + newly uploaded
+        const newImages = req.files["images"].map((file) => file.filename);
+        payload.coverImages = [...existingImages, ...newImages];
+      } else if (req.body.existingImages) {
+        // No new files, but existing images list was sent (preserve the list)
+        try {
+          payload.coverImages = JSON.parse(req.body.existingImages);
+        } catch (e) {
+          payload.coverImages = [];
+        }
       }
 
       //thumbnail
       if (req.files && req.files["thumbnail"]) {
         const blog = await blogService.get(blogId);
-        
-        // Record the old image path if it exists
+
         if (blog.thumbnail) {
-          oldImagePath = path.join("uploads", blog.thumbnail);
+          const thumbnailPath = path.join("uploads", blog.thumbnail);
+          try {
+            await fs.access(thumbnailPath);
+            await fs.unlink(thumbnailPath);
+          } catch (unlinkError) {
+            if (unlinkError.code !== 'ENOENT') {
+              console.error("Error deleting old thumbnail:", unlinkError);
+            }
+          }
         }
 
-
-        // Set the new image filename in payload
         payload.thumbnail = req.files["thumbnail"][0].filename;
       }
 
-      
-
-        console.log('category payload', payload);
-
-
       // Update the blog with new data
       const response = await blogService.update(blogId, payload);
-
-      // Delete the old image only if the update is successful and old image exists
-      if (oldImagePath) {
-        try {
-          fs.unlink(oldImagePath);
-        } catch (unlinkError) {
-          console.error("Error deleting old image:", unlinkError);
-        }
-      }
 
       // Return success response
       SuccessResponse.data = response;

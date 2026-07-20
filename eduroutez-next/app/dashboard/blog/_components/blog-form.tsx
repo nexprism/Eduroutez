@@ -49,7 +49,7 @@ const formSchema = z.object({
   stream: z.string().optional(),
   description: z.string().optional(),
   thumbnail: z.any().optional(),
-  coverImages: z.array(z.any()).optional(),
+  coverImages: z.array(z.union([z.instanceof(File), z.string()])).optional(),
 });
 
 function BlogForm(props: any) {
@@ -77,21 +77,6 @@ function BlogForm(props: any) {
       coverImages: [],
     },
   });
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImageUrls([reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-      form.setValue('coverImages', [file]);
-    } else {
-      setPreviewImageUrls([]);
-      form.setValue('coverImages', undefined);
-    }
-  };
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -131,10 +116,6 @@ function BlogForm(props: any) {
     if (fileInputImageRef.current) {
       fileInputImageRef.current.value = '';
     }
-  };
-
-  const triggerImageFileInput = () => {
-    fileInputImageRef.current?.click();
   };
 
   const triggerThumbnailInput = () => {
@@ -180,6 +161,7 @@ function BlogForm(props: any) {
         category: blog.data.category,
         stream: blog.data.stream,
         description: blog.data.description,
+        coverImages: blog.data.coverImages || [],
       });
       if (blog.data.coverImages && Array.isArray(blog.data.coverImages)) {
         const urls = blog.data.coverImages.map((img: string) => `${IMAGE_URL}/${img}`);
@@ -196,8 +178,14 @@ function BlogForm(props: any) {
 
   const handleCoverImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length > 0) {
-      const readers = files.map(
+    const currentCoverImages = form.getValues('coverImages') || [];
+    const newFiles = files.filter(
+      (file) => !currentCoverImages.some((img: any) => img instanceof File && img.name === file.name)
+    );
+    const updatedCoverImages = [...currentCoverImages, ...newFiles];
+    if (newFiles.length > 0) {
+      const existingPreviews = previewImageUrls.slice(0, currentCoverImages.length);
+      const readers = newFiles.map(
         (file) =>
           new Promise<string>((resolve) => {
             const reader = new FileReader();
@@ -205,49 +193,57 @@ function BlogForm(props: any) {
             reader.readAsDataURL(file);
           })
       );
-      Promise.all(readers).then((urls) => {
-        setPreviewImageUrls(urls);
+      Promise.all(readers).then((newUrls) => {
+        setPreviewImageUrls([...existingPreviews, ...newUrls]);
       });
-      form.setValue('coverImages', files);
-    } else {
-      setPreviewImageUrls([]);
-      form.setValue('coverImages', undefined);
+      form.setValue('coverImages', updatedCoverImages);
     }
   };
 
-  const onSubmit = async (data: any) => {
-    try {
-      const formData = new FormData();
-      formData.append('title', data.title);
-      formData.append('category', data.category);
-      if (data.stream) formData.append('stream', data.stream);
-      if (data.description) formData.append('description', data.description);
-      if (data.thumbnail) formData.append('thumbnail', data.thumbnail);
-      if (data.coverImages && Array.isArray(data.coverImages)) {
-        data.coverImages.forEach((file: File) => {
-          formData.append('images', file);
-        });
-      }
-
-      let response;
-      if (isEdit) {
-        response = await axiosInstance.patch(`${apiUrl}/blog/${segments[4]}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-      } else {
-        response = await axiosInstance.post(`${apiUrl}/blog`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-      }
-
-      toast.success(response.data?.message || (isEdit ? 'Blog updated successfully' : 'Blog created successfully'));
+  const { mutate, isPending: isSubmitting } = useMutation({
+    mutationFn: async (formData: FormData) => {
+      const endpoint = isEdit
+        ? `${apiUrl}/blog/${segments[4]}`
+        : `${apiUrl}/blog`;
+      const response = await axiosInstance({
+        url: endpoint,
+        method: isEdit ? 'patch' : 'post',
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || (isEdit ? 'Blog updated successfully' : 'Blog created successfully'));
       router.push('/dashboard/blog');
-    } catch (error: any) {
+    },
+    onError: (error: any) => {
       toast.error(error?.response?.data?.message || 'Something went wrong');
-    }
-  };
+    },
+  });
 
-  const isSubmitting = false; // Replace with actual submitting state if needed
+  const onSubmit = (data: any) => {
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('category', data.category);
+    if (data.stream) formData.append('stream', data.stream);
+    if (data.description) formData.append('description', data.description);
+    if (data.thumbnail) formData.append('thumbnail', data.thumbnail);
+    if (data.coverImages && Array.isArray(data.coverImages)) {
+      const existingImages: string[] = [];
+      data.coverImages.forEach((fileOrString: File | string) => {
+        if (fileOrString instanceof File) {
+          formData.append('images', fileOrString);
+        } else if (typeof fileOrString === 'string') {
+          existingImages.push(fileOrString);
+        }
+      });
+      if (existingImages.length > 0) {
+        formData.append('existingImages', JSON.stringify(existingImages));
+      }
+    }
+    mutate(formData);
+  };
 
   return (
     <Card className="mx-auto w-full">
