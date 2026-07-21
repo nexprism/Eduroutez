@@ -431,6 +431,12 @@ export default function CreateCourse() {
       if (values.metaImage !== undefined) {
         formData.append('metaImage',  values.metaImage);
       }
+      if (values.canonicalUrl !== undefined) {
+        formData.append('canonicalUrl',  values.canonicalUrl);
+      }
+      if (values.ogImage !== undefined) {
+        formData.append('ogImage',  values.ogImage);
+      }
       if(values.pros !== undefined){
         formData.append('pros', values.pros);
       }
@@ -551,6 +557,8 @@ export default function CreateCourse() {
         metaTitle: course.data.metaTitle,
         metaDescription: course.data.metaDescription,
         metaKeywords: course.data.metaKeywords,
+        canonicalUrl: course.data.canonicalUrl || '',
+        ogImage: course.data.ogImage || '',
         isCoursePopular: course.data.isCoursePopular || false,
         isCourseTreanding: course.data.isCourseTrending || false,
         pros: course.data.pros,
@@ -1725,6 +1733,28 @@ export default function CreateCourse() {
                       <FormItem>
                         <FormLabel>Meta Description </FormLabel>
                         <Input placeholder="Enter Meta Description" {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="canonicalUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Canonical URL</FormLabel>
+                        <Input placeholder="https://example.com/canonical-url" {...field} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="ogImage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>OG Image URL</FormLabel>
+                        <Input placeholder="https://example.com/og-image.jpg" {...field} />
                         <FormMessage />
                       </FormItem>
                     )}

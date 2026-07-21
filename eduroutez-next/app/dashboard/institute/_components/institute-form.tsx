@@ -176,7 +176,15 @@ export default function CreateInstitute() {
   }, [segments]);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema)
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      metaTitle: '',
+      metaDescription: '',
+      metaKeywords: '',
+      canonicalUrl: '',
+      ogImage: '',
+      metaImage: undefined
+    }
   });
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const baseURL =process.env.NEXT_PUBLIC_NEW_IMAGES;
@@ -261,11 +269,32 @@ export default function CreateInstitute() {
     }
   };
 
+  const handleOgImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewOgImageUrl(reader.result as string);
+      reader.readAsDataURL(file);
+      form.setValue('ogImage', file);
+    } else {
+      setPreviewOgImageUrl(null);
+      form.setValue('ogImage', undefined);
+    }
+  };
+
   const removeMetaImage = () => {
     setPreviewMetaImageUrl(null);
     form.setValue('metaImage', undefined);
     if (fileInputMetaImageRef.current) {
       fileInputMetaImageRef.current.value = '';
+    }
+  };
+
+  const removeOgImage = () => {
+    setPreviewOgImageUrl(null);
+    form.setValue('ogImage', undefined);
+    if (fileInputOgImageRef.current) {
+      fileInputOgImageRef.current.value = '';
     }
   };
 
@@ -1014,6 +1043,32 @@ console.log('Error updating institute:', error.message); }
                   <FormLabel>Meta Description</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter meta description for SEO" {...field} value={field.value || ''} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="canonicalUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Canonical URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/canonical-url" {...field} value={field.value || ''} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ogImage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>OG Image URL</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://example.com/og-image.jpg" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
