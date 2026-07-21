@@ -28,24 +28,21 @@ import { usePathname, useRouter } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
 import PasswordStrength from '@/components/password-strength';
 import { X, Plus } from 'lucide-react';
+import { stringField, emailField } from '@/lib/validations';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 // Dynamic schema based on edit mode
 const getFormSchema = (isEdit: boolean) => {
   const baseSchema = {
-    firstname: z.string().min(2, {
-      message: 'First name must be at least 2 characters.'
-    }),
-    lastname: z.string().min(2, {
-      message: 'Last name must be at least 2 characters.'
-    }),
+    firstname: stringField('First Name'),
+    lastname: stringField('Last Name'),
     contactno: z.string().min(10, {
       message: 'Contact number must be at least 10 characters.'
+    }).refine((val) => !/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{200D}\u{20E3}\u{231A}-\u{231B}\u{23E9}-\u{23F3}\u{23F8}-\u{23FA}\u{25AA}-\u{25AB}\u{25B6}\u{25C0}\u{25FB}-\u{25FE}]/u.test(val), {
+      message: 'Contact number cannot contain emojis',
     }),
-    email: z.string().email({
-      message: 'Invalid email address.'
-    }),
+    email: emailField,
     category: z.string().min(1, {
       message: 'Category is required.'
     }),

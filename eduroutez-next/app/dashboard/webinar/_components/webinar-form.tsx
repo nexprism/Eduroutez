@@ -23,6 +23,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import CustomEditor from '@/components/custom-editor';
+import { stringField, optionalStringField } from '@/lib/validations';
 import { 
   AlertDialog, 
   AlertDialogAction, 
@@ -38,11 +39,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 
 const formSchema = z.object({
-  title: z.string().min(2, {
-    message: 'Title must be at least 2 characters.'
-  }).nonempty({
-    message: 'Title is required.'
-  }),
+  title: stringField('Title'),
   time: z.string().nonempty({
     message: 'Time is required.'
   }),
@@ -76,9 +73,9 @@ const formSchema = z.object({
         message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.'
       }
     ),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
+  metaTitle: optionalStringField('Meta Title'),
+  metaDescription: optionalStringField('Meta Description'),
+  metaKeywords: optionalStringField('Meta Keywords'),
   metaImage: z.any().optional(),
 });
 export default function WebinarForm() {

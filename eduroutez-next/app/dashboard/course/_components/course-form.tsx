@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { stringField, optionalStringField } from '@/lib/validations';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from "@/components/ui/checkbox";
@@ -83,9 +84,7 @@ const languages = [
 ];
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 const formSchema = z.object({
-  courseTitle: z.string().min(2, {
-    message: 'Title must be at least 2 characters.'
-  }),
+  courseTitle: stringField('Course Title'),
   courseType: z.string({
     required_error: 'Please select a course type.'
   }),
@@ -101,16 +100,12 @@ const formSchema = z.object({
   status: z.string({
     required_error: 'Please select a status.'
   }),
-  // visibility: z.string({
-  //   required_error: 'Please select a visibility option.'
-  // }),
   language: z.string({
     required_error: 'Please select a language.'
   }),
 
   eligibility: z.string().optional(),
   cutOff: z.string().optional(),
-  // ranking: z.string().optional(),
   examAccepted: z.string().optional(),
   courseDurationYears: z.any().optional(),
   courseDurationMonths: z.any().optional(),
@@ -131,9 +126,9 @@ const formSchema = z.object({
   coursePreviewUrl: z.string().optional(),
   coursePreviewThumbnail: z.any().optional(),
   coursePreviewCover: z.any().optional(),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
+  metaTitle: optionalStringField('Meta Title'),
+  metaDescription: optionalStringField('Meta Description'),
+  metaKeywords: optionalStringField('Meta Keywords'),
   metaImage: z.any().optional(),
   isCourseFree: z.enum(['free', 'notfree'], {
     required_error: 'You need to select one option.'

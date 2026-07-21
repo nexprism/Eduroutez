@@ -38,28 +38,30 @@ import { toast } from 'sonner';
 import axiosInstance from '@/lib/axios';
 import * as z from 'zod';
 import { Checkbox } from '@/components/ui/checkbox';
+import { emailField, stringField, optionalStringField } from '@/lib/validations';
 
+const hasEmoji = (val: string) => /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{200D}\u{20E3}\u{231A}-\u{231B}\u{23E9}-\u{23F3}\u{23F8}-\u{23FA}\u{25AA}-\u{25AB}\u{25B6}\u{25C0}\u{25FB}-\u{25FE}]/u.test(val);
 
 export const profileSchema = z.object({
   firstname: z
     .string({ required_error: 'First Name is required' })
-    .min(3, { message: 'First Name must be at least 3 characters' }),
+    .min(3, { message: 'First Name must be at least 3 characters' })
+    .refine((val) => !hasEmoji(val), { message: 'First Name cannot contain emojis' }),
   lastname: z
     .string({ required_error: 'Last Name is required' })
-    .min(3, { message: 'Last Name must be at least 3 characters' }),
+    .min(3, { message: 'Last Name must be at least 3 characters' })
+    .refine((val) => !hasEmoji(val), { message: 'Last Name cannot contain emojis' }),
   category: z
     .string({ required_error: 'Category is required' }),
-  bankName: z.string({ required_error: 'Bank Name is required' }).min(3, { message: 'Bank Name must be at least 3 characters' }),
-  accountNumber: z.string({ required_error: 'Account Number is required' }).min(10, { message: 'Account Number must be at least 10 characters' }),
-  accountHolderName: z.string({ required_error: 'Account Holder Name is required' }).min(3, { message: 'Account Holder Name must be at least 3 characters' }),
+  bankName: z.string({ required_error: 'Bank Name is required' }).min(3, { message: 'Bank Name must be at least 3 characters' }).refine((val) => !hasEmoji(val), { message: 'Bank Name cannot contain emojis' }),
+  accountNumber: z.string({ required_error: 'Account Number is required' }).min(10, { message: 'Account Number must be at least 10 characters' }).refine((val) => !hasEmoji(val), { message: 'Account Number cannot contain emojis' }),
+  accountHolderName: z.string({ required_error: 'Account Holder Name is required' }).min(3, { message: 'Account Holder Name must be at least 3 characters' }).refine((val) => !hasEmoji(val), { message: 'Account Holder Name cannot contain emojis' }),
   ifscCode: z
     .string({ required_error: 'IFSC Code is required' })
     .min(3, { message: 'IFSC Code must be at least 3 characters' }),
-  email: z
-    .string({ required_error: 'Email is required' })
-    .email({ message: 'Please enter a valid email address' }),
+  email: emailField,
   instituteEmail: z
-    .string({ required_error: 'Institute Email is required' }).min(1, { message: 'Institute Email must be at least 1 character' }),
+    .string({ required_error: 'Institute Email is required' }).min(1, { message: 'Institute Email must be at least 1 character' }).refine((val) => !hasEmoji(val), { message: 'Institute Email cannot contain emojis' }),
   contactno: z.coerce.number({ required_error: 'Contact Number is required' }),
   language: z.string({ required_error: 'Language is required' }),
   ExperienceYear: z.string({ required_error: 'Experience Year is required' }),

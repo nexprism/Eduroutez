@@ -29,11 +29,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
+import { stringField, optionalStringField } from '@/lib/validations';
 
 const formSchema = z.object({
-  title: z.string().min(2, {
-    message: 'Name must be at least 2 characters.'
-  }),
+  title: stringField('Title'),
   category: z
     .string()
     .min(1, { message: 'Please select a category.' })
@@ -66,9 +65,9 @@ const formSchema = z.object({
   opportunity: z.string(),
   topColleges: z.string(),
   description: z.string(),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
+  metaTitle: optionalStringField('Meta Title'),
+  metaDescription: optionalStringField('Meta Description'),
+  metaKeywords: optionalStringField('Meta Keywords'),
   metaImage: z.any().optional(),
 });
 

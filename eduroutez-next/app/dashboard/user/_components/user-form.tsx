@@ -22,20 +22,15 @@ import {
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { stringField, emailField } from '@/lib/validations';
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Name must be at least 2 characters.'
-  }),
+  name: stringField('Name'),
   country: z.string({
     required_error: 'Please select a country.'
   }),
-  email: z.string().email({
-    message: 'Please enter a valid email address.'
-  }),
-  company: z.string().min(1, {
-    message: 'Company name is required.'
-  }),
+  email: emailField,
+  company: stringField('Company Name', 1),
   gender: z.enum(['male', 'female', 'other'], {
     required_error: 'Please select a gender.'
   })

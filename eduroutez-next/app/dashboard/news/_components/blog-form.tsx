@@ -19,9 +19,10 @@ import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import axiosInstance from '@/lib/axios';
+import { stringField, optionalStringField } from '@/lib/validations';
 
 const formSchema = z.object({
-  title: z.string().min(2, { message: 'Title must be at least 2 characters.' }),
+  title: stringField('Title'),
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
   date: z.date({ required_error: 'Please select a date.' }),
   image: z
@@ -31,9 +32,9 @@ const formSchema = z.object({
     .refine((file) => !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type), {
       message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.',
     }),
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  metaKeywords: z.string().optional(),
+  metaTitle: optionalStringField('Meta Title'),
+  metaDescription: optionalStringField('Meta Description'),
+  metaKeywords: optionalStringField('Meta Keywords'),
   metaImage: z.any().optional(),
 });
 

@@ -28,6 +28,7 @@ import axiosInstance from '@/lib/axios';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { stringField, emailField } from '@/lib/validations';
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 const organisationOptions = [
@@ -37,9 +38,7 @@ const organisationOptions = [
 ];
 
 const formSchema = z.object({
-  title: z.string().min(2, {
-    message: 'Title must be at least 2 characters.'
-  }),
+  title: stringField('Institute Name'),
   phone: z
     .string({
       required_error: 'Please enter a phone number.'
@@ -47,13 +46,7 @@ const formSchema = z.object({
     .regex(/^[6-9]\d{9}$/, {
       message: 'Please enter a valid Indian mobile number.'
     }),
-  email: z
-    .string({
-      required_error: 'Please enter an email.'
-    })
-    .email({
-      message: 'Please enter a valid email address.'
-    }),
+  email: emailField,
   organization: z.string({
     required_error: 'Please select organization.'
   }),

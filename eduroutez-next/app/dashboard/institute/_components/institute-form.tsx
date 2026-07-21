@@ -40,6 +40,7 @@ import axiosInstance from '@/lib/axios';
 import { toast } from 'sonner';
 import { add } from 'date-fns';
 import { title } from 'process';
+import { stringField, emailField, urlField, optionalStringField, noEmoji } from '@/lib/validations';
 const courseTypes = [
   { value: 'live', label: 'Live' },
   { value: 'recorded', label: 'Recorded' },
@@ -53,9 +54,7 @@ const orgTypes = [
 
 
 const formSchema = z.object({
-  title: z.string().min(2, {
-    message: 'Title must be at least 2 characters.'
-  }),
+  title: stringField('Title'),
   courseType: z.string({
     required_error: 'Please select a course type.'
   }),
@@ -104,20 +103,24 @@ const formSchema = z.object({
     required_error: 'Please enter a phone number.'
   }),
   institutePhone: z.string().optional(),
-  email: z.string({
-    required_error: 'Please enter an email.'
-  }),
+  email: emailField,
   establishedYear: z.any({
     required_error: 'Please enter an established year.'
   }),
   website: z.string({
     required_error: 'Please enter a website.'
+  }).refine((val) => !/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{200D}\u{20E3}\u{231A}-\u{231B}\u{23E9}-\u{23F3}\u{23F8}-\u{23FA}\u{25AA}-\u{25AB}\u{25B6}\u{25C0}\u{25FB}-\u{25FE}]/u.test(val), {
+    message: 'Website cannot contain emojis',
   }),
   address: z.string({
     required_error: 'Please enter an address.'
+  }).refine((val) => !/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{200D}\u{20E3}\u{231A}-\u{231B}\u{23E9}-\u{23F3}\u{23F8}-\u{23FA}\u{25AA}-\u{25AB}\u{25B6}\u{25C0}\u{25FB}-\u{25FE}]/u.test(val), {
+    message: 'Address cannot contain emojis',
   }),
   about: z.string({
     required_error: 'Please enter about.'
+  }).refine((val) => !/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{200D}\u{20E3}\u{231A}-\u{231B}\u{23E9}-\u{23F3}\u{23F8}-\u{23FA}\u{25AA}-\u{25AB}\u{25B6}\u{25C0}\u{25FB}-\u{25FE}]/u.test(val), {
+    message: 'About cannot contain emojis',
   }),
   organisationType: z.string({
     required_error: 'Please select an organization type.'
@@ -127,16 +130,16 @@ const formSchema = z.object({
   admissionInfo: z.string(),
   placementInfo: z.string(),
   campusInfo: z.string().optional(),
-gallery:z.array(z.any()).optional(),
-facility: z.array(z.string()).optional(),
-scholarshipInfo: z.string().optional(),
-fee: z.string().optional(),
-ranking: z.string().optional(),
-cutoff: z.string().optional(),
-metaTitle: z.string().optional(),
-metaDescription: z.string().optional(),
-metaKeywords: z.string().optional(),
-metaImage: z.any().optional(),
+  gallery:z.array(z.any()).optional(),
+  facility: z.array(z.string()).optional(),
+  scholarshipInfo: z.string().optional(),
+  fee: z.string().optional(),
+  ranking: z.string().optional(),
+  cutoff: z.string().optional(),
+  metaTitle: optionalStringField('Meta Title'),
+  metaDescription: optionalStringField('Meta Description'),
+  metaKeywords: optionalStringField('Meta Keywords'),
+  metaImage: z.any().optional(),
 });
 
 export default function CreateInstitute() {

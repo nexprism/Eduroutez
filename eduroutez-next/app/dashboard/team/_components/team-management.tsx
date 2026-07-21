@@ -36,10 +36,11 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { stringField, emailField } from '@/lib/validations';
 
 const staffSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Enter a valid email'),
+  name: stringField('Name', 1),
+  email: emailField,
   subRole: z.string().min(1, 'Role is required'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
