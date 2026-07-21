@@ -254,6 +254,12 @@ const instituteSchema = new mongoose.Schema(
     metaImage: {
       type: String,
     },
+    canonicalUrl: {
+      type: String,
+    },
+    ogImage: {
+      type: String,
+    },
     staffPermissions: {
       type: Map,
       of: [String],

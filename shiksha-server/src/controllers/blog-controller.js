@@ -198,6 +198,19 @@ export async function updateBlog(req, res) {
           }
         }
         payload.metaImage = req.files["metaImage"][0].filename;
+
+        if (blog.ogImage) {
+          const ogImagePath = path.join("uploads", blog.ogImage);
+          try {
+            await fs.access(ogImagePath);
+            await fs.unlink(ogImagePath);
+          } catch (unlinkError) {
+            if (unlinkError.code !== 'ENOENT') {
+              console.error("Error deleting old og image:", unlinkError);
+            }
+          }
+        }
+        payload.ogImage = req.files["ogImage"][0].filename;
       }
 
       if (typeof req.body.isPublished !== 'undefined') {

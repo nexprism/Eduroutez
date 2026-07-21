@@ -89,6 +89,12 @@ const careerSchema = new mongoose.Schema(
     metaImage: {
       type: String,
     },
+    canonicalUrl: {
+      type: String,
+    },
+    ogImage: {
+      type: String,
+    },
     isPublished: {
       type: Boolean,
       default: true,

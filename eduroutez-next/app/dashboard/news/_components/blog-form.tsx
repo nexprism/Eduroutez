@@ -35,6 +35,7 @@ const formSchema = z.object({
   metaTitle: optionalStringField('Meta Title'),
   metaDescription: optionalStringField('Meta Description'),
   metaKeywords: optionalStringField('Meta Keywords'),
+  canonicalUrl: optionalStringField('Canonical URL'),
   metaImage: z.any().optional(),
 });
 
@@ -58,6 +59,7 @@ export default function NewsForm() {
       description: '',
       date: new Date(),
       image: null as File | null,
+      canonicalUrl: '',
     },
   });
 
@@ -86,6 +88,7 @@ export default function NewsForm() {
         title: news.data.title,
         description: news.data.description,
         date: news.data.date ? parseISO(news.data.date) : new Date(),
+        canonicalUrl: news.data.canonicalUrl || '',
       });
       if (news.data.image) {
         setPreviewImage(`${IMAGE_URL}/${news.data.image}`);
@@ -183,6 +186,7 @@ export default function NewsForm() {
     if (values.metaDescription) formData.append('metaDescription', values.metaDescription);
     if (values.metaKeywords) formData.append('metaKeywords', values.metaKeywords);
     if (values.metaImage) formData.append('metaImage', values.metaImage);
+    if (values.canonicalUrl) formData.append('canonicalUrl', values.canonicalUrl);
 
     mutate(formData);
   };
@@ -284,6 +288,10 @@ export default function NewsForm() {
                 <div>
                   <label>Meta Description</label>
                   <Input placeholder="Enter meta description for SEO" {...{ value: control._formValues.metaDescription || '', onChange: (e: any) => setValue('metaDescription', e.target.value) }} />
+                </div>
+                <div>
+                  <label>Canonical URL</label>
+                  <Input placeholder="https://example.com/this-page" {...{ value: control._formValues.canonicalUrl || '', onChange: (e: any) => setValue('canonicalUrl', e.target.value) }} />
                 </div>
                 <div>
                   <label>Meta Image (OG Image)</label>

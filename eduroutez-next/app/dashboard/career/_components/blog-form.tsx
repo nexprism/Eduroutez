@@ -68,6 +68,7 @@ const formSchema = z.object({
   metaTitle: optionalStringField('Meta Title'),
   metaDescription: optionalStringField('Meta Description'),
   metaKeywords: optionalStringField('Meta Keywords'),
+  canonicalUrl: optionalStringField('Canonical URL'),
   metaImage: z.any().optional(),
 });
 
@@ -92,7 +93,8 @@ export default function CounselorForm() {
     topColleges: '',
     counselorType: '',
     thumbnail: undefined,
-    coverImages: []
+    coverImages: [],
+    canonicalUrl: ''
   }), []);
 
   // Create form with stable configuration
@@ -168,7 +170,8 @@ export default function CounselorForm() {
         topColleges: counselor.data.topColleges || '',
         counselorType: counselor.data.counselorType || '',
         thumbnail: undefined,
-        coverImages: counselor.data.coverImages || []
+        coverImages: counselor.data.coverImages || [],
+        canonicalUrl: counselor.data.canonicalUrl || ''
       });
 
       // Update cover image previews
@@ -372,6 +375,7 @@ export default function CounselorForm() {
     if (values.metaDescription) formData.append('metaDescription', values.metaDescription);
     if (values.metaKeywords) formData.append('metaKeywords', values.metaKeywords);
     if (values.metaImage) formData.append('metaImage', values.metaImage);
+    if (values.canonicalUrl) formData.append('canonicalUrl', values.canonicalUrl);
     mutate(formData);
   };
 
@@ -712,6 +716,19 @@ export default function CounselorForm() {
                     <FormLabel>Meta Description</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter meta description for SEO" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="canonicalUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Canonical URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/this-page" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

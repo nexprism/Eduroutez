@@ -139,6 +139,8 @@ const formSchema = z.object({
   metaTitle: optionalStringField('Meta Title'),
   metaDescription: optionalStringField('Meta Description'),
   metaKeywords: optionalStringField('Meta Keywords'),
+  canonicalUrl: optionalStringField('Canonical URL'),
+  ogImage: optionalStringField('OG Image'),
   metaImage: z.any().optional(),
 });
 
@@ -225,10 +227,13 @@ export default function CreateInstitute() {
         cutoff: instituteData.cutoff,
         thumbnail: instituteData.thumbnailImage,
         cover: instituteData.coverImage,
-        logo: instituteData.instituteLogo,
-        metaTitle: instituteData.metaTitle || '',
-        metaDescription: instituteData.metaDescription || '',
-        metaKeywords: instituteData.metaKeywords || '',
+         logo: instituteData.instituteLogo,
+         metaTitle: instituteData.metaTitle || '',
+         metaDescription: instituteData.metaDescription || '',
+         metaKeywords: instituteData.metaKeywords || '',
+         canonicalUrl: instituteData.canonicalUrl || '',
+         ogImage: instituteData.ogImage || '',
+         metaImage: instituteData.metaImage || ''
       });
       console.log("Form values:", );
       console.log('organisationType',instituteData.organisationType)

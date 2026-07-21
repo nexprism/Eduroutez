@@ -133,7 +133,13 @@ const courseSchema = new mongoose.Schema(
     },
     metaImage: {
       type: String,
-    }, //image
+    },
+    canonicalUrl: {
+      type: String,
+    },
+    ogImage: {
+      type: String,
+    },
     applicationStartDate: {
       type: Date,
     },

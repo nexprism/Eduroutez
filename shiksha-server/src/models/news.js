@@ -42,6 +42,12 @@ const newsSchema = new mongoose.Schema(
         metaImage: {
             type: String,
         },
+        ogImage: {
+            type: String,
+        },
+        canonicalUrl: {
+            type: String,
+        },
         isPublished: {
             type: Boolean,
             default: true,

@@ -213,6 +213,14 @@ export async function updateCareer(req, res) {
         payload.metaImage = req.files["metaImage"][0].filename;
       }
 
+      if (req.files && req.files["ogImage"]) {
+        const career = await careerService.get(careerId);
+        if (career.ogImage) {
+          oldImagePath = path.join("uploads", career.ogImage);
+        }
+        payload.ogImage = req.files["ogImage"][0].filename;
+      }
+
       if (typeof req.body.isPublished !== 'undefined') {
         payload.isPublished = req.body.isPublished;
       }

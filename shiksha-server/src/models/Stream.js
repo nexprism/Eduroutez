@@ -35,6 +35,15 @@ const streamSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    metaImage: {
+      type: String,
+    },
+    ogImage: {
+      type: String,
+    },
+    canonicalUrl: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

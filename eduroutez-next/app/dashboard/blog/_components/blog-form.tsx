@@ -52,6 +52,7 @@ const formSchema = z.object({
   metaTitle: optionalStringField('Meta Title'),
   metaDescription: optionalStringField('Meta Description'),
   metaKeywords: optionalStringField('Meta Keywords'),
+  canonicalUrl: optionalStringField('Canonical URL'),
   metaImage: z.any().optional(),
 });
 
@@ -83,6 +84,7 @@ function BlogForm(props: any) {
       metaTitle: '',
       metaDescription: '',
       metaKeywords: '',
+      canonicalUrl: '',
       metaImage: undefined,
     },
   });
@@ -201,6 +203,7 @@ function BlogForm(props: any) {
         metaTitle: blog.data.metaTitle || '',
         metaDescription: blog.data.metaDescription || '',
         metaKeywords: blog.data.metaKeywords || '',
+        canonicalUrl: blog.data.canonicalUrl || '',
       });
       if (blog.data.coverImages && Array.isArray(blog.data.coverImages)) {
         const urls = blog.data.coverImages.map((img: string) => `${IMAGE_URL}/${img}`);
@@ -288,6 +291,7 @@ function BlogForm(props: any) {
     if (data.metaDescription) formData.append('metaDescription', data.metaDescription);
     if (data.metaKeywords) formData.append('metaKeywords', data.metaKeywords);
     if (data.metaImage) formData.append('metaImage', data.metaImage);
+    if (data.canonicalUrl) formData.append('canonicalUrl', data.canonicalUrl);
     mutate(formData);
   };
 
@@ -543,6 +547,19 @@ function BlogForm(props: any) {
                     <FormLabel>Meta Description</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter meta description for SEO" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="canonicalUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Canonical URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/this-page" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

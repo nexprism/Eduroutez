@@ -223,6 +223,13 @@ export async function updateCourse(req, res) {
         payload.metaImage = req.files["metaImage"][0].filename;
       }
 
+      if (req.files && req.files["ogImage"]) {
+        if (course.ogImage) {
+          oldImagePaths.ogImage = path.join("uploads", course.ogImage);
+        }
+        payload.ogImage = req.files["ogImage"][0].filename;
+      }
+
       if(payload.courseTitle){
         payload.slug = payload.courseTitle.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }

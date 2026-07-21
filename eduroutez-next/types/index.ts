@@ -10,6 +10,7 @@ export type Blog = {
   metaDescription?: string;
   metaKeywords?: string;
   metaImage?: string;
+  canonicalUrl?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -28,6 +29,7 @@ export type Course = {
   metaDescription?: string;
   metaKeywords?: string;
   metaImage?: string;
+  canonicalUrl?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -44,6 +46,7 @@ export type News = {
   metaDescription?: string;
   metaKeywords?: string;
   metaImage?: string;
+  canonicalUrl?: string;
 };
 
 export type Career = {
@@ -62,6 +65,7 @@ export type Career = {
   metaDescription?: string;
   metaKeywords?: string;
   metaImage?: string;
+  canonicalUrl?: string;
 };
 
 export type Institute = {
@@ -137,6 +141,7 @@ export type Webinar = {
   metaDescription?: string;
   metaKeywords?: string;
   metaImage?: string;
+  canonicalUrl?: string;
   createdAt: string;
 };
 

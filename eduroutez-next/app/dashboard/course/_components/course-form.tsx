@@ -129,6 +129,8 @@ const formSchema = z.object({
   metaTitle: optionalStringField('Meta Title'),
   metaDescription: optionalStringField('Meta Description'),
   metaKeywords: optionalStringField('Meta Keywords'),
+  canonicalUrl: optionalStringField('Canonical URL'),
+  ogImage: optionalStringField('OG Image'),
   metaImage: z.any().optional(),
   isCourseFree: z.enum(['free', 'notfree'], {
     required_error: 'You need to select one option.'
@@ -182,6 +184,11 @@ export default function CreateCourse() {
       isCourseTreanding: false, 
       applicationStartDate: null, // Set default to null
       applicationEndDate: null,
+      metaTitle: '',
+      metaDescription: '',
+      metaKeywords: '',
+      canonicalUrl: '',
+      ogImage: '',
     }
   });
 

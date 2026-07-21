@@ -76,6 +76,7 @@ const formSchema = z.object({
   metaTitle: optionalStringField('Meta Title'),
   metaDescription: optionalStringField('Meta Description'),
   metaKeywords: optionalStringField('Meta Keywords'),
+  canonicalUrl: optionalStringField('Canonical URL'),
   metaImage: z.any().optional(),
 });
 export default function WebinarForm() {
@@ -107,7 +108,8 @@ export default function WebinarForm() {
       webinarLink: '',
       description: '',
       webinarCreatedBy:'',
-      image: undefined
+      image: undefined,
+      canonicalUrl: ''
     }
   });
 
@@ -158,6 +160,7 @@ export default function WebinarForm() {
     if (values.metaDescription) formData.append('metaDescription', values.metaDescription);
     if (values.metaKeywords) formData.append('metaKeywords', values.metaKeywords);
     if (values.metaImage) formData.append('metaImage', values.metaImage);
+    if (values.canonicalUrl) formData.append('canonicalUrl', values.canonicalUrl);
 
     const webinarCreatedBy = localStorage.getItem('instituteId');
     if (webinarCreatedBy) {
@@ -242,6 +245,7 @@ export default function WebinarForm() {
         duration: category.data.duration,
         webinarLink: category.data.webinarLink,
         description: category.data.description,
+        canonicalUrl: category.data.canonicalUrl || '',
       });
 
       if (category.data.icon) {
@@ -497,22 +501,35 @@ export default function WebinarForm() {
                     )}
                   />
                 </div>
-                <FormField
-                  control={form.control}
-                  name="metaDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Meta Description</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter meta description for SEO" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="metaImage"
+              <FormField
+                control={form.control}
+                name="metaDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Meta Description</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter meta description for SEO" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="canonicalUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Canonical URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/this-page" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="metaImage"
                   render={() => (
                     <FormItem>
                       <FormLabel>Meta Image (OG Image)</FormLabel>
