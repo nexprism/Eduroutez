@@ -6,6 +6,10 @@ export type Blog = {
   category?: string;
   isPublished: boolean;
   isActive: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  metaImage?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -20,6 +24,10 @@ export type Course = {
   isPublished: boolean;
   isActive: boolean;
   thumbnail?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  metaImage?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -32,6 +40,10 @@ export type News = {
   category?: string;
   isPublished: boolean;
   _id: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  metaImage?: string;
 };
 
 export type Career = {
@@ -46,6 +58,10 @@ export type Career = {
   _id: string;
   thumbnail?: string;
   category?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  metaImage?: string;
 };
 
 export type Institute = {
@@ -57,6 +73,10 @@ export type Institute = {
   onhold?: boolean;
   _id: string;
   rank?: number;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  metaImage?: string;
 };
 
 export type CourseCategory = {
@@ -113,6 +133,10 @@ export type Webinar = {
   duration?: string;
   date?: string;
   webinarLink?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string;
+  metaImage?: string;
   createdAt: string;
 };
 

@@ -132,7 +132,11 @@ facility: z.array(z.string()).optional(),
 scholarshipInfo: z.string().optional(),
 fee: z.string().optional(),
 ranking: z.string().optional(),
-cutoff: z.string().optional()
+cutoff: z.string().optional(),
+metaTitle: z.string().optional(),
+metaDescription: z.string().optional(),
+metaKeywords: z.string().optional(),
+metaImage: z.any().optional(),
 });
 
 export default function CreateInstitute() {
@@ -146,8 +150,10 @@ export default function CreateInstitute() {
     null
   );
   const [previewUrls, setPreviewUrls] = React.useState<string[]>([]);
+  const [previewMetaImageUrl, setPreviewMetaImageUrl] = React.useState<string | null>(null);
 
   const fileInputThumbnailRef = React.useRef<HTMLInputElement | null>(null);
+  const fileInputMetaImageRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputLogoRef = React.useRef<HTMLInputElement | null>(null);
   const fileInputCoverRef = React.useRef<HTMLInputElement | null>(null);
   const multipleFileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -217,7 +223,9 @@ export default function CreateInstitute() {
         thumbnail: instituteData.thumbnailImage,
         cover: instituteData.coverImage,
         logo: instituteData.instituteLogo,
-        
+        metaTitle: instituteData.metaTitle || '',
+        metaDescription: instituteData.metaDescription || '',
+        metaKeywords: instituteData.metaKeywords || '',
       });
       console.log("Form values:", );
       console.log('organisationType',instituteData.organisationType)
@@ -225,12 +233,33 @@ export default function CreateInstitute() {
       setPreviewCoverUrl(`${baseURL}/${instituteData.coverImage}`);
       setPreviewLogoUrl(`${baseURL}/${instituteData.instituteLogo}`);
   
+      setPreviewMetaImageUrl(instituteData.metaImage ? `${baseURL}/${instituteData.metaImage}` : null);
       setGalleryImages(galleryUrls); // Set the full URLs for rendering
     } catch (error) {
       console.error("Error fetching institute data:", error);
     }
   };
 
+  const handleMetaImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewMetaImageUrl(reader.result as string);
+      reader.readAsDataURL(file);
+      form.setValue('metaImage', file);
+    } else {
+      setPreviewMetaImageUrl(null);
+      form.setValue('metaImage', undefined);
+    }
+  };
+
+  const removeMetaImage = () => {
+    setPreviewMetaImageUrl(null);
+    form.setValue('metaImage', undefined);
+    if (fileInputMetaImageRef.current) {
+      fileInputMetaImageRef.current.value = '';
+    }
+  };
 
 
   const deleteFacility = async (facility: string) => {
@@ -504,6 +533,7 @@ console.log('Error updating institute:', error.message); }
              <ResponsiveTabsTrigger value="ranking">Ranking</ResponsiveTabsTrigger>
                     <ResponsiveTabsTrigger value="cutoff">Cut-Offs</ResponsiveTabsTrigger>
                     <ResponsiveTabsTrigger value="facility">Facility</ResponsiveTabsTrigger>
+                    <ResponsiveTabsTrigger value="seo">SEO</ResponsiveTabsTrigger>
         </ResponsiveTabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -915,6 +945,116 @@ console.log('Error updating institute:', error.message); }
                       value={field.value}
                       onChange={field.onChange}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="button" onClick={handleFormSubmit}>
+              Save & Update
+            </Button>
+          </div>
+        </Form>
+      </CardContent>
+    </Card>
+  </TabsContent>
+
+  <TabsContent value="seo">
+    <Card>
+      <CardHeader>
+        <CardTitle>SEO Settings</CardTitle>
+        <p className="text-sm text-gray-600">
+          Configure SEO meta tags for your institute page.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="metaTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Meta Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter meta title for SEO" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="metaKeywords"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Meta Keywords</FormLabel>
+                    <FormControl>
+                      <Input placeholder="keyword1, keyword2, keyword3" {...field} value={field.value || ''} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="metaDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Meta Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter meta description for SEO" {...field} value={field.value || ''} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="metaImage"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Meta Image (OG Image)</FormLabel>
+                  <FormControl>
+                    <div className="space-y-4">
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        onChange={handleMetaImageChange}
+                        ref={fileInputMetaImageRef}
+                        className="hidden"
+                      />
+                      {previewMetaImageUrl ? (
+                        <div className="relative inline-block">
+                          <Image
+                            src={previewMetaImageUrl}
+                            alt="Meta Image Preview"
+                            className="h-40 w-full rounded-md object-cover"
+                            width={200}
+                            height={160}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute right-0 top-0 -mr-2 -mt-2"
+                            onClick={removeMetaImage}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove meta image</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={() => fileInputMetaImageRef.current?.click()}
+                          className="border-grey-300 flex h-40 w-full cursor-pointer items-center justify-center rounded-md border"
+                        >
+                          <Plus className="text-grey-400 h-10 w-10" />
+                        </div>
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

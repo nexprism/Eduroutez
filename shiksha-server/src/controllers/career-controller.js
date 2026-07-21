@@ -11,10 +11,14 @@ const singleUploader = FileUpload.upload.single("images");
 const multiUploader = FileUpload.upload.fields([
   {
     name: "images",
-    maxCount: 10, // Allow up to 10 images for coverImages array
+    maxCount: 10,
   },
   {
     name: "thumbnail",
+    maxCount: 1,
+  },
+  {
+    name: "metaImage",
     maxCount: 1,
   }
 ]);
@@ -36,9 +40,12 @@ export const createCareer = async (req, res) => {
         payload.coverImages = req.files["images"].map((file) => file.filename);
       }
 
-      //thumbnail
       if (req.files && req.files["thumbnail"]) {
         payload.thumbnail = req.files["thumbnail"][0].filename;
+      }
+
+      if (req.files && req.files["metaImage"]) {
+        payload.metaImage = req.files["metaImage"][0].filename;
       }
 
       if(payload.title){
@@ -187,6 +194,23 @@ export async function updateCareer(req, res) {
 
       if(req.body.instituteId) {
         payload.instituteId = req.body.instituteId;
+      }
+
+      if (req.body.metaTitle) {
+        payload.metaTitle = req.body.metaTitle;
+      }
+      if (req.body.metaDescription) {
+        payload.metaDescription = req.body.metaDescription;
+      }
+      if (req.body.metaKeywords) {
+        payload.metaKeywords = req.body.metaKeywords;
+      }
+      if (req.files && req.files["metaImage"]) {
+        const career = await careerService.get(careerId);
+        if (career.metaImage) {
+          oldImagePath = path.join("uploads", career.metaImage);
+        }
+        payload.metaImage = req.files["metaImage"][0].filename;
       }
 
       if (typeof req.body.isPublished !== 'undefined') {

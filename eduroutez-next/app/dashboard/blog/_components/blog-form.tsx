@@ -50,13 +50,19 @@ const formSchema = z.object({
   description: z.string().optional(),
   thumbnail: z.any().optional(),
   coverImages: z.array(z.union([z.instanceof(File), z.string()])).optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
+  metaImage: z.any().optional(),
 });
 
 function BlogForm(props: any) {
   const [previewImageUrls, setPreviewImageUrls] = React.useState<string[]>([]);
   const [thumbnail, setThumbnail] = React.useState<{ file: File; preview: string } | null>(null);
+  const [previewMetaImageUrl, setPreviewMetaImageUrl] = React.useState<string | null>(null);
   const fileInputImageRef = React.useRef<HTMLInputElement>(null);
   const thumbnailInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputMetaImageRef = React.useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const segments = pathname.split('/');
@@ -75,6 +81,10 @@ function BlogForm(props: any) {
       description: '',
       thumbnail: undefined,
       coverImages: [],
+      metaTitle: '',
+      metaDescription: '',
+      metaKeywords: '',
+      metaImage: undefined,
     },
   });
 
@@ -97,6 +107,33 @@ function BlogForm(props: any) {
     } else {
       setThumbnail(null);
       form.setValue('thumbnail', undefined);
+    }
+  };
+
+  const handleMetaImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewMetaImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      form.setValue('metaImage', file);
+    } else {
+      setPreviewMetaImageUrl(null);
+      form.setValue('metaImage', undefined);
+    }
+  };
+
+  const triggerMetaImageFileInput = () => {
+    fileInputMetaImageRef.current?.click();
+  };
+
+  const removeMetaImage = () => {
+    setPreviewMetaImageUrl(null);
+    form.setValue('metaImage', undefined);
+    if (fileInputMetaImageRef.current) {
+      fileInputMetaImageRef.current.value = '';
     }
   };
 
@@ -162,6 +199,9 @@ function BlogForm(props: any) {
         stream: blog.data.stream,
         description: blog.data.description,
         coverImages: blog.data.coverImages || [],
+        metaTitle: blog.data.metaTitle || '',
+        metaDescription: blog.data.metaDescription || '',
+        metaKeywords: blog.data.metaKeywords || '',
       });
       if (blog.data.coverImages && Array.isArray(blog.data.coverImages)) {
         const urls = blog.data.coverImages.map((img: string) => `${IMAGE_URL}/${img}`);
@@ -172,6 +212,9 @@ function BlogForm(props: any) {
           preview: `${IMAGE_URL}/${blog.data.thumbnail}`,
           file: new File([], blog.data.thumbnail)
         });
+      }
+      if (blog.data.metaImage) {
+        setPreviewMetaImageUrl(`${IMAGE_URL}/${blog.data.metaImage}`);
       }
     }
   }, [blog, form, IMAGE_URL]);
@@ -242,6 +285,10 @@ function BlogForm(props: any) {
         formData.append('existingImages', JSON.stringify(existingImages));
       }
     }
+    if (data.metaTitle) formData.append('metaTitle', data.metaTitle);
+    if (data.metaDescription) formData.append('metaDescription', data.metaDescription);
+    if (data.metaKeywords) formData.append('metaKeywords', data.metaKeywords);
+    if (data.metaImage) formData.append('metaImage', data.metaImage);
     mutate(formData);
   };
 
@@ -458,6 +505,100 @@ function BlogForm(props: any) {
                 </FormItem>
               )}
             />
+
+            <div className="border-t pt-6 mt-6">
+              <h3 className="text-lg font-semibold mb-4">SEO Settings</h3>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="metaTitle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Meta Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter meta title for SEO" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="metaKeywords"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Meta Keywords</FormLabel>
+                      <FormControl>
+                        <Input placeholder="keyword1, keyword2, keyword3" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="metaDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Meta Description</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter meta description for SEO" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="metaImage"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>Meta Image (OG Image)</FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        <Input
+                          type="file"
+                          accept="image/png, image/jpeg, image/webp"
+                          onChange={handleMetaImageChange}
+                          ref={fileInputMetaImageRef}
+                          className="hidden"
+                        />
+                        {previewMetaImageUrl ? (
+                          <div className="relative inline-block">
+                            <Image
+                              src={previewMetaImageUrl}
+                              alt="Meta Image Preview"
+                              className="h-40 w-full rounded-md object-cover"
+                              width={200}
+                              height={160}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute right-0 top-0 -mr-2 -mt-2"
+                              onClick={removeMetaImage}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove meta image</span>
+                            </Button>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={triggerMetaImageFileInput}
+                            className="border-grey-300 flex h-40 w-full cursor-pointer items-center justify-center rounded-md border"
+                          >
+                            <Plus className="text-grey-400 h-10 w-10" />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Submitting...' : isEdit ? 'Update' : 'Submit'}

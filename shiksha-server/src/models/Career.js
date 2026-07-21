@@ -77,6 +77,18 @@ const careerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Institute",
     },
+    metaTitle: {
+      type: String,
+    },
+    metaDescription: {
+      type: String,
+    },
+    metaKeywords: {
+      type: String,
+    },
+    metaImage: {
+      type: String,
+    },
     isPublished: {
       type: Boolean,
       default: true,

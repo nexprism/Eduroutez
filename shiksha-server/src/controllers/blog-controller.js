@@ -9,10 +9,14 @@ import randomstring from "randomstring";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "images",
-    maxCount: 10, // Allow up to 10 images for coverImages array
+    maxCount: 10,
   },
   {
     name: "thumbnail",
+    maxCount: 1,
+  },
+  {
+    name: "metaImage",
     maxCount: 1,
   }
 ]);
@@ -35,9 +39,12 @@ export const createBlog = async (req, res) => {
         payload.coverImages = req.files["images"].map((file) => file.filename);
       }
 
-      //thumbnail
       if (req.files && req.files["thumbnail"]) {
         payload.thumbnail = req.files["thumbnail"][0].filename;
+      }
+
+      if (req.files && req.files["metaImage"]) {
+        payload.metaImage = req.files["metaImage"][0].filename;
       }
 
       if(payload.title){
@@ -166,6 +173,31 @@ export async function updateBlog(req, res) {
       //stream 
       if(req.body.stream){
         payload.stream = req.body.stream;
+      }
+
+      if (req.body.metaTitle) {
+        payload.metaTitle = req.body.metaTitle;
+      }
+      if (req.body.metaDescription) {
+        payload.metaDescription = req.body.metaDescription;
+      }
+      if (req.body.metaKeywords) {
+        payload.metaKeywords = req.body.metaKeywords;
+      }
+      if (req.files && req.files["metaImage"]) {
+        const blog = await blogService.get(blogId);
+        if (blog.metaImage) {
+          const metaImagePath = path.join("uploads", blog.metaImage);
+          try {
+            await fs.access(metaImagePath);
+            await fs.unlink(metaImagePath);
+          } catch (unlinkError) {
+            if (unlinkError.code !== 'ENOENT') {
+              console.error("Error deleting old meta image:", unlinkError);
+            }
+          }
+        }
+        payload.metaImage = req.files["metaImage"][0].filename;
       }
 
       if (typeof req.body.isPublished !== 'undefined') {

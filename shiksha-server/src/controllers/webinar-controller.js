@@ -5,7 +5,16 @@ import { FileUpload } from "../middlewares/index.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import WebinarService from "../services/webinar-service.js";
 import UserService from "../services/user-service.js";
-const singleUploader = FileUpload.upload.single("image");
+const webinarUploader = FileUpload.upload.fields([
+  {
+    name: "image",
+    maxCount: 1,
+  },
+  {
+    name: "metaImage",
+    maxCount: 1,
+  }
+]);
 const webinarService = new WebinarService();
 const usersevice = new UserService();
 
@@ -15,13 +24,18 @@ const usersevice = new UserService();
  */
 export const createWebinar = async (req, res) => {
   try {
-    singleUploader(req, res, async function (err, data) {
+    webinarUploader(req, res, async function (err) {
       if (err) {
         return res.status(500).json({ error: err });
       }
 
       const payload = { ...req.body };
-      payload.image = req.file.filename;
+      if (req.files && req.files["image"]) {
+        payload.image = req.files["image"][0].filename;
+      }
+      if (req.files && req.files["metaImage"]) {
+        payload.metaImage = req.files["metaImage"][0].filename;
+      }
 
       const response = await webinarService.create(payload);
 
@@ -117,7 +131,7 @@ export async function getWebinar(req, res) {
  */
 
 export async function updateWebinar(req, res) {
-  singleUploader(req, res, async (err) => {
+  webinarUploader(req, res, async (err) => {
     if (err) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "File upload error", details: err });
     }
@@ -125,9 +139,8 @@ export async function updateWebinar(req, res) {
     try {
       const webinarId = req.params.id;
       const payload = {};
-      let oldImagePath;
+      let oldImagePaths = [];
 
-      // Check if a new title is provided
       if (req.body.title) {
         payload.title = req.body.title;
       }
@@ -135,22 +148,18 @@ export async function updateWebinar(req, res) {
         payload.description = req.body.description;
       }
 
-      //webinarLink
       if (req.body.webinarLink) {
         payload.webinarLink = req.body.webinarLink;
       }
 
-      //date
       if (req.body.date) {
         payload.date = req.body.date;
       }
 
-      //time
       if (req.body.time) {
         payload.time = req.body.time;
       }
 
-      //duration
       if (req.body.duration) {
         payload.duration = req.body.duration;
       }
@@ -159,28 +168,39 @@ export async function updateWebinar(req, res) {
         payload.status = req.body.status;
       }
 
-      // Check if a new image is uploaded
-      if (req.file) {
-        const webinar = await webinarService.getwebinarById(webinarId);
-
-        // Record the old image path if it exists
-        if (webinar.image) {
-          oldImagePath = path.join("uploads", webinar.image);
-        }
-
-        // Set the new image filename in payload
-        payload.image = req.file.filename;
+      if (req.body.metaTitle) {
+        payload.metaTitle = req.body.metaTitle;
+      }
+      if (req.body.metaDescription) {
+        payload.metaDescription = req.body.metaDescription;
+      }
+      if (req.body.metaKeywords) {
+        payload.metaKeywords = req.body.metaKeywords;
       }
 
-      // Update the webinar with new data
+      if (req.files && req.files["image"]) {
+        const webinar = await webinarService.getwebinarById(webinarId);
+        if (webinar.image) {
+          oldImagePaths.push(path.join("uploads", webinar.image));
+        }
+        payload.image = req.files["image"][0].filename;
+      }
+
+      if (req.files && req.files["metaImage"]) {
+        const webinar = await webinarService.getwebinarById(webinarId);
+        if (webinar.metaImage) {
+          oldImagePaths.push(path.join("uploads", webinar.metaImage));
+        }
+        payload.metaImage = req.files["metaImage"][0].filename;
+      }
+
       const response = await webinarService.update(webinarId, payload);
 
-      // Delete the old image only if the update is successful and old image exists
-      if (oldImagePath) {
+      for (const oldPath of oldImagePaths) {
         try {
-          fs.unlink(oldImagePath);
+          await fs.unlink(oldPath);
         } catch (unlinkError) {
-          console.error("Error deleting old image:", unlinkError);
+          console.error("Error deleting old file:", unlinkError);
         }
       }
 

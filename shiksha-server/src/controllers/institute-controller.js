@@ -61,6 +61,10 @@ const updateUploader = FileUpload.upload.fields([
     name: "thumbnail",
     maxCount: 1,
   },
+  {
+    name: "metaImage",
+    maxCount: 1,
+  },
 ]);
 
 // Uploader that includes gallery (for create endpoint and other operations)
@@ -91,6 +95,10 @@ const multiUploader = FileUpload.upload.fields([
   },
   {
     name: "file",
+    maxCount: 1,
+  },
+  {
+    name: "metaImage",
     maxCount: 1,
   },
 ]);
@@ -519,6 +527,10 @@ export async function updateInstitute(req, res) {
         }
         if (req.files["image"]?.[0]) payload.image = req.files["image"][0].filename;
         if (req.files["file"]?.[0]) payload.file = req.files["file"][0].filename;
+        if (req.files["metaImage"]?.[0]) {
+          if (institute.metaImage) oldImagePaths.push(path.join("uploads", institute.metaImage));
+          payload.metaImage = req.files["metaImage"][0].filename;
+        }
       }
 
       // Reconstruct nested objects from flat FormData keys (e.g., country[name])

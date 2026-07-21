@@ -31,6 +31,10 @@ const formSchema = z.object({
     .refine((file) => !file || ['image/png', 'image/jpeg', 'image/webp'].includes(file.type), {
       message: 'Invalid image format. Only PNG, JPEG, and WEBP are allowed.',
     }),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  metaKeywords: z.string().optional(),
+  metaImage: z.any().optional(),
 });
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -38,7 +42,9 @@ const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
 
 export default function NewsForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputMetaImageRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | ArrayBuffer | null>(null);
+  const [previewMetaImageUrl, setPreviewMetaImageUrl] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const segments = pathname.split('/');
@@ -83,6 +89,9 @@ export default function NewsForm() {
       if (news.data.image) {
         setPreviewImage(`${IMAGE_URL}/${news.data.image}`);
       }
+      if (news.data.metaImage) {
+        setPreviewMetaImageUrl(`${IMAGE_URL}/${news.data.metaImage}`);
+      }
     }
   }, [news, reset]);
 
@@ -94,6 +103,25 @@ export default function NewsForm() {
       reader.readAsDataURL(file);
       setValue('image', file);
     }
+  };
+
+  const handleMetaImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewMetaImageUrl(reader.result as string);
+      reader.readAsDataURL(file);
+      setValue('metaImage', file);
+    } else {
+      setPreviewMetaImageUrl(null);
+      setValue('metaImage', null);
+    }
+  };
+
+  const removeMetaImage = () => {
+    setPreviewMetaImageUrl(null);
+    setValue('metaImage', null);
+    if (fileInputMetaImageRef.current) fileInputMetaImageRef.current.value = '';
   };
 
   const removeImage = () => {
@@ -150,6 +178,10 @@ export default function NewsForm() {
     formData.append('instituteId', role == 'SUPER_ADMIN' ? 'null' : instituteId);
 
     if (values.image) formData.append('image', values.image);
+    if (values.metaTitle) formData.append('metaTitle', values.metaTitle);
+    if (values.metaDescription) formData.append('metaDescription', values.metaDescription);
+    if (values.metaKeywords) formData.append('metaKeywords', values.metaKeywords);
+    if (values.metaImage) formData.append('metaImage', values.metaImage);
 
     mutate(formData);
   };
@@ -233,6 +265,42 @@ export default function NewsForm() {
                       <p className="mt-2 text-sm text-gray-600">Click to upload image</p>
                     </div>
                   )}
+                </div>
+              </div>
+
+              <div className="border-t pt-6 mt-6">
+                <h3 className="text-lg font-semibold mb-4">SEO Settings</h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <label>Meta Title</label>
+                    <Input placeholder="Enter meta title for SEO" {...{ value: control._formValues.metaTitle || '', onChange: (e: any) => setValue('metaTitle', e.target.value) }} />
+                  </div>
+                  <div>
+                    <label>Meta Keywords</label>
+                    <Input placeholder="keyword1, keyword2, keyword3" {...{ value: control._formValues.metaKeywords || '', onChange: (e: any) => setValue('metaKeywords', e.target.value) }} />
+                  </div>
+                </div>
+                <div>
+                  <label>Meta Description</label>
+                  <Input placeholder="Enter meta description for SEO" {...{ value: control._formValues.metaDescription || '', onChange: (e: any) => setValue('metaDescription', e.target.value) }} />
+                </div>
+                <div>
+                  <label>Meta Image (OG Image)</label>
+                  <div className="space-y-4">
+                    <Input type="file" accept="image/*" ref={fileInputMetaImageRef} onChange={handleMetaImageChange} className="hidden" />
+                    {previewMetaImageUrl ? (
+                      <div className="relative">
+                        <Image src={previewMetaImageUrl} alt="Meta Image Preview" width={200} height={160} className="h-40 w-full rounded-md object-cover" />
+                        <Button type="button" variant="destructive" className="absolute top-2 right-2" onClick={removeMetaImage}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div onClick={() => fileInputMetaImageRef.current?.click()} className="h-40 flex items-center justify-center border border-dashed border-gray-300 rounded-lg cursor-pointer">
+                        <Plus className="h-10 w-10 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 

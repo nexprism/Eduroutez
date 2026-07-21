@@ -11,6 +11,10 @@ const multiUploader = FileUpload.upload.fields([
   {
     name: "image",
     maxCount: 1,
+  },
+  {
+    name: "metaImage",
+    maxCount: 1,
   }
 ]);
 const newsService = new NewsService();
@@ -41,6 +45,9 @@ export const createNews = async (req, res) => {
       const payload = { ...req.body };
         if (req.files && req.files["image"]) {
             payload.image = req.files["image"][0].filename;
+      }
+      if (req.files && req.files["metaImage"]) {
+        payload.metaImage = req.files["metaImage"][0].filename;
       }
 
       //check if institute exists
@@ -181,6 +188,24 @@ export async function updateNews(req, res) {
 
        if (req.files && req.files["image"]) {
             payload.image = req.files["image"][0].filename;
+      }
+
+      if (req.files && req.files["metaImage"]) {
+        const news = await newsService.get(newsId);
+        if (news.metaImage) {
+          oldImagePath = path.join("uploads", news.metaImage);
+        }
+        payload.metaImage = req.files["metaImage"][0].filename;
+      }
+
+      if (req.body.metaTitle) {
+        payload.metaTitle = req.body.metaTitle;
+      }
+      if (req.body.metaDescription) {
+        payload.metaDescription = req.body.metaDescription;
+      }
+      if (req.body.metaKeywords) {
+        payload.metaKeywords = req.body.metaKeywords;
       }
 
       if (typeof req.body.isPublished !== 'undefined') {

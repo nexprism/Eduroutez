@@ -30,6 +30,18 @@ const newsSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        metaTitle: {
+            type: String,
+        },
+        metaDescription: {
+            type: String,
+        },
+        metaKeywords: {
+            type: String,
+        },
+        metaImage: {
+            type: String,
+        },
         isPublished: {
             type: Boolean,
             default: true,

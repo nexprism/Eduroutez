@@ -242,6 +242,18 @@ const instituteSchema = new mongoose.Schema(
         ref: "Issue",
       },
     ],
+    metaTitle: {
+      type: String,
+    },
+    metaDescription: {
+      type: String,
+    },
+    metaKeywords: {
+      type: String,
+    },
+    metaImage: {
+      type: String,
+    },
     staffPermissions: {
       type: Map,
       of: [String],
