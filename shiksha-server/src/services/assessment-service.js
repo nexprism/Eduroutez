@@ -13,6 +13,7 @@ const DIMENSIONS = [
     "Leadership",
     "Practical",
     "Conventional",
+    "ProblemSolving",
 ];
 
 // Maps institute stream / specialization / facility keywords to a personality dimension.
@@ -31,6 +32,8 @@ const STREAM_DIMENSION_MAP = {
         "electronics",
         "mechanical",
         "civil",
+        "problem-solving",
+        "problem solving",
     ],
     Creative: [
         "design",
@@ -45,6 +48,7 @@ const STREAM_DIMENSION_MAP = {
         "interior",
         "multimedia",
         "journalism",
+        "arts",
     ],
     Social: [
         "education",
@@ -58,6 +62,7 @@ const STREAM_DIMENSION_MAP = {
         "physiotherapy",
         "arts",
         "social",
+        "community",
     ],
     Leadership: [
         "management",
@@ -68,6 +73,7 @@ const STREAM_DIMENSION_MAP = {
         "entrepreneurship",
         "administration",
         "marketing",
+        "commerce",
     ],
     Practical: [
         "pharmacy",
@@ -80,6 +86,8 @@ const STREAM_DIMENSION_MAP = {
         "dairy",
         "horticulture",
         "nursing",
+        "laboratory",
+        "clinical",
     ],
     Conventional: [
         "law",
@@ -91,14 +99,32 @@ const STREAM_DIMENSION_MAP = {
         "taxation",
         "banking",
         "audit",
+        "finance",
+    ],
+    ProblemSolving: [
+        "engineering",
+        "technology",
+        "computer",
+        "science",
+        "mathematics",
+        "physics",
+        "chemistry",
+        "it",
+        "software",
+        "data",
+        "electronics",
+        "problem-solving",
+        "problem solving",
+        "research",
+        "analytics",
     ],
 };
 
 // Default personality-to-college-fit assessment. Each option boosts one dimension.
 const DEFAULT_ASSESSMENT = {
-    title: "Personality-to-College Fit Assessment",
+    title: "Student Personality & Problem-Solving Assessment",
     description:
-        "A short psychometric assessment that maps your personality to the colleges and campus cultures that suit you best.",
+        "A comprehensive psychometric assessment that maps your personality, problem-solving style, and interests to the colleges and career paths that suit you best.",
     questions: [
         {
             questionText:
@@ -109,6 +135,9 @@ const DEFAULT_ASSESSMENT = {
                 { text: "Imagining a brand-new creative solution", dimension: "Creative" },
                 { text: "Discussing it with others to find a way forward", dimension: "Social" },
                 { text: "Organising a plan and leading the fix", dimension: "Leadership" },
+                { text: "Tackling it step-by-step with what works", dimension: "Practical" },
+                { text: "Following a proven method or framework", dimension: "Conventional" },
+                { text: "Solving puzzles or logical challenges", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -119,6 +148,9 @@ const DEFAULT_ASSESSMENT = {
                 { text: "Designing a poster, film or product", dimension: "Creative" },
                 { text: "Running a community outreach or teaching drive", dimension: "Social" },
                 { text: "Starting a student club or business idea", dimension: "Leadership" },
+                { text: "Fixing something broken or building a prototype", dimension: "Practical" },
+                { text: "Organising a well-structured event or process", dimension: "Conventional" },
+                { text: "Solving a real-world challenge with a systematic approach", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -129,6 +161,8 @@ const DEFAULT_ASSESSMENT = {
                 { text: "Clear rules, notes and structured study", dimension: "Conventional" },
                 { text: "Group discussions and debates", dimension: "Social" },
                 { text: "Open-ended, explore-my-own-way tasks", dimension: "Creative" },
+                { text: "Reading textbooks and solving practice problems", dimension: "Analytical" },
+                { text: "Following step-by-step tutorials and guides", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -136,9 +170,12 @@ const DEFAULT_ASSESSMENT = {
             category: "Lifestyle",
             options: [
                 { text: "A hackathon or a science museum", dimension: "Analytical" },
-                { text: "A art exhibit, concert or workshop", dimension: "Creative" },
+                { text: "An art exhibit, concert or workshop", dimension: "Creative" },
                 { text: "Volunteering or hanging out with a big group", dimension: "Social" },
                 { text: "Planning an event or side hustle", dimension: "Leadership" },
+                { text: "Working on a DIY project or fixing something", dimension: "Practical" },
+                { text: "Reading about a new system or process", dimension: "Conventional" },
+                { text: "Tackling a puzzle, logic game or brainteaser", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -149,6 +186,9 @@ const DEFAULT_ASSESSMENT = {
                 { text: "Expressive, artistic and diverse", dimension: "Creative" },
                 { text: "Warm, friendly and community-driven", dimension: "Social" },
                 { text: "Ambitious, competitive and network-rich", dimension: "Leadership" },
+                { text: "Hands-on workshops and maker spaces", dimension: "Practical" },
+                { text: "Well-organised with clear academic pathways", dimension: "Conventional" },
+                { text: "Innovation labs and hackathons", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -159,6 +199,9 @@ const DEFAULT_ASSESSMENT = {
                 { text: "Fine Arts or Architecture", dimension: "Creative" },
                 { text: "Psychology or Social Work", dimension: "Social" },
                 { text: "Commerce or Business Administration", dimension: "Leadership" },
+                { text: "Engineering or Mechanical Trade", dimension: "Practical" },
+                { text: "Accounting or Finance", dimension: "Conventional" },
+                { text: "Data Science or Cybersecurity", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -169,6 +212,9 @@ const DEFAULT_ASSESSMENT = {
                 { text: "Fixing things with my hands", dimension: "Practical" },
                 { text: "Coming up with fresh ideas", dimension: "Creative" },
                 { text: "Motivating and guiding a team", dimension: "Leadership" },
+                { text: "Analysing data and finding patterns", dimension: "Analytical" },
+                { text: "Helping people and resolving conflicts", dimension: "Social" },
+                { text: "Debugging issues or finding root causes", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -179,6 +225,9 @@ const DEFAULT_ASSESSMENT = {
                 { text: "I learn best by doing, not just reading", dimension: "Practical" },
                 { text: "I'm curious about how things work", dimension: "Analytical" },
                 { text: "I care a lot about people and relationships", dimension: "Social" },
+                { text: "I love creating something from nothing", dimension: "Creative" },
+                { text: "I enjoy taking charge of a group", dimension: "Leadership" },
+                { text: "I break hard problems into smaller parts", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -189,6 +238,9 @@ const DEFAULT_ASSESSMENT = {
                 { text: "Designer, writer or artist", dimension: "Creative" },
                 { text: "Teacher, counsellor or healthcare worker", dimension: "Social" },
                 { text: "Manager, founder or lawyer", dimension: "Conventional" },
+                { text: "Builder, mechanic or farmer", dimension: "Practical" },
+                { text: "Team lead or community organiser", dimension: "Leadership" },
+                { text: "Researcher, detective or strategist", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -199,6 +251,9 @@ const DEFAULT_ASSESSMENT = {
                 { text: "The one who builds the prototype", dimension: "Practical" },
                 { text: "The one who bridges and supports everyone", dimension: "Social" },
                 { text: "The one who sets the vision", dimension: "Creative" },
+                { text: "The one who analyses everything carefully", dimension: "Analytical" },
+                { text: "The one who delegates and organises tasks", dimension: "Leadership" },
+                { text: "The one who cracks the hardest sub-problem", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -209,6 +264,9 @@ const DEFAULT_ASSESSMENT = {
                 { text: "Making something beautiful or original", dimension: "Creative" },
                 { text: "Helping others grow", dimension: "Social" },
                 { text: "Earning responsibility and influence", dimension: "Leadership" },
+                { text: "Building something real with my hands", dimension: "Practical" },
+                { text: "Following a proven path to a stable career", dimension: "Conventional" },
+                { text: "Cracking a problem no one else has solved", dimension: "ProblemSolving" },
             ],
         },
         {
@@ -219,6 +277,61 @@ const DEFAULT_ASSESSMENT = {
                 { text: "Studio, agency or NGO", dimension: "Creative" },
                 { text: "Hospital, school or social enterprise", dimension: "Social" },
                 { text: "Bank, firm or startup", dimension: "Conventional" },
+                { text: "Workshop, factory or farm", dimension: "Practical" },
+                { text: "Consulting or management firm", dimension: "Leadership" },
+                { text: "Cybersecurity or data analysis firm", dimension: "ProblemSolving" },
+            ],
+        },
+        {
+            questionText: "A friend asks you for urgent help resolving a conflict. You…",
+            category: "Conflict",
+            options: [
+                { text: "List the facts and propose a logical solution", dimension: "Analytical" },
+                { text: "Suggest a creative compromise both sides love", dimension: "Creative" },
+                { text: "Listen to everyone and mediate with empathy", dimension: "Social" },
+                { text: "Take charge and decide the best path forward", dimension: "Leadership" },
+                { text: "Draw on past experience to find what works", dimension: "Practical" },
+                { text: "Follow a fair process or agreed rules", dimension: "Conventional" },
+                { text: "Break the conflict into parts and solve each one", dimension: "ProblemSolving" },
+            ],
+        },
+        {
+            questionText: "You have one free hour today. What do you do?",
+            category: "FreeTime",
+            options: [
+                { text: "Read about a new technology or topic", dimension: "Analytical" },
+                { text: "Draw, write or create something", dimension: "Creative" },
+                { text: "Call a friend or visit someone", dimension: "Social" },
+                { text: "Plan or organise something for tomorrow", dimension: "Leadership" },
+                { text: "Build or fix something around the house", dimension: "Practical" },
+                { text: "Follow a structured routine or exercise", dimension: "Conventional" },
+                { text: "Work on a puzzle or brain teaser", dimension: "ProblemSolving" },
+            ],
+        },
+        {
+            questionText: "What does a typical school/classroom feel like to you?",
+            category: "Environment",
+            options: [
+                { text: "A place to explore ideas and ask why", dimension: "Analytical" },
+                { text: "A place to express yourself freely", dimension: "Creative" },
+                { text: "A place to connect with friends and grow", dimension: "Social" },
+                { text: "A place to lead group projects and initiatives", dimension: "Leadership" },
+                { text: "A place to get hands-on and build skills", dimension: "Practical" },
+                { text: "A place with clear rules and measurable goals", dimension: "Conventional" },
+                { text: "A challenge to solve and level up every day", dimension: "ProblemSolving" },
+            ],
+        },
+        {
+            questionText: "Which approach would you use to plan a big event?",
+            category: "Planning",
+            options: [
+                { text: "Research every detail and build a data-driven plan", dimension: "Analytical" },
+                { text: "Design the theme, visuals and overall feel", dimension: "Creative" },
+                { text: "Get everyone involved and delegate tasks", dimension: "Social" },
+                { text: "Set the timeline, assign roles and manage progress", dimension: "Leadership" },
+                { text: "Use what is available practically and work with what you have", dimension: "Practical" },
+                { text: "Follow a step-by-step event-planning checklist", dimension: "Conventional" },
+                { text: "Identify the biggest risks first and plan solutions for each", dimension: "ProblemSolving" },
             ],
         },
     ],

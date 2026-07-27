@@ -47,6 +47,7 @@ const ASSESSMENT_DIMENSIONS = [
     "Leadership",
     "Practical",
     "Conventional",
+    "ProblemSolving",
 ];
 
 const assessmentService = new AssessmentService();
