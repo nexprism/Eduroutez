@@ -15,7 +15,7 @@ import { createStream, deleteStream, getStream, getStreams, trendingStreams, upd
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getTrendingCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue, getIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure, megamenuCollages } from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue, getIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure, megamenuCollages, trendingInstitute, popularInstitute, recommendedInstitute } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer, getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview, getCounselorById, getCounselorsByCategory, scheduleTest } from "../../controllers/counselor-controller.js";
@@ -193,6 +193,12 @@ router.get("/best-rated-institute", bestRatedInstitute);
 //download-bruchure
 router.get("/download-bruchure/:id", downloadBruchure);
 
+//trending institutes
+router.get("/trending-institutes", trendingInstitute);
+//popular institutes
+router.get("/popular-institutes", popularInstitute);
+//recommended institutes
+router.get("/recommended-institutes", recommendedInstitute);
 
 
 //addGallery

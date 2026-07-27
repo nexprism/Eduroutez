@@ -116,6 +116,14 @@ const instituteSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isPopular: {
+      type: Boolean,
+      default: false,
+    },
+    isRecommended: {
+      type: Boolean,
+      default: false,
+    },
     admissionOpen: {
       type: Boolean,
       default: false,

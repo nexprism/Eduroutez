@@ -281,12 +281,34 @@ export async function bestRatedInstitute(req, res) {
 //trendingInstitute
 export async function trendingInstitute(req, res) {
   try {
-    const response = await instituteService.trendingInstitute();
-    SuccessResponse.data = response;
-    SuccessResponse.message = "Successfully fetched institutes";
-    return res.status(StatusCodes.OK).json(SuccessResponse);
+    req.query.filters = { isTrending: true, ...JSON.parse(req.query.filters || '{}') };
+    return getInstitutes(req, res);
   } catch (error) {
-    console.error("Get institutes error:", error);
+    console.error("Get trending institutes error:", error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || 500).json(ErrorResponse);
+  }
+}
+
+//popularInstitute
+export async function popularInstitute(req, res) {
+  try {
+    req.query.filters = { isPopular: true, ...JSON.parse(req.query.filters || '{}') };
+    return getInstitutes(req, res);
+  } catch (error) {
+    console.error("Get popular institutes error:", error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || 500).json(ErrorResponse);
+  }
+}
+
+//recommendedInstitute
+export async function recommendedInstitute(req, res) {
+  try {
+    req.query.filters = { isRecommended: true, ...JSON.parse(req.query.filters || '{}') };
+    return getInstitutes(req, res);
+  } catch (error) {
+    console.error("Get recommended institutes error:", error);
     ErrorResponse.error = error;
     return res.status(error.statusCode || 500).json(ErrorResponse);
   }

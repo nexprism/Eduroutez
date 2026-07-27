@@ -161,7 +161,8 @@ escapeRegex(str) {
 
         if (key === 'streams' || key === 'specialization') {
           if (Array.isArray(value)) {
-            const regexPattern = value.map(v => this.escapeRegex(v)).join('|');
+            const splitValues = value.flatMap(v => String(v).split(',').map(s => s.trim()).filter(Boolean));
+            const regexPattern = splitValues.map(v => this.escapeRegex(v)).join('|');
             streamSpecFilters.push({ [key]: { $regex: regexPattern, $options: 'i' } });
           } else {
             streamSpecFilters.push({ [key]: createRegex(value) });
@@ -169,14 +170,16 @@ escapeRegex(str) {
         } else if (key === 'state' || key === 'city') {
           const path = `${key}.name`;
           if (Array.isArray(value)) {
-            const regexPattern = value.map(v => this.escapeRegex(v)).join('|');
+            const splitValues = value.flatMap(v => String(v).split(',').map(s => s.trim()).filter(Boolean));
+            const regexPattern = splitValues.map(v => this.escapeRegex(v)).join('|');
             locationFilters.push({ [path]: { $regex: regexPattern, $options: 'i' } });
           } else {
             locationFilters.push({ [path]: createRegex(value) });
           }
         } else if (key === 'organisationType' || key === 'organization') {
           if (Array.isArray(value)) {
-            const regexPattern = value.map(v => this.escapeRegex(v)).join('|');
+            const splitValues = value.flatMap(v => String(v).split(',').map(s => s.trim()).filter(Boolean));
+            const regexPattern = splitValues.map(v => this.escapeRegex(v)).join('|');
             otherFilters.push({ [key]: { $regex: regexPattern, $options: 'i' } });
           } else {
             otherFilters.push({ [key]: createRegex(value) });

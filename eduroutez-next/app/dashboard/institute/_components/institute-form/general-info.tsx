@@ -140,6 +140,9 @@ const formSchema = z.object({
   isBestRatedUniversity: z.boolean().optional(),
   isBestRatedCollege: z.boolean().optional(),
   isBestRatedInstitute: z.boolean().optional(),
+  isTrending: z.boolean().optional(),
+  isPopular: z.boolean().optional(),
+  isRecommended: z.boolean().optional(),
   admissionOpen: z.boolean().optional(),
 
 });
@@ -281,6 +284,9 @@ const GeneralInfo = () => {
         isBestRatedUniversity: instituteData.isBestRatedUniversity || false,
         isBestRatedCollege: instituteData.isBestRatedCollege || false,
         isBestRatedInstitute: instituteData.isBestRatedInstitute || false,
+        isTrending: instituteData.isTrending || false,
+        isPopular: instituteData.isPopular || false,
+        isRecommended: instituteData.isRecommended || false,
         admissionOpen: instituteData.admissionOpen || false,
 
       });
@@ -329,6 +335,9 @@ const GeneralInfo = () => {
       isBestRatedUniversity: false,
       isBestRatedCollege: false,
       isBestRatedInstitute: false,
+      isTrending: false,
+      isPopular: false,
+      isRecommended: false,
       admissionOpen: false,
 
     }
@@ -412,6 +421,15 @@ const GeneralInfo = () => {
     }
     if (typeof values.admissionOpen === 'boolean') {
       formData.append('admissionOpen', String(values.admissionOpen));
+    }
+    if (typeof values.isTrending === 'boolean') {
+      formData.append('isTrending', String(values.isTrending));
+    }
+    if (typeof values.isPopular === 'boolean') {
+      formData.append('isPopular', String(values.isPopular));
+    }
+    if (typeof values.isRecommended === 'boolean') {
+      formData.append('isRecommended', String(values.isRecommended));
     }
 
     mutate(formData);
@@ -1041,6 +1059,57 @@ const GeneralInfo = () => {
                       />
                     </FormControl>
                     <FormLabel className="mb-0 text-green-700 font-semibold cursor-pointer">Admission Open</FormLabel>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isTrending"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2 space-y-0 border border-blue-200 rounded-lg px-3 py-2 bg-blue-50/30">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value ?? false}
+                        onChange={e => field.onChange(e.target.checked)}
+                        className="accent-blue-500"
+                      />
+                    </FormControl>
+                    <FormLabel className="mb-0 text-blue-700 font-semibold cursor-pointer">Trending</FormLabel>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isPopular"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2 space-y-0 border border-orange-200 rounded-lg px-3 py-2 bg-orange-50/30">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value ?? false}
+                        onChange={e => field.onChange(e.target.checked)}
+                        className="accent-orange-500"
+                      />
+                    </FormControl>
+                    <FormLabel className="mb-0 text-orange-700 font-semibold cursor-pointer">Popular</FormLabel>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isRecommended"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-2 space-y-0 border border-purple-200 rounded-lg px-3 py-2 bg-purple-50/30">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value ?? false}
+                        onChange={e => field.onChange(e.target.checked)}
+                        className="accent-purple-500"
+                      />
+                    </FormControl>
+                    <FormLabel className="mb-0 text-purple-700 font-semibold cursor-pointer">Recommended</FormLabel>
                   </FormItem>
                 )}
               />
