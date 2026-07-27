@@ -34,9 +34,24 @@ class CourseRepository extends CrudRepository {
 
 
 
-async getPopularCourses() {
+async getPopularCourses(extraFilters = {}, limit = 20) {
   try {
-    const courses = await Course.find({ isCoursePopular: true });
+    const filter = { $or: [{ isCoursePopular: true }, { isCoursePopular: 'true' }], ...extraFilters };
+    console.log('getPopularCourses filter:', filter);
+    const courses = await Course.find(filter).limit(limit).lean();
+    console.log('getPopularCourses found:', courses.length);
+    return courses;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async getTrendingCourses(extraFilters = {}, limit = 20) {
+  try {
+    const filter = { $or: [{ isCourseTrending: true }, { isCourseTrending: 'true' }], ...extraFilters };
+    console.log('getTrendingCourses filter:', filter);
+    const courses = await Course.find(filter).limit(limit).lean();
+    console.log('getTrendingCourses found:', courses.length);
     return courses;
   } catch (error) {
     throw error;

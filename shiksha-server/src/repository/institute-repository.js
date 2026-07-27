@@ -48,7 +48,12 @@ class InstituteRepository extends CrudRepository {
       );
 
       if (courseIndex === -1) {
-        throw new Error("Course not found in institute");
+        const result = await this.model.findByIdAndUpdate(
+          instituteId,
+          { $push: { courses: { ...data, _id: courseId } } },
+          { new: true }
+        );
+        return result;
       }
 
       // Create a courses array copy and update the specific course

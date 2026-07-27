@@ -107,9 +107,23 @@ class CourseService {
   }
 
   //getPopularCourses
-  async getPopularCourses() {
+  async getPopularCourses(query) {
     try {
-      const courses = await this.courseRepository.getPopularCourses();
+      const { filters = "{}", limit = 20 } = query;
+      const parsedFilters = JSON.parse(filters);
+      const courses = await this.courseRepository.getPopularCourses(parsedFilters, parseInt(limit));
+      return courses;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //getTrendingCourses
+  async getTrendingCourses(query) {
+    try {
+      const { filters = "{}", limit = 20 } = query;
+      const parsedFilters = JSON.parse(filters);
+      const courses = await this.courseRepository.getTrendingCourses(parsedFilters, parseInt(limit));
       return courses;
     } catch (error) {
       throw error;

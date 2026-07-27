@@ -130,15 +130,24 @@ export async function getCourses(req, res) {
 
 export async function getPopularCourses(req, res) {
   try {
-    
-    const query = { ...req.query };
-    
-    query.filters = { isCourseFree: 'free' }
-
-    
-    const response = await courseService.getAll(query);
-    SuccessResponse.data = response;
+    const response = await courseService.getPopularCourses(req.query);
+    console.log('getPopularCourses result count:', response?.length);
+    SuccessResponse.data = { result: response };
     SuccessResponse.message = "Successfully fetched popular courses";
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    ErrorResponse.error = error;
+    console.log('error',error.message);
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+export async function getTrendingCourses(req, res) {
+  try {
+    const response = await courseService.getTrendingCourses(req.query);
+    console.log('getTrendingCourses result count:', response?.length);
+    SuccessResponse.data = { result: response };
+    SuccessResponse.message = "Successfully fetched trending courses";
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {
     ErrorResponse.error = error;
@@ -234,9 +243,20 @@ export async function updateCourse(req, res) {
         payload.slug = payload.courseTitle.toLowerCase().replace(/ /g, "-") + '-' + randomstring.generate(5);
       }
 
+      const oldInstituteCategory = course.instituteCategory;
+
       const response = await courseService.update(courseId, payload);
-      if (payload.instituteCategory) {
-        const resp = await instituteService.updateCourses(payload.instituteCategory, courseId, response);
+
+      const newInstituteCategory = payload.instituteCategory;
+      if (newInstituteCategory) {
+        if (oldInstituteCategory && oldInstituteCategory.toString() !== newInstituteCategory.toString()) {
+          await instituteService.deleteCourse(oldInstituteCategory, courseId);
+          await instituteService.addCourses(newInstituteCategory, response);
+        } else {
+          await instituteService.updateCourses(newInstituteCategory, courseId, response);
+        }
+      } else if (oldInstituteCategory) {
+        await instituteService.updateCourses(oldInstituteCategory, courseId, response);
       }
 
       //update courses in institute
