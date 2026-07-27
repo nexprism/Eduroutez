@@ -8,6 +8,38 @@ import Assessment from "../models/Assessment.js";
 import AssessmentService from "./assessment-service.js";
 import { v4 as uuidv4 } from "uuid";
 
+const MAX_USER_QUESTIONS = 10;
+
+const EDUCATION_KEYWORDS = [
+  'course', 'college', 'university', 'exam', 'admission', 'fee', 'fees',
+  'career', 'job', 'placement', 'scholarship', 'study', 'degree', 'diploma',
+  'student', 'teacher', 'professor', 'lecture', 'class', 'subject', 'syllabus',
+  'curriculum', 'internship', 'training', 'skill', 'learn',
+  'education', 'school', 'institute', 'academy', 'coaching', 'tutor',
+  'rank', 'percentile', 'score', 'marks', 'grade', 'cgpa', 'gpa',
+  'science', 'arts', 'commerce', 'engineering', 'medical', 'management',
+  'btech', 'mtech', 'bsc', 'msc', 'bba', 'mba', 'bca', 'mca', 'ba', 'ma',
+  'phd', 'doctorate', 'research', 'thesis',
+  'personality', 'assessment', 'career fit', 'college fit',
+  'hostel', 'campus', 'library', 'lab', 'facility',
+  'distance', 'online', 'correspondence',
+  'government', 'private', 'aided', 'autonomous',
+  'counseling', 'guidance', 'admission', 'entrance',
+  'syllabus', 'semester', 'scholarship', 'loan', 'education loan',
+  'review', 'ranking', 'accreditation', 'approval', 'recognition',
+  'assignment', 'project', 'practical', 'lab', 'workshop',
+  'certification', 'certificate', 'diploma', 'vocational',
+  'placement', 'package', 'salary', 'recruiter', 'company',
+  'igcse', 'cbse', 'icse', 'state board', 'ncert', 'ugc', 'aicte',
+  'cat', 'gate', 'neet', 'jee', 'sat', 'gre', 'gmat', 'ielts', 'toefl',
+];
+
+const GREETINGS = [
+  'hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening',
+  'thanks', 'thank you', 'thanku', 'thx', 'bye', 'goodbye', 'ok', 'okay',
+  'sure', 'great', 'nice', 'awesome', 'cool', 'yes', 'no',
+];
+
 const ASSESSMENT_DIMENSIONS = [
     "Analytical",
     "Creative",
@@ -306,11 +338,10 @@ function buildSystemPrompt({ institutes, courses, careers, faqs }, language) {
         .map((f) => `Q: ${f.question}\nA: ${f.answer}`)
         .join("\n\n");
 
-    const firstLine = language === "hi"
-        ? `[LANGUAGE RULE: ALWAYS match the user's language. If they write in Urdu, reply in Urdu. If they write in Punjabi, reply in Punjabi. If they write in English, reply in English. ONLY use Hindi when the user writes in Hindi. Never force Hindi if the user is using another language.]`
-        : `[LANGUAGE RULE: ALWAYS match the user's language. If they write in Hindi, reply in Hindi. If they write in Urdu, reply in Urdu. If they write in Punjabi, reply in Punjabi. ONLY use English when the user writes in English. Never force English if the user is using another language.]`;
+    const selectedLanguage = language === "hi" ? "Hindi" : "English";
+    const firstLine = `[ABSOLUTE LANGUAGE RULE: The user interface language is set to ${selectedLanguage}. You MUST write your entire response in ${selectedLanguage} only. Never use any other language. This is your TOP PRIORITY rule. Ignore any language detection or context. Always output in ${selectedLanguage}.]`;
 
-    const lastLine = `[REMINDER: ALWAYS match the user's language. Do NOT force ${language === "hi" ? "Hindi" : "English"} if the user wrote in a different language.]`;
+    const lastLine = `[FINAL REMINDER: Respond ONLY in ${selectedLanguage}. Do not switch to any other language for any reason.]`;
 
     return `${firstLine}
 
@@ -367,13 +398,94 @@ Today's date: ${new Date().toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata
 }
 
 // ─────────────────────────────────────────────
+//  Education / limit helpers
+// ─────────────────────────────────────────────
+
+async function isEducationRelated(text) {
+    const t = text.toLowerCase().trim();
+
+    const isGreeting = GREETINGS.some(
+        (g) => t === g || t.startsWith(g + ' ') || t.startsWith(g + ',') || t.startsWith(g + '!') || t.startsWith(g + '.')
+    );
+    if (isGreeting) return true;
+
+    if (EDUCATION_KEYWORDS.some((kw) => t.includes(kw))) return true;
+
+    const classificationPrompt =
+        "You are a classifier. Respond with exactly one word: YES or NO.\n" +
+        "Is the following message about education, academics, career guidance, college admissions, exams, courses, studying, or any related academic topic?\n" +
+        `Message: "${text}"\n` +
+        "Answer YES or NO:";
+
+    try {
+        const result = await callGemini(classificationPrompt, [
+            { role: "user", parts: [{ text: text }] },
+        ], {
+            temperature: 0,
+            max_tokens: 10,
+        });
+        return result.toUpperCase().includes("YES");
+    } catch {
+        return false;
+    }
+}
+
+async function getUserQuestionCount(session, userId, ipAddress) {
+    const sessionUserCount = session.messages.filter((m) => m.role === "user").length;
+    if (userId) {
+        const allSessions = await ChatSession.find({ userId }).select("messages").lean();
+        let total = 0;
+        for (const s of allSessions) {
+            total += s.messages.filter((m) => m.role === "user").length;
+        }
+        return total;
+    }
+    if (ipAddress) {
+        const allSessions = await ChatSession.find({ ipAddress }).select("messages").lean();
+        let total = 0;
+        for (const s of allSessions) {
+            total += s.messages.filter((m) => m.role === "user").length;
+        }
+        return total;
+    }
+    return sessionUserCount;
+}
+
+const LOCALIZED_MESSAGES = {
+  en: {
+    notEducation: "I'm here to help with education-related questions only. Please ask me about courses, colleges, careers, exams, or anything related to your academic journey.",
+    limitReached: "You have reached the maximum of 10 questions. Please {action} drop your question in the QA section where our experts will answer you.",
+    limitReachedLoggedIn: "log in and",
+    limitReachedAnonymous: "",
+  },
+  hi: {
+    notEducation: "मैं केवल शिक्षा से संबंधित प्रश्नों में सहायता के लिए हूँ। कृपया मुझसे कोर्स, कॉलेज, करियर, परीक्षा या आपकी शैक्षणिक यात्रा से जुड़ी किसी भी चीज़ के बारे में पूछें।",
+    limitReached: "आप अधिकतम 10 प्रश्नों की सीमा तक पहुँच चुके हैं। कृपया {action} QA सेक्शन में अपना प्रश्न पूछें, हमारे विशेषज्ञ आपको उत्तर देंगे।",
+    limitReachedLoggedIn: "लॉगिन करके",
+    limitReachedAnonymous: "",
+  },
+};
+
+function getLocalizedMessage(key, language, isLoggedIn) {
+  const lang = LOCALIZED_MESSAGES[language] ? language : "en";
+  let msg = LOCALIZED_MESSAGES[lang][key] || LOCALIZED_MESSAGES.en[key];
+  if (key === "limitReached") {
+    const action = isLoggedIn
+      ? LOCALIZED_MESSAGES[lang].limitReachedLoggedIn
+      : LOCALIZED_MESSAGES[lang].limitReachedAnonymous;
+    msg = msg.replace("{action}", action ? action + " " : "");
+  }
+  return msg;
+}
+
+// ─────────────────────────────────────────────
 //  Public service functions
 // ─────────────────────────────────────────────
 
 /**
  * Start or continue a chat session.
  */
-export async function chat({ sessionId, message, language = "en", userId = null }) {
+export async function chat({ sessionId, message, language = "en", userId = null, ipAddress = null }) {
     // 1. Load or create session
     let session = null;
     if (sessionId) {
@@ -385,35 +497,70 @@ export async function chat({ sessionId, message, language = "en", userId = null 
             userId: userId || null,
             language,
             messages: [],
+            ipAddress: ipAddress || null,
         });
     }
 
-    // 2. Route assessment flow if active or triggered
     const userText = message.trim();
-    let assistantReply;
+
+    const lang = language || session.language || "en";
+
+    // 2. Check question limit
+    const questionCount = await getUserQuestionCount(session, userId, ipAddress);
+    if (questionCount >= MAX_USER_QUESTIONS) {
+        const reply = getLocalizedMessage("limitReached", lang, !!userId);
+        session.messages.push({ role: "user", content: message });
+        session.messages.push({ role: "assistant", content: reply });
+        session.lastActivity = new Date();
+        await session.save();
+        return { sessionId: session.sessionId, reply, language: session.language };
+    }
+
+    // 3. Route assessment flow if active (skip education check for assessment answers)
     if (session.assessment && session.assessment.active) {
-        assistantReply = await handleAssessmentAnswer(session, userText);
-    } else if (shouldStartAssessment(userText)) {
+        const assistantReply = await handleAssessmentAnswer(session, userText);
+        session.messages.push({ role: "user", content: message });
+        session.messages.push({ role: "assistant", content: assistantReply });
+        session.lastActivity = new Date();
+        session.language = language || session.language;
+        if (userId) session.userId = userId;
+        await session.save();
+        return { sessionId: session.sessionId, reply: assistantReply, language: session.language };
+    }
+
+    // 4. Check if question is education-related
+    if (!(await isEducationRelated(userText))) {
+        const reply = getLocalizedMessage("notEducation", lang);
+        session.messages.push({ role: "user", content: message });
+        session.messages.push({ role: "assistant", content: reply });
+        session.lastActivity = new Date();
+        await session.save();
+        return { sessionId: session.sessionId, reply, language: session.language };
+    }
+
+    // 5. Start assessment if triggered, or call Gemini
+    let assistantReply;
+    if (shouldStartAssessment(userText)) {
         assistantReply = await startAssessment(session, language || session.language);
     } else {
-        // 3. Build context from live DB + call Gemini
         const context = await buildContext(userText);
         const systemPrompt = buildSystemPrompt(context, language || session.language);
 
-        const historySlice = session.messages.slice(-20); // last 10 turns (20 messages)
+        const historySlice = session.messages.slice(-20);
         const geminiContents = historySlice.map((m) => ({
             role: m.role === "assistant" ? "model" : "user",
             parts: [{ text: m.content }],
         }));
+        const selectedLanguage = lang === "hi" ? "Hindi" : "English";
         geminiContents.push({
             role: "user",
-            parts: [{ text: userText }],
+            parts: [{ text: `[SYSTEM: You must respond in ${selectedLanguage} only. Do not use any other language.]\n\n${userText}` }],
         });
 
         assistantReply = await callGemini(systemPrompt, geminiContents);
     }
 
-    // 5. Persist messages
+    // 6. Persist messages
     session.messages.push({ role: "user", content: message });
     session.messages.push({ role: "assistant", content: assistantReply });
     session.lastActivity = new Date();

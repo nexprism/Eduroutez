@@ -14,12 +14,14 @@ export async function chatWithBot(req, res) {
         }
 
         const userId = req.user?._id || null;
+        const ipAddress = req.ip || req.connection?.remoteAddress || req.headers["x-forwarded-for"] || null;
 
         const result = await ChatbotService.chat({
             sessionId: sessionId || null,
             message: message.trim(),
             language: language || "en",
             userId,
+            ipAddress,
         });
 
         return res.status(StatusCodes.OK).json({

@@ -60,6 +60,10 @@ const chatSessionSchema = new mongoose.Schema(
             ref: "User",
             default: null,
         },
+        ipAddress: {
+            type: String,
+            default: null,
+        },
         language: {
             type: String,
             default: "en",
@@ -93,6 +97,7 @@ const chatSessionSchema = new mongoose.Schema(
 
 // Auto-expire sessions after 7 days of inactivity
 chatSessionSchema.index({ lastActivity: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 7 });
+chatSessionSchema.index({ ipAddress: 1 });
 
 const ChatSession = mongoose.model("ChatSession", chatSessionSchema);
 export default ChatSession;
