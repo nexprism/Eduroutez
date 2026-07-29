@@ -106,6 +106,8 @@ export default function AppSidebar({
           ]
           : ['Online counselling', 'Slots', 'Subscription', 'Profile', 'Support', 'Redeem', "Recruiter", "Media", "Webinars", "Coupons", "Webinar", "SMS Templates", 'Test Result'];
 
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
   let computedFilteredNavItems = navItems.filter(
     (item) => !excludedTitles.includes(item.title)
   );
@@ -153,7 +155,19 @@ export default function AppSidebar({
 
   const [filteredNavItems, setFilteredNavItems] = React.useState(computedFilteredNavItems);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  // Update filteredNavItems when staff permissions are fetched asynchronously
+  useEffect(() => {
+    if (isStaff && staffPerms?.allowedModules) {
+      const allowedTitles = staffPerms.allowedModules
+        .map((mod: string) => moduleToNavTitle[mod])
+        .filter(Boolean);
+      allowedTitles.push('Dashboard');
+      const uniqueTitles = [...new Set(allowedTitles)];
+      setFilteredNavItems(
+        navItems.filter((item) => uniqueTitles.includes(item.title))
+      );
+    }
+  }, [isStaff, staffPerms]);
   const { data: subscription } = useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
