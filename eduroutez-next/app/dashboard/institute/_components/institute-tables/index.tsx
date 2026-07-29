@@ -36,7 +36,6 @@ export default function InstituteTable({
           <option value="University">University</option>
           <option value="College">College</option>
           <option value="Institute">Institute</option>
-          <option value="Polytechnic">Polytechnic</option>
         </select>
       </div>
       <DataTable columns={columns} data={data} totalItems={totalData} />
