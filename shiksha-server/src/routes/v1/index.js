@@ -15,7 +15,7 @@ import { createStream, deleteStream, getStream, getStreams, trendingStreams, upd
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
 import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getTrendingCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
-import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue, getIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure, megamenuCollages, trendingInstitute, popularInstitute, recommendedInstitute } from "../../controllers/institute-controller.js";
+import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue, getIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure, megamenuCollages, trendingInstitute, popularInstitute, recommendedInstitute, getFilteredInstitutes } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer, getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";
 import { bookSlots, createCounselor, deleteCounselor, getCounselor, getCounselors, markSlot, updateCounselor, getCounselorsByInstitute, submitcounsellorReview, getCounselorById, getCounselorsByCategory, scheduleTest } from "../../controllers/counselor-controller.js";
@@ -35,7 +35,7 @@ import { createWishlist, deleteWishlist, getWishlist, getWishlists, updateWishli
 
 import { createWebinar, deleteWebinar, getWebinar, getWebinars, updateWebinar, getWebinarsByInstitute, getMonthlyWebinarCount } from "../../controllers/webinar-controller.js";
 import { createLevel, deleteLevel, getLevel, getLevels, updateLevel } from "../../controllers/level-controller.js";
-import { createAdmin, getAdmins, loginAsInstitute } from "../../controllers/admin-controller.js";
+import { createAdmin, getAdmins, loginAsInstitute, getFilteredInstitutesAdmin } from "../../controllers/admin-controller.js";
 import { createStaff, getStaff, updateStaff, deleteStaff, getStaffPermissions, getInstituteStaffPermissions, updateInstituteStaffPermissions } from "../../controllers/staff-controller.js";
 import { createMedia, deleteMedia, getMedia, getMedias, updateMedia, uploadEditorFile } from "../../controllers/media-controller.js";
 import { createBanner, deleteBanner, getBanner, getBanners, updateBanner } from "../../controllers/banner-controller.js";
@@ -199,6 +199,9 @@ router.get("/trending-institutes", trendingInstitute);
 router.get("/popular-institutes", popularInstitute);
 //recommended institutes
 router.get("/recommended-institutes", recommendedInstitute);
+//Checkbox filtered institutes (admin only)
+router.get("/filtered-institutes", getFilteredInstitutes);
+router.get("/filtered-institutes-admin", accessTokenAutoRefresh, passport.authenticate("jwt", { session: false }), getFilteredInstitutesAdmin);
 
 
 //addGallery

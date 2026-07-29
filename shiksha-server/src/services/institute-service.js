@@ -152,9 +152,9 @@ escapeRegex(str) {
       }
       if (key === 'Exam') key = "examAccepted";
 
-      if (value === "true") {
+      if (value === "true" || value === true) {
         filterConditions[key] = true;
-      } else if (value === "false") {
+      } else if (value === "false" || value === false) {
         filterConditions[key] = false;
       } else {
         const createRegex = val => ({ $regex: this.escapeRegex(val), $options: 'i' });

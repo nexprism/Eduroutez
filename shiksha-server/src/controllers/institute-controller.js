@@ -302,6 +302,65 @@ export async function popularInstitute(req, res) {
   }
 }
 
+//checkbox filtering for admin - supports multiple filterType values (comma-separated)
+export async function getFilteredInstitutes(req, res) {
+  try {
+    const { filterType } = req.query;
+    let filters = {};
+
+    if (Array.isArray(filterType)) {
+      const filterTypes = filterType;
+
+      for (const filterType of filterTypes) {
+        switch (filterType) {
+          case 'trending':
+            filters = { ...filters, isTrending: true };
+            break;
+          case 'popular':
+            filters = { ...filters, isPopular: true };
+            break;
+          case 'top':
+            if (!filters.$or) {
+              filters.$or = [
+                { isBestRatedUniversity: true },
+                { isBestRatedCollege: true },
+                { isBestRatedInstitute: true }
+              ];
+            }
+            break;
+        }
+      }
+    } else if (filterType) {
+      switch (filterType) {
+        case 'trending':
+          filters = { isTrending: true };
+          break;
+        case 'popular':
+          filters = { isPopular: true };
+          break;
+        case 'top':
+          filters = {
+            $or: [
+              { isBestRatedUniversity: true },
+              { isBestRatedCollege: true },
+              { isBestRatedInstitute: true }
+            ]
+          };
+          break;
+        default:
+          filters = {};
+      }
+    }
+
+    req.query.filters = filters;
+    return getInstitutes(req, res);
+  } catch (error) {
+    console.error("Get filtered institutes error:", error);
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || 500).json(ErrorResponse);
+  }
+}
+
 //recommendedInstitute
 export async function recommendedInstitute(req, res) {
   try {

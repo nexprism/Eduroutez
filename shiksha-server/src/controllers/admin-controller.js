@@ -4,6 +4,7 @@ import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import AdminService from "../services/admin-service.js";
 import User from "../models/User.js";
 import { Token } from "../utils/index.js";
+import { getFilteredInstitutes } from "./institute-controller.js";
 const multiUploader = FileUpload.upload.fields([
   {
     name: "image",
@@ -81,6 +82,27 @@ export async function getAdmins(req, res) {
   } catch (error) {
     ErrorResponse.error = error;
     return res.status(error.statusCode).json(ErrorResponse);
+  }
+}
+
+// Get filtered institutes (SuperAdmin only) - uses checkbox filtering logic
+export const getFilteredInstitutesAdmin = async (req, res) => {
+  try {
+    const requestingUser = req.user;
+    if (!requestingUser || requestingUser.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only superadmin can perform this action',
+        data: {},
+        err: {}
+      });
+    }
+
+    // Use the checkbox filtering logic which handles comma-separated values
+    return await getFilteredInstitutes(req, res);
+  } catch (error) {
+    ErrorResponse.error = error;
+    return res.status(error.statusCode || 500).json(ErrorResponse);
   }
 }
 
