@@ -26,19 +26,17 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'Subscriptions',
-    url: '/dashboard/subscriptions',
-    icon: 'award',
+    title: 'Promotions',
+    url: '/dashboard/promotion',
+    icon: 'message-square',
     isActive: false,
     items: [] // No child items
   },
   {
-    title: 'Streams',
-    url: '/dashboard/stream',
-    icon: 'microscope',
+    title: 'Webinars',
+    url: '/dashboard/webinar',
+    icon: 'laptop-minimal',
     isActive: false,
-    isCourseStream: true,
-    isCounsellorStream: false,
     items: [] // No child items
   },
   {
@@ -60,6 +58,59 @@ export const navItems: NavItem[] = [
     ]
   },
   {
+    title: 'Queries',
+    url: '/dashboard/query',
+    icon: 'rocket',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Support',
+    url: '/dashboard/support',
+    icon: 'chart-no-axes-combined',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'FAQs',
+    url: '/dashboard/question-answer',
+    icon: 'message-circle-question',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Team',
+    url: '/dashboard/team',
+    icon: 'users',
+    isActive: false,
+    items: []
+  },
+  {
+    title: 'Counselors',
+    url: '/dashboard/counselor',
+    icon: 'users',
+    isActive: false,
+    isCourseStream: false,
+    isCounsellorStream: true,
+    items: [] // No child items
+  },
+  {
+    title: 'Subscriptions',
+    url: '/dashboard/subscriptions',
+    icon: 'award',
+    isActive: false,
+    items: [] // No child items
+  },
+  {
+    title: 'Streams',
+    url: '/dashboard/stream',
+    icon: 'microscope',
+    isActive: false,
+    isCourseStream: true,
+    isCounsellorStream: false,
+    items: [] // No child items
+  },
+  {
     title: 'Bulk Institute Upload',
     url: '/dashboard/bulk-institute-upload',
     icon: 'school',
@@ -71,15 +122,6 @@ export const navItems: NavItem[] = [
     url: '/dashboard/institute',
     icon: 'school',
     isActive: false,
-    items: [] // No child items
-  },
-  {
-    title: 'Counselors',
-    url: '/dashboard/counselor',
-    icon: 'users',
-    isActive: false,
-    isCourseStream: false,
-    isCounsellorStream: true,
     items: [] // No child items
   },
   {
@@ -160,13 +202,6 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'Support',
-    url: '/dashboard/support',
-    icon: 'chart-no-axes-combined',
-    isActive: false,
-    items: [] // No child items
-  },
-  {
     title: 'Banner',
     url: '/dashboard/banner',
     icon: 'bookmark',
@@ -178,22 +213,6 @@ export const navItems: NavItem[] = [
       }
     ]
   },
-
-  // {
-  //   title: 'Newsletter',
-  //   url: '/dashboard/newsletter',
-  //   icon: 'mails',
-  //   isActive: false,
-  //   items: [] // No child items
-  // },
-
-  {
-    title: 'Promotions',
-    url: '/dashboard/promotion',
-    icon: 'message-square',
-    isActive: false,
-    items: [] // No child items
-  },
   {
     title: 'Manage Pages',
     url: '/dashboard/manage-page',
@@ -201,14 +220,6 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: [] // No child items
   },
-  {
-    title: 'Queries',
-    url: '/dashboard/query',
-    icon: 'rocket',
-    isActive: false,
-    items: [] // No child items
-  },
-
   {
     title: 'Blogs',
     url: '/dashboard/blog',
@@ -223,34 +234,10 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: [] // No child items
   },
-
   {
     title: 'Career',
     url: '/dashboard/career',
     icon: 'post',
-    isActive: false,
-    items: [] // No child items
-  },
-
-  // {
-  //   title: 'Import and Export Data',
-  //   url: '/dashboard/import-export',
-  //   icon: 'download',
-  //   isActive: false,
-  //   items: [] // No child items
-  // },
-
-  // {
-  //   title: 'Chats',
-  //   url: '/dashboard/chat',
-  //   icon: 'message-circle-more',
-  //   isActive: false,
-  //   items: [] // No child itemspreloa
-  // },
-  {
-    title: 'Webinars',
-    url: '/dashboard/webinar',
-    icon: 'laptop-minimal',
     isActive: false,
     items: [] // No child items
   },
@@ -269,21 +256,12 @@ export const navItems: NavItem[] = [
     items: [] // No child items
   },
   {
-    title: 'FAQs',
-    url: '/dashboard/question-answer',
-    icon: 'message-circle-question',
-    isActive: false,
-    items: [] // No child items
-  },
-  {
     title: 'Questions and Answers',
     url: '/dashboard/answer',
     icon: 'message-circle-question',
     isActive: false,
     items: [] // No child items
   },
-
-
   {
     title: 'Online counselling',
     url: '/dashboard/scheduled-counselling-list',
@@ -299,7 +277,6 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: [] // No child items
   },
-
   {
     title: 'Refer and Earn',
     url: '/dashboard/refer-earn',
@@ -325,13 +302,6 @@ export const navItems: NavItem[] = [
     title: 'Test Result',
     url: '/dashboard/test-result',
     icon: 'award',
-    isActive: false,
-    items: []
-  },
-  {
-    title: 'Team',
-    url: '/dashboard/team',
-    icon: 'users',
     isActive: false,
     items: []
   }
