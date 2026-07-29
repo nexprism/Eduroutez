@@ -66,7 +66,7 @@ export default function AppSidebar({
       : role === 'institute'
         ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
           'Career', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots',
-          'Email Templates', 'SMS Templates', 'Banner', 'Promotions', 'Test Result', 'Webinars']
+          'Email Templates', 'SMS Templates', 'Banner', 'Test Result', 'Webinars']
         : role === 'counsellor'
           ? [
             'Institutes',

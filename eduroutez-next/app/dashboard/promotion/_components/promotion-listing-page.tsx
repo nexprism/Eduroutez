@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import PromotionTable from './promotion-tables';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
 import { usePromotionTableFilters } from './promotion-tables/use-promotion-table-filters';
 import axiosInstance from '@/lib/axios';
@@ -15,22 +16,39 @@ type TPromotionListingPage = {};
 
 export default function PromotionListingPage({}: TPromotionListingPage) {
   const { searchQuery, page, limit } = usePromotionTableFilters();
-
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [instituteId, setInstituteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setUserRole(localStorage.getItem('role'));
+    setInstituteId(localStorage.getItem('instituteId'));
+  }, []);
 
   const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['Promotions', searchQuery, page, limit],
+    queryKey: ['Promotions', searchQuery, page, limit, userRole, instituteId],
     queryFn: async () => {
+      if (userRole === null || (userRole !== 'SUPER_ADMIN' && instituteId === null)) {
+        throw new Error('User information not available');
+      }
+
+      const filters: Record<string, string> = {};
+      if (userRole !== 'SUPER_ADMIN' && instituteId) {
+        filters.instituteId = instituteId;
+      }
+
       const response = await axiosInstance.get(`${apiUrl}/promotions`, {
         params: {
           searchFields: JSON.stringify({}),
+          filters: JSON.stringify(filters),
           sort: JSON.stringify({ createdAt: 'desc' }),
           page: page,
           limit: limit
         }
       });
       return response.data;
-    }
+    },
+    enabled: userRole !== null && (userRole === 'SUPER_ADMIN' || instituteId !== null),
   });
 
   return (
