@@ -12,7 +12,7 @@ import { X, ImageIcon, Calculator, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-// const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGES;
+const IMAGE_URL = process.env.NEXT_PUBLIC_NEW_IMAGES;
 const RAZORPAY_KEY = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
 // Pricing configuration
@@ -201,7 +201,7 @@ export default function PromotionForm() {
   const [numberOfDays, setNumberOfDays] = React.useState(0);
   const [paymentProcessing, setPaymentProcessing] = React.useState(false);
   const [selectedLocation, setSelectedLocation] = React.useState<keyof typeof PROMOTION_LOCATIONS | null>(null);
-  
+
   const pathname = usePathname();
   const segments = pathname.split('/');
   const promotionId = segments[4];
@@ -247,7 +247,7 @@ export default function PromotionForm() {
         setSelectedLocation(p.location as keyof typeof PROMOTION_LOCATIONS);
       }
       if (p.image) {
-        setPreviewUrl(`${apiUrl}/uploads/${p.image}`);
+        setPreviewUrl(`${IMAGE_URL}/${p.image}`);
       }
     }
   }, [isEdit, promotionData, form]);
@@ -259,12 +259,12 @@ export default function PromotionForm() {
     script.onload = () => console.log("Razorpay script loaded");
     script.onerror = () => console.error("Failed to load Razorpay script");
     document.body.appendChild(script);
-  
+
     return () => {
       document.body.removeChild(script);
     };
   }, []);
-  
+
 
   // Calculate pricing when location or dates change
   React.useEffect(() => {
@@ -342,7 +342,7 @@ export default function PromotionForm() {
         await mutate(formData);
         return;
       }
-  
+
       const options = {
         key: "rzp_test_1DP5mmOlF5G5ag",
         amount: totalAmount * 100,
@@ -355,18 +355,18 @@ export default function PromotionForm() {
             setPaymentProcessing(false);
             return;
           }
-  
+
           try {
             // Add payment details to formData
             formData.append("amount", totalAmount.toString());
             formData.append("paymentId", response.razorpay_payment_id);
             formData.append("instituteId", localStorage.getItem("instituteId") || "");
-  
+
             // Send the complete formData to your backend
             const result = await axiosInstance.post(`${apiUrl}/promotion`, formData, {
               headers: { "Content-Type": "multipart/form-data" },
             });
-  
+
             if (result.data) {
               toast.success("Promotion created successfully! 🎉");
               router.push('/dashboard/promotion');
@@ -384,7 +384,7 @@ export default function PromotionForm() {
         },
         theme: { color: "#3399cc" },
       };
-  
+
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (error) {
@@ -393,7 +393,7 @@ export default function PromotionForm() {
       setPaymentProcessing(false);
     }
   };
-  
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -438,11 +438,11 @@ export default function PromotionForm() {
     formData.append('showTitle', String(values.showTitle));
     formData.append('startDate', values.startDate.toISOString());
     formData.append('endDate', values.endDate.toISOString());
-    console.log('values',values)
+    console.log('values', values)
     if (values.image) {
       formData.append('image', values.image);
     }
-    
+
     if (isEdit) {
       await mutate(formData);
     } else {
@@ -553,14 +553,12 @@ export default function PromotionForm() {
                   onClick={() =>
                     form.setValue('showTitle', !form.watch('showTitle'))
                   }
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    form.watch('showTitle') ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${form.watch('showTitle') ? 'bg-blue-600' : 'bg-gray-300'
+                    }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      form.watch('showTitle') ? 'translate-x-6' : 'translate-x-1'
-                    }`}
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.watch('showTitle') ? 'translate-x-6' : 'translate-x-1'
+                      }`}
                   />
                 </button>
               </div>
@@ -571,20 +569,20 @@ export default function PromotionForm() {
                   Placement Location
                 </label>
                 <select
-  {...form.register('location')}
-  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
->
-  <option value="">Select placement location</option>
-  {Object.entries(LOCATION_CATEGORIES).map(([category, locations]) => (
-    <optgroup key={category} label={category}>
-      {locations.map((location) => (
-        <option key={location.id} value={location.id}>
-          {location.label} - {location.width}X{location.height}px  -  ₹{LOCATION_PRICING[location.id]}/day
-        </option>
-      ))}
-    </optgroup>
-  ))}
-</select>
+                  {...form.register('location')}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="">Select placement location</option>
+                  {Object.entries(LOCATION_CATEGORIES).map(([category, locations]) => (
+                    <optgroup key={category} label={category}>
+                      {locations.map((location) => (
+                        <option key={location.id} value={location.id}>
+                          {location.label} - {location.width}X{location.height}px  -  ₹{LOCATION_PRICING[location.id]}/day
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
                 {form.formState.errors.location && (
                   <p className="mt-1 text-sm text-red-600">
                     {form.formState.errors.location.message}
@@ -592,8 +590,8 @@ export default function PromotionForm() {
                 )}
               </div>
 
-             {/* Image Upload */}
-             <div>
+              {/* Image Upload */}
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Promotion Image
                 </label>
@@ -627,11 +625,11 @@ export default function PromotionForm() {
                     onClick={() => fileInputRef.current?.click()}
                     className="cursor-pointer border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition-colors"
                     style={{
-                      width: selectedLocation && PROMOTION_LOCATIONS[selectedLocation] ? 
-                        `${PROMOTION_LOCATIONS[selectedLocation].width}px` : 
+                      width: selectedLocation && PROMOTION_LOCATIONS[selectedLocation] ?
+                        `${PROMOTION_LOCATIONS[selectedLocation].width}px` :
                         '100%',
-                      height: selectedLocation && PROMOTION_LOCATIONS[selectedLocation] ? 
-                        `${PROMOTION_LOCATIONS[selectedLocation].height}px` : 
+                      height: selectedLocation && PROMOTION_LOCATIONS[selectedLocation] ?
+                        `${PROMOTION_LOCATIONS[selectedLocation].height}px` :
                         '200px',
                     }}
                   >
