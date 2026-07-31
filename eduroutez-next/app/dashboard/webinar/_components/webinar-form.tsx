@@ -268,10 +268,10 @@ export default function WebinarForm() {
         const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
         const instituteData = response.data.data;
   
-        const plan = instituteData.plan;
-        const webinarFeature = plan.features.find(
-          (feature: any) => feature.key === 'Webinar'
-        );
+const plan = instituteData.plan;
+          const webinarFeature = plan?.features?.find(
+            (feature: any) => feature.key === 'Webinar'
+          );
   
         // Enable form only if webinar feature value is "Yes"
         setIsWebinarEnabled(webinarFeature?.value !== "0");

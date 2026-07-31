@@ -40,10 +40,10 @@ export default function CourseListingPage({}: TCourseListingPage) {
         const response = await axiosInstance.get(`${apiUrl}/institute/${instituteId}`);
         const instituteData = response.data.data;
 
-        const plan = instituteData.plan;
-        const feature = plan.features.find(
-          (feature: any) => feature.key === 'Courses Listing'
-        );
+const plan = instituteData.plan;
+          const feature = plan?.features?.find(
+            (feature: any) => feature.key === 'Courses Listing'
+          );
         if (feature) {
           setPopularCourseFeature(feature.value);
         }

@@ -486,18 +486,26 @@ export default function CreateCourse() {
 
 
   useEffect(() => {
-    const fetchInstituteData = async () => {
+const fetchInstituteData = async () => {
       const id = localStorage.getItem('instituteId');
+      const userRole = localStorage.getItem('role');
+
+      // Super admin always has all features enabled
+      if (userRole === 'SUPER_ADMIN') {
+        setIsPopularEnabled(true);
+        return;
+      }
+
       try {
         console.log("Fetching institute data...");
         const response = await axiosInstance.get(`${apiUrl}/institute/${id}`);
         const instituteData = response.data.data;
         console.log("Institute data here:", instituteData);
         
-        const plan = instituteData.plan;
-        const popularCourseFeature = plan.features.find(
-          (feature:any) => feature.key === 'Popular Courses'
-        );
+const plan = instituteData.plan;
+          const popularCourseFeature = plan?.features?.find(
+            (feature:any) => feature.key === 'Popular Courses'
+          );
         
         // Enable checkbox only if feature value is "Yes"
         setIsPopularEnabled(popularCourseFeature?.value === "Yes");
