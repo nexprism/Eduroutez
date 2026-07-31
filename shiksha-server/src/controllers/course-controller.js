@@ -21,6 +21,24 @@ const multiUploader = FileUpload.upload.fields([
     maxCount: 1,
   },
 ]);
+const bulkUploader = FileUpload.upload.fields([
+  {
+    name: "coursePreviewThumbnail",
+    maxCount: 1,
+  },
+  {
+    name: "coursePreviewCover",
+    maxCount: 1,
+  },
+  {
+    name: "metaImage",
+    maxCount: 1,
+  },
+  {
+    name: "ogImage",
+    maxCount: 1,
+  },
+]);
 const courseService = new CourseService();
 const instituteService=new InstituteService();
 const userService=new UserService();
@@ -180,6 +198,89 @@ export async function getCourse(req, res) {
 
 
 //getCourseByInstitute
+
+/**
+ * POST : /course/bulk-image-upload
+ * Uploads a single image and assigns it to multiple selected courses.
+ * req.body: { courseIds: string[] | string, metaImage: file }
+ */
+export async function bulkImageUpload(req, res) {
+  bulkUploader(req, res, async (err) => {
+    if (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: "File upload error",
+        details: err,
+      });
+    }
+
+    try {
+      let courseIds = req.body.courseIds;
+      if (typeof courseIds === "string") {
+        try {
+          courseIds = JSON.parse(courseIds);
+        } catch {
+          courseIds = courseIds.split(",").filter(Boolean);
+        }
+      }
+      if (!Array.isArray(courseIds) || !courseIds.length) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "No course IDs provided",
+        });
+      }
+
+      if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          success: false,
+          message: "No image file provided",
+        });
+      }
+
+      const imageFields = [
+        "coursePreviewThumbnail",
+        "coursePreviewCover",
+        "metaImage",
+        "ogImage",
+      ];
+
+      const payload = {};
+      const uploadedImages = {};
+      for (const field of imageFields) {
+        if (req.files && req.files[field]) {
+          const filename = req.files[field][0].filename;
+          payload[field] = filename;
+          uploadedImages[field] = filename;
+        }
+      }
+
+      let updatedCount = 0;
+      const errors = [];
+
+      for (const courseId of courseIds) {
+        try {
+          await courseService.update(courseId, payload);
+          updatedCount++;
+        } catch (updateError) {
+          errors.push(`Failed to update course ${courseId}: ${updateError.message}`);
+        }
+      }
+
+      SuccessResponse.data = {
+        updatedCount,
+        total: courseIds.length,
+        uploadedImages,
+        errors: errors.length > 0 ? errors : undefined,
+      };
+      SuccessResponse.message = `Successfully uploaded images to ${updatedCount} of ${courseIds.length} course(s)`;
+
+      return res.status(StatusCodes.OK).json(SuccessResponse);
+    } catch (error) {
+      console.error("Bulk image upload error:", error);
+      ErrorResponse.error = error;
+      return res.status(error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR).json(ErrorResponse);
+    }
+  });
+}
 
 export async function getCourseByInstitute(req, res) {
   try {

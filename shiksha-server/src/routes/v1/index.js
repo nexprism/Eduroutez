@@ -14,7 +14,7 @@ import { createCategory, deleteCategory, getCategory, updateCategory } from "../
 import { createStream, deleteStream, getStream, getStreams, trendingStreams, updateStream } from "../../controllers/stream-controller.js";
 import { createSubscription, deleteSubscription, getSubscription, getSubscriptions, updateSubscription, purchasePlan } from "../../controllers/subscription-controller.js";
 import { createCourseCategory, deleteCourseCategory, getCourseCategories, getCourseCategory, updateCourseCategory } from "../../controllers/course-category-controller.js";
-import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getTrendingCourses, getCourseByInstitute } from "../../controllers/course-controller.js";
+import { createCourse, deleteCourse, getCourse, getCourses, updateCourse, getPopularCourses, getTrendingCourses, getCourseByInstitute, bulkImageUpload } from "../../controllers/course-controller.js";
 import { createInstitute, deleteInstitute, getInstitute, getInstituteByEmail, getInstitutes, makeInstitute, updateInstitute, upgradeInstitute, addGallery, deleteGallery, addFacility, deleteFacility, submitIssue, getIssue, bestRatedInstitute, bulkAddInstitutes, getHelpList, updateIssue, downloadBruchure, megamenuCollages, trendingInstitute, popularInstitute, recommendedInstitute, getFilteredInstitutes } from "../../controllers/institute-controller.js";
 import { createCareer, deleteCareer, getCareer, getCareers, updateCareer, getCareerByinstituteId } from "../../controllers/career-controller.js";
 import { createInstituteInquiry, deleteInstituteInquiry, getInstituteInquiries, getInstituteInquiry, updateInstituteInquiry } from "../../controllers/institute-inquiry-controller.js";
@@ -128,6 +128,7 @@ router.get("/courses", getCourses);
 router.get("/popular-courses", getPopularCourses);
 router.get("/trending-courses", getTrendingCourses);
 router.get("/course/:id", getCourse);
+router.post("/course/bulk-image-upload", ...requireAuth, bulkImageUpload);
 router.patch("/course/:id", ...requireAuth, updateCourse);
 router.delete("/course/:id", ...requireAuth, deleteCourse);
 router.get("/course-by-institute/:id", getCourseByInstitute);

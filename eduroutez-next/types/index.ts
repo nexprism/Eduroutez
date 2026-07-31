@@ -25,6 +25,9 @@ export type Course = {
   isPublished: boolean;
   isActive: boolean;
   thumbnail?: string;
+  coursePreviewThumbnail?: string;
+  coursePreviewCover?: string;
+  ogImage?: string;
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
