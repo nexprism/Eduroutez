@@ -630,7 +630,7 @@ import {
 } from "../../controllers/assessment-controller.js";
 import { getMarketTrends, askMarketQuestion } from "../../controllers/trend-controller.js";
 import { predictCareerOutcomeController } from "../../controllers/career-outcome-controller.js";
-import { recommendController } from "../../controllers/recommendation-controller.js";
+import { recommendController, nearbyStatesController } from "../../controllers/recommendation-controller.js";
 import { relatedContentController } from "../../controllers/related-content-controller.js";
 import { geoDemandController } from "../../controllers/geo-demand-controller.js";
 
@@ -674,6 +674,9 @@ router.post("/career-outcome/predict", predictCareerOutcomeController);
 //  AI College Matchmaking Engine (scores + budget + location + behavior)
 // ─────────────────────────────────────────────
 router.post("/recommendation", recommendController);
+
+// Nearby states helper for the recommendation geo fallback (fast, cached).
+router.get("/recommendation/nearby-states", nearbyStatesController);
 
 // ─────────────────────────────────────
 //  Geo-Demand Intelligence (city / district / state demand heatmaps)

@@ -4,7 +4,67 @@ import Counselor from "../models/Counselor.js";
 import Activity from "../models/Activity.js";
 import Wishlist from "../models/Wishlist.js";
 import Career from "../models/Career.js";
+import State from "../models/States.js";
 import { callGemini, parseJsonFromGemini } from "../utils/gemini.js";
+
+const toRad = (deg) => (deg * Math.PI) / 180;
+const haversineKm = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+};
+
+// Cache of stateName -> [nearby state names] so we don't hit Mongo every call.
+const nearbyStateCache = new Map();
+
+async function getNearbyStateNames(stateName, { maxDistanceKm = 400, maxCount = 6 } = {}) {
+  if (!stateName) return [];
+  const key = normText(stateName);
+  if (nearbyStateCache.has(key)) return nearbyStateCache.get(key);
+  try {
+    const st = await State.findOne({
+      country_id: 101,
+      name: { $regex: new RegExp(key, "i") },
+    }).lean();
+    if (!st || !st.latitude || !st.longitude) {
+      nearbyStateCache.set(key, []);
+      return [];
+    }
+    const lat = Number(st.latitude);
+    const lon = Number(st.longitude);
+    const all = await State.find({ country_id: 101 }).lean();
+    const nearby = all
+      .map((s) => ({
+        name: normText(s.name),
+        distance: haversineKm(lat, lon, Number(s.latitude), Number(s.longitude)),
+      }))
+      .filter((s) => s.name && s.name !== key && s.distance <= maxDistanceKm)
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, maxCount)
+      .map((s) => s.name);
+    nearbyStateCache.set(key, nearby);
+    return nearby;
+  } catch (err) {
+    console.error("getNearbyStateNames error:", err.message);
+    nearbyStateCache.set(key, []);
+    return [];
+  }
+}
+
+const stateNameOf = (inst) => normText(normStr(inst.state));
+const cityNameOf = (inst) => normText(normStr(inst.city));
+const hasStreamMatch = (inst, preferredCourse) => {
+  if (!preferredCourse) return true;
+  const pref = normText(preferredCourse);
+  const hay = normText(
+    [inst.streams, inst.specialization, inst.courseTitle, inst.category].filter(Boolean).join(" ")
+  );
+  return hay.includes(pref);
+};
 
 // ──────────────────────────────────────────────────────────────────────────
 //  Helpers (ported from the client-side engine in D:\eduroutez src/ApiFunctions/api.js)
@@ -252,7 +312,7 @@ const classifyTier = (inst) => {
   return { tier: "bronze", tierLabel: "Accessible", tierScore: score };
 };
 
-const scoreInstitute = (inst, { marks, exam, preferredCourse, budget, state, city, category }, behavior) => {
+const scoreInstitute = (inst, { marks, exam, preferredCourse, budget, state, city, category, nearbyStates = [] }, behavior) => {
   const tier = classifyTier(inst);
   let dims = { reputation: 0, affordability: 0, infrastructure: 0, location: 0 };
 
@@ -304,10 +364,10 @@ const scoreInstitute = (inst, { marks, exam, preferredCourse, budget, state, cit
   if (city && instCity) {
     if (instCity.toLowerCase() === city.toLowerCase()) dims.location = 100;
     else if (instCity.toLowerCase().includes(city.toLowerCase()) || city.toLowerCase().includes(instCity.toLowerCase())) dims.location = 75;
-    else if (state && instState) dims.location = instState.toLowerCase() === state.toLowerCase() ? 55 : 20;
+    else if (state && instState) dims.location = instState.toLowerCase() === state.toLowerCase() ? 65 : nearbyStates.includes(stateNameOf(inst)) ? 45 : 20;
     else dims.location = 30;
   } else if (state && instState) {
-    dims.location = instState.toLowerCase() === state.toLowerCase() ? 65 : 20;
+    dims.location = instState.toLowerCase() === state.toLowerCase() ? 65 : nearbyStates.includes(stateNameOf(inst)) ? 45 : 20;
   } else {
     dims.location = 30;
   }
@@ -412,12 +472,13 @@ const scoreCourse = (course, { marks, preferredCourse, budget }, behavior) => {
   return { ...course, _score: Math.round(score), _eligible: true, _behaviorMatch: behaviorMatch, _behaviorReason: behaviorReason };
 };
 
-const scoreCounselor = (c, { state, city, preferredCourse }, behavior) => {
+const scoreCounselor = (c, { state, city, preferredCourse, nearbyStates = [] }, behavior) => {
   let score = 0;
   const cCity = normStr(c.city);
   const cState = normStr(c.state);
   if (city && cCity && cCity.toLowerCase() === city.toLowerCase()) score += 40;
   else if (state && cState && cState.toLowerCase() === state.toLowerCase()) score += 25;
+  else if (state && cState && nearbyStates.includes(stateNameOf(c))) score += 12;
   if (preferredCourse && c.category && normText(c.category).includes(normText(preferredCourse))) score += 20;
   if (c.ExperienceYear) score += Math.min(Number(c.ExperienceYear), 20);
 
@@ -506,7 +567,7 @@ function applyAiRanking(list, aiOrder = [], aiReasons = {}) {
   return out;
 }
 
-async function rankWithGemini(profile, behavior, institutes, courses, counselors) {
+async function rankWithGemini(profile, behavior, institutes, courses, counselors, nearbyStates = []) {
   const budget = Number(profile.budget) || 0;
   const ratioFor = (fee) => (budget && fee ? Math.round((fee / budget) * 100) / 100 : null);
   const candidates = [
@@ -567,6 +628,7 @@ async function rankWithGemini(profile, behavior, institutes, courses, counselors
       preferredCourse: profile.preferredCourse,
       state: profile.state,
       city: profile.city,
+      nearbyStates,
     },
     studentInterests: behavior || [],
     candidates,
@@ -617,6 +679,10 @@ function applyAiSelection(list, selectedIds, reasons) {
   return out;
 }
 
+export async function getNearbyStatesFor(stateName, opts = {}) {
+  return getNearbyStateNames(stateName, opts);
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 //  Main entry
 // ──────────────────────────────────────────────────────────────────────────
@@ -629,13 +695,38 @@ export async function getRecommendations(profile = {}, userId) {
   // Institutes
   const instQuery = { status: true, deletedAt: null };
   const institutesRaw = await Institute.find(instQuery).limit(300).lean();
+  const nearbyStates = state ? await getNearbyStateNames(state) : [];
+
+  // Location tiers (highest priority first):
+  //   same_city -> same_state -> nearby_state (same stream preferred) -> any
+  const tierOf = (inst) => {
+    const c = cityNameOf(inst);
+    const s = stateNameOf(inst);
+    if (city && c === city.toLowerCase()) return "same_city";
+    if (state && s === state.toLowerCase()) return "same_state";
+    if (state && nearbyStates.includes(s)) return "nearby_state";
+    return "other";
+  };
+
   let institutes = institutesRaw.filter((i) => {
-    const c = normStr(i.city).toLowerCase();
-    const s = normStr(i.state).toLowerCase();
-    if (city) return c === city.toLowerCase();
-    if (state) return s === state.toLowerCase();
-    return true;
+    const c = cityNameOf(i);
+    const s = stateNameOf(i);
+    if (city && c === city.toLowerCase()) return true;
+    if (state && s === state.toLowerCase()) return true;
+    // Fallback: only pull in nearby-state institutes (and, if still empty,
+    // same-stream institutes anywhere) — otherwise the results list collapses.
+    if (state && nearbyStates.includes(s)) return hasStreamMatch(i, preferredCourse);
+    return !city && !state;
   });
+
+  // If location filtering left too few candidates, broaden to same-stream
+  // institutes in any state so the user still gets useful results.
+  if (institutes.length < 3) {
+    const extra = institutesRaw.filter(
+      (i) => !institutes.includes(i) && hasStreamMatch(i, preferredCourse)
+    );
+    institutes = [...institutes, ...extra];
+  }
   // Budget filter (keep >=3 affordable, else ignore)
   const b = Number(budget);
   if (b) {
@@ -643,9 +734,14 @@ export async function getRecommendations(profile = {}, userId) {
     if (affordable.length >= 3) institutes = affordable;
   }
   institutes = institutes
-    .map((i) => scoreInstitute(i, { marks, exam, preferredCourse, budget, state, city, category }, behavior))
+    .map((i) => ({
+      ...scoreInstitute(i, { marks, exam, preferredCourse, budget, state, city, category, nearbyStates }, behavior),
+      _match: tierOf(i),
+    }))
     .sort((a, b2) => {
       if (a._eligible !== b2._eligible) return a._eligible ? -1 : 1;
+      const rank = { same_city: 4, same_state: 3, nearby_state: 2, other: 1 };
+      if (rank[a._match] !== rank[b2._match]) return rank[b2._match] - rank[a._match];
       return b2._score - a._score;
     })
     .slice(0, 15)
@@ -653,7 +749,7 @@ export async function getRecommendations(profile = {}, userId) {
     .filter((i) => !exam || i._examMatch === "accepted");
 
   // Courses
-  let coursesRaw = await Course.find({ status: true, deletedAt: null }).limit(200).lean();
+  let coursesRaw = await Course.find({ isActive: { $ne: false }, isPublished: { $ne: false }, deletedAt: null }).limit(200).lean();
   if (preferredCourse) coursesRaw = coursesRaw.filter((c) => normText(c.courseTitle || "").includes(normText(preferredCourse)));
   if (marks) coursesRaw = coursesRaw.filter((c) => !c.cutOff || Number(c.cutOff) <= Number(marks));
   if (b) coursesRaw = coursesRaw.filter((c) => !c.coursePrice || Number(c.coursePrice) <= b * 1.2);
@@ -665,18 +761,41 @@ export async function getRecommendations(profile = {}, userId) {
     .filter((c) => !exam || checkExamMatch(c, exam) === "accepted");
 
   // Counselors
-  const counselorQuery = { status: true, deletedAt: null };
-  let counselorsRaw = await Counselor.find(counselorQuery).limit(200).lean();
-  counselorsRaw = counselorsRaw.filter((c) => {
-    const cCity = normStr(c.city).toLowerCase();
-    const cState = normStr(c.state).toLowerCase();
-    if (city) return cCity === city.toLowerCase();
-    if (state) return cState === state.toLowerCase();
-    return true;
+  const counselorQuery = { deletedAt: null };
+  const counselorsAll = await Counselor.find(counselorQuery).limit(200).lean();
+  const counselorTierOf = (c) => {
+    const cCity = cityNameOf(c);
+    const cState = stateNameOf(c);
+    if (city && cCity === city.toLowerCase()) return "same_city";
+    if (state && cState === state.toLowerCase()) return "same_state";
+    if (state && nearbyStates.includes(cState)) return "nearby_state";
+    return "other";
+  };
+  let counselorsRaw = counselorsAll.filter((c) => {
+    const cCity = cityNameOf(c);
+    const cState = stateNameOf(c);
+    if (city && cCity === city.toLowerCase()) return true;
+    if (state && cState === state.toLowerCase()) return true;
+    if (state && nearbyStates.includes(cState)) return hasStreamMatch(c, preferredCourse);
+    return !city && !state;
   });
+  // Same-stream counselors from any state if the location pool is empty.
+  if (counselorsRaw.length < 3) {
+    const extra = counselorsAll.filter(
+      (c) => !counselorsRaw.includes(c) && hasStreamMatch(c, preferredCourse)
+    );
+    counselorsRaw = [...counselorsRaw, ...extra];
+  }
   const counselors = counselorsRaw
-    .map((c) => scoreCounselor(c, { state, city, preferredCourse }, behavior))
-    .sort((a, b2) => b2._score - a._score)
+    .map((c) => ({
+      ...scoreCounselor(c, { state, city, preferredCourse, nearbyStates }, behavior),
+      _match: counselorTierOf(c),
+    }))
+    .sort((a, b2) => {
+      const rank = { same_city: 4, same_state: 3, nearby_state: 2, other: 1 };
+      if (rank[a._match] !== rank[b2._match]) return rank[b2._match] - rank[a._match];
+      return b2._score - a._score;
+    })
     .slice(0, 10);
 
   // Optional AI re-ranking + explanations (no-op if Gemini unavailable).
@@ -687,7 +806,8 @@ export async function getRecommendations(profile = {}, userId) {
       behavior,
       institutes,
       courses,
-      counselors
+      counselors,
+      nearbyStates
     );
     if (ai) {
       aiSummary = ai.summary;

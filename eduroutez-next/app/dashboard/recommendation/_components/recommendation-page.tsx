@@ -75,6 +75,14 @@ export default function RecommendationPage() {
     return acc;
   }, []).sort((a: any, b: any) => b.institutes - a.institutes).slice(0, 10);
 
+  const counselorCategoryData = counselors.reduce((acc: any[], c: any) => {
+    const category = c.category || 'Other';
+    const existing = acc.find((item) => item.name === category);
+    if (existing) existing.value++;
+    else acc.push({ name: category, value: 1 });
+    return acc;
+  }, []);
+
   const statsCards = [
     {
       title: 'Total Courses',
@@ -187,6 +195,34 @@ export default function RecommendationPage() {
                     <Tooltip />
                     <Bar dataKey="institutes" fill="#b82025" radius={[4, 4, 0, 0]} />
                   </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Counselors by Category</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={counselorCategoryData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={100}
+                      dataKey="value"
+                    >
+                      {counselorCategoryData.map((_: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
