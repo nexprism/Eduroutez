@@ -58,8 +58,6 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
             <QuestionAnswerTable
               data={data?.data?.result ?? []}
               totalData={Number(data?.data?.totalDocuments ?? 0)}
-              currentPage={page}
-              pageSize={limit}
             />
           </div>
         )
