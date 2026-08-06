@@ -9,14 +9,14 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import axiosInstance from '@/lib/axios';
-import { Answer } from '@/types';
+import { QuestionAnswer } from '@/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Edit, Eye, MoreHorizontal, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 interface CellActionProps {
-  data:Answer;
+  data: QuestionAnswer;
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {

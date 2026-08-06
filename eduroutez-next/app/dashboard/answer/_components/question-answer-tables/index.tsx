@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { DataTable } from '@/components/ui/table/data-table';
 import { columns } from './columns';
-import { Answer } from '@/types';
+import { QuestionAnswer } from '@/types';
 
 export default function QuestionAnswerTable({
   data,
   totalData
 }: {
-  data: Answer[];
+  data: QuestionAnswer[];
   totalData: number;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
