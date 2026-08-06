@@ -204,6 +204,16 @@ export type Query = {
   updatedAt: string;
 };
 
+export type Faq = {
+  _id: string;
+  question?: string;
+  answer?: string;
+  email?: string;
+  instituteId?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type QuestionAnswer = {
   _id: string;
   question: string;
