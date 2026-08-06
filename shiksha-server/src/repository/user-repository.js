@@ -339,18 +339,13 @@ class UserRepository extends CrudRepository {
         var model = Career;
       }
 
-      //get course by id
-      const item = await model.findById(courseId);
       if (like == 1) {
-        item.likes.push(userId);
+        await model.findByIdAndUpdate(courseId, { $addToSet: { likes: userId } });
       } else {
-        //pull user from likes array
-        item.likes.pull(userId);
-
+        await model.findByIdAndUpdate(courseId, { $pull: { likes: userId } });
       }
 
-      //save course
-      await item.save();
+      const item = await model.findById(courseId);
       return item;
     } catch (error) {
       throw error;
