@@ -269,7 +269,12 @@ export async function verifyOtp(req, res) {
       });
     }
 
-    const response = await userService.verifyOtp(req.body.otp, contact_number);
+    // Same phone can belong to multiple roles; the phone-keyed OTP may be
+    // overwritten by another role's request, so fall back to the email key.
+    let response = await userService.verifyOtp(req.body.otp, contact_number);
+    if (!response && req.body.email) {
+      response = await userService.verifyOtp(req.body.otp, req.body.email);
+    }
     if (!response) {
       return res.status(400).json({
 
@@ -410,7 +415,13 @@ export const signup = async (req, res) => {
       }
 
       //check otp
-      const otpResponse = await userService.verifyOtp(req.body.otp, contact_number);
+      // The same phone can belong to multiple roles (e.g. student & counsellor),
+      // so the phone-keyed OTP may be overwritten by another role's request.
+      // Fall back to the unique email-keyed OTP to avoid collisions.
+      let otpResponse = await userService.verifyOtp(req.body.otp, contact_number);
+      if (!otpResponse && req.body.email) {
+        otpResponse = await userService.verifyOtp(req.body.otp, req.body.email);
+      }
       if (!otpResponse) {
         return res.status(400).json({
           message: "Invalid OTP",
