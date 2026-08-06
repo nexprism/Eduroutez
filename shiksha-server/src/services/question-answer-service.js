@@ -53,6 +53,27 @@ class questionAnswerService {
         }
       }
 
+      // Institute-scoped listing: match questions belonging to the institute
+      // (by name or slug) plus questions with no institute attached.
+      if (query.instituteEmail) {
+        const aliases = String(query.instituteEmail)
+          .split(",")
+          .map((a) => a.trim())
+          .filter(Boolean);
+        if (aliases.length > 0) {
+          const escaped = aliases
+            .map((a) => a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+            .join("|");
+          filterConditions.$and = filterConditions.$and || [];
+          filterConditions.$and.push({
+            $or: [
+              { instituteEmail: { $regex: `^(${escaped})$`, $options: "i" } },
+              { instituteEmail: { $in: [null, ""] } },
+            ],
+          });
+        }
+      }
+
       const searchConditions = [];
       for (const [field, term] of Object.entries(parsedSearchFields)) {
         searchConditions.push({ [field]: { $regex: term, $options: "i" } });

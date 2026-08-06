@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import QuestionAnswerTable from './question-answer-tables';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
 import { useQuestionAnswerTableFilters } from './question-answer-tables/use-question-answer-table-filters';
 import axiosInstance from '@/lib/axios';
@@ -18,23 +19,61 @@ export default function QuestionAnswerListingPage({}: TQuestionAnswerListingPage
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const { data, isLoading, isSuccess } = useQuery({
-    queryKey: ['question-answers', searchQuery, page, limit],
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [instituteId, setInstituteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setUserRole(localStorage.getItem('role'));
+    setInstituteId(localStorage.getItem('instituteId'));
+  }, []);
+
+  const isInstituteUser =
+    userRole !== null && userRole !== 'SUPER_ADMIN' && instituteId !== null;
+
+  const { data: instituteData } = useQuery({
+    queryKey: ['answer-institute-detail', instituteId],
     queryFn: async () => {
-      const response = await axiosInstance.get(`${apiUrl}/question-answers`, {
-        params: {
-          // send both question and askedBy so backend can search by question text or asker name
-          searchFields: JSON.stringify({ question: searchQuery || '', askedBy: searchQuery || '' }),
-          sort: JSON.stringify({ createdAt: 'desc' }),
-          page: page,
-          limit: limit
-        }
-      });
-      return response.data;
-    }
+      const response = await axiosInstance.get(`${apiUrl}/institute/${instituteId}`);
+      return response.data.data;
+    },
+    enabled: isInstituteUser,
   });
 
-  console.log(data?.data);
+  const instituteEmailParam = instituteData
+    ? [instituteData?.instituteName, instituteData?.slug]
+        .filter(Boolean)
+        .join(',')
+    : '';
+
+  const { data, isLoading, isSuccess } = useQuery({
+    queryKey: [
+      'question-answers',
+      searchQuery,
+      page,
+      limit,
+      userRole,
+      instituteId,
+      instituteEmailParam
+    ],
+    queryFn: async () => {
+      const params: Record<string, any> = {
+        // send both question and askedBy so backend can search by question text or asker name
+        searchFields: JSON.stringify({ question: searchQuery || '', askedBy: searchQuery || '' }),
+        sort: JSON.stringify({ createdAt: 'desc' }),
+        page: page,
+        limit: limit
+      };
+      if (isInstituteUser && instituteEmailParam) {
+        params.instituteEmail = instituteEmailParam;
+      }
+      const response = await axiosInstance.get(`${apiUrl}/question-answers`, {
+        params
+      });
+      return response.data;
+    },
+    enabled:
+      userRole !== null && (!isInstituteUser || instituteEmailParam !== '')
+  });
 
   return (
     <PageContainer scrollable>
