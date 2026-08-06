@@ -2,7 +2,7 @@
 import { Switch } from './switch';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '@/lib/axios';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ToggleStatusProps {
   checked: boolean;
@@ -22,6 +22,11 @@ export function ToggleStatus({
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const queryClient = useQueryClient();
   const [isChecked, setIsChecked] = useState(checked);
+  const previousValueRef = useRef(checked);
+
+  useEffect(() => {
+    setIsChecked(checked);
+  }, [checked]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (newValue: boolean) => {
@@ -33,6 +38,7 @@ export function ToggleStatus({
       });
     },
     onMutate: (newValue) => {
+      previousValueRef.current = isChecked;
       setIsChecked(newValue);
     },
     onSuccess: () => {
@@ -41,7 +47,7 @@ export function ToggleStatus({
       }
     },
     onError: () => {
-      setIsChecked(!isChecked);
+      setIsChecked(previousValueRef.current);
     }
   });
 
