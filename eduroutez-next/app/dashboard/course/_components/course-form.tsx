@@ -94,9 +94,7 @@ const formSchema = z.object({
   category: z.string({
     required_error: 'Please select a category.'
   }),
-  instituteCategory: z.string({
-    required_error: 'Please select a category.'
-  }),
+  instituteCategory: z.string().optional(),
   status: z.string({
     required_error: 'Please select a status.'
   }),
@@ -344,7 +342,9 @@ export default function CreateCourse() {
       formData.append('courseType', values.courseType);
       formData.append('category', values.category);
       formData.append('status', values.status);
-      formData.append('instituteCategory', values.instituteCategory);
+      if (values.instituteCategory) {
+        formData.append('instituteCategory', values.instituteCategory);
+      }
       // formData.append('visibility', values.visibility);
       formData.append('language', values.language);
       formData.append('isCoursePopular', values.isCoursePopular?.toString() || 'false');
@@ -801,7 +801,9 @@ const plan = instituteData.plan;
           </div>
         ) : (
           <Select
-            onValueChange={field.onChange}
+            onValueChange={(value) =>
+              field.onChange(value === 'none' ? undefined : value)
+            }
             value={field.value}
           >
             <FormControl>
@@ -812,6 +814,7 @@ const plan = instituteData.plan;
               </SelectTrigger>
             </FormControl>
             <SelectContent className="max-h-60 overflow-y-auto">
+              <SelectItem value="none">None</SelectItem>
               {instituteCategories?.data?.result?.length > 0
                 ? instituteCategories.data.result.map(
                     (category: Institute) => (
@@ -823,7 +826,7 @@ const plan = instituteData.plan;
                       </SelectItem>
                     )
                   )
-                : <SelectItem value="">No Institutes Available</SelectItem>}
+                : null}
             </SelectContent>
           </Select>
         )}
@@ -1697,7 +1700,6 @@ const plan = instituteData.plan;
                     courseTitle: 'Title must be at least 2 characters.',
                     courseType: 'Please select a course type.',
                     category: 'Please select a category.',
-                    instituteCategory: 'Please select an institute category.',
                     status: 'Please select a status.',
                     shortDescription: 'Short description must be at least 10 characters.',
                     // visibility: 'Please select a visibility option.',
