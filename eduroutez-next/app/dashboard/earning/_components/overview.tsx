@@ -4,9 +4,11 @@ import {
   Card, CardContent, CardHeader, CardTitle, CardDescription 
 } from '@/components/ui/card';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-  TablePagination
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
+import {
+  Tabs, TabsContent, TabsList, TabsTrigger
+} from "@/components/ui/tabs";
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
@@ -23,6 +25,30 @@ interface Income {
   total: number;
 }
 
+interface RoleEarningRow {
+  _id: string;
+  name?: string;
+  source?: string;
+  email?: string;
+  amount?: number;
+  completedSlots?: number;
+  redeemedPoints?: number;
+  redeemCount?: number;
+  currentPoints?: number;
+}
+
+interface RoleEarnings {
+  total: number;
+  rows: RoleEarningRow[];
+}
+
+interface RoleWiseEarnings {
+  admin: RoleEarnings;
+  institute: RoleEarnings;
+  counsellor: RoleEarnings;
+  student: RoleEarnings;
+}
+
 interface EarningsData {
   totalSubscription: Income[];
   promotionIncome: Income[];
@@ -34,6 +60,7 @@ interface EarningsData {
     count: number;
     totalPoints: number;
   };
+  roleWiseEarnings: RoleWiseEarnings;
 }
 
 interface Transaction {
@@ -105,6 +132,80 @@ const CustomTooltip = ({ active, payload, label }) => {
     );
   }
   return null;
+};
+
+interface ColumnHeader {
+  label: string;
+  align?: 'left' | 'right';
+}
+
+interface PaginatedEarningsTableProps {
+  headers: ColumnHeader[];
+  rows: RoleEarningRow[];
+  pageSize?: number;
+  emptyMessage?: string;
+  renderRow: (row: RoleEarningRow) => React.ReactNode;
+}
+
+const PaginatedEarningsTable = ({
+  headers,
+  rows,
+  pageSize = 10,
+  emptyMessage = 'No data available',
+  renderRow
+}: PaginatedEarningsTableProps) => {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * pageSize;
+  const pageRows = rows.slice(start, start + pageSize);
+
+  if (rows.length === 0) {
+    return <p className="text-muted-foreground text-sm">{emptyMessage}</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header, index) => (
+              <TableHead key={index} className={header.align === 'right' ? 'text-right' : ''}>
+                {header.label}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {pageRows.map((row) => renderRow(row))}
+        </TableBody>
+      </Table>
+
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Showing {start + 1}-{Math.min(start + pageSize, rows.length)} of {rows.length}
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={safePage <= 1}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" /> Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={safePage >= totalPages}
+          >
+            Next <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 
@@ -315,6 +416,104 @@ export default function EarningsReportPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="bg-card shadow-sm border border-border">
+        <CardHeader>
+          <CardTitle>Role-wise Earnings</CardTitle>
+          <CardDescription>Earning breakdown per role</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="admin">
+            <TabsList>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
+              <TabsTrigger value="institute">Institute</TabsTrigger>
+              <TabsTrigger value="counsellor">Counsellor</TabsTrigger>
+              <TabsTrigger value="student">Student</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="admin">
+              <div className="mb-3 text-sm text-muted-foreground">
+                Total: <span className="font-semibold text-foreground">{formatCurrency(earningsData.roleWiseEarnings.admin.total)}</span>
+              </div>
+              <PaginatedEarningsTable
+                headers={[{ label: 'Source' }, { label: 'Amount', align: 'right' }]}
+                rows={earningsData.roleWiseEarnings.admin.rows}
+                renderRow={(row) => (
+                  <TableRow key={row._id}>
+                    <TableCell className="font-medium">{row.source}</TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(row.amount ?? 0)}</TableCell>
+                  </TableRow>
+                )}
+              />
+            </TabsContent>
+
+            <TabsContent value="institute">
+              <div className="mb-3 text-sm text-muted-foreground">
+                Total: <span className="font-semibold text-foreground">{formatCurrency(earningsData.roleWiseEarnings.institute.total)}</span>
+              </div>
+              <PaginatedEarningsTable
+                headers={[{ label: 'Institute' }, { label: 'Email' }, { label: 'Amount', align: 'right' }]}
+                rows={earningsData.roleWiseEarnings.institute.rows}
+                renderRow={(row) => (
+                  <TableRow key={row._id}>
+                    <TableCell className="font-medium">{row.name}</TableCell>
+                    <TableCell className="text-muted-foreground">{row.email}</TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(row.amount ?? 0)}</TableCell>
+                  </TableRow>
+                )}
+              />
+            </TabsContent>
+
+            <TabsContent value="counsellor">
+              <div className="mb-3 text-sm text-muted-foreground">
+                Total: <span className="font-semibold text-foreground">{formatCurrency(earningsData.roleWiseEarnings.counsellor.total)}</span>
+              </div>
+              <PaginatedEarningsTable
+                headers={[
+                  { label: 'Counsellor' },
+                  { label: 'Email' },
+                  { label: 'Completed Slots', align: 'right' },
+                  { label: 'Amount', align: 'right' }
+                ]}
+                rows={earningsData.roleWiseEarnings.counsellor.rows}
+                renderRow={(row) => (
+                  <TableRow key={row._id}>
+                    <TableCell className="font-medium">{row.name || 'Deleted Counsellor'}</TableCell>
+                    <TableCell className="text-muted-foreground">{row.email || '—'}</TableCell>
+                    <TableCell className="text-right">{row.completedSlots}</TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(row.amount ?? 0)}</TableCell>
+                  </TableRow>
+                )}
+              />
+            </TabsContent>
+
+            <TabsContent value="student">
+              <div className="mb-3 text-sm text-muted-foreground">
+                Total points redeemed: <span className="font-semibold text-foreground">{earningsData.roleWiseEarnings.student.total}</span>
+              </div>
+              <PaginatedEarningsTable
+                headers={[
+                  { label: 'User' },
+                  { label: 'Email' },
+                  { label: 'Redeemed Points', align: 'right' },
+                  { label: 'Redeem Count', align: 'right' },
+                  { label: 'Current Points', align: 'right' }
+                ]}
+                rows={earningsData.roleWiseEarnings.student.rows}
+                renderRow={(row) => (
+                  <TableRow key={row._id}>
+                    <TableCell className="font-medium">{row.name || 'Deleted User'}</TableCell>
+                    <TableCell className="text-muted-foreground">{row.email || '—'}</TableCell>
+                    <TableCell className="text-right">{row.redeemedPoints}</TableCell>
+                    <TableCell className="text-right">{row.redeemCount}</TableCell>
+                    <TableCell className="text-right">{row.currentPoints}</TableCell>
+                  </TableRow>
+                )}
+              />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 }
