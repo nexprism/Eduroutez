@@ -35,6 +35,11 @@ export const columns: ColumnDef<Answer>[] = [
     cell: ({ row }) => <div>{typeof row.original.askedBy === 'object' ? (row.original.askedBy as any)?.name : String(row.original.askedBy || '')}</div> ,
   },
   {
+    header: 'Institute',
+    accessorKey: 'instituteEmail',
+    cell: ({ row }) => <div>{String((row.original as any).instituteEmail || '-')}</div>,
+  },
+  {
     id: 'actions',
     header: 'Actions', // Added header for clarity
     cell: ({ row }) => <CellAction data={row.original} />,
