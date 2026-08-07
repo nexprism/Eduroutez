@@ -4,9 +4,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
 import { Badge } from '@/components/ui/badge';
-import { Answer, QuestionAnswer } from '@/types';
+import { QuestionAnswer } from '@/types';
 
-export const columns: ColumnDef<Answer>[] = [
+export const columns: ColumnDef<QuestionAnswer>[] = [
   {
     header: 'ID',
     cell: ({ row }) => <div>{row.index + 1}</div>, // Corrected formatting
@@ -32,7 +32,12 @@ export const columns: ColumnDef<Answer>[] = [
   {
     header: 'Asked By',
     accessorKey: 'askedBy',
-    cell: ({ row }) => <div>{typeof row.original.askedBy === 'object' ? (row.original.askedBy as any)?.name : String(row.original.askedBy || '')}</div> ,
+    cell: ({ row }) => <div>{typeof row.original.askedBy === 'object' ? row.original.askedBy?.name : String(row.original.askedBy || '')}</div>,
+  },
+  {
+    header: 'Institute',
+    accessorKey: 'instituteEmail',
+    cell: ({ row }) => <div>{String(row.original.instituteEmail || '-')}</div>,
   },
   {
     id: 'actions',

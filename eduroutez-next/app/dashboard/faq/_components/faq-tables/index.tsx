@@ -3,22 +3,21 @@
 import { useState } from 'react';
 import { DataTable } from '@/components/ui/table/data-table';
 import { columns } from './columns';
-import { QuestionAnswer } from '@/types';
+import { Faq } from '@/types';
 
-export default function QuestionAnswerTable({
+export default function FaqTable({
   data,
   totalData
 }: {
-  data: QuestionAnswer[];
+  data: Faq[];
   totalData: number;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter data using regex
   const filteredData = Array.isArray(data)
     ? data.filter((item) => {
-        const regex = new RegExp(searchQuery, 'i'); // 'i' for case-insensitive search
-        return regex.test(item.question); // Replace 'name' with the appropriate field to search
+        const regex = new RegExp(searchQuery, 'i');
+        return regex.test(item.question || '');
       })
     : [];
 

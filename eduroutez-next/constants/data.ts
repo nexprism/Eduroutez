@@ -73,7 +73,7 @@ export const navItems: NavItem[] = [
   },
   {
     title: 'FAQs',
-    url: '/dashboard/question-answer',
+    url: '/dashboard/faq',
     icon: 'message-circle-question',
     isActive: false,
     items: [] // No child items

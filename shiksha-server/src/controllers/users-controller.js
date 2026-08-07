@@ -8,6 +8,7 @@ import StudentService from "../services/student-service.js";
 import CounselorService from "../services/counselor-service.js";
 import { SuccessResponse, ErrorResponse } from "../utils/common/index.js";
 import ActivityService from "../services/activity-service.js";
+import Activity from "../models/Activity.js";
 const singleUploader = FileUpload.upload.single("image");
 const userService = new UserService();
 const instituteService = new InstituteService();
@@ -450,9 +451,10 @@ export async function likeDislike(req, res) {
       activityService.logActivity(userId, activityType, targetModel, courseId, itemName, meta);
     }else{
       SuccessResponse.message = "Successfully Disliked";
-      const activityType = `unlike_${type?.toLowerCase()}`;
+      const likeActivityType = `like_${type?.toLowerCase()}`;
       const targetModel = type?.toLowerCase() === "blog" ? "Blog" : type?.toLowerCase() === "career" ? "Career" : "Course";
-      activityService.logActivity(userId, activityType, targetModel, courseId, itemName);
+      await Activity.deleteMany({ user: userId, type: likeActivityType, targetId: courseId });
+      activityService.logActivity(userId, `unlike_${type?.toLowerCase()}`, targetModel, courseId, itemName);
     }
     return res.status(StatusCodes.OK).json(SuccessResponse);
   } catch (error) {

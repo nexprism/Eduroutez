@@ -182,9 +182,13 @@ const formSchema = z.object({
     .or(z.literal('')),
   startDate: z.date({
     required_error: 'Start date is required.'
+  }).refine((date) => !isNaN(date.getTime()), {
+    message: 'Start date is required.'
   }),
   endDate: z.date({
     required_error: 'End date is required.'
+  }).refine((date) => !isNaN(date.getTime()), {
+    message: 'End date is required.'
   }),
   showTitle: z.boolean().default(true)
 }).refine((data) => data.startDate <= data.endDate, {
@@ -649,10 +653,15 @@ export default function PromotionForm() {
                   </label>
                   <input
                     type="date"
-                    {...form.register('startDate')}
+                    {...form.register('startDate', { valueAsDate: true })}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     min={new Date().toISOString().split('T')[0]}
                   />
+                  {form.formState.errors.startDate && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {form.formState.errors.startDate.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -661,10 +670,15 @@ export default function PromotionForm() {
                   </label>
                   <input
                     type="date"
-                    {...form.register('endDate')}
+                    {...form.register('endDate', { valueAsDate: true })}
                     className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     min={new Date().toISOString().split('T')[0]}
                   />
+                  {form.formState.errors.endDate && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {form.formState.errors.endDate.message}
+                    </p>
+                  )}
                 </div>
               </div>
 

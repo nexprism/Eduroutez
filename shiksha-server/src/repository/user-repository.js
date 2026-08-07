@@ -142,13 +142,149 @@ class UserRepository extends CrudRepository {
 
 
 
+      // ---- Separate earning tables per role ----
+
+      // 1. Admin / platform income by source
+      const adminEarnings = [
+        { _id: 'subscriptions', source: 'Subscriptions', amount: totalSubscription[0]?.total ?? 0 },
+        { _id: 'listed_ads', source: 'Listed Ads', amount: promotionIncome[0]?.total ?? 0 },
+        { _id: 'unlisted_ads', source: 'Unlisted Ads', amount: unlistedpromotionIncome[0]?.total ?? 0 },
+        { _id: 'counselor_income', source: 'Counselor Income', amount: completedScheduleIncome },
+        { _id: 'counselor_shares', source: 'Counselor Shares', amount: completedCounselorShares },
+      ];
+
+      // 2. Institute earnings (subscription + promotion payments) per institute
+      const [instituteSubscriptions, institutePromotions] = await Promise.all([
+        Transaction.aggregate([
+          { $match: { status: 'COMPLETED' } },
+          { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'u' } },
+          { $unwind: { path: '$u', preserveNullAndEmptyArrays: false } },
+          { $match: { 'u.role': 'institute' } },
+          {
+            $group: {
+              _id: '$u._id',
+              name: { $first: '$u.name' },
+              email: { $first: '$u.email' },
+              amount: { $sum: '$amount' },
+            },
+          },
+        ]).allowDiskUse(true),
+        PromotionTransaction.aggregate([
+          { $match: { status: 'COMPLETED' } },
+          { $lookup: { from: 'institutes', localField: 'instituteId', foreignField: '_id', as: 'inst' } },
+          { $unwind: { path: '$inst', preserveNullAndEmptyArrays: true } },
+          {
+            $group: {
+              _id: '$instituteId',
+              name: { $first: '$inst.instituteName' },
+              amount: { $sum: '$amount' },
+            },
+          },
+        ]).allowDiskUse(true),
+      ]);
+
+      const instituteMap = new Map();
+      for (const row of instituteSubscriptions) {
+        instituteMap.set(row._id.toString(), {
+          _id: row._id,
+          name: row.name || '',
+          email: row.email || '',
+          amount: row.amount || 0,
+        });
+      }
+      for (const row of institutePromotions) {
+        const key = row._id?.toString();
+        if (!key) continue;
+        const existing = instituteMap.get(key);
+        if (existing) {
+          existing.amount += row.amount || 0;
+        } else {
+          instituteMap.set(key, { _id: row._id, name: row.name || '', email: '', amount: row.amount || 0 });
+        }
+      }
+      const instituteEarnings = [...instituteMap.values()].sort((a, b) => b.amount - a.amount);
+
+      // 3. Counsellor earnings (30% share per completed slot) per counsellor
+      const counsellorEarnings = await ScheduleSlot.aggregate([
+        { $match: { status: 'completed' } },
+        { $lookup: { from: 'counselors', localField: 'counselorId', foreignField: '_id', as: 'c' } },
+        { $unwind: { path: '$c', preserveNullAndEmptyArrays: true } },
+        { $lookup: { from: 'users', localField: 'counselorId', foreignField: '_id', as: 'cu' } },
+        { $unwind: { path: '$cu', preserveNullAndEmptyArrays: true } },
+        {
+          $group: {
+            _id: '$counselorId',
+            cName: { $first: { $ifNull: ['$c.firstname', ''] } },
+            cLastName: { $first: { $ifNull: ['$c.lastname', ''] } },
+            uName: { $first: { $ifNull: ['$cu.name', ''] } },
+            cEmail: { $first: { $ifNull: ['$c.email', null] } },
+            uEmail: { $first: { $ifNull: ['$cu.email', null] } },
+            completedSlots: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            name: {
+              $cond: [
+                { $ne: ['$cName', ''] },
+                { $trim: { input: { $concat: ['$cName', ' ', '$cLastName'] } } },
+                { $ifNull: ['$uName', ''] },
+              ],
+            },
+            email: { $ifNull: ['$cEmail', '$uEmail', null] },
+            completedSlots: 1,
+            amount: { $multiply: ['$completedSlots', 150] },
+          },
+        },
+        { $sort: { amount: -1 } },
+      ]).allowDiskUse(true);
+
+      // 4. Redeem earnings (points redeemed) per user
+      const studentEarnings = await ReddemHistry.aggregate([
+        { $match: { status: 'COMPLETED' } },
+        { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'u' } },
+        { $unwind: { path: '$u', preserveNullAndEmptyArrays: true } },
+        {
+          $group: {
+            _id: '$user',
+            name: { $first: { $ifNull: ['$u.name', ''] } },
+            email: { $first: { $ifNull: ['$u.email', ''] } },
+            redeemedPoints: { $sum: '$points' },
+            redeemCount: { $sum: 1 },
+            currentPoints: { $first: { $ifNull: ['$u.points', 0] } },
+          },
+        },
+        { $sort: { redeemedPoints: -1 } },
+      ]).allowDiskUse(true);
+
+      const roleWiseEarnings = {
+        admin: {
+          total: adminEarnings.reduce((sum, row) => sum + row.amount, 0),
+          rows: adminEarnings,
+        },
+        institute: {
+          total: instituteEarnings.reduce((sum, row) => sum + row.amount, 0),
+          rows: instituteEarnings,
+        },
+        counsellor: {
+          total: counsellorEarnings.reduce((sum, row) => sum + row.amount, 0),
+          rows: counsellorEarnings,
+        },
+        student: {
+          total: studentEarnings.reduce((sum, row) => sum + row.redeemedPoints, 0),
+          rows: studentEarnings,
+        },
+      };
+
       const response = {
         totalSubscription,
         promotionIncome,
         unlistedpromotionIncome,
         counselorIcome,
         counselorShares,
-        redeemInfo
+        redeemInfo,
+        roleWiseEarnings,
       };
 
 
@@ -339,18 +475,13 @@ class UserRepository extends CrudRepository {
         var model = Career;
       }
 
-      //get course by id
-      const item = await model.findById(courseId);
       if (like == 1) {
-        item.likes.push(userId);
+        await model.findByIdAndUpdate(courseId, { $addToSet: { likes: userId } });
       } else {
-        //pull user from likes array
-        item.likes.pull(userId);
-
+        await model.findByIdAndUpdate(courseId, { $pull: { likes: userId } });
       }
 
-      //save course
-      await item.save();
+      const item = await model.findById(courseId);
       return item;
     } catch (error) {
       throw error;

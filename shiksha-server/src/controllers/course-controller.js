@@ -103,7 +103,9 @@ export const createCourse = async (req, res) => {
       
       
       const response = await courseService.create(payload);
-      const resp=await instituteService.addCourses(instituteCategory,response);
+      if (instituteCategory) {
+        const resp=await instituteService.addCourses(instituteCategory,response);
+      }
       // console.log('good')
       // console.log(response)
       // console.log('good2');
@@ -346,6 +348,15 @@ export async function updateCourse(req, res) {
 
       const oldInstituteCategory = course.instituteCategory;
 
+      // If the institute category is being cleared, remove the course from the old institute
+      const clearedInstituteCategory = payload.instituteCategory === '' || payload.instituteCategory === 'none';
+      if (clearedInstituteCategory) {
+        delete payload.instituteCategory;
+        if (oldInstituteCategory) {
+          await instituteService.deleteCourse(oldInstituteCategory, courseId);
+        }
+      }
+
       const response = await courseService.update(courseId, payload);
 
       const newInstituteCategory = payload.instituteCategory;
@@ -356,7 +367,7 @@ export async function updateCourse(req, res) {
         } else {
           await instituteService.updateCourses(newInstituteCategory, courseId, response);
         }
-      } else if (oldInstituteCategory) {
+      } else if (oldInstituteCategory && !clearedInstituteCategory) {
         await instituteService.updateCourses(oldInstituteCategory, courseId, response);
       }
 
@@ -407,7 +418,9 @@ export async function deleteCourse(req, res) {
     // console.log(log);
 
     const response = await courseService.delete(req.params.id);
-    const resp = await instituteService.deleteCourse(instituteCategory, req.params.id);
+    if (instituteCategory) {
+      const resp = await instituteService.deleteCourse(instituteCategory, req.params.id);
+    }
     SuccessResponse.data = response;
     SuccessResponse.message = "Successfully deleted the course";
     return res.status(200).json(SuccessResponse);
