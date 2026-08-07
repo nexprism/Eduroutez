@@ -64,9 +64,38 @@ export default function AppSidebar({
     isStaff
       ? [] // handled by subRole-based filtering below
       : role === 'institute'
-        ? ['Institutes', 'Users', 'Refer and Earn', 'Blogs',
-          'Career', 'Manage Pages', 'Subscriptions', 'Bulk Institute Upload', 'Help And Support', 'Earnings', 'Payouts', 'Streams', 'Redeem', 'Students', 'Sales', 'Media', 'Online counselling list', 'Online counselling', 'Slots',
-          'Email Templates', 'SMS Templates', 'Banner', 'Test Result', 'Webinars']
+        ? [
+            'Institutes',
+            'Users',
+            'Refer and Earn',
+            'Blogs',
+            'Career',
+            'Manage Pages',
+            'Subscriptions',
+            'Bulk Institute Upload',
+            'Help And Support',
+            'Earnings',
+            'Payouts',
+            'Streams',
+            'Redeem',
+            'Students',
+            'Sales',
+            'Media',
+            'Online counselling list',
+            'Online counselling',
+            'Slots',
+            'Email Templates',
+            'SMS Templates',
+            'Banner',
+            'Test Result',
+            'Webinar',
+            'Recommendations',
+            'Recruiter',
+            'Reviews',
+            'News',
+            'Coupons',
+            'Questions and Answers'
+          ]
         : role === 'counsellor'
           ? [
             'Institutes',
