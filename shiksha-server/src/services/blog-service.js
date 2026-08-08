@@ -9,6 +9,11 @@ class BlogService {
     this.studentRepository = new StudentRepository();
   }
 
+  escapeRegex(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   async create(data) {
     try {
       const blog = await this.blogRepository.create(data);
@@ -84,7 +89,7 @@ class BlogService {
 
   async getAll(query) {
     try {
-      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}", search = "" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -114,8 +119,19 @@ class BlogService {
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
+
+      if (search) {
+        const escapedSearch = this.escapeRegex(search);
+        searchConditions.push(
+          { title: { $regex: escapedSearch, $options: "i" } },
+          { description: { $regex: escapedSearch, $options: "i" } },
+          { slug: { $regex: escapedSearch, $options: "i" } }
+        );
+      }
+
       for (const [field, term] of Object.entries(parsedSearchFields)) {
-        searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+        const escapedTerm = this.escapeRegex(term);
+        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
       }
       if (searchConditions.length > 0) {
         filterConditions.$or = searchConditions;

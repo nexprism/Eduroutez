@@ -11,7 +11,7 @@ class NewsRepository extends CrudRepository {
     async getNewsByInstitute(instituteId) {
         try {
             console.log("instituteId", instituteId);
-            const news = await News.find({ institute: instituteId });
+            const news = await News.find({ institute: instituteId, isPublished: { $ne: false } });
             return news;
         } catch (error) {
             throw error;
@@ -21,7 +21,7 @@ class NewsRepository extends CrudRepository {
     //getAllNews
     async getAllNews() {
         try {
-            const news = await News.find();
+            const news = await News.find({ isPublished: { $ne: false } });
             return news;
         } catch (error) {
             throw error;
@@ -31,7 +31,7 @@ class NewsRepository extends CrudRepository {
     async getAllSuperAdminNews() {
 
         try {
-            const news = await News.find();
+            const news = await News.find({ isPublished: { $ne: false } });
             return news;
         }
         catch (error) {

@@ -26,9 +26,14 @@ async getCareerByinstituteId(instituteId) {
   }
 
 
+  escapeRegex(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   async getAll(query) {
     try {
-      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}" } = query;
+      const { page = 1, limit = 10, filters = "{}", searchFields = "{}", sort = "{}", search = "" } = query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -58,8 +63,19 @@ async getCareerByinstituteId(instituteId) {
 
       // Build search conditions for multiple fields with partial matching
       const searchConditions = [];
+
+      if (search) {
+        const escapedSearch = this.escapeRegex(search);
+        searchConditions.push(
+          { title: { $regex: escapedSearch, $options: "i" } },
+          { description: { $regex: escapedSearch, $options: "i" } },
+          { slug: { $regex: escapedSearch, $options: "i" } }
+        );
+      }
+
       for (const [field, term] of Object.entries(parsedSearchFields)) {
-        searchConditions.push({ [field]: { $regex: term, $options: "i" } });
+        const escapedTerm = this.escapeRegex(term);
+        searchConditions.push({ [field]: { $regex: escapedTerm, $options: "i" } });
       }
       if (searchConditions.length > 0) {
         filterConditions.$or = searchConditions;

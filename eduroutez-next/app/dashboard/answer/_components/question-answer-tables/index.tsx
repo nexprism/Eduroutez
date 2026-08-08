@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import { DataTable } from '@/components/ui/table/data-table';
+import { DataTableSearch } from '@/components/ui/table/data-table-search';
 import { columns } from './columns';
+import { useQuestionAnswerTableFilters } from './use-question-answer-table-filters';
 import { QuestionAnswer } from '@/types';
 
 export default function QuestionAnswerTable({
@@ -12,28 +13,19 @@ export default function QuestionAnswerTable({
   data: QuestionAnswer[];
   totalData: number;
 }) {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Filter data using regex
-  const filteredData = Array.isArray(data)
-    ? data.filter((item) => {
-        const regex = new RegExp(searchQuery, 'i'); // 'i' for case-insensitive search
-        return regex.test(item.question); // Replace 'name' with the appropriate field to search
-      })
-    : [];
+  const { searchQuery, setSearchQuery, setPage } = useQuestionAnswerTableFilters();
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="border rounded px-4 py-2"
+        <DataTableSearch
+          searchKey="questions"
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setPage={setPage}
         />
       </div>
-      <DataTable columns={columns} data={filteredData} totalItems={totalData} />
+      <DataTable columns={columns} data={data} totalItems={totalData} />
     </div>
   );
 }

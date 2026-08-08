@@ -18,11 +18,14 @@ export const columns: ColumnDef<Faq>[] = [
   },
   {
     header: 'Answer',
-    cell: ({ row }) => (
-      <div className="max-w-md truncate text-sm text-muted-foreground">
-        {row.original.answer || '-'}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const plainAnswer = row.original.answer ? row.original.answer.replace(/<[^>]*>/g, '') : '-';
+      return (
+        <div className="max-w-md truncate text-sm text-muted-foreground">
+          {plainAnswer}
+        </div>
+      );
+    },
   },
   {
     header: 'Email',
